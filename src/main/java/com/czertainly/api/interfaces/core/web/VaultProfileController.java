@@ -55,7 +55,7 @@ public interface VaultProfileController extends AuthProtectedController {
 
     @Operation(summary = "Get details of a Vault Profile")
     @ApiResponse(responseCode = "200", description = "Vault Profile details retrieved")
-    @GetMapping(path = "/vaults/{vaultUuid}/vaultProfiles/{vaultProfileUuid}", consumes = {"application/json"}, produces = {"application/json"})
+    @GetMapping(path = "/vaults/{vaultUuid}/vaultProfiles/{vaultProfileUuid}", produces = {"application/json"})
     VaultProfileDetailDto getVaultProfileDetails(@Parameter(description = "UUID of Vault Instance") @PathVariable UUID vaultUuid, @Parameter(description = "UUID of vault profile") @PathVariable UUID vaultProfileUuid) throws NotFoundException;
 
     @Operation(summary = "Update a Vault Profile")
