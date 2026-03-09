@@ -88,7 +88,7 @@ public interface DiscoveryController extends AuthProtectedController {
 			examples={@ExampleObject(value="[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")}))
 										@RequestBody List<String> discoveryUuids) throws NotFoundException;
 
-	@Operation(summary = "Get Discovery searchable fields information")
+	@Operation(operationId = "getDiscoverySearchableFields", summary = "Get Discovery searchable fields information")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Discovery searchable field information retrieved")})
 	@GetMapping(path = "/search", produces = {"application/json"})
 	List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

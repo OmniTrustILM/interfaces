@@ -47,7 +47,7 @@ import java.util.UUID;
         })
 public interface SecretManagementController extends AuthProtectedController {
 
-    @Operation(summary = "List search filters for secrets")
+    @Operation(operationId = "getSecretSearchableFields", summary = "List search filters for secrets")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of search filters retrieved")})
     @GetMapping(path = "/secrets/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

@@ -79,7 +79,7 @@ public interface VaultInstanceController extends AuthProtectedController {
     @PutMapping(path = "/{uuid}", produces = {"application/json"})
     VaultInstanceDetailDto updateVaultInstance(@Parameter(description = "Vault instance UUID") @PathVariable UUID uuid, @RequestBody VaultInstanceUpdateRequestDto vaultInstanceRequest) throws ConnectorException, NotFoundException, AttributeException;
 
-    @Operation(summary = "List search filters for Vault instances")
+    @Operation(operationId = "getVaultInstanceSearchableFields", summary = "List search filters for Vault instances")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of search filters retrieved")})
     @GetMapping(path = "/search", produces = {"application/json"})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

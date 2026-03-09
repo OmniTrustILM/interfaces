@@ -63,7 +63,7 @@ public interface LocationManagementController extends AuthProtectedController {
     )
     LocationsResponseDto listLocations(@RequestBody SearchRequestDto request);
 
-    @Operation(summary = "Get Locations searchable fields information")
+    @Operation(operationId = "getLocationSearchableFields", summary = "Get Locations searchable fields information")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Locations searchable field information retrieved")})
     @GetMapping(path = "/locations/search", produces = {"application/json"})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

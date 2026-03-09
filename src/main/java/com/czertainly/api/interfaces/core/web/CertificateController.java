@@ -111,7 +111,7 @@ public interface CertificateController extends AuthProtectedController {
     @PostMapping(path = "/delete", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     BulkOperationResponse bulkDeleteCertificate(@RequestBody RemoveCertificateDto request) throws NotFoundException, NotSupportedException;
 
-    @Operation(summary = "Get Certificate searchable fields information")
+    @Operation(operationId = "getCertificateSearchableFields", summary = "Get Certificate searchable fields information")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate searchable field information retrieved")})
     @GetMapping(path = "/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

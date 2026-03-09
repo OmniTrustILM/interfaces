@@ -36,7 +36,7 @@ public interface AuditLogController extends AuthProtectedController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	void purgeAuditLogs(@RequestBody List<SearchFilterRequestDto> filters);
 
-	@Operation(summary = "Get Audit logs searchable fields information")
+	@Operation(operationId = "getAuditLogSearchableFields", summary = "Get Audit logs searchable fields information")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Audit logs searchable field information retrieved")})
 	@GetMapping(path = "/search", produces = {"application/json"})
 	List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

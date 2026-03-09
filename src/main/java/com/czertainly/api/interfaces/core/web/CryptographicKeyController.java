@@ -39,7 +39,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
 
-    @Operation(summary = "Get CryptographicKey searchable fields information")
+    @Operation(operationId = "getCryptographicKeySearchableFields", summary = "Get CryptographicKey searchable fields information")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "CryptographicKey searchable field information retrieved")})
     @GetMapping(path = "/keys/search", produces = {"application/json"})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
