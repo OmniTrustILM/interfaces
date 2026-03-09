@@ -42,7 +42,7 @@ public class SecretApiClient extends BaseApiClient {
                         uriBuilder.queryParam("version", version);
                     }
 
-                    return prepareRequest(HttpMethod.GET, connector, true)
+                    return prepareRequest(HttpMethod.POST, connector, true)
                             .uri(uriBuilder.build().toUri())
                             .bodyValue(req)
                             .retrieve()

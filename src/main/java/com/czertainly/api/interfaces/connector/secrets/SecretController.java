@@ -51,7 +51,7 @@ public interface SecretController extends AuthProtectedConnectorController {
                             schema = @Schema(implementation = ProblemDetailExtended.class)
                     )
             )})
-    @GetMapping(path = "/content", consumes = {"application/json"}, produces = {"application/json"})
+    @PostMapping(path = "/content", consumes = {"application/json"}, produces = {"application/json"})
     SecretContentResponseDto getSecretContent(@Parameter(description = "Secret request") @RequestBody SecretRequestDto request, @RequestParam(required = false, name = "version") String version) throws NotFoundException;
 
     @Operation(summary = "Create Secret")
