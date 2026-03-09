@@ -18,7 +18,7 @@ public enum SecretType implements IPlatformEnum {
     SECRET_KEY(Codes.SECRET_KEY, "Secret Key"),
     KEY_STORE(Codes.KEY_STORE, "Key Store"),
     KEY_VALUE(Codes.KEY_VALUE, "Key-Value Pairs"),
-    GENERIC(Codes.GENERIC, "Other type of secret");
+    GENERIC(Codes.GENERIC, "Generic");
 
     private static final SecretType[] VALUES;
 
