@@ -57,7 +57,7 @@ public interface ConnectorController extends AuthProtectedController {
     PaginationResponseDto<ConnectorDto> listConnectors(@RequestBody SearchRequestDto request)
             throws NotFoundException;
 
-    @Operation(summary = "Get Connectors searchable fields information", operationId = "getConnectorSearchableFieldInformation")
+    @Operation(operationId = "getConnectorSearchableFields", summary = "Get Connectors searchable fields information")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Connector searchable field information retrieved")})
     @GetMapping(path = "/search", produces = {"application/json"})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

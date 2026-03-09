@@ -47,7 +47,7 @@ import java.util.UUID;
         })
 public interface SecretManagementController extends AuthProtectedController {
 
-    @Operation(summary = "List search filters for secrets")
+    @Operation(operationId = "getSecretSearchableFields", summary = "List search filters for secrets")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of search filters retrieved")})
     @GetMapping(path = "/secrets/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
@@ -103,7 +103,7 @@ public interface SecretManagementController extends AuthProtectedController {
 
     @Operation(summary = "Add vault profile to secret")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Vault profile added to secret successfully")})
-    @PatchMapping(path = "/secrets/{uuid}/syncVaultProfiles/{vaultProfileUuid}")
+    @PatchMapping(path = "/secrets/{uuid}/syncVaultProfiles/{vaultProfileUuid}", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void addVaultProfileToSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid, @RequestBody List<RequestAttribute> createSecretAttributes) throws NotFoundException, ConnectorException, AttributeException;
 
@@ -115,7 +115,7 @@ public interface SecretManagementController extends AuthProtectedController {
 
     @Operation(summary = "Update Secret Objects")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret objects updated")})
-    @PatchMapping(path = "/secrets/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "/secrets/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void updateSecretObjects(@Parameter(description = "Secret UUID") @PathVariable UUID uuid, @RequestBody SecretUpdateObjectsDto request) throws NotFoundException, ConnectorException, AttributeException;
 

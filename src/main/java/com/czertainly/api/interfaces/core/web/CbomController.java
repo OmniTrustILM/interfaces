@@ -89,7 +89,7 @@ public interface CbomController extends AuthProtectedController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void sync() throws CbomRepositoryException;
 
-    @Operation(summary = "Get Cbom searchable fields information")
+    @Operation(operationId = "getCbomSearchableFields", summary = "Get Cbom searchable fields information")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Cbom searchable field information retrieved")})
     @GetMapping(path = "/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();

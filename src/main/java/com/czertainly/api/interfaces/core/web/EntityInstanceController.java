@@ -63,7 +63,7 @@ public interface EntityInstanceController extends AuthProtectedController {
     )
     EntityInstanceResponseDto listEntityInstances(@RequestBody SearchRequestDto request);
 
-    @Operation(summary = "Get Entities searchable fields information")
+    @Operation(operationId = "getEntitySearchableFields", summary = "Get Entities searchable fields information")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Entity searchable field information retrieved")})
     @GetMapping(path = "/search", produces = {"application/json"})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
