@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +52,7 @@ public interface SecretController extends AuthProtectedConnectorController {
                     )
             )})
     @PostMapping(path = "/content", consumes = {"application/json"}, produces = {"application/json"})
-    SecretContentResponseDto getSecretContent(@Parameter(description = "Secret request") @RequestBody SecretRequestDto request, @RequestParam(required = false, name = "version") String version) throws NotFoundException;
+    SecretContentResponseDto getSecretContent(@Parameter(description = "Secret request") @Valid @RequestBody SecretRequestDto request, @RequestParam(required = false, name = "version") String version) throws NotFoundException;
 
     @Operation(summary = "Create Secret")
     @ApiResponses(value = {
@@ -79,7 +80,7 @@ public interface SecretController extends AuthProtectedConnectorController {
             )})
     @PostMapping(consumes = {"application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    SecretResponseDto createSecret(@Parameter(description = "Create Secret request") @RequestBody CreateSecretRequestDto request) throws AlreadyExistException;
+    SecretResponseDto createSecret(@Parameter(description = "Create Secret request") @Valid @RequestBody CreateSecretRequestDto request) throws AlreadyExistException;
 
     @Operation(summary = "Update Secret")
     @ApiResponses(value = {
@@ -111,7 +112,7 @@ public interface SecretController extends AuthProtectedConnectorController {
                     )
             )})
     @PutMapping(consumes = {"application/json"})
-    SecretResponseDto updateSecret(@Parameter(description = "Update Secret request") @RequestBody UpdateSecretRequestDto request) throws NotFoundException;
+    SecretResponseDto updateSecret(@Parameter(description = "Update Secret request") @Valid @RequestBody UpdateSecretRequestDto request) throws NotFoundException;
 
     @Operation(summary = "Delete Secret")
     @ApiResponses(value = {
@@ -136,7 +137,7 @@ public interface SecretController extends AuthProtectedConnectorController {
             )})
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteSecret(@Parameter(description = "Secret request") @RequestBody SecretRequestDto request) throws NotFoundException;
+    void deleteSecret(@Parameter(description = "Secret request") @Valid @RequestBody SecretRequestDto request) throws NotFoundException;
 
     @Operation(summary = "Get Rotate Attributes")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Rotate attributes retrieved")})
@@ -173,6 +174,6 @@ public interface SecretController extends AuthProtectedConnectorController {
                     )
             )})
     @PostMapping(path = "/rotate")
-    SecretResponseDto rotateSecret(@Parameter(description = "Secret request") @RequestBody SecretRequestDto request) throws NotFoundException;
+    SecretResponseDto rotateSecret(@Parameter(description = "Secret request") @Valid @RequestBody SecretRequestDto request) throws NotFoundException;
 
 }

@@ -4,6 +4,7 @@ import com.czertainly.api.model.connector.secrets.SecretType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -21,6 +22,7 @@ import lombok.Data;
 @Schema(implementation = SecretContentDto.class)
 public abstract class SecretContent implements SecretContentDto {
 
+    @NotNull
     @Schema(description = "Secret type", requiredMode = Schema.RequiredMode.REQUIRED, examples = {SecretType.Codes.API_KEY})
     private final SecretType type;
 

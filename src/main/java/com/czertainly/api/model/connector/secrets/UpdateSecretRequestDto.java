@@ -4,6 +4,9 @@ import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
 import com.czertainly.api.model.connector.secrets.content.*;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,9 +21,12 @@ import java.util.List;
 @NoArgsConstructor
 public class UpdateSecretRequestDto {
 
+    @NotBlank
     @Schema(description = "Name of the secret", requiredMode = Schema.RequiredMode.REQUIRED, examples = {"MyServerCredentials"})
     private String name;
 
+    @Valid
+    @NotNull
     @Schema(description = "Secret content", requiredMode = Schema.RequiredMode.REQUIRED)
     private SecretContent secret;
 
