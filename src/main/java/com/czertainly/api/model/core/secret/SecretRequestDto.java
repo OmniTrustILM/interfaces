@@ -9,7 +9,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class SecretRequestDto {
@@ -20,10 +19,6 @@ public class SecretRequestDto {
 
     @Schema(description = "Description of the secret", requiredMode = Schema.RequiredMode.REQUIRED)
     private String description;
-
-    @Schema(description = "UUID of the vault profile where the secret is stored", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
-    private UUID sourceVaultProfileUuid;
 
     @Schema(description = "Content of the secret", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
