@@ -70,7 +70,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @Operation(summary = "Get secret content")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Secret content retrieved")})
     @GetMapping(path = "/secrets/{uuid}/content", produces = {MediaType.APPLICATION_JSON_VALUE})
-    SecretContent getSecretContent(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid) throws NotFoundException, ConnectorException, NoSuchAlgorithmException, AttributeException;
+    SecretContent getSecretContent(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Create a new secret")
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Secret created successfully")})
