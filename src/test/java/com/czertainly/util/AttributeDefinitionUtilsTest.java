@@ -133,7 +133,8 @@ class AttributeDefinitionUtilsTest {
                        }
                      ],
                      "type": "data",
-                     "version": 3
+                     "version": 3,
+                     "contentType": "string"
                    },
                    {
                      "name": "description",
@@ -144,6 +145,7 @@ class AttributeDefinitionUtilsTest {
                          "contentType": "string"
                        }
                      ],
+                     "contentType": "string",
                      "type": "data",
                      "version": 3
                    },
@@ -159,6 +161,7 @@ class AttributeDefinitionUtilsTest {
                          "contentType": "object"
                        }
                      ],
+                     "contentType": "object",
                      "type": "data",
                      "version": 3
                    },
@@ -174,6 +177,7 @@ class AttributeDefinitionUtilsTest {
                          "contentType": "object"
                        }
                      ],
+                     "contentType": "object",
                      "type": "data",
                      "version": 3
                    },
@@ -185,12 +189,12 @@ class AttributeDefinitionUtilsTest {
                          "data": {
                            "id": 0,
                            "name": "DemoServerSubCA"
-                         },
-                         "contentType": "object"
+                         }
                        }
                      ],
+                     "contentType": "object",
                      "type": "data",
-                     "version": 3
+                     "version": 2
                    },
                    {
                      "name": "sendNotifications",
@@ -202,7 +206,8 @@ class AttributeDefinitionUtilsTest {
                        }
                      ],
                      "type": "data",
-                     "version": 3
+                     "version": 3,
+                     "contentType": "boolean"
                    },
                    {
                      "name": "keyRecoverable",
@@ -214,7 +219,8 @@ class AttributeDefinitionUtilsTest {
                        }
                      ],
                      "type": "data",
-                     "version": 3
+                     "version": 3,
+                     "contentType": "boolean"
                    }
                  ]
                 """;
@@ -222,6 +228,10 @@ class AttributeDefinitionUtilsTest {
         List<BaseAttribute> attrs = deserialize(attrData, BaseAttribute.class);
         Assertions.assertNotNull(attrs);
         Assertions.assertEquals(7, attrs.size());
+
+        List<RequestAttribute> clientAttributes = AttributeDefinitionUtils.getClientAttributes(attrs);
+        Assertions.assertEquals(7, clientAttributes.size());
+        Assertions.assertTrue(clientAttributes.stream().allMatch(a -> a.getContentType() != null));
 
         NameAndIdDto endEntityProfile = getNameAndIdData("endEntityProfile", AttributeDefinitionUtils.getClientAttributes(attrs));
         Assertions.assertNotNull(endEntityProfile);
