@@ -802,6 +802,7 @@ public class AttributeDefinitionUtils {
             atr.setName(dataAttribute.getName());
             if (dataAttribute.getUuid() != null) atr.setUuid(UUID.fromString(dataAttribute.getUuid()));
             atr.setContent(dataAttribute.getContent());
+            atr.setContentType(dataAttribute.getContentType());
             convertedDefinition.add(atr);
     }
 
@@ -813,6 +814,7 @@ public class AttributeDefinitionUtils {
             atr.setName(dataAttributeV2.getName());
             if (dataAttributeV2.getUuid() != null) atr.setUuid(UUID.fromString(dataAttributeV2.getUuid()));
             atr.setContent(dataAttributeV2.getContent());
+            atr.setContentType(dataAttributeV2.getContentType());
             convertedDefinition.add(atr);
     }
 
