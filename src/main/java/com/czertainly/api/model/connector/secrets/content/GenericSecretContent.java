@@ -15,7 +15,7 @@ public class GenericSecretContent extends SecretContent {
 
     @NotBlank
     @ToString.Exclude
-    @Schema(description = "Generic secret content encoded as Base64 string", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Generic secret content represented as string. In case secret content are binary data, it should be encoded as BASE64 string", requiredMode = Schema.RequiredMode.REQUIRED)
     private String content;
 
     public GenericSecretContent() {
