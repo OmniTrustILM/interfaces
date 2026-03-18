@@ -17,7 +17,7 @@ public class JwtTokenSecretContent extends SecretContent {
     @ToString.Exclude
     @Schema(
             requiredMode = Schema.RequiredMode.REQUIRED,
-            description = "JWT Token content in compact (dot separated) format specified in [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-3)",
+            description = "JWT Token content in compact (dot-separated) format specified in [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-3)",
             example = "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
     )
     private String content;
