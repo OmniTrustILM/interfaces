@@ -98,12 +98,13 @@ public enum Resource implements IPlatformEnum {
     // Secrets
     VAULT(Codes.VAULT, "Vault", true, true),
     VAULT_PROFILE(Codes.VAULT_PROFILE, "Vault Profile", true, true),
-    SECRET(Codes.SECRET, "Secret", false, true)
+    SECRET(Codes.SECRET, "Secret", false, true, true, true)
     ;
 
     private static final Resource[] VALUES;
     private static final EnumSet<Resource> complianceSubjects = EnumSet.of(Resource.CERTIFICATE, Resource.CERTIFICATE_REQUEST, Resource.CRYPTOGRAPHIC_KEY);
     private static final EnumSet<Resource> complianceProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.TOKEN_PROFILE);
+    private static final EnumSet<Resource> approvalProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.VAULT_PROFILE);
 
     static {
         VALUES = values();
@@ -186,6 +187,10 @@ public enum Resource implements IPlatformEnum {
 
     public boolean hasComplianceProfiles() {
         return complianceProfilesAssignable.contains(this);
+    }
+
+    public boolean hasApprovalProfiles() {
+        return approvalProfilesAssignable.contains(this);
     }
 
     @JsonCreator
