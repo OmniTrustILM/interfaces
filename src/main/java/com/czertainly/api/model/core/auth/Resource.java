@@ -98,7 +98,13 @@ public enum Resource implements IPlatformEnum {
     // Secrets
     VAULT(Codes.VAULT, "Vault", true, true),
     VAULT_PROFILE(Codes.VAULT_PROFILE, "Vault Profile", true, true),
-    SECRET(Codes.SECRET, "Secret", false, true, true, true)
+    SECRET(Codes.SECRET, "Secret", false, true, true, true),
+
+    // Signing
+    SIGNATURE_PROFILE(Codes.SIGNATURE_PROFILE, "Signature Profile", true, true),
+    SIGNING_WORKFLOW_CONFIGURATION(Codes.SIGNING_WORKFLOW_CONFIGURATION, "Signing Workflow Configuration", true, true),
+    TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
+    TSP_CONFIGURATION(Codes.TSP_CONFIGURATION, "Timestamping Protocol Configuration", true, true),
     ;
 
     private static final Resource[] VALUES;
@@ -232,8 +238,11 @@ public enum Resource implements IPlatformEnum {
         public static final String VAULT = "vaults";
         public static final String VAULT_PROFILE = "vaultProfiles";
         public static final String SECRET = "secrets";
-
         public static final String CBOM = "cboms";
+        public static final String SIGNATURE_PROFILE = "signatureProfiles";
+        public static final String SIGNING_WORKFLOW_CONFIGURATION = "signingWorkflowConfigurations";
+        public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
+        public static final String TSP_CONFIGURATION = "tspConfigurations";
 
         private Codes() {
 
