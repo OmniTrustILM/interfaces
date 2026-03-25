@@ -1,9 +1,6 @@
 package com.czertainly.api.model.core.signing.digitalsignature;
 
 import com.czertainly.api.model.common.NameAndUuidDto;
-import com.czertainly.api.model.core.signing.SignatureFormat;
-import com.czertainly.api.model.core.signing.SignatureLevel;
-import com.czertainly.api.model.core.signing.SigningProtocol;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileListDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -11,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -36,31 +32,6 @@ public class DigitalSignatureDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private ZonedDateTime createdAt;
-
-    @Schema(
-            description = "Signing protocol that produced this Digital Signature",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private SigningProtocol signingProtocol;
-
-    @Schema(
-            description = "Signature format (encapsulation standard) of this Digital Signature",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private SignatureFormat signatureFormat;
-
-    @Schema(
-            description = "ETSI conformance level of this Digital Signature",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private SignatureLevel signatureLevel;
-
-    @Schema(
-            description = "OID or JCA name of the signature algorithm used, such as  '1.2.840.113549.1.1.11' (sha256WithRSAEncryption) or 'SHA256withRSA'.",
-            examples = {"SHA256withRSA", "SHA384withECDSA"},
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private String signingAlgorithm;
 
     @Schema(
             description = "Raw signature value as a byte array (e.g. the DER-encoded CMS SignedData structure " +

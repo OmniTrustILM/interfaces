@@ -1,26 +1,27 @@
 package com.czertainly.api.model.core.signing;
 
 import com.czertainly.api.model.common.NameAndUuidDto;
-import com.czertainly.api.model.common.enums.cryptography.DigestAlgorithm;
-import com.czertainly.api.model.core.signing.signatureprofile.DelegatedSigningDto;
-import com.czertainly.api.model.core.signing.signatureprofile.DelegatedSigningRequestDto;
-import com.czertainly.api.model.core.signing.signatureprofile.ManagedSigningDto;
-import com.czertainly.api.model.core.signing.signatureprofile.ManagedSigningRequestDto;
-import com.czertainly.api.model.core.signing.signatureprofile.ManagedSigningType;
-import com.czertainly.api.model.core.signing.signatureprofile.OneTimeKeyManagedSigningDto;
-import com.czertainly.api.model.core.signing.signatureprofile.OneTimeKeyManagedSigningRequestDto;
-import com.czertainly.api.model.core.signing.signatureprofile.SigningScheme;
-import com.czertainly.api.model.core.signing.signatureprofile.SigningSchemeDto;
-import com.czertainly.api.model.core.signing.signatureprofile.SigningSchemeRequestDto;
-import com.czertainly.api.model.core.signing.signatureprofile.StaticKeyManagedSigningDto;
-import com.czertainly.api.model.core.signing.signatureprofile.StaticKeyManagedSigningRequestDto;
-import com.czertainly.api.model.core.signing.workflow.SigningWorkflowConfigurationCreateRequestDto;
-import com.czertainly.api.model.core.signing.workflow.SigningWorkflowConfigurationDto;
-import com.czertainly.api.model.core.signing.workflow.SigningWorkflowConfigurationUpdateRequestDto;
-import com.czertainly.api.model.core.signing.workflow.SigningWorkflowType;
-import com.czertainly.api.model.core.signing.workflow.TimestampingConfigurationCreateRequestDto;
-import com.czertainly.api.model.core.signing.workflow.TimestampingConfigurationDto;
-import com.czertainly.api.model.core.signing.workflow.TimestampingConfigurationUpdateRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.DelegatedSigningDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.DelegatedSigningRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.ManagedSigningDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.ManagedSigningRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.ManagedSigningType;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.OneTimeKeyManagedSigningDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.OneTimeKeyManagedSigningRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.SigningScheme;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.SigningSchemeDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.SigningSchemeRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.StaticKeyManagedSigningDto;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.StaticKeyManagedSigningRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.CodeBinarySigningWorkflowDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.CodeBinarySigningWorkflowRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.DocumentSigningWorkflowDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.DocumentSigningWorkflowRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.SigningWorkflowType;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.TimestampingWorkflowDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.TimestampingWorkflowRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.WorkflowDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.WorkflowRequestDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -46,13 +47,13 @@ class PolymorphicSerializationTest {
     }
 
     // -------------------------------------------------------------------------
-    // TimestampingConfigurationDto
+    // TimestampingWorkflowDto
     // -------------------------------------------------------------------------
 
     @Test
-    void timestampingConfigurationDto_serializesDiscriminator() throws Exception {
-        TimestampingConfigurationDto dto = new TimestampingConfigurationDto();
-        dto.setQualifiedTimestamp(true);
+    void timestampingWorkflowConfigDto_serializesDiscriminator() throws Exception {
+        TimestampingWorkflowDto dto = new TimestampingWorkflowDto();
+        dto.setDefaultPolicyId("1.2.3.4.5");
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -60,58 +61,45 @@ class PolymorphicSerializationTest {
     }
 
     @Test
-    void timestampingConfigurationDto_deserializesViaBaseClass() throws Exception {
+    void timestampingWorkflowConfigDto_deserializesViaBaseClass() throws Exception {
         String json = """
                 {
-                  "uuid": "11111111-0000-0000-0000-000000000001",
-                  "name": "My TSA Workflow",
                   "type": "timestamping",
-                  "qualifiedTimestamp": true,
                   "defaultPolicyId": "1.2.3.4.5",
-                  "allowedPolicyIds": ["1.2.3.4.5", "1.2.3.4.6"],
-                  "allowedDigestAlgorithms": ["SHA-256", "SHA-512"]
+                  "allowedPolicyIds": ["1.2.3.4.5", "1.2.3.4.6"]
                 }
                 """;
 
-        SigningWorkflowConfigurationDto base = mapper.readValue(json, SigningWorkflowConfigurationDto.class);
+        WorkflowDto base = mapper.readValue(json, WorkflowDto.class);
 
-        assertInstanceOf(TimestampingConfigurationDto.class, base);
-        TimestampingConfigurationDto result = (TimestampingConfigurationDto) base;
+        assertInstanceOf(TimestampingWorkflowDto.class, base);
+        TimestampingWorkflowDto result = (TimestampingWorkflowDto) base;
         assertEquals(SigningWorkflowType.TIMESTAMPING, result.getType());
-        assertEquals("11111111-0000-0000-0000-000000000001", result.getUuid());
-        assertEquals("My TSA Workflow", result.getName());
-        assertTrue(result.getQualifiedTimestamp());
         assertEquals("1.2.3.4.5", result.getDefaultPolicyId());
         assertEquals(List.of("1.2.3.4.5", "1.2.3.4.6"), result.getAllowedPolicyIds());
-        assertEquals(List.of(DigestAlgorithm.SHA_256, DigestAlgorithm.SHA_512), result.getAllowedDigestAlgorithms());
     }
 
     @Test
-    void timestampingConfigurationDto_roundTrip() throws Exception {
-        TimestampingConfigurationDto original = new TimestampingConfigurationDto();
-        original.setUuid("11111111-0000-0000-0000-000000000001");
-        original.setName("My TSA Workflow");
-        original.setQualifiedTimestamp(false);
+    void timestampingWorkflowConfigDto_roundTrip() throws Exception {
+        TimestampingWorkflowDto original = new TimestampingWorkflowDto();
         original.setDefaultPolicyId("1.2.3.4.5");
         original.setAllowedPolicyIds(List.of("1.2.3.4.5", "1.2.3.4.6"));
-        original.setAllowedDigestAlgorithms(List.of(DigestAlgorithm.SHA_256, DigestAlgorithm.SHA_384));
 
         String json = mapper.writeValueAsString(original);
-        SigningWorkflowConfigurationDto deserialized = mapper.readValue(json, SigningWorkflowConfigurationDto.class);
+        WorkflowDto deserialized = mapper.readValue(json, WorkflowDto.class);
 
-        assertInstanceOf(TimestampingConfigurationDto.class, deserialized);
+        assertInstanceOf(TimestampingWorkflowDto.class, deserialized);
         assertEquals(original, deserialized);
     }
 
     // -------------------------------------------------------------------------
-    // TimestampingConfigurationCreateRequestDto
+    // TimestampingWorkflowRequestDto
     // -------------------------------------------------------------------------
 
     @Test
-    void timestampingCreateRequestDto_serializesDiscriminator() throws Exception {
-        TimestampingConfigurationCreateRequestDto dto = new TimestampingConfigurationCreateRequestDto();
-        dto.setName("New Workflow");
-        dto.setQualifiedTimestamp(true);
+    void timestampingWorkflowConfigRequestDto_serializesDiscriminator() throws Exception {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.2.3.4.5");
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -119,73 +107,136 @@ class PolymorphicSerializationTest {
     }
 
     @Test
-    void timestampingCreateRequestDto_deserializesViaBaseClass() throws Exception {
+    void timestampingWorkflowConfigRequestDto_deserializesViaBaseClass() throws Exception {
         String json = """
                 {
-                  "name": "New TSA Workflow",
                   "type": "timestamping",
-                  "qualifiedTimestamp": true,
-                  "defaultPolicyId": "1.2.3.4.5",
-                  "allowedDigestAlgorithms": ["SHA-256"]
+                  "defaultPolicyId": "1.2.3.4.5"
                 }
                 """;
 
-        SigningWorkflowConfigurationCreateRequestDto base =
-                mapper.readValue(json, SigningWorkflowConfigurationCreateRequestDto.class);
+        WorkflowRequestDto base =
+                mapper.readValue(json, WorkflowRequestDto.class);
 
-        assertInstanceOf(TimestampingConfigurationCreateRequestDto.class, base);
-        TimestampingConfigurationCreateRequestDto result = (TimestampingConfigurationCreateRequestDto) base;
+        assertInstanceOf(TimestampingWorkflowRequestDto.class, base);
+        TimestampingWorkflowRequestDto result = (TimestampingWorkflowRequestDto) base;
         assertEquals(SigningWorkflowType.TIMESTAMPING, result.getType());
-        assertEquals("New TSA Workflow", result.getName());
-        assertTrue(result.getQualifiedTimestamp());
         assertEquals("1.2.3.4.5", result.getDefaultPolicyId());
-        assertEquals(List.of(DigestAlgorithm.SHA_256), result.getAllowedDigestAlgorithms());
     }
 
     @Test
-    void timestampingCreateRequestDto_roundTrip() throws Exception {
-        TimestampingConfigurationCreateRequestDto original = new TimestampingConfigurationCreateRequestDto();
-        original.setName("New TSA Workflow");
-        original.setQualifiedTimestamp(true);
+    void timestampingWorkflowConfigRequestDto_roundTrip() throws Exception {
+        TimestampingWorkflowRequestDto original = new TimestampingWorkflowRequestDto();
         original.setDefaultPolicyId("1.2.3.4.5");
         original.setAllowedPolicyIds(List.of("1.2.3.4.5"));
-        original.setAllowedDigestAlgorithms(List.of(DigestAlgorithm.SHA_256, DigestAlgorithm.SHA_512));
         UUID tqUuid = UUID.randomUUID();
         original.setTimeQualityConfigurationUuid(tqUuid);
 
         String json = mapper.writeValueAsString(original);
-        SigningWorkflowConfigurationCreateRequestDto deserialized = mapper.readValue(json, SigningWorkflowConfigurationCreateRequestDto.class);
+        WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
 
-        assertInstanceOf(TimestampingConfigurationCreateRequestDto.class, deserialized);
+        assertInstanceOf(TimestampingWorkflowRequestDto.class, deserialized);
+        assertEquals(original, deserialized);
+    }
+
+    @Test
+    void timestampingWorkflowConfigRequestDto_withFormatterConnector_roundTrip() throws Exception {
+        TimestampingWorkflowRequestDto original = new TimestampingWorkflowRequestDto();
+        original.setSignatureFormatterConnectorUuid(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"));
+
+        String json = mapper.writeValueAsString(original);
+        WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
+
+        assertInstanceOf(TimestampingWorkflowRequestDto.class, deserialized);
+        TimestampingWorkflowRequestDto result = (TimestampingWorkflowRequestDto) deserialized;
+        assertEquals(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"), result.getSignatureFormatterConnectorUuid());
+    }
+
+    // -------------------------------------------------------------------------
+    // DocumentSigningWorkflowDto
+    // -------------------------------------------------------------------------
+
+    @Test
+    void documentSigningWorkflowConfigDto_serializesDiscriminator() throws Exception {
+        DocumentSigningWorkflowDto dto = new DocumentSigningWorkflowDto();
+
+        JsonNode json = mapper.valueToTree(dto);
+
+        assertEquals(SigningWorkflowType.Codes.DOCUMENT_SIGNING, json.get("type").asText());
+    }
+
+    @Test
+    void documentSigningWorkflowConfigDto_deserializesViaBaseClass() throws Exception {
+        String json = """
+                {
+                  "type": "document_signing"
+                }
+                """;
+
+        WorkflowDto base = mapper.readValue(json, WorkflowDto.class);
+
+        assertInstanceOf(DocumentSigningWorkflowDto.class, base);
+        assertEquals(SigningWorkflowType.DOCUMENT_SIGNING, base.getType());
+    }
+
+    @Test
+    void documentSigningWorkflowConfigRequestDto_serializesDiscriminator() throws Exception {
+        DocumentSigningWorkflowRequestDto dto = new DocumentSigningWorkflowRequestDto();
+        dto.setSignatureFormatterConnectorUuid(UUID.fromString("11111111-2222-3333-4444-555555555555"));
+
+        JsonNode json = mapper.valueToTree(dto);
+
+        assertEquals(SigningWorkflowType.Codes.DOCUMENT_SIGNING, json.get("type").asText());
+    }
+
+    @Test
+    void documentSigningWorkflowConfigRequestDto_roundTrip() throws Exception {
+        DocumentSigningWorkflowRequestDto original = new DocumentSigningWorkflowRequestDto();
+        original.setSignatureFormatterConnectorUuid(UUID.fromString("11111111-2222-3333-4444-555555555555"));
+
+        String json = mapper.writeValueAsString(original);
+        WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
+
+        assertInstanceOf(DocumentSigningWorkflowRequestDto.class, deserialized);
         assertEquals(original, deserialized);
     }
 
     // -------------------------------------------------------------------------
-    // TimestampingConfigurationUpdateRequestDto
+    // CodeBinarySigningWorkflowDto
     // -------------------------------------------------------------------------
 
     @Test
-    void timestampingUpdateRequestDto_serializesDiscriminator() throws Exception {
-        TimestampingConfigurationUpdateRequestDto dto = new TimestampingConfigurationUpdateRequestDto();
-        dto.setName("Updated Workflow");
-        dto.setQualifiedTimestamp(false);
+    void codeBinarySigningWorkflowConfigDto_serializesDiscriminator() throws Exception {
+        CodeBinarySigningWorkflowDto dto = new CodeBinarySigningWorkflowDto();
 
         JsonNode json = mapper.valueToTree(dto);
 
-        assertEquals(SigningWorkflowType.Codes.TIMESTAMPING, json.get("type").asText());
+        assertEquals(SigningWorkflowType.Codes.CODE_BINARY_SIGNING, json.get("type").asText());
     }
 
     @Test
-    void timestampingUpdateRequestDto_roundTrip() throws Exception {
-        TimestampingConfigurationUpdateRequestDto original = new TimestampingConfigurationUpdateRequestDto();
-        original.setName("Updated TSA Workflow");
-        original.setQualifiedTimestamp(false);
-        original.setAllowedDigestAlgorithms(List.of(DigestAlgorithm.SHA_384));
+    void codeBinarySigningWorkflowConfigDto_deserializesViaBaseClass() throws Exception {
+        String json = """
+                {
+                  "type": "code_binary_signing"
+                }
+                """;
+
+        WorkflowDto base = mapper.readValue(json, WorkflowDto.class);
+
+        assertInstanceOf(CodeBinarySigningWorkflowDto.class, base);
+        assertEquals(SigningWorkflowType.CODE_BINARY_SIGNING, base.getType());
+    }
+
+    @Test
+    void codeBinarySigningWorkflowConfigRequestDto_roundTrip() throws Exception {
+        CodeBinarySigningWorkflowRequestDto original = new CodeBinarySigningWorkflowRequestDto();
+        original.setSignatureFormatterConnectorUuid(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-111111111111"));
 
         String json = mapper.writeValueAsString(original);
-        SigningWorkflowConfigurationUpdateRequestDto deserialized = mapper.readValue(json, SigningWorkflowConfigurationUpdateRequestDto.class);
+        WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
 
-        assertInstanceOf(TimestampingConfigurationUpdateRequestDto.class, deserialized);
+        assertInstanceOf(CodeBinarySigningWorkflowRequestDto.class, deserialized);
         assertEquals(original, deserialized);
     }
 
@@ -555,15 +606,14 @@ class PolymorphicSerializationTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void unknownSigningWorkflowType_throwsOnDeserialization() {
+    void unknownWorkflowType_throwsOnDeserialization() {
         String json = """
                 {
                   "type": "unknown_workflow_type",
-                  "qualifiedTimestamp": true
                 }
                 """;
 
-        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningWorkflowConfigurationDto.class));
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, WorkflowDto.class));
     }
 
     @Test

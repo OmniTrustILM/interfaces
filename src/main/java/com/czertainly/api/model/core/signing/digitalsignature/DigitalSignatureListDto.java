@@ -1,9 +1,6 @@
 package com.czertainly.api.model.core.signing.digitalsignature;
 
 import com.czertainly.api.model.common.NameAndUuidDto;
-import com.czertainly.api.model.core.signing.SignatureFormat;
-import com.czertainly.api.model.core.signing.SignatureLevel;
-import com.czertainly.api.model.core.signing.SigningProtocol;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileListDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -35,22 +32,4 @@ public class DigitalSignatureListDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private ZonedDateTime createdAt;
-
-    @Schema(
-            description = "Signing protocol that produced this Digital Signature",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private SigningProtocol signingProtocol;
-
-    @Schema(
-            description = "Signature format (encapsulation standard) of this Digital Signature",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private SignatureFormat signatureFormat;
-
-    @Schema(
-            description = "ETSI conformance level of this Digital Signature",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private SignatureLevel signatureLevel;
 }

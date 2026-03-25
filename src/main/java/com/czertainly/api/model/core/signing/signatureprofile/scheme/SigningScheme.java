@@ -1,4 +1,4 @@
-package com.czertainly.api.model.core.signing;
+package com.czertainly.api.model.core.signing.signatureprofile.scheme;
 
 import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
@@ -9,15 +9,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Arrays;
 
+/**
+ * Signing Scheme defines the overall approach to signing, which can be either managed by ILM or delegated to an external service.
+ * In addition, a managed signing scheme distinguishes between two types of signing:
+ * 1. Signing by a static key pair
+ * 2. Signing by a one-time key pair
+ */
 @Schema(enumAsRef = true)
-public enum SigningProtocol implements IPlatformEnum {
+public enum SigningScheme implements IPlatformEnum {
 
-    CSC_API(Codes.CSC_API, "CSC API Protocol", "Cloud Signature Consortium API v2"),
-    ILM_SIGNING_PROTOCOL(Codes.ILM_SIGNING_PROTOCOL, "ILM Signing Protocol", "internal ILM-based signing protocol"),
-    TSP(Codes.TSP, "Timestamping Protocol", "Timestamping Protocol based on RFC 3161"),
+    MANAGED(Codes.MANAGED, "Managed Signing", "ILM manages the signing workflow"),
+    DELEGATED(Codes.DELEGATED, "Delegated Signing", "ILM delegates the signing to an external signing service")
     ;
 
-    private static final SigningProtocol[] VALUES;
+    private static final SigningScheme[] VALUES;
 
     static {
         VALUES = values();
@@ -27,19 +32,19 @@ public enum SigningProtocol implements IPlatformEnum {
     private final String label;
     private final String description;
 
-    SigningProtocol(String code, String label, String description) {
+    SigningScheme(String code, String label, String description) {
         this.code = code;
         this.label = label;
         this.description = description;
     }
 
     @JsonCreator
-    public static SigningProtocol findByCode(String code) {
+    public static SigningScheme findByCode(String code) {
         return Arrays.stream(VALUES)
                 .filter(k -> k.code.equals(code))
                 .findFirst()
                 .orElseThrow(() ->
-                        new ValidationException(ValidationError.create("Unknown signing protocol {}", code)));
+                        new ValidationException(ValidationError.create("Unknown signing scheme {}", code)));
     }
 
     @Override
@@ -59,9 +64,8 @@ public enum SigningProtocol implements IPlatformEnum {
     }
 
     public static class Codes {
-        public static final String CSC_API = "cscApi";
-        public static final String ILM_SIGNING_PROTOCOL = "ilmSigningProtocol";
-        public static final String TSP = "tsp";
+        public static final String MANAGED = "managed";
+        public static final String DELEGATED = "delegated";
 
         private Codes() {
         }

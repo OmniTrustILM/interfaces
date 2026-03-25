@@ -1,4 +1,4 @@
-package com.czertainly.api.model.core.signing;
+package com.czertainly.api.model.core.signing.signatureprofile.scheme;
 
 import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
@@ -10,14 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 @Schema(enumAsRef = true)
-public enum SigningProtocol implements IPlatformEnum {
+public enum ManagedSigningType implements IPlatformEnum {
 
-    CSC_API(Codes.CSC_API, "CSC API Protocol", "Cloud Signature Consortium API v2"),
-    ILM_SIGNING_PROTOCOL(Codes.ILM_SIGNING_PROTOCOL, "ILM Signing Protocol", "internal ILM-based signing protocol"),
-    TSP(Codes.TSP, "Timestamping Protocol", "Timestamping Protocol based on RFC 3161"),
-    ;
+    STATIC_KEY(Codes.STATIC_KEY, "Static Key", "Signing uses a pre-existing static certificate and key pair"),
+    ONE_TIME_KEY(Codes.ONE_TIME_KEY, "One-Time Key", "Signing uses a freshly issued certificate and key pair per operation");
 
-    private static final SigningProtocol[] VALUES;
+    private static final ManagedSigningType[] VALUES;
 
     static {
         VALUES = values();
@@ -27,19 +25,19 @@ public enum SigningProtocol implements IPlatformEnum {
     private final String label;
     private final String description;
 
-    SigningProtocol(String code, String label, String description) {
+    ManagedSigningType(String code, String label, String description) {
         this.code = code;
         this.label = label;
         this.description = description;
     }
 
     @JsonCreator
-    public static SigningProtocol findByCode(String code) {
+    public static ManagedSigningType findByCode(String code) {
         return Arrays.stream(VALUES)
                 .filter(k -> k.code.equals(code))
                 .findFirst()
                 .orElseThrow(() ->
-                        new ValidationException(ValidationError.create("Unknown signing protocol {}", code)));
+                        new ValidationException(ValidationError.create("Unknown managed signing type {}", code)));
     }
 
     @Override
@@ -59,9 +57,8 @@ public enum SigningProtocol implements IPlatformEnum {
     }
 
     public static class Codes {
-        public static final String CSC_API = "cscApi";
-        public static final String ILM_SIGNING_PROTOCOL = "ilmSigningProtocol";
-        public static final String TSP = "tsp";
+        public static final String STATIC_KEY = "staticKey";
+        public static final String ONE_TIME_KEY = "oneTimeKey";
 
         private Codes() {
         }

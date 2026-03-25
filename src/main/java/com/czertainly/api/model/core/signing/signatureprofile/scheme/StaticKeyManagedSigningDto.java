@@ -1,0 +1,40 @@
+package com.czertainly.api.model.core.signing.signatureprofile.scheme;
+
+import com.czertainly.api.model.client.attribute.ResponseAttribute;
+import com.czertainly.api.model.common.NameAndUuidDto;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
+@JsonDeserialize(using = JsonDeserializer.None.class)
+@Schema(name = "StaticKeyManagedSigningDto",
+        description = "Managed signing using a pre-existing static cryptographic key")
+public class StaticKeyManagedSigningDto extends ManagedSigningDto {
+
+    @NotNull
+    @Schema(description = "Token Profile used for signing", requiredMode = Schema.RequiredMode.REQUIRED)
+    private NameAndUuidDto tokenProfile;
+
+    @NotNull
+    @Schema(description = "Cryptographic Key used for signing", requiredMode = Schema.RequiredMode.REQUIRED)
+    private NameAndUuidDto cryptographicKey;
+
+    @NotNull
+    @Schema(description = "List of attributes required for signing operations (such as digest algorithm), provided by the Cryprography Provider Connector",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ResponseAttribute> attributes = new ArrayList<>();
+
+    public StaticKeyManagedSigningDto() {
+        super(ManagedSigningType.STATIC_KEY);
+    }
+}

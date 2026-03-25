@@ -1,6 +1,8 @@
 package com.czertainly.api.model.core.signing.signatureprofile;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.core.signing.signatureprofile.scheme.SigningSchemeRequestDto;
+import com.czertainly.api.model.core.signing.signatureprofile.workflow.WorkflowRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +11,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @Schema(name = "SignatureProfileCreateRequestDto", description = "Request to create a new Signature Profile")
@@ -23,17 +24,19 @@ public class SignatureProfileCreateRequestDto {
     private String description;
 
     @NotNull
-    @Schema(description = "UUID of the Signing Workflow Configuration to use", requiredMode = Schema.RequiredMode.REQUIRED)
-    private UUID signingWorkflowConfigurationUuid;
-
-    @NotNull
     @Schema(description = "Whether the Signature Profile is enabled", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
     private Boolean enabled;
 
     @NotNull
     @Valid
-    @Schema(description = "'Signing with' configuration", requiredMode = Schema.RequiredMode.REQUIRED)
-    private SigningSchemeRequestDto signingWith;
+    @Schema(description = "Signing scheme configuration (who holds the key and how the cryptographic operation is performed)",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private SigningSchemeRequestDto signingScheme;
+
+    @NotNull
+    @Valid
+    @Schema(description = "Workflow-type-specific configuration.", requiredMode = Schema.RequiredMode.REQUIRED)
+    private WorkflowRequestDto workflow;
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> customAttributes = new ArrayList<>();

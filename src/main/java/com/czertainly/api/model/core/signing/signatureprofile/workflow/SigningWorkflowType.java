@@ -1,4 +1,4 @@
-package com.czertainly.api.model.core.signing;
+package com.czertainly.api.model.core.signing.signatureprofile.workflow;
 
 import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
@@ -10,14 +10,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 @Schema(enumAsRef = true)
-public enum SigningProtocol implements IPlatformEnum {
+public enum SigningWorkflowType implements IPlatformEnum {
 
-    CSC_API(Codes.CSC_API, "CSC API Protocol", "Cloud Signature Consortium API v2"),
-    ILM_SIGNING_PROTOCOL(Codes.ILM_SIGNING_PROTOCOL, "ILM Signing Protocol", "internal ILM-based signing protocol"),
-    TSP(Codes.TSP, "Timestamping Protocol", "Timestamping Protocol based on RFC 3161"),
+    CODE_BINARY_SIGNING(Codes.CODE_BINARY_SIGNING, "Code & Binary Signing", "Signing of code and binary files"),
+    DOCUMENT_SIGNING(Codes.DOCUMENT_SIGNING, "Document Signing", "Signing of documents"),
+    RAW_SIGNING(Codes.RAW_SIGNING, "Raw Signing", "Signing of raw data"),
+    TIMESTAMPING(Codes.TIMESTAMPING, "Timestamping", "Timestamping of data"),
     ;
 
-    private static final SigningProtocol[] VALUES;
+    private static final SigningWorkflowType[] VALUES;
 
     static {
         VALUES = values();
@@ -27,19 +28,19 @@ public enum SigningProtocol implements IPlatformEnum {
     private final String label;
     private final String description;
 
-    SigningProtocol(String code, String label, String description) {
+    SigningWorkflowType(String code, String label, String description) {
         this.code = code;
         this.label = label;
         this.description = description;
     }
 
     @JsonCreator
-    public static SigningProtocol findByCode(String code) {
+    public static SigningWorkflowType findByCode(String code) {
         return Arrays.stream(VALUES)
                 .filter(k -> k.code.equals(code))
                 .findFirst()
                 .orElseThrow(() ->
-                        new ValidationException(ValidationError.create("Unknown signing protocol {}", code)));
+                        new ValidationException(ValidationError.create("Unknown signing workflow type {}", code)));
     }
 
     @Override
@@ -59,9 +60,10 @@ public enum SigningProtocol implements IPlatformEnum {
     }
 
     public static class Codes {
-        public static final String CSC_API = "cscApi";
-        public static final String ILM_SIGNING_PROTOCOL = "ilmSigningProtocol";
-        public static final String TSP = "tsp";
+        public static final String CODE_BINARY_SIGNING = "code_binary_signing";
+        public static final String DOCUMENT_SIGNING = "document_signing";
+        public static final String RAW_SIGNING = "raw_signing";
+        public static final String TIMESTAMPING = "timestamping";
 
         private Codes() {
         }
