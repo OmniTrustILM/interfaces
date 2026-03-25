@@ -9,6 +9,7 @@ import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureDto;
 import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureListDto;
+import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureValidationResultDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,28 +55,20 @@ public interface DigitalSignatureController extends AuthProtectedController {
     @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     DigitalSignatureDto getDigitalSignature(@Parameter(description = "Digital Signature UUID") @PathVariable UUID uuid) throws NotFoundException;
 
-    @Operation(operationId = "deleteDigitalSignature", summary = "Delete a Digital Signature")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Digital Signature deleted")})
-    @DeleteMapping(path = "/{uuid}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteDigitalSignature(@Parameter(description = "Digital Signature UUID") @PathVariable UUID uuid) throws NotFoundException;
+    @Operation(
+            operationId = "validateDigitalSignature",
+            summary = "Validate a Digital Signature",
+            description = "Triggers a full validation of the Digital Signature: cryptographic integrity, " +
+                    "certificate chain, and revocation status of all involved certificates at the time of signing. " +
+                    "Returns the highest ETSI conformance level that was successfully verified, along with " +
+                    "any warnings or errors encountered."
+    )
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Validation completed (check 'valid' field for the outcome)")})
+    @PostMapping(path = "/{uuid}/validate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    DigitalSignatureValidationResultDto validateDigitalSignature(
+            @Parameter(description = "Digital Signature UUID") @PathVariable UUID uuid
+    ) throws NotFoundException;
 
-    @Operation(operationId = "bulkDeleteDigitalSignatures", summary = "Delete multiple Digital Signatures")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Digital Signatures deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
-    })
-    @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BulkActionMessageDto> bulkDeleteDigitalSignatures(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Digital Signature UUIDs",
-                    content = @Content(
-                            array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")}
-                    )
-            )
-            @RequestBody List<UUID> uuids
-    );
+    // :TODO: Deletion endpoints: need to clarify first the retention/archival policy. Perhaps archive first and delete after period of time?
+    // :TODO: Do we need legal hold?
 }

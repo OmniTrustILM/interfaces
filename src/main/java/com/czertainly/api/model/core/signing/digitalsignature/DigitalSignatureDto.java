@@ -1,37 +1,72 @@
 package com.czertainly.api.model.core.signing.digitalsignature;
 
+import com.czertainly.api.model.common.NameAndUuidDto;
+import com.czertainly.api.model.core.signing.SignatureFormat;
+import com.czertainly.api.model.core.signing.SignatureLevel;
+import com.czertainly.api.model.core.signing.SigningProtocol;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileListDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
-@Schema(name = "DigitalSignatureDto", description = "Digital Signature detail.")
-public class DigitalSignatureDto {
-
-    @Schema(
-            description = "UUID of the Digital Signature",
-            examples = {"7b55ge1c-844f-11dc-a8a3-0242ac120002"},
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private UUID uuid;
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Schema(name = "DigitalSignatureDto", description = "Digital Signature detail")
+public class DigitalSignatureDto extends NameAndUuidDto {
 
     @Schema(description = "Signature Profile used to produce this Digital Signature", requiredMode = Schema.RequiredMode.REQUIRED)
     private SignatureProfileListDto signatureProfile;
 
     @Schema(
-            description = "Time at which the Digital Signature was produced. Represents the signing time as recorded by the signing operation.",
+            description = "Claimed signing time embedded in the signature structure by the signing operation. " +
+                    "This is the local time reported by the signer and may not be trusted unless " +
+                    "corroborated by a timestamp token (see signingProtocol).",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private ZonedDateTime signingTime;
 
     @Schema(
-            description = "Signed data as a Base64-encoded byte array. " +
-                    "Contains the raw output of the signing operation (e.g. a CMS SignedData structure). " +
-                    "May be null if the signed data was not retained or has not been requested.",
+            description = "Server time at which the Digital Signature record was created in the system. " +
+                    "This timestamp is set by the platform and is independent of the cryptographic signing time.",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private ZonedDateTime createdAt;
+
+    @Schema(
+            description = "Signing protocol that produced this Digital Signature",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private SigningProtocol signingProtocol;
+
+    @Schema(
+            description = "Signature format (encapsulation standard) of this Digital Signature",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private SignatureFormat signatureFormat;
+
+    @Schema(
+            description = "ETSI conformance level of this Digital Signature",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private SignatureLevel signatureLevel;
+
+    @Schema(
+            description = "OID or JCA name of the signature algorithm used, such as  '1.2.840.113549.1.1.11' (sha256WithRSAEncryption) or 'SHA256withRSA'.",
+            examples = {"SHA256withRSA", "SHA384withECDSA"},
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String signingAlgorithm;
+
+    @Schema(
+            description = "Raw signature value as a byte array (e.g. the DER-encoded CMS SignedData structure " +
+                    "for CAdES, or the detached XML signature element for XAdES). " +
+                    "May be null if the signature value was not retained by the platform.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
-    private byte[] signedData;
+    private byte[] signatureValue;
 }

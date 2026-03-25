@@ -14,6 +14,7 @@ import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileCr
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileDto;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileListDto;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileUpdateRequestDto;
+import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureListDto;
 import com.czertainly.api.model.core.signing.tsp.TspConfigurationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -138,6 +139,27 @@ public interface SignatureProfileController extends AuthProtectedController {
     void disassociateFromApprovalProfile(@Parameter(description = "Signature Profile UUID") @PathVariable UUID signatureProfileUuid,
                                          @Parameter(description = "Approval Profile UUID") @PathVariable UUID approvalProfileUuid) throws NotFoundException;
 
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Digital Signatures
+    // -----------------------------------------------------------------------------------------------------------------
+
+    @Operation(
+            operationId = "listDigitalSignaturesForSignatureProfile",
+            summary = "List Digital Signatures produced under a Signature Profile",
+            description = "Returns a paginated, filterable list of all Digital Signatures that were produced " +
+                    "using this Signature Profile. Supports the same search and pagination parameters as " +
+                    "the top-level Digital Signatures listing."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Digital Signatures retrieved"),
+            @ApiResponse(responseCode = "404", description = "Signature Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+    })
+    @PostMapping(path = "/{uuid}/digitalSignatures", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
+    PaginationResponseDto<DigitalSignatureListDto> listDigitalSignaturesForSignatureProfile(
+            @Parameter(description = "Signature Profile UUID") @PathVariable UUID uuid,
+            @RequestBody SearchRequestDto request
+    ) throws NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Protocols
