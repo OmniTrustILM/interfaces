@@ -37,10 +37,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping("/v1/IlmSigningProtocolConfigurations")
+@RequestMapping("/v1/ilmSigningProtocolConfigurations")
 @Tag(name = "ILM Signing Protocol Configuration Management", description = "Internal ILM Signing Protocol Configuration Management API")
 @ApiResponses(value = {@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
-public interface IlmConfigurationController extends AuthProtectedController {
+public interface IlmSigningProtocolConfigurationController extends AuthProtectedController {
 
     @Operation(operationId = "listIlmSigningProtocolConfigurationSearchableFields", summary = "List search filters for ILM Signing Protocol Configurations")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of search filters retrieved")})
