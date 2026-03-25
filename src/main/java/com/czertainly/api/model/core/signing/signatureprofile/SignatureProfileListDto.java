@@ -14,6 +14,9 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class SignatureProfileListDto extends NameAndUuidDto {
 
+    @Schema(description = "Version of the Signature Profile", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private int version;
+
     @Schema(description = "Description of the Signature Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
 

@@ -20,6 +20,9 @@ public class SignatureProfileDto extends NameAndUuidDto {
     @Schema(description = "Description of the Signature Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
 
+    @Schema(description = "Version of the Signature Profile", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private int version;
+
     @Schema(description = "Whether the Signature Profile is enabled", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean enabled;
 

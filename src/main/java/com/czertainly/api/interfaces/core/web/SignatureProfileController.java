@@ -12,12 +12,14 @@ import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileCreateRequestDto;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileDto;
+import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileForVersionDto;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileListDto;
 import com.czertainly.api.model.core.signing.signatureprofile.SignatureProfileUpdateRequestDto;
 import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureListDto;
 import com.czertainly.api.model.core.signing.tsp.TspConfigurationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -56,10 +58,11 @@ public interface SignatureProfileController extends AuthProtectedController {
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<SignatureProfileListDto> listSignatureProfiles(@RequestBody SearchRequestDto request);
 
-    @Operation(operationId = "getSignatureProfile", summary = "Details of a Signature Profile")
+    @Operation(operationId = "getSignatureProfile", summary = "Details of a Signature Profile. If no specific version is provided, the latest version will be returned.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signature Profile details retrieved")})
     @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    SignatureProfileDto getSignatureProfile(@Parameter(description = "Signature Profile UUID") @PathVariable UUID uuid) throws NotFoundException;
+    SignatureProfileDto getSignatureProfile(@Parameter(description = "Signature Profile UUID") @PathVariable UUID uuid,
+                                            @Parameter(in = ParameterIn.QUERY, description = "Specific version of the Signature Profile") SignatureProfileForVersionDto signatureProfileForVersionDto) throws NotFoundException;
 
     @Operation(operationId = "createSignatureProfile", summary = "Add new Signature Profile")
     @ApiResponses(value = {
@@ -197,7 +200,6 @@ public interface SignatureProfileController extends AuthProtectedController {
             consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
-
     void activateTsp(@Parameter(description = "Signature Profile UUID") @PathVariable UUID signatureProfileUuid,
                      @Parameter(description = "TSP Configuration UUID") @PathVariable UUID tspConfigurationUuid) throws NotFoundException;
 
