@@ -1,6 +1,7 @@
 package com.czertainly.api.model.core.signing.ilm;
 
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
+import com.czertainly.api.model.core.signing.signingprofile.SimplifiedSigningProfileDto;
 import com.czertainly.api.model.common.NameAndUuidDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -18,6 +19,9 @@ public class IlmSigningProtocolConfigurationDto extends NameAndUuidDto {
 
     @Schema(description = "Description of the ILM Signing Protocol Configuration", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "ILM signing protocol configuration for production")
     private String description;
+
+    @Schema(description = "Default Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
+    private SimplifiedSigningProfileDto signingProfile;
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
