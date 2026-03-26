@@ -3,6 +3,8 @@ package com.czertainly.api.model.client.signing.profile.workflow;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.client.signing.profile.workflow.validation.ValidOid;
 import com.czertainly.api.model.client.signing.profile.workflow.validation.ValidOidList;
+import com.czertainly.api.model.client.signing.profile.workflow.validation.ValidTimestampingQualification;
+import com.czertainly.api.model.common.enums.cryptography.DigestAlgorithm;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,7 +19,7 @@ import java.util.UUID;
  *
  * <p>Fields are grouped into two logical categories:</p>
  * <ul>
- *     <li>Signature Formatter Connector properties: managed signing only — null for delegated</li>
+ *     <li>Workflow validation and DTBS formatting properties: managed signing only — null for delegated</li>
  *     <li>Workflow validation properties: both managed and delegated signing</li>
  * </ul>
  */
@@ -25,11 +27,12 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Schema(name = "TimestampingWorkflowRequestDto", description = "Timestamping workflow configuration request")
 @ToString(callSuper = true)
+@ValidTimestampingQualification
 public class TimestampingWorkflowRequestDto extends WorkflowRequestDto {
 
-    // -------------------------------------------------------------------------
-    // Signature Formatter Connector properties — ILM-managed signing only
-    // -------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
+    // Workflow validation and DTBS formatting properties — ILM-managed signing only
+    // --------------------------------------------------------------------------------
 
     @Schema(
             description = "UUID of the Signature Formatter Connector that constructs the data-to-be-signed (DTBS) for Timestamping. " +
@@ -39,10 +42,17 @@ public class TimestampingWorkflowRequestDto extends WorkflowRequestDto {
 
     @Schema(
             description = "Attributes for the Signature Formatter Connector that control DTBS construction " +
-                    "(e.g. serial number generation strategy, qcStatement extension for ETSI EN 319 422 qualified timestamps). " +
+                    "(e.g. serial number generation strategy, whether to include signing time attribute). " +
                     "Applicable only when ILM-managed signing is used.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> signatureFormatterConnectorAttributes = new ArrayList<>();
+
+    @Schema(
+            description = "ETSI qualified electronic timestamp. " +
+                    "Present only when ILM-managed signing is used; null for delegated signing.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Boolean qualifiedTimestamp;
 
     @Schema(
             description = "UUID of the Time Quality Configuration that validates clock accuracy at signing time. " +
@@ -70,6 +80,12 @@ public class TimestampingWorkflowRequestDto extends WorkflowRequestDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             example = "[\"1.2.3.4.5\", \"1.2.3.4.6\"]")
     private List<String> allowedPolicyIds = new ArrayList<>();
+
+    @Schema(
+            description = "List of digest algorithms that are accepted for timestamping. An empty list means that all digest algorithms are accepted.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            example = "[\"SHA-256\", \"SHA-384\"]")
+    private List<DigestAlgorithm> allowedDigestAlgorithms = new ArrayList<>();
 
     public TimestampingWorkflowRequestDto() {
         super(SigningWorkflowType.TIMESTAMPING);

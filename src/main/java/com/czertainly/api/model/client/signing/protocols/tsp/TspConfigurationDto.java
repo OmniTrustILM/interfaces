@@ -23,6 +23,13 @@ public class TspConfigurationDto extends NameAndUuidDto {
     @Schema(description = "Default Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
     private SimplifiedSigningProfileDto signingProfile;
 
+    @Schema(
+            description = "TSP URL for signing",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            example = "https://ilm.otilm.com/api/v1/protocols/tsp/tsp-configuration-1/sign"
+    )
+    private String signingUrl;
+
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
 }
