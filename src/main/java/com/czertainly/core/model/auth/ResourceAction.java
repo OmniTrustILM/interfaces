@@ -51,7 +51,7 @@ public enum ResourceAction implements IPlatformEnum {
 
     // Secret
     GET_SECRET_CONTENT("getSecretContent", "Get secret content"),
-
+    UPDATE_SOURCE_VAULT_PROFILE("updateSourceVaultProfile", "Update source vault profile")
     ;
 
     @Schema(description = "Resource Action Name",
