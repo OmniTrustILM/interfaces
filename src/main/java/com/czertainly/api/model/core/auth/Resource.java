@@ -108,8 +108,8 @@ public enum Resource implements IPlatformEnum {
     ;
 
     private static final Resource[] VALUES;
-    private static final EnumSet<Resource> complianceSubjects = EnumSet.of(Resource.CERTIFICATE, Resource.CERTIFICATE_REQUEST, Resource.CRYPTOGRAPHIC_KEY);
-    private static final EnumSet<Resource> complianceProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.TOKEN_PROFILE);
+    private static final EnumSet<Resource> complianceSubjects = EnumSet.of(Resource.CERTIFICATE, Resource.CERTIFICATE_REQUEST, Resource.CRYPTOGRAPHIC_KEY, Resource.SECRET);
+    private static final EnumSet<Resource> complianceProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.TOKEN_PROFILE, Resource.VAULT_PROFILE);
     private static final EnumSet<Resource> approvalProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.SIGNING_PROFILE, Resource.VAULT_PROFILE);
 
     static {
