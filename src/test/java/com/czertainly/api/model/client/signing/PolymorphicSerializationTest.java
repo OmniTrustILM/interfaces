@@ -17,6 +17,8 @@ import com.czertainly.api.model.client.signing.profile.workflow.CodeBinarySignin
 import com.czertainly.api.model.client.signing.profile.workflow.CodeBinarySigningWorkflowRequestDto;
 import com.czertainly.api.model.client.signing.profile.workflow.DocumentSigningWorkflowDto;
 import com.czertainly.api.model.client.signing.profile.workflow.DocumentSigningWorkflowRequestDto;
+import com.czertainly.api.model.client.signing.profile.workflow.RawSigningWorkflowDto;
+import com.czertainly.api.model.client.signing.profile.workflow.RawSigningWorkflowRequestDto;
 import com.czertainly.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import com.czertainly.api.model.client.signing.profile.workflow.TimestampingWorkflowDto;
 import com.czertainly.api.model.client.signing.profile.workflow.TimestampingWorkflowRequestDto;
@@ -602,14 +604,72 @@ class PolymorphicSerializationTest {
     }
 
     // -------------------------------------------------------------------------
-    // Unknown type discriminator guards
+    // RawSigningWorkflowDto
+    // -------------------------------------------------------------------------
+
+    @Test
+    void rawSigningWorkflowDto_serializesDiscriminator() throws Exception {
+        RawSigningWorkflowDto dto = new RawSigningWorkflowDto();
+
+        JsonNode json = mapper.valueToTree(dto);
+
+        assertEquals(SigningWorkflowType.Codes.RAW_SIGNING, json.get("type").asText());
+    }
+
+    @Test
+    void rawSigningWorkflowDto_deserializesViaBaseClass() throws Exception {
+        String json = """
+                {
+                  "type": "raw_signing"
+                }
+                """;
+
+        WorkflowDto base = mapper.readValue(json, WorkflowDto.class);
+
+        assertInstanceOf(RawSigningWorkflowDto.class, base);
+        assertEquals(SigningWorkflowType.RAW_SIGNING, base.getType());
+    }
+
+    @Test
+    void rawSigningWorkflowDto_roundTrip() throws Exception {
+        RawSigningWorkflowDto original = new RawSigningWorkflowDto();
+
+        String json = mapper.writeValueAsString(original);
+        WorkflowDto deserialized = mapper.readValue(json, WorkflowDto.class);
+
+        assertInstanceOf(RawSigningWorkflowDto.class, deserialized);
+        assertEquals(original, deserialized);
+    }
+
+    @Test
+    void rawSigningWorkflowRequestDto_serializesDiscriminator() throws Exception {
+        RawSigningWorkflowRequestDto dto = new RawSigningWorkflowRequestDto();
+
+        JsonNode json = mapper.valueToTree(dto);
+
+        assertEquals(SigningWorkflowType.Codes.RAW_SIGNING, json.get("type").asText());
+    }
+
+    @Test
+    void rawSigningWorkflowRequestDto_roundTrip() throws Exception {
+        RawSigningWorkflowRequestDto original = new RawSigningWorkflowRequestDto();
+
+        String json = mapper.writeValueAsString(original);
+        WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
+
+        assertInstanceOf(RawSigningWorkflowRequestDto.class, deserialized);
+        assertEquals(original, deserialized);
+    }
+
+    // -------------------------------------------------------------------------
+    // Unknown type discriminator guards — WorkflowDto / WorkflowRequestDto
     // -------------------------------------------------------------------------
 
     @Test
     void unknownWorkflowType_throwsOnDeserialization() {
         String json = """
                 {
-                  "type": "unknown_workflow_type",
+                  "type": "unknown_workflow_type"
                 }
                 """;
 
@@ -617,7 +677,40 @@ class PolymorphicSerializationTest {
     }
 
     @Test
-    void unknownSigningByType_throwsOnDeserialization() {
+    void missingWorkflowType_throwsOnDeserialization() {
+        String json = """
+                {
+                  "defaultPolicyId": "1.2.3.4.5"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, WorkflowDto.class));
+    }
+
+    @Test
+    void unknownWorkflowType_throwsOnRequestDtoDeserialization() {
+        String json = """
+                {
+                  "type": "unknown_workflow_type"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, WorkflowRequestDto.class));
+    }
+
+    @Test
+    void missingWorkflowType_throwsOnRequestDtoDeserialization() {
+        String json = "{}";
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, WorkflowRequestDto.class));
+    }
+
+    // -------------------------------------------------------------------------
+    // Unknown type discriminator guards — SigningSchemeDto / SigningSchemeRequestDto
+    // -------------------------------------------------------------------------
+
+    @Test
+    void unknownSigningScheme_throwsOnDeserialization() {
         String json = """
                 {
                   "signingScheme": "unknown_signing_scheme"
@@ -628,7 +721,44 @@ class PolymorphicSerializationTest {
     }
 
     @Test
-    void unknownManagedSigningType_throwsOnDeserialization() {
+    void missingSigningScheme_throwsOnDeserialization() {
+        String json = """
+                {
+                  "managedSigningType": "staticKey"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeDto.class));
+    }
+
+    @Test
+    void unknownSigningScheme_throwsOnRequestDtoDeserialization() {
+        String json = """
+                {
+                  "signingScheme": "unknown_signing_scheme"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeRequestDto.class));
+    }
+
+    @Test
+    void missingSigningScheme_throwsOnRequestDtoDeserialization() {
+        String json = """
+                {
+                  "managedSigningType": "staticKey"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeRequestDto.class));
+    }
+
+    // -------------------------------------------------------------------------
+    // Unknown type discriminator guards — ManagedSigningDto / ManagedSigningRequestDto
+    // -------------------------------------------------------------------------
+
+    @Test
+    void unknownManagedSigningType_throwsOnSigningSchemeDtoDeserialization() {
         String json = """
                 {
                   "signingScheme": "managed",
@@ -637,6 +767,19 @@ class PolymorphicSerializationTest {
                 """;
 
         assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeDto.class));
+    }
+
+    @Test
+    void missingManagedSigningType_throwsOnSigningSchemeDtoDeserialization() {
+        String json = """
+                {
+                  "signingScheme": "managed"
+                }
+                """;
+
+        InvalidTypeIdException ex = assertThrows(InvalidTypeIdException.class,
+                () -> mapper.readValue(json, SigningSchemeDto.class));
+        assertNull(ex.getTypeId());
     }
 
     @Test
@@ -649,5 +792,64 @@ class PolymorphicSerializationTest {
                 """;
 
         assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, ManagedSigningDto.class));
+    }
+
+    @Test
+    void missingManagedSigningType_throwsWhenDeserializingViaManagedBase() {
+        String json = """
+                {
+                  "signingScheme": "managed"
+                }
+                """;
+
+        InvalidTypeIdException ex = assertThrows(InvalidTypeIdException.class,
+                () -> mapper.readValue(json, ManagedSigningDto.class));
+        assertNull(ex.getTypeId());
+    }
+
+    @Test
+    void unknownManagedSigningType_throwsOnSigningSchemeRequestDtoDeserialization() {
+        String json = """
+                {
+                  "signingScheme": "managed",
+                  "managedSigningType": "unknown_managed_type"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeRequestDto.class));
+    }
+
+    @Test
+    void missingManagedSigningType_throwsOnSigningSchemeRequestDtoDeserialization() {
+        String json = """
+                {
+                  "signingScheme": "managed"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeRequestDto.class));
+    }
+
+    @Test
+    void unknownManagedSigningType_throwsWhenDeserializingViaManagedRequestBase() {
+        String json = """
+                {
+                  "signingScheme": "managed",
+                  "managedSigningType": "unknown_managed_type"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, ManagedSigningRequestDto.class));
+    }
+
+    @Test
+    void missingManagedSigningType_throwsWhenDeserializingViaManagedRequestBase() {
+        String json = """
+                {
+                  "signingScheme": "managed"
+                }
+                """;
+
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, ManagedSigningRequestDto.class));
     }
 }

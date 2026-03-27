@@ -3,9 +3,11 @@ package com.czertainly.api.model.client.signing.profile.workflow.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import java.util.regex.Pattern;
+
 public class OidValidator implements ConstraintValidator<ValidOid, String> {
 
-    private static final String OID_REGEX = "^[0-2](\\.(0|[1-9]\\d*)){1,50}$";
+    private static final Pattern OID_REGEX = Pattern.compile("^[0-2](\\.(0|[1-9]\\d*)){1,50}$");
 
     @Override
     public boolean isValid(String oid, ConstraintValidatorContext constraintValidatorContext) {
@@ -17,7 +19,6 @@ public class OidValidator implements ConstraintValidator<ValidOid, String> {
     }
 
     static boolean isValidOid(String oid) {
-        return oid.matches(OID_REGEX);
+        return OID_REGEX.matcher(oid).matches();
     }
-
 }

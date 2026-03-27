@@ -12,7 +12,6 @@ import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileCreateRequestDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileDto;
-import com.czertainly.api.model.client.signing.profile.SigningProfileForVersionDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileListDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileUpdateRequestDto;
 import com.czertainly.api.model.client.signing.protocols.ilm.IlmSigningProtocolActivationDetailDto;
@@ -55,7 +54,10 @@ public interface SigningProfileController extends AuthProtectedController {
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
 
     @Operation(operationId = "listSigningProfiles", summary = "List of available Signing Profiles")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signing Profiles retrieved")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Signing Profiles retrieved"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<SigningProfileListDto> listSigningProfiles(@RequestBody SearchRequestDto request);
 
@@ -63,12 +65,13 @@ public interface SigningProfileController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signing Profile details retrieved")})
     @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     SigningProfileDto getSigningProfile(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid,
-                                        @Parameter(in = ParameterIn.QUERY, description = "Specific version of the Signing Profile") SigningProfileForVersionDto signingProfileForVersionDto) throws NotFoundException;
+                                        @Parameter(in = ParameterIn.QUERY, description = "Specific version of the Signing Profile") Integer version) throws NotFoundException;
 
     @Operation(operationId = "createSigningProfile", summary = "Add new Signing Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Signing Profile added"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     SigningProfileDto createSigningProfile(@RequestBody @Valid SigningProfileCreateRequestDto request) throws AlreadyExistException, AttributeException, NotFoundException;
@@ -111,7 +114,10 @@ public interface SigningProfileController extends AuthProtectedController {
     void disableSigningProfile(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid) throws NotFoundException;
 
     @Operation(operationId = "bulkDisableSigningProfiles", summary = "Disable multiple Signing Profiles")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signing Profiles disabled")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Signing Profiles disabled"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
     @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BulkActionMessageDto> bulkDisableSigningProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Signing Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 
@@ -157,17 +163,19 @@ public interface SigningProfileController extends AuthProtectedController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Digital Signatures retrieved"),
-            @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+            @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
     })
+
     @PostMapping(path = "/{uuid}/digitalSignatures", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<DigitalSignatureListDto> listDigitalSignaturesForSigningProfile(
             @Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid,
             @RequestBody SearchRequestDto request
     ) throws NotFoundException;
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // Protocols
-    // -----------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------
+// Protocols
+// -----------------------------------------------------------------------------------------------------------------
 
     @Operation(summary = "Get the activation details of the ILM Signing Protocol for Signing Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "ILM Signing Protocol details retrieved"),

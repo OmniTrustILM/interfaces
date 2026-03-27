@@ -55,9 +55,8 @@ public abstract class ManagedSigningRequestDto extends SigningSchemeRequestDto i
             } else if (ManagedSigningType.Codes.ONE_TIME_KEY.equals(typeId)) {
                 return ctxt.readTreeAsValue(tree, OneTimeKeyManagedSigningRequestDto.class);
             }
-            throw InvalidTypeIdException.from(p,
-                    "Unknown or missing managedSigningType: " + typeId,
-                    ctxt.constructType(ManagedSigningRequestDto.class), typeId);
+            String errorMessage = typeId == null ? "Missing managedSigningType" : "Unknown managedSigningType: " + typeId;
+            throw InvalidTypeIdException.from(p, errorMessage, ctxt.constructType(ManagedSigningRequestDto.class), typeId);
         }
     }
 }

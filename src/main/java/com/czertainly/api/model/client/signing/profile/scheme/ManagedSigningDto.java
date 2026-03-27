@@ -72,8 +72,8 @@ public abstract class ManagedSigningDto extends SigningSchemeDto implements Mana
             } else if (ManagedSigningType.Codes.ONE_TIME_KEY.equals(typeId)) {
                 return ctxt.readTreeAsValue(tree, OneTimeKeyManagedSigningDto.class);
             }
-            throw InvalidTypeIdException.from(p, "Unknown or missing managedSigningType: " + typeId,
-                    ctxt.constructType(ManagedSigningDto.class), typeId);
+            String errorMessage = typeId == null ? "Missing managedSigningType" : "Unknown managedSigningType: " + typeId;
+            throw InvalidTypeIdException.from(p, errorMessage, ctxt.constructType(ManagedSigningDto.class), typeId);
         }
     }
 }

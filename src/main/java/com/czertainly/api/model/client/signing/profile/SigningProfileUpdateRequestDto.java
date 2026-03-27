@@ -13,7 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Schema(name = "SigningProfileUpdateRequestDto", description = "Request to update an existing Signing Profile")
+@Schema(name = "SigningProfileUpdateRequestDto",
+        description = """
+Request to update an existing Signing Profile.
+If there are existing Digital Signatures produced using this Signing Profile, creates a new version of Signing Profile.
+Otherwise updates the latest version in-place.
+""")
 public class SigningProfileUpdateRequestDto {
 
     @NotBlank

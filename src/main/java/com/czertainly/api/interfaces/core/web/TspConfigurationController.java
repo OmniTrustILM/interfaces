@@ -48,7 +48,10 @@ public interface TspConfigurationController extends AuthProtectedController {
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
 
     @Operation(operationId = "listTspConfigurations", summary = "List of available TSP Configurations")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "TSP Configurations retrieved")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "TSP Configurations retrieved"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<TspConfigurationListDto> listTspConfigurations(@RequestBody SearchRequestDto request);
 

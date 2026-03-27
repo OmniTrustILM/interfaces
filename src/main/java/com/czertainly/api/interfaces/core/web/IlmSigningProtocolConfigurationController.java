@@ -48,7 +48,10 @@ public interface IlmSigningProtocolConfigurationController extends AuthProtected
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
 
     @Operation(operationId = "listIlmSigningProtocolConfigurations", summary = "List of available ILM Signing Protocol Configurations")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "ILM Signing Protocol Configurations retrieved")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "ILM Signing Protocol Configurations retrieved"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<IlmSigningProtocolConfigurationListDto> listIlmSigningProtocolConfigurations(@RequestBody SearchRequestDto request);
 
