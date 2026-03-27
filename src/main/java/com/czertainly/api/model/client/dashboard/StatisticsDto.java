@@ -47,6 +47,24 @@ public class StatisticsDto {
     @Schema(description = "Map of Certificate count by compliance status")
     private Map<String, Long> certificateStatByComplianceStatus;
 
+    // Secrets related statistics
+    @Schema(description = "Number of Secrets")
+    private Long totalSecrets;
+    @Schema(description = "Number of Vault Instances")
+    private Long totalVaultInstances;
+    @Schema(description = "Number of Vault Profiles")
+    private Long totalVaultProfiles;
+    @Schema(description = "Map of Secret count by type")
+    private Map<String, Long> secretStatByType;
+    @Schema(description = "Map of Secret count by state")
+    private Map<String, Long> secretStatByState;
+    @Schema(description = "Map of Secret count by compliance status")
+    private Map<String, Long> secretStatByComplianceStatus;
+    @Schema(description = "Map of Secret count by vault profile")
+    private Map<String, Long> secretStatByVaultProfile;
+    @Schema(description = "Map of Secret count by group")
+    private Map<String, Long> secretStatByGroup;
+
     //Other Entities by Status
 	@Schema(description = "Map of Connector count by status")
     private Map<String, Long> connectorStatByStatus;
@@ -231,6 +249,70 @@ public class StatisticsDto {
 
     public void setCertificateStatByComplianceStatus(Map<String, Long> certificateStatByComplianceStatus) {
         this.certificateStatByComplianceStatus = certificateStatByComplianceStatus;
+    }
+
+    public Long getTotalSecrets() {
+        return totalSecrets;
+    }
+
+    public void setTotalSecrets(Long totalSecrets) {
+        this.totalSecrets = totalSecrets;
+    }
+
+    public Long getTotalVaultInstances() {
+        return totalVaultInstances;
+    }
+
+    public void setTotalVaultInstances(Long totalVaultInstances) {
+        this.totalVaultInstances = totalVaultInstances;
+    }
+
+    public Long getTotalVaultProfiles() {
+        return totalVaultProfiles;
+    }
+
+    public void setTotalVaultProfiles(Long totalVaultProfiles) {
+        this.totalVaultProfiles = totalVaultProfiles;
+    }
+
+    public Map<String, Long> getSecretStatByType() {
+        return secretStatByType;
+    }
+
+    public void setSecretStatByType(Map<String, Long> secretStatByType) {
+        this.secretStatByType = secretStatByType;
+    }
+
+    public Map<String, Long> getSecretStatByState() {
+        return secretStatByState;
+    }
+
+    public void setSecretStatByState(Map<String, Long> secretStatByState) {
+        this.secretStatByState = secretStatByState;
+    }
+
+    public Map<String, Long> getSecretStatByComplianceStatus() {
+        return secretStatByComplianceStatus;
+    }
+
+    public void setSecretStatByComplianceStatus(Map<String, Long> secretStatByComplianceStatus) {
+        this.secretStatByComplianceStatus = secretStatByComplianceStatus;
+    }
+
+    public Map<String, Long> getSecretStatByVaultProfile() {
+        return secretStatByVaultProfile;
+    }
+
+    public void setSecretStatByVaultProfile(Map<String, Long> secretStatByVaultProfile) {
+        this.secretStatByVaultProfile = secretStatByVaultProfile;
+    }
+
+    public Map<String, Long> getSecretStatByGroup() {
+        return secretStatByGroup;
+    }
+
+    public void setSecretStatByGroup(Map<String, Long> secretStatByGroup) {
+        this.secretStatByGroup = secretStatByGroup;
     }
 
     public StatisticsDto() {
