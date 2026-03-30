@@ -34,7 +34,7 @@ public class StaticKeyManagedSigningRequestDto extends ManagedSigningRequestDto 
     @NotNull
     @Schema(description = "List of attributes required for signing operations (such as digest algorithm), provided by the Cryptography Provider Connector",
             requiredMode = Schema.RequiredMode.REQUIRED)
-    private List<RequestAttribute> attributes = new ArrayList<>();
+    private List<RequestAttribute> signingOperationAttributes = new ArrayList<>();
 
     public StaticKeyManagedSigningRequestDto() {
         super(ManagedSigningType.STATIC_KEY);
