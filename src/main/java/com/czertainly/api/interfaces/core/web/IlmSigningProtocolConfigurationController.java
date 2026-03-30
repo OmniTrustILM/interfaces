@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -85,4 +86,32 @@ public interface IlmSigningProtocolConfigurationController extends AuthProtected
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BulkActionMessageDto> bulkDeleteIlmSigningProtocolConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ILM Signing Protocol Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+
+    @Operation(operationId = "enableIlmSigningProtocolConfiguration", summary = "Enable ILM Signing Protocol Configuration")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "ILM Signing Protocol Configuration enabled")})
+    @PatchMapping(path = "/{uuid}/enable", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void enableIlmSigningProtocolConfiguration(@Parameter(description = "ILM Signing Protocol Configuration UUID") @PathVariable UUID uuid) throws NotFoundException;
+
+    @Operation(operationId = "bulkEnableIlmSigningProtocolConfigurations", summary = "Enable multiple ILM Signing Protocol Configurations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "ILM Signing Protocol Configurations enabled"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
+    @PatchMapping(path = "/enable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BulkActionMessageDto> bulkEnableIlmSigningProtocolConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ILM Signing Protocol Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+
+    @Operation(operationId = "disableIlmSigningProtocolConfiguration", summary = "Disable ILM Signing Protocol Configuration")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "ILM Signing Protocol Configuration disabled")})
+    @PatchMapping(path = "/{uuid}/disable", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void disableIlmSigningProtocolConfiguration(@Parameter(description = "ILM Signing Protocol Configuration UUID") @PathVariable UUID uuid) throws NotFoundException;
+
+    @Operation(operationId = "bulkDisableIlmSigningProtocolConfigurations", summary = "Disable multiple ILM Signing Protocol Configurations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "ILM Signing Protocol Configurations disabled"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
+    @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BulkActionMessageDto> bulkDisableIlmSigningProtocolConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ILM Signing Protocol Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 }

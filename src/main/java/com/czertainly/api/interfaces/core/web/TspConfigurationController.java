@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -85,4 +86,32 @@ public interface TspConfigurationController extends AuthProtectedController {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BulkActionMessageDto> bulkDeleteTspConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+
+    @Operation(operationId = "enableTspConfiguration", summary = "Enable TSP Configuration")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "TSP Configuration enabled")})
+    @PatchMapping(path = "/{uuid}/enable", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void enableTspConfiguration(@Parameter(description = "TSP Configuration UUID") @PathVariable UUID uuid) throws NotFoundException;
+
+    @Operation(operationId = "bulkEnableTspConfigurations", summary = "Enable multiple TSP Configurations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "TSP Configurations enabled"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
+    @PatchMapping(path = "/enable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BulkActionMessageDto> bulkEnableTspConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+
+    @Operation(operationId = "disableTspConfiguration", summary = "Disable TSP Configuration")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "TSP Configuration disabled")})
+    @PatchMapping(path = "/{uuid}/disable", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void disableTspConfiguration(@Parameter(description = "TSP Configuration UUID") @PathVariable UUID uuid) throws NotFoundException;
+
+    @Operation(operationId = "bulkDisableTspConfigurations", summary = "Disable multiple TSP Configurations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "TSP Configurations disabled"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
+    })
+    @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BulkActionMessageDto> bulkDisableTspConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 }
