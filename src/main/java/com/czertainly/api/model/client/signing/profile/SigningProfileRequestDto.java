@@ -25,10 +25,6 @@ public class SigningProfileRequestDto {
     private String description;
 
     @NotNull
-    @Schema(description = "Whether the Signing Profile is enabled", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
-    private Boolean enabled;
-
-    @NotNull
     @Valid
     @Schema(description = "Signing scheme configuration (who holds the key and how the cryptographic operation is performed)",
             requiredMode = Schema.RequiredMode.REQUIRED)

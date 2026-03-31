@@ -23,7 +23,6 @@ public class SigningProfileListDto extends NameAndUuidDto {
     @Schema(description = "Signing workflow type", requiredMode = Schema.RequiredMode.REQUIRED)
     private SigningWorkflowType signingWorkflowType;
 
-    @NotNull
     @Schema(description = "Whether the Signing Profile is enabled", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Boolean enabled;
+    private boolean enabled;
 }
