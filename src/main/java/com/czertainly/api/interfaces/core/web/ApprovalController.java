@@ -7,7 +7,6 @@ import com.czertainly.api.model.client.approval.ApprovalResponseDto;
 import com.czertainly.api.model.client.approval.ApprovalUserDto;
 import com.czertainly.api.model.client.approval.UserApprovalDto;
 import com.czertainly.api.model.common.ErrorMessageDto;
-import com.czertainly.api.model.core.auth.Resource;
 import com.czertainly.api.model.core.scheduler.PaginationRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,7 +26,7 @@ public interface ApprovalController extends AuthProtectedController {
     @Operation(summary = "List of Approvals")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of all approvals")})
     @GetMapping(produces = {"application/json"})
-    ApprovalResponseDto listApprovals(final PaginationRequestDto paginationRequestDto, @RequestParam(required = false) Resource resource);
+    ApprovalResponseDto listApprovals(final PaginationRequestDto paginationRequestDto);
 
     @Operation(summary = "List of User's Approvals")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of all approvals")})

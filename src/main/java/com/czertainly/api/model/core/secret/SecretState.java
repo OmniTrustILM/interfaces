@@ -13,6 +13,7 @@ public enum SecretState implements IPlatformEnum {
     REVOKED("revoked", "Revoked", "Secret has been revoked and is no longer valid"),
     PENDING_APPROVAL("pendingApproval", "Pending Approval", "Secret is pending approval and is not available for use"),
     REJECTED("rejected", "Rejected", "Secret has been rejected and is not available for use"),
+    FAILED("failed", "Failed", "Creation of the secret has failed and is not available for use"),
     ;
 
     private final String code;
