@@ -24,6 +24,7 @@ import com.czertainly.api.model.client.signing.profile.workflow.TimestampingWork
 import com.czertainly.api.model.client.signing.profile.workflow.TimestampingWorkflowRequestDto;
 import com.czertainly.api.model.client.signing.profile.workflow.WorkflowDto;
 import com.czertainly.api.model.client.signing.profile.workflow.WorkflowRequestDto;
+import com.czertainly.api.model.core.certificate.CertificateSimpleDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -249,8 +250,9 @@ class PolymorphicSerializationTest {
     @Test
     void staticKeyManagedSigningDto_serializesBothDiscriminators() throws Exception {
         StaticKeyManagedSigningDto dto = new StaticKeyManagedSigningDto();
-        dto.setTokenProfile(new NameAndUuidDto("aaaa-bbbb", "Token"));
-        dto.setCryptographicKey(new NameAndUuidDto("cccc-dddd", "Key"));
+        CertificateSimpleDto certificate = new CertificateSimpleDto();
+        certificate.setCommonName("Test Certificate");
+        dto.setCertificate(certificate);
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -264,8 +266,7 @@ class PolymorphicSerializationTest {
                 {
                   "signingScheme": "managed",
                   "managedSigningType": "staticKey",
-                  "tokenProfile": {"uuid": "aaaa-bbbb", "name": "Token"},
-                  "cryptographicKey": {"uuid": "cccc-dddd", "name": "Key"}
+                  "certificate": {"uuid": "65418a34-360d-4b4c-ae2c-e716644d4120", "commonName": "Test Certificate"}
                 }
                 """;
 
@@ -275,8 +276,7 @@ class PolymorphicSerializationTest {
         StaticKeyManagedSigningDto result = (StaticKeyManagedSigningDto) base;
         assertEquals(SigningScheme.MANAGED, result.getSigningScheme());
         assertEquals(ManagedSigningType.STATIC_KEY, result.getManagedSigningType());
-        assertEquals("aaaa-bbbb", result.getTokenProfile().getUuid());
-        assertEquals("cccc-dddd", result.getCryptographicKey().getUuid());
+        assertEquals("Test Certificate", result.getCertificate().getCommonName());
     }
 
     @Test
@@ -285,8 +285,7 @@ class PolymorphicSerializationTest {
                 {
                   "signingScheme": "managed",
                   "managedSigningType": "staticKey",
-                  "tokenProfile": {"uuid": "aaaa-bbbb", "name": "Token"},
-                  "cryptographicKey": {"uuid": "cccc-dddd", "name": "Key"}
+                  "certificate": {"uuid": "9a616184-d03f-4c81-a681-22f2e35aa11a", "commonName": "Test Certificate"}
                 }
                 """;
 
@@ -295,21 +294,25 @@ class PolymorphicSerializationTest {
         assertInstanceOf(StaticKeyManagedSigningDto.class, base);
         StaticKeyManagedSigningDto result = (StaticKeyManagedSigningDto) base;
         assertEquals(ManagedSigningType.STATIC_KEY, result.getManagedSigningType());
-        assertEquals("aaaa-bbbb", result.getTokenProfile().getUuid());
-        assertEquals("cccc-dddd", result.getCryptographicKey().getUuid());
+        assertEquals("Test Certificate", result.getCertificate().getCommonName());
     }
 
     @Test
     void staticKeyManagedSigningDto_roundTrip() throws Exception {
         StaticKeyManagedSigningDto original = new StaticKeyManagedSigningDto();
-        original.setTokenProfile(new NameAndUuidDto("aaaa-bbbb", "Token Profile"));
-        original.setCryptographicKey(new NameAndUuidDto("cccc-dddd", "RSA Key"));
+        CertificateSimpleDto certificate = new CertificateSimpleDto();
+        certificate.setCommonName("Test Certificate");
+        original.setCertificate(certificate);
 
         String json = mapper.writeValueAsString(original);
         SigningSchemeDto deserialized = mapper.readValue(json, SigningSchemeDto.class);
 
         assertInstanceOf(StaticKeyManagedSigningDto.class, deserialized);
-        assertEquals(original, deserialized);
+        StaticKeyManagedSigningDto result = (StaticKeyManagedSigningDto) deserialized;
+        assertEquals(SigningScheme.MANAGED, result.getSigningScheme());
+        assertEquals(ManagedSigningType.STATIC_KEY, result.getManagedSigningType());
+        assertEquals("Test Certificate", result.getCertificate().getCommonName());
+        assertEquals(original.getSigningOperationAttributes(), result.getSigningOperationAttributes());
     }
 
     // -------------------------------------------------------------------------
@@ -438,8 +441,7 @@ class PolymorphicSerializationTest {
     @Test
     void staticKeyManagedSigningRequestDto_serializesBothDiscriminators() throws Exception {
         StaticKeyManagedSigningRequestDto dto = new StaticKeyManagedSigningRequestDto();
-        dto.setTokenProfileUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
-        dto.setCryptographicKeyUuid(UUID.fromString("22222222-2222-2222-2222-222222222222"));
+        dto.setCertificateUuid(UUID.fromString("22222222-2222-2222-2222-222222222222"));
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -453,8 +455,7 @@ class PolymorphicSerializationTest {
                 {
                   "signingScheme": "managed",
                   "managedSigningType": "staticKey",
-                  "tokenProfileUuid": "11111111-1111-1111-1111-111111111111",
-                  "cryptographicKeyUuid": "22222222-2222-2222-2222-222222222222"
+                  "certificateUuid": "22222222-2222-2222-2222-222222222222"
                 }
                 """;
 
@@ -464,8 +465,7 @@ class PolymorphicSerializationTest {
         StaticKeyManagedSigningRequestDto result = (StaticKeyManagedSigningRequestDto) base;
         assertEquals(SigningScheme.MANAGED, result.getSigningScheme());
         assertEquals(ManagedSigningType.STATIC_KEY, result.getManagedSigningType());
-        assertEquals(UUID.fromString("11111111-1111-1111-1111-111111111111"), result.getTokenProfileUuid());
-        assertEquals(UUID.fromString("22222222-2222-2222-2222-222222222222"), result.getCryptographicKeyUuid());
+        assertEquals(UUID.fromString("22222222-2222-2222-2222-222222222222"), result.getCertificateUuid());
     }
 
     @Test
@@ -474,8 +474,7 @@ class PolymorphicSerializationTest {
                 {
                   "signingScheme": "managed",
                   "managedSigningType": "staticKey",
-                  "tokenProfileUuid": "11111111-1111-1111-1111-111111111111",
-                  "cryptographicKeyUuid": "22222222-2222-2222-2222-222222222222"
+                  "certificateUuid": "22222222-2222-2222-2222-222222222222"
                 }
                 """;
 
@@ -484,15 +483,13 @@ class PolymorphicSerializationTest {
         assertInstanceOf(StaticKeyManagedSigningRequestDto.class, base);
         StaticKeyManagedSigningRequestDto result = (StaticKeyManagedSigningRequestDto) base;
         assertEquals(ManagedSigningType.STATIC_KEY, result.getManagedSigningType());
-        assertEquals(UUID.fromString("11111111-1111-1111-1111-111111111111"), result.getTokenProfileUuid());
-        assertEquals(UUID.fromString("22222222-2222-2222-2222-222222222222"), result.getCryptographicKeyUuid());
+        assertEquals(UUID.fromString("22222222-2222-2222-2222-222222222222"), result.getCertificateUuid());
     }
 
     @Test
     void staticKeyManagedSigningRequestDto_roundTrip() throws Exception {
         StaticKeyManagedSigningRequestDto original = new StaticKeyManagedSigningRequestDto();
-        original.setTokenProfileUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
-        original.setCryptographicKeyUuid(UUID.fromString("22222222-2222-2222-2222-222222222222"));
+        original.setCertificateUuid(UUID.fromString("22222222-2222-2222-2222-222222222222"));
 
         String json = mapper.writeValueAsString(original);
         SigningSchemeRequestDto deserialized = mapper.readValue(json, SigningSchemeRequestDto.class);

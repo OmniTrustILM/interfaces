@@ -1,7 +1,7 @@
 package com.czertainly.api.model.client.signing.profile.scheme;
 
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
-import com.czertainly.api.model.common.NameAndUuidDto;
+import com.czertainly.api.model.core.certificate.CertificateSimpleDto;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -18,18 +18,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
 @JsonDeserialize(using = JsonDeserializer.None.class)
-@Schema(name = "StaticKeyManagedSigningDto",
-        description = "Managed signing using a pre-existing static cryptographic key")
+@Schema(name = "StaticKeyManagedSigningDto", description = "Managed signing using a pre-existing static certificate and associated key(s)")
 @ToString(callSuper = true)
 public class StaticKeyManagedSigningDto extends ManagedSigningDto {
 
     @NotNull
-    @Schema(description = "Token Profile used for signing", requiredMode = Schema.RequiredMode.REQUIRED)
-    private NameAndUuidDto tokenProfile;
-
-    @NotNull
-    @Schema(description = "Cryptographic Key used for signing", requiredMode = Schema.RequiredMode.REQUIRED)
-    private NameAndUuidDto cryptographicKey;
+    @Schema(description = "Certificate and the associated key(s) used for signing", requiredMode = Schema.RequiredMode.REQUIRED)
+    private CertificateSimpleDto certificate;
 
     @NotNull
     @Schema(description = "List of attributes required for signing operations (such as digest algorithm), provided by the Cryptography Provider Connector",
