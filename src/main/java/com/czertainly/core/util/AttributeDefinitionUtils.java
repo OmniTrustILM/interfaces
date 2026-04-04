@@ -292,7 +292,7 @@ public class AttributeDefinitionUtils {
             if (!containsAttributeDefinition(attribute.getName(), definitions)) {
                 // do not throw error in case the definition is not found, warn only
                 logger.warn("Cannot validate Attribute '{}' as it has unknown definition", attribute.getName());
-                errors.add(ValidationError.create("Attribute {} not supported.", attribute.getName()));
+//                errors.add(ValidationError.create("Attribute {} not supported.", attribute.getName()));
             }
         }
 
