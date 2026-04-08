@@ -4,6 +4,7 @@ import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.client.signing.timequality.validation.PositiveDuration;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidHostnameList;
 import com.czertainly.api.model.common.validation.ValidName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -26,6 +27,7 @@ public class TimeQualityConfigurationUpdateRequestDto {
 
     @NotNull
     @PositiveDuration
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Desired accuracy for the time quality, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S", defaultValue = "PT1S")
     private Duration accuracy;
 
@@ -36,6 +38,7 @@ public class TimeQualityConfigurationUpdateRequestDto {
     private List<String> ntpServers;
 
     @PositiveDuration
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT30S", defaultValue = "PT30S")
     private Duration ntpCheckInterval = Duration.ofSeconds(30);
 
@@ -44,6 +47,7 @@ public class TimeQualityConfigurationUpdateRequestDto {
     private int ntpSamplesPerServer = 4;
 
     @PositiveDuration
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Timeout for a single NTP check, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT5S", defaultValue = "PT5S")
     private Duration ntpCheckTimeout = Duration.ofSeconds(5);
 
@@ -52,6 +56,7 @@ public class TimeQualityConfigurationUpdateRequestDto {
     private int ntpServersMinReachable = 1;
 
     @PositiveDuration
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT1S", defaultValue = "PT1S")
     private Duration maxClockDrift = Duration.ofSeconds(1);
 
