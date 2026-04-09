@@ -86,7 +86,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret deleted successfully")})
     @DeleteMapping(path = "/secrets/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @RequestParam(required = false, defaultValue = "false") Boolean deleteInVaults) throws NotFoundException, ConnectorException, AttributeException;
+    void deleteSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @RequestParam(defaultValue = "false") Boolean deleteInVaults) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Enable a secret")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret enabled successfully")})
@@ -110,7 +110,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Vault profile removed from secret successfully")})
     @DeleteMapping(path = "/secrets/{uuid}/syncVaultProfiles/{vaultProfileUuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void removeVaultProfileFromSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid, @RequestParam(required = false, defaultValue = "false") Boolean deleteInVault) throws NotFoundException, ConnectorException, AttributeException;
+    void removeVaultProfileFromSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid, @RequestParam(defaultValue = "false") Boolean deleteInVault) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Update Secret Objects")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret objects updated")})
