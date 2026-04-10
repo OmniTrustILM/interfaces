@@ -13,7 +13,6 @@ import java.util.Arrays;
 public enum SigningProtocol implements IPlatformEnum {
 
     CSC_API(Codes.CSC_API, "CSC API Protocol", "Cloud Signature Consortium API v2"),
-    ILM_SIGNING_PROTOCOL(Codes.ILM_SIGNING_PROTOCOL, "ILM Signing Protocol", "internal ILM-based signing protocol"),
     TSP(Codes.TSP, "Timestamping Protocol", "Timestamping Protocol based on RFC 3161"),
     ;
 
@@ -60,7 +59,6 @@ public enum SigningProtocol implements IPlatformEnum {
 
     public static class Codes {
         public static final String CSC_API = "cscApi";
-        public static final String ILM_SIGNING_PROTOCOL = "ilmSigningProtocol";
         public static final String TSP = "tsp";
 
         private Codes() {

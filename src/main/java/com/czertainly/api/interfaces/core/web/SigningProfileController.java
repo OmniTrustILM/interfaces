@@ -16,7 +16,6 @@ import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileListDto;
-import com.czertainly.api.model.client.signing.protocols.ilm.IlmSigningProtocolActivationDetailDto;
 import com.czertainly.api.model.client.signing.protocols.tsp.TspActivationDetailDto;
 import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureListDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -211,32 +210,6 @@ public interface SigningProfileController extends AuthProtectedController {
 // -----------------------------------------------------------------------------------------------------------------
 // Protocols
 // -----------------------------------------------------------------------------------------------------------------
-
-    @Operation(summary = "Get the activation details of the ILM Signing Protocol for Signing Profile")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "ILM Signing Protocol details retrieved"),
-            @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
-    })
-    @GetMapping(path = "/{uuid}/protocols/ilm", produces = {MediaType.APPLICATION_JSON_VALUE})
-    IlmSigningProtocolActivationDetailDto getIlmSigningProtocolActivationDetails(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid) throws NotFoundException;
-
-    @Operation(operationId = "activateIlmSigningProtocol", summary = "Activate ILM Signing Protocol for Signing Profile")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "ILM Signing Protocol activated", content = @Content(schema = @Schema(implementation = IlmSigningProtocolActivationDetailDto.class))),
-            @ApiResponse(responseCode = "404", description = "Signing Profile or ILM Signing Protocol Configuration not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
-    })
-    @PatchMapping(path = "/{signingProfileUuid}/protocols/ilm/activate/{ilmSigningProtocolConfigurationUuid}", produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    IlmSigningProtocolActivationDetailDto activateIlmSigningProtocol(@Parameter(description = "Signing Profile UUID") @PathVariable UUID signingProfileUuid,
-                                                                     @Parameter(description = "ILM Signing Protocol Configuration UUID") @PathVariable UUID ilmSigningProtocolConfigurationUuid) throws NotFoundException;
-
-    @Operation(operationId = "deactivateIlmSigningProtocol", summary = "Deactivate ILM Signing Protocol for Signing Profile")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "ILM Signing Protocol deactivated"),
-            @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
-    })
-    @PatchMapping(path = "/{uuid}/protocols/ilm/deactivate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deactivateIlmSigningProtocol(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid) throws NotFoundException;
 
     @Operation(summary = "Get the activation details of the Timestamping Protocol (TSP) for Signing Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "TSP details retrieved"),

@@ -102,7 +102,6 @@ public enum Resource implements IPlatformEnum {
 
     // Signing
     DIGITAL_SIGNATURE(Codes.DIGITAL_SIGNATURE, "Digital Signature", false, true, true, true),
-    ILM_SIGNING_PROTOCOL_CONFIGURATION(Codes.ILM_SIGNING_PROTOCOL_CONFIGURATION, "ILM Signing Protocol Configuration", true, true),
     SIGNING_PROFILE(Codes.SIGNING_PROFILE, "Signing Profile", true, true),
     TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
     TSP_PROFILE(Codes.TSP_PROFILE, "Timestamping Protocol Profile", true, true),
@@ -241,7 +240,6 @@ public enum Resource implements IPlatformEnum {
         public static final String SECRET = "secrets";
         public static final String CBOM = "cboms";
         public static final String DIGITAL_SIGNATURE = "digitalSignatures";
-        public static final String ILM_SIGNING_PROTOCOL_CONFIGURATION = "ilmSigningProtocolConfigurations";
         public static final String SIGNING_PROFILE = "signingProfiles";
         public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
         public static final String TSP_PROFILE = "tspProfiles";
