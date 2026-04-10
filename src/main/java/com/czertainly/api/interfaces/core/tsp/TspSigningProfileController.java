@@ -77,6 +77,7 @@ public interface TspSigningProfileController extends NoAuthController {
             )
     })
     @PostMapping(
+            value = "/sign",
             consumes = "application/timestamp-query",
             produces = "application/timestamp-response"
     )
