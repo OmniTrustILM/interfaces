@@ -24,7 +24,7 @@ public abstract class FormatDtbsRequestDto implements FormatDtbsInterface {
     private final SigningWorkflowType type;
 
     @Schema(
-            description = "Certificate chain where the first element is the signer certificate",
+            description = "Certificate chain where the first element is the signer certificate. Individual certificates must be Base64 DER encoded X.509 certificates.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private List<byte[]> certificateChain;
