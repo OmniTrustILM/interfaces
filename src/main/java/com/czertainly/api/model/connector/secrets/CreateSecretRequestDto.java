@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @Data
 @NoArgsConstructor
-public class CreateSecretRequestDto {
+public class CreateSecretRequestDto implements SecretOperationRequest {
 
     @NotBlank
     @Schema(description = "Name of the secret", requiredMode = Schema.RequiredMode.REQUIRED, examples = {"MyServerCredentials"})
@@ -32,6 +32,10 @@ public class CreateSecretRequestDto {
     @Builder.Default
     @Schema(description = "Vault attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> vaultAttributes = new ArrayList<>();
+
+    @Builder.Default
+    @Schema(description = "Vault profile attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<RequestAttribute> vaultProfileAttributes = new ArrayList<>();
 
     @Builder.Default
     @Schema(description = "Secret attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)

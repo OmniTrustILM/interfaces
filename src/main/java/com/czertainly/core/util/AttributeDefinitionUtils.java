@@ -292,7 +292,6 @@ public class AttributeDefinitionUtils {
             if (!containsAttributeDefinition(attribute.getName(), definitions)) {
                 // do not throw error in case the definition is not found, warn only
                 logger.warn("Cannot validate Attribute '{}' as it has unknown definition", attribute.getName());
-                errors.add(ValidationError.create("Attribute {} not supported.", attribute.getName()));
             }
         }
 
@@ -802,6 +801,7 @@ public class AttributeDefinitionUtils {
             atr.setName(dataAttribute.getName());
             if (dataAttribute.getUuid() != null) atr.setUuid(UUID.fromString(dataAttribute.getUuid()));
             atr.setContent(dataAttribute.getContent());
+            atr.setContentType(dataAttribute.getContentType());
             convertedDefinition.add(atr);
     }
 
@@ -813,6 +813,7 @@ public class AttributeDefinitionUtils {
             atr.setName(dataAttributeV2.getName());
             if (dataAttributeV2.getUuid() != null) atr.setUuid(UUID.fromString(dataAttributeV2.getUuid()));
             atr.setContent(dataAttributeV2.getContent());
+            atr.setContentType(dataAttributeV2.getContentType());
             convertedDefinition.add(atr);
     }
 

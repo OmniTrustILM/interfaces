@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,17 +50,22 @@ public interface VaultInstanceController extends AuthProtectedController {
 
     @Operation(summary = "List Vault Instance Attributes")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Attribute information retrieved")})
-    @GetMapping(path = "/{connectorUuid}/attributes", produces = {"application/json"})
+    @GetMapping(path = "/{connectorUuid}/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BaseAttribute> listVaultInstanceAttributes(@Parameter(description = "Connector UUID") @PathVariable UUID connectorUuid) throws ConnectorException, NotFoundException, AttributeException;
+
+    @Operation(summary = "List Vault Profile Attributes")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Vault profile attributes retrieved")})
+    @GetMapping(path = "/{uuid}/vaultProfiles/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BaseAttribute> listVaultProfileAttributes(@Parameter(description = "Vault instance UUID") @PathVariable UUID uuid) throws ConnectorException, NotFoundException, AttributeException;
 
     @Operation(summary = "Details of a Vault instance")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Vault instance details retrieved")})
-    @GetMapping(path = "/{uuid}", produces = {"application/json"})
+    @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     VaultInstanceDetailDto getVaultInstanceDetails(@Parameter(description = "Vault instance UUID") @PathVariable UUID uuid) throws ConnectorException, NotFoundException, AttributeException;
 
     @Operation(summary = "List Vault instances")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of Vault instances retrieved")})
-    @PostMapping(path = "/list", produces = {"application/json"})
+    @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<VaultInstanceDto> listVaultInstances(@RequestBody SearchRequestDto searchRequest);
 
     @Operation(summary = "Delete a Vault instance")
@@ -70,18 +76,18 @@ public interface VaultInstanceController extends AuthProtectedController {
 
     @Operation(summary = "Create a Vault instance")
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Vault instance created")})
-    @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     VaultInstanceDetailDto createVaultInstance(@RequestBody @Valid VaultInstanceRequestDto vaultInstanceRequest) throws ConnectorException, NotFoundException, AttributeException, AlreadyExistException;
 
     @Operation(summary = "Update a Vault instance")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Vault instance updated")})
-    @PutMapping(path = "/{uuid}", produces = {"application/json"})
+    @PutMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     VaultInstanceDetailDto updateVaultInstance(@Parameter(description = "Vault instance UUID") @PathVariable UUID uuid, @RequestBody VaultInstanceUpdateRequestDto vaultInstanceRequest) throws ConnectorException, NotFoundException, AttributeException;
 
     @Operation(operationId = "getVaultInstanceSearchableFields", summary = "List search filters for Vault instances")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of search filters retrieved")})
-    @GetMapping(path = "/search", produces = {"application/json"})
+    @GetMapping(path = "/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
 
 }

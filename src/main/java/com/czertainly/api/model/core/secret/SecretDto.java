@@ -2,6 +2,7 @@ package com.czertainly.api.model.core.secret;
 
 import com.czertainly.api.model.common.NameAndUuidDto;
 import com.czertainly.api.model.connector.secrets.SecretType;
+import com.czertainly.api.model.core.compliance.ComplianceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,5 +36,11 @@ public class SecretDto extends NameAndUuidDto {
 
     @Schema(description = "Groups that have access to the secret", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<NameAndUuidDto> groups;
+
+    @Schema(
+            description = "Secret compliance status",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private ComplianceStatus complianceStatus;
 
 }

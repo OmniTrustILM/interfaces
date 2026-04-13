@@ -90,7 +90,7 @@ public interface VaultProfileController extends AuthProtectedController {
     @Operation(summary = "List attributes for creating a secret in a Vault Profile")
     @ApiResponse(responseCode = "200", description = "List of attributes for creating a secret in a Vault Profile retrieved")
     @GetMapping(path = "/vaults/{vaultUuid}/vaultProfiles/{vaultProfileUuid}/secrets/{secretType}/attributes", produces = {"application/json"})
-    List<BaseAttribute> getAttributesForCreatingSecret(@Parameter(description = "UUID of Vault Instance") @PathVariable UUID vaultUuid, @Parameter(description = "UUID of vault profile") @PathVariable UUID vaultProfileUuid, @Parameter(description = "Type of the secret") @PathVariable SecretType secretType) throws ConnectorException, NotFoundException, AttributeException;
+    List<BaseAttribute> listSecretAttributes(@Parameter(description = "UUID of Vault Instance") @PathVariable UUID vaultUuid, @Parameter(description = "UUID of vault profile") @PathVariable UUID vaultProfileUuid, @Parameter(description = "Type of the secret") @PathVariable SecretType secretType) throws ConnectorException, NotFoundException, AttributeException;
 
     @Operation(operationId = "getVaultProfileSearchableFields", summary = "List search filters for Vault Profiles")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of search filters retrieved")})

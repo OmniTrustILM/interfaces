@@ -14,6 +14,7 @@ import java.util.List;
 public class VaultApiClient extends BaseApiClient {
 
     private static final String VAULT_BASE_PATH = "/v1/secretProvider/vaults";
+    private static final String VAULT_PROFILE_BASE_PATH = "/v1/secretProvider/vaultProfiles";
 
     public VaultApiClient(WebClient webClient, TrustManager[] defaultTrustManagers) {
         super(webClient, defaultTrustManagers);
@@ -41,6 +42,20 @@ public class VaultApiClient extends BaseApiClient {
                         .collectList()
                         .block(),
                 connector,
+                connector
+        );
+    }
+
+    public List<BaseAttribute> listVaultProfileAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> attributes) throws ConnectorException {
+        return processRequest(
+                attrs -> prepareRequest(HttpMethod.POST, connector, true)
+                        .uri(connector.getUrl() + VAULT_PROFILE_BASE_PATH + "/attributes")
+                        .bodyValue(attrs)
+                        .retrieve()
+                        .bodyToFlux(BaseAttribute.class)
+                        .collectList()
+                        .block(),
+                attributes,
                 connector
         );
     }

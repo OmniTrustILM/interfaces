@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/v1/secretProvider/vaults")
+@RequestMapping("/v1/secretProvider")
 @Tag(name = "Vault Management", description = "Vault Management API")
 public interface VaultController extends AuthProtectedConnectorController {
 
-    @PostMapping(consumes = {"application/json"})
+    @PostMapping(path = "/vaults", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @Operation(
             summary = "Check connection to Vault Instance"
     )
@@ -60,7 +60,19 @@ public interface VaultController extends AuthProtectedConnectorController {
                     description = "Vault Attributes retrieved"
             )
     })
-    @GetMapping(path = "/attributes", produces = {"application/json"})
+    @GetMapping(path = "/vaults/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BaseAttribute> listVaultAttributes() throws NotFoundException;
+
+    @Operation(
+            summary = "List Vault Profile Attributes"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Vault Profile Attributes retrieved"
+            )
+    })
+    @PostMapping(path = "/vaultProfiles/attributes", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BaseAttribute> listVaultProfileAttributes(@Parameter(description = "Vault attributes") @RequestBody List<RequestAttribute> attributes) throws NotFoundException;
 
 }

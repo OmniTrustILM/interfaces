@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,7 +69,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @Operation(summary = "Get secret content")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Secret content retrieved")})
     @GetMapping(path = "/secrets/{uuid}/content", produces = {MediaType.APPLICATION_JSON_VALUE})
-    SecretContent getSecretContent(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid) throws NotFoundException, ConnectorException, NoSuchAlgorithmException;
+    SecretContent getSecretContent(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Create a new secret")
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Secret created successfully")})
@@ -87,7 +86,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret deleted successfully")})
     @DeleteMapping(path = "/secrets/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid) throws NotFoundException, ConnectorException;
+    void deleteSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Enable a secret")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret enabled successfully")})
@@ -111,7 +110,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Vault profile removed from secret successfully")})
     @DeleteMapping(path = "/secrets/{uuid}/syncVaultProfiles/{vaultProfileUuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void removeVaultProfileFromSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid) throws NotFoundException, ConnectorException;
+    void removeVaultProfileFromSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Update Secret Objects")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret objects updated")})

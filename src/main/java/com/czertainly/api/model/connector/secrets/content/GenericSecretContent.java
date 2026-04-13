@@ -9,13 +9,14 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 @Schema(
         title = "GenericSecretContent",
-        description = "Secret representing generic content encoded as Base64 string"
+        description = "Secret representing generic content represented as string"
 )
 public class GenericSecretContent extends SecretContent {
 
     @NotBlank
     @ToString.Exclude
-    @Schema(description = "Generic secret content encoded as Base64 string", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Generic secret content represented as string. In case secret content is binary data, it should be encoded as BASE64 string.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private String content;
 
     public GenericSecretContent() {
