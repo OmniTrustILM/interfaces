@@ -101,7 +101,7 @@ public enum Resource implements IPlatformEnum {
     SECRET(Codes.SECRET, "Secret", false, true, true, true),
 
     // Signing
-    DIGITAL_SIGNATURE(Codes.DIGITAL_SIGNATURE, "Digital Signature", false, true, true, true),
+    SIGNING_RECORD(Codes.SIGNING_RECORD, "Signing Record", false, true, true, true),
     SIGNING_PROFILE(Codes.SIGNING_PROFILE, "Signing Profile", true, true),
     TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
     TSP_PROFILE(Codes.TSP_PROFILE, "Timestamping Protocol Profile", true, true),
@@ -239,7 +239,7 @@ public enum Resource implements IPlatformEnum {
         public static final String VAULT_PROFILE = "vaultProfiles";
         public static final String SECRET = "secrets";
         public static final String CBOM = "cboms";
-        public static final String DIGITAL_SIGNATURE = "digitalSignatures";
+        public static final String SIGNING_RECORD = "signingRecords";
         public static final String SIGNING_PROFILE = "signingProfiles";
         public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
         public static final String TSP_PROFILE = "tspProfiles";

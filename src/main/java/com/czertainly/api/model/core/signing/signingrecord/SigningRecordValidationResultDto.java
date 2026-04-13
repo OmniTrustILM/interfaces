@@ -1,4 +1,4 @@
-package com.czertainly.api.model.core.signing.digitalsignature;
+package com.czertainly.api.model.core.signing.signingrecord;
 
 import com.czertainly.api.model.core.signing.SignatureLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,16 +10,16 @@ import java.util.List;
 
 @Data
 @Schema(
-        name = "DigitalSignatureValidationResultDto",
-        description = "Result of a Digital Signature validation operation. " +
+        name = "SigningRecordValidationResultDto",
+        description = "Result of a Signing Record validation operation. " +
                 "Validation checks the cryptographic integrity of the signature, the validity of the " +
                 "signing certificate chain, and the revocation status of all involved certificates " +
                 "at the time of signing."
 )
-public class DigitalSignatureValidationResultDto {
+public class SigningRecordValidationResultDto {
 
     @Schema(
-            description = "Whether the Digital Signature is cryptographically valid and all validation checks passed",
+            description = "Whether the Signing Record is cryptographically valid and all validation checks passed",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Boolean valid;

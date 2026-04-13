@@ -18,7 +18,7 @@ import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileListDto;
 import com.czertainly.api.model.client.signing.protocols.tsp.TspActivationDetailDto;
-import com.czertainly.api.model.core.signing.digitalsignature.DigitalSignatureListDto;
+import com.czertainly.api.model.core.signing.signingrecord.SigningRecordListDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -190,24 +190,24 @@ public interface SigningProfileController extends AuthProtectedController {
             @Parameter(description = "Certificate UUID") @PathVariable UUID certificateUuid) throws NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Digital Signatures
+    // Signing Records
     // -----------------------------------------------------------------------------------------------------------------
 
     @Operation(
-            operationId = "listDigitalSignaturesForSigningProfile",
-            summary = "List Digital Signatures produced under a Signing Profile",
-            description = "Returns a paginated, filterable list of all Digital Signatures that were produced " +
+            operationId = "listSigningRecordsForSigningProfile",
+            summary = "List Signing Records produced under a Signing Profile",
+            description = "Returns a paginated, filterable list of all Signing Records that were produced " +
                     "using this Signing Profile. Supports the same search and pagination parameters as " +
-                    "the top-level Digital Signatures listing."
+                    "the top-level Signing Records listing."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Digital Signatures retrieved"),
+            @ApiResponse(responseCode = "200", description = "Signing Records retrieved"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
     })
 
-    @PostMapping(path = "/{uuid}/digitalSignatures", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
-    PaginationResponseDto<DigitalSignatureListDto> listDigitalSignaturesForSigningProfile(
+    @PostMapping(path = "/{uuid}/signingRecords", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
+    PaginationResponseDto<SigningRecordListDto> listSigningRecordsForSigningProfile(
             @Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid,
             @RequestBody SearchRequestDto request
     ) throws NotFoundException;
