@@ -36,7 +36,10 @@ public enum SystemOid {
     IPSEC_USER("1.3.6.1.5.5.8.2.2", "IPSec User", OidCategory.EXTENDED_KEY_USAGE),
     IPSEC_END_SYSTEM("1.3.6.1.5.5.7.3.5", "IPSec End System", OidCategory.EXTENDED_KEY_USAGE),
     IPSEC_TUNNEL("1.3.6.1.5.5.7.3.6", "IPSec Tunnel", OidCategory.EXTENDED_KEY_USAGE),
-    AUTHENTIC_DOCUMENTS_TRUST("1.2.840.113583.1.1.5", "Authentic Documents Trust", OidCategory.EXTENDED_KEY_USAGE)
+    AUTHENTIC_DOCUMENTS_TRUST("1.2.840.113583.1.1.5", "Authentic Documents Trust", OidCategory.EXTENDED_KEY_USAGE),
+
+    // QC Statements (ETSI EN 319 412)
+    QC_COMPLIANCE("0.4.0.19422.1.1", "QC Compliance", OidCategory.QC_STATEMENT)
     ;
 
     private static final SystemOid[] VALUES;

@@ -169,7 +169,10 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "listSigningCertificates", summary = "Get list of certificates eligible to be used for digital signing")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of certificates retrieved")})
     @GetMapping(path = "/signingCertificates", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<CertificateDto> listSigningCertificates(@Parameter(description = "Signing Workflow Type") @RequestParam SigningWorkflowType signingWorkflowType);
+    List<CertificateDto> listSigningCertificates(
+            @Parameter(description = "Signing Workflow Type") @RequestParam SigningWorkflowType signingWorkflowType,
+            @Parameter(description = "When true and signingWorkflowType is TIMESTAMPING, restricts results to certificates that satisfy ETSI EN 319 421 qualified timestamp requirements")
+            @RequestParam(required = false, defaultValue = "false") boolean qualifiedTimestamp);
 
     @Operation(
             operationId = "listSignatureAttributesForCertificate",
