@@ -8,6 +8,7 @@ import com.czertainly.api.model.common.BulkActionMessageDto;
 import com.czertainly.api.model.common.ErrorMessageDto;
 import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
+import com.czertainly.api.model.client.signing.profile.SimplifiedSigningProfileDto;
 import com.czertainly.api.model.client.signing.timequality.TimeQualityConfigurationCreateRequestDto;
 import com.czertainly.api.model.client.signing.timequality.TimeQualityConfigurationDto;
 import com.czertainly.api.model.client.signing.timequality.TimeQualityConfigurationListDto;
@@ -79,6 +80,11 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
     @DeleteMapping(path = "/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteTimeQualityConfiguration(@Parameter(description = "Time Quality Configuration UUID") @PathVariable UUID uuid) throws NotFoundException;
+
+    @Operation(operationId = "listSigningProfilesForTimeQualityConfiguration", summary = "List Signing Profiles using this Time Quality Configuration")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signing Profiles retrieved")})
+    @GetMapping(path = "/{uuid}/signingProfiles", produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<SimplifiedSigningProfileDto> listSigningProfilesForTimeQualityConfiguration(@Parameter(description = "Time Quality Configuration UUID") @PathVariable UUID uuid);
 
     @Operation(operationId = "bulkDeleteTimeQualityConfigurations", summary = "Delete multiple Time Quality Configurations")
     @ApiResponses(value = {
