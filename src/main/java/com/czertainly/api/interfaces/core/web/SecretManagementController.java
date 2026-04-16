@@ -110,7 +110,7 @@ public interface SecretManagementController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Vault profile removed from secret successfully")})
     @DeleteMapping(path = "/secrets/{uuid}/syncVaultProfiles/{vaultProfileUuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void removeVaultProfileFromSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid, @Parameter(description = "Remove secret in the vault") @RequestParam(defaultValue = "false") boolean deleteInVault) throws NotFoundException, ConnectorException, AttributeException;
+    void removeVaultProfileFromSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid, @Parameter(description = "UUID of the vault profile") @PathVariable UUID vaultProfileUuid, @Parameter(description = "Remove secret in the vault associated with removed vault profile as well") @RequestParam(defaultValue = "false") boolean deleteInVault) throws NotFoundException, ConnectorException, AttributeException;
 
     @Operation(summary = "Update Secret Objects")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret objects updated")})
