@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.cert.CertificateException;
@@ -33,7 +34,7 @@ public interface AuthController extends AuthProtectedController {
     @Operation(summary = "Update User Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Authenticate a user"), @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PutMapping(path = "/profile", produces = {"application/json"})
-    UserDetailDto updateUserProfile(@RequestBody UpdateUserRequestDto request) throws NotFoundException, CertificateException;
+    UserDetailDto updateUserProfile(@RequestBody @Valid UpdateUserRequestDto request) throws NotFoundException, CertificateException;
 
     @Operation(summary = "Get Auth Resources")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Resources retrieved successfully")})
