@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public interface UserManagementController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PutMapping(path = "/{userUuid}", consumes = {"application/json"}, produces = {"application/json"})
-	UserDetailDto updateUser(@Parameter(description = "User UUID") @PathVariable String userUuid, @RequestBody UpdateUserRequestDto request) throws NotFoundException, CertificateException, AttributeException;
+	UserDetailDto updateUser(@Parameter(description = "User UUID") @PathVariable String userUuid, @RequestBody @Valid UpdateUserRequestDto request) throws NotFoundException, CertificateException, AttributeException;
 
     @Operation(summary = "Enable User")
     @ApiResponses(value = {
