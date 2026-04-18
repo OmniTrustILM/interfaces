@@ -4,7 +4,7 @@ import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.model.core.authority.CertRevocationDto;
 import com.czertainly.api.model.core.authority.CertificateSignRequestDto;
 import com.czertainly.api.model.core.authority.CertificateSignResponseDto;
-import com.czertainly.api.model.core.connector.ConnectorDto;
+import com.czertainly.api.model.core.connector.ConnectorApiClientDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -22,7 +22,7 @@ public class CertificateApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
-    public CertificateSignResponseDto issueCertificate(ConnectorDto connector, String authorityUuid, String endEntityProfileName, CertificateSignRequestDto requestDto) throws ConnectorException {
+    public CertificateSignResponseDto issueCertificate(ConnectorApiClientDto connector, String authorityUuid, String endEntityProfileName, CertificateSignRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> r
@@ -35,7 +35,7 @@ public class CertificateApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void revokeCertificate(ConnectorDto connector, String authorityUuid, String endEntityProfileName, CertRevocationDto requestDto) throws ConnectorException {
+    public void revokeCertificate(ConnectorApiClientDto connector, String authorityUuid, String endEntityProfileName, CertRevocationDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r

@@ -8,7 +8,7 @@ import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.cryptography.key.CreateKeyRequestDto;
 import com.czertainly.api.model.connector.cryptography.key.KeyDataResponseDto;
 import com.czertainly.api.model.connector.cryptography.key.KeyPairDataResponseDto;
-import com.czertainly.api.model.core.connector.ConnectorDto;
+import com.czertainly.api.model.core.connector.ConnectorApiClientDto;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -37,7 +37,7 @@ public class KeyManagementApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
-    public List<BaseAttribute> listCreateSecretKeyAttributes(ConnectorDto connector, String uuid) throws ConnectorException {
+    public List<BaseAttribute> listCreateSecretKeyAttributes(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -49,7 +49,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void validateCreateSecretKeyAttributes(ConnectorDto connector, String uuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
+    public void validateCreateSecretKeyAttributes(ConnectorApiClientDto connector, String uuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -62,7 +62,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public KeyDataResponseDto createSecretKey(ConnectorDto connector, String uuid, CreateKeyRequestDto requestDto) throws ConnectorException {
+    public KeyDataResponseDto createSecretKey(ConnectorApiClientDto connector, String uuid, CreateKeyRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> r
@@ -75,7 +75,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public List<BaseAttribute> listCreateKeyPairAttributes(ConnectorDto connector, String uuid) throws ConnectorException {
+    public List<BaseAttribute> listCreateKeyPairAttributes(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -87,7 +87,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void validateCreateKeyPairAttributes(ConnectorDto connector, String uuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
+    public void validateCreateKeyPairAttributes(ConnectorApiClientDto connector, String uuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -100,7 +100,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public KeyPairDataResponseDto createKeyPair(ConnectorDto connector, String uuid, CreateKeyRequestDto requestDto) throws ConnectorException {
+    public KeyPairDataResponseDto createKeyPair(ConnectorApiClientDto connector, String uuid, CreateKeyRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> r
@@ -113,7 +113,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public List<KeyDataResponseDto> listKeys(ConnectorDto connector, String uuid) throws ConnectorException {
+    public List<KeyDataResponseDto> listKeys(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -125,7 +125,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public KeyDataResponseDto getKey(ConnectorDto connector, String uuid, String keyUuid) throws ConnectorException {
+    public KeyDataResponseDto getKey(ConnectorApiClientDto connector, String uuid, String keyUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -137,7 +137,7 @@ public class KeyManagementApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void destroyKey(ConnectorDto connector, String uuid, String keyUuid) throws ConnectorException {
+    public void destroyKey(ConnectorApiClientDto connector, String uuid, String keyUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.DELETE, connector, true);
 
         processRequest(r -> r

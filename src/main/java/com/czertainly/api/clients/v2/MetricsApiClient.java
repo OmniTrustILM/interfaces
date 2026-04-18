@@ -2,7 +2,7 @@ package com.czertainly.api.clients.v2;
 
 import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
-import com.czertainly.api.model.core.connector.ConnectorDto;
+import com.czertainly.api.model.core.connector.ConnectorApiClientDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -14,7 +14,7 @@ public class MetricsApiClient extends BaseApiClient {
         super(webClient, defaultTrustManagers);
     }
 
-    public String getMetrics(ConnectorDto connector) throws ConnectorException {
+    public String getMetrics(ConnectorApiClientDto connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
         return processRequest(r -> r
                         .uri(connector.getUrl() + "/v1/metrics")

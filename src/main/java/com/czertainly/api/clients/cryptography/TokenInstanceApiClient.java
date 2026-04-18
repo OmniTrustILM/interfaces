@@ -8,7 +8,7 @@ import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.cryptography.token.TokenInstanceDto;
 import com.czertainly.api.model.connector.cryptography.token.TokenInstanceRequestDto;
 import com.czertainly.api.model.connector.cryptography.token.TokenInstanceStatusDto;
-import com.czertainly.api.model.core.connector.ConnectorDto;
+import com.czertainly.api.model.core.connector.ConnectorApiClientDto;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -37,7 +37,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
-    public List<TokenInstanceDto> listTokenInstances(ConnectorDto connector) throws ConnectorException {
+    public List<TokenInstanceDto> listTokenInstances(ConnectorApiClientDto connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -49,7 +49,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public TokenInstanceDto getTokenInstance(ConnectorDto connector, String uuid) throws ConnectorException {
+    public TokenInstanceDto getTokenInstance(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -61,7 +61,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public TokenInstanceDto createTokenInstance(ConnectorDto connector, TokenInstanceRequestDto requestDto) throws ConnectorException {
+    public TokenInstanceDto createTokenInstance(ConnectorApiClientDto connector, TokenInstanceRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> r
@@ -75,7 +75,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
     }
 
 
-    public TokenInstanceDto updateTokenInstance(ConnectorDto connector, String uuid, TokenInstanceRequestDto requestDto) throws ConnectorException {
+    public TokenInstanceDto updateTokenInstance(ConnectorApiClientDto connector, String uuid, TokenInstanceRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> r
@@ -88,7 +88,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void removeTokenInstance(ConnectorDto connector, String uuid) throws ConnectorException {
+    public void removeTokenInstance(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.DELETE, connector, true);
 
         processRequest(r -> r
@@ -100,7 +100,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public TokenInstanceStatusDto getTokenInstanceStatus(ConnectorDto connector, String uuid) throws ConnectorException {
+    public TokenInstanceStatusDto getTokenInstanceStatus(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -112,7 +112,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public List<BaseAttribute> listTokenProfileAttributes(ConnectorDto connector, String uuid) throws ConnectorException {
+    public List<BaseAttribute> listTokenProfileAttributes(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -124,7 +124,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void validateTokenProfileAttributes(ConnectorDto connector, String uuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
+    public void validateTokenProfileAttributes(ConnectorApiClientDto connector, String uuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -137,7 +137,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public List<BaseAttribute> listTokenInstanceActivationAttributes(ConnectorDto connector, String uuid) throws ConnectorException {
+    public List<BaseAttribute> listTokenInstanceActivationAttributes(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -149,7 +149,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void validateTokenInstanceActivationAttributes(ConnectorDto connector, String uuid, List<RequestAttribute>attributes) throws ValidationException, ConnectorException {
+    public void validateTokenInstanceActivationAttributes(ConnectorApiClientDto connector, String uuid, List<RequestAttribute>attributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -162,7 +162,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void activateTokenInstance(ConnectorDto connector, String uuid, List<RequestAttribute>attributes) throws ConnectorException {
+    public void activateTokenInstance(ConnectorApiClientDto connector, String uuid, List<RequestAttribute>attributes) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.PATCH, connector, true);
 
         processRequest(r -> r
@@ -175,7 +175,7 @@ public class TokenInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void deactivateTokenInstance(ConnectorDto connector, String uuid) throws ConnectorException {
+    public void deactivateTokenInstance(ConnectorApiClientDto connector, String uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.PATCH, connector, true);
 
         processRequest(r -> r
