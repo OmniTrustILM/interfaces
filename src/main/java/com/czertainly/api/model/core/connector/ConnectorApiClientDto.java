@@ -6,6 +6,7 @@ import com.czertainly.api.model.common.NameAndUuidDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  */
 @Setter
 @Getter
+@ToString(callSuper = true)
 public class ConnectorApiClientDto extends NameAndUuidDto implements ApiClientConnectorInfo {
     @Schema(description = "URL of the Connector",
             examples = {"http://network-discovery-provider:8080"},
