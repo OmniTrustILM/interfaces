@@ -22,7 +22,7 @@
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>ilm</sonar.organization>
-        <sonar.projectKey>interfaces</sonar.projectKey>
+        <sonar.projectKey>ilm_interfaces</sonar.projectKey>
         <sonar.sources>src/main/java</sonar.sources>
         <sonar.cpd.exclusions>src/main/java/com/czertainly/api/model/**,src/main/java/com/czertainly/api/interfaces/**</sonar.cpd.exclusions>
         <sonar.coverage.exclusions>src/main/java/com/czertainly/api/interfaces/**</sonar.coverage.exclusions>
