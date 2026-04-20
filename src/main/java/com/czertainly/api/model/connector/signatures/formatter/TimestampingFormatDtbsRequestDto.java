@@ -75,6 +75,12 @@ public class TimestampingFormatDtbsRequestDto extends FormatDtbsRequestDto {
     private boolean includeSignerCertificate;
 
     @Schema(
+            description = "Whether the timestamp is ETSI qualified electronic timestamp",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private boolean qualifiedTimestamp;
+
+    @Schema(
             description = "Extensions from the timestamp request"
     )
     private List<ExtensionDto> requestExtensions;

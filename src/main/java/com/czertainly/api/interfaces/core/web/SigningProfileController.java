@@ -2,6 +2,7 @@ package com.czertainly.api.interfaces.core.web;
 
 import com.czertainly.api.exception.AlreadyExistException;
 import com.czertainly.api.exception.AttributeException;
+import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.interfaces.AuthProtectedController;
 import com.czertainly.api.model.client.approvalprofile.ApprovalProfileDto;
@@ -9,6 +10,7 @@ import com.czertainly.api.model.client.certificate.SearchRequestDto;
 import com.czertainly.api.model.client.signing.profile.SigningProfileRequestDto;
 import com.czertainly.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
+import com.czertainly.api.model.common.attribute.common.DataAttribute;
 import com.czertainly.api.model.core.certificate.CertificateDto;
 import com.czertainly.api.model.core.signing.SigningProtocol;
 import com.czertainly.api.model.common.BulkActionMessageDto;
@@ -188,6 +190,21 @@ public interface SigningProfileController extends AuthProtectedController {
     @GetMapping(path = "/certificates/{certificateUuid}/signatureAttributes", produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listSignatureAttributesForCertificate(
             @Parameter(description = "Certificate UUID") @PathVariable UUID certificateUuid) throws NotFoundException;
+
+    @Operation(
+            operationId = "listSignatureFormatterConnectorAttributes",
+            summary = "Get formatter attribute descriptors from a Signature Formatter Connector",
+            description = "Queries the Signature Formatter Connector for its available formatter attribute descriptors with connector default values. " +
+                    "The signingProfileUuid parameter is used for authorization only and does not affect the returned descriptors."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Formatter attribute descriptors retrieved"),
+            @ApiResponse(responseCode = "404", description = "Connector or Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+    })
+    @GetMapping(path = "/signatureFormatterConnectors/{connectorUuid}/formatterAttributes", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<DataAttribute> listSignatureFormatterConnectorAttributes(
+            @Parameter(description = "Signature Formatter Connector UUID") @PathVariable UUID connectorUuid,
+            @Parameter(description = "Signing Profile UUID — used for authorization purposes only", in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid) throws NotFoundException, ConnectorException, AttributeException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Signing Records
