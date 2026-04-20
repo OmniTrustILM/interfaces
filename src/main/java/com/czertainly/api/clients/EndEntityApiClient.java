@@ -4,7 +4,6 @@ import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.model.core.authority.AddEndEntityRequestDto;
 import com.czertainly.api.model.core.authority.EditEndEntityRequestDto;
 import com.czertainly.api.model.core.authority.EndEntityDto;
-import com.czertainly.api.model.core.connector.ConnectorDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -23,7 +22,7 @@ public class EndEntityApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
-    public List<EndEntityDto> listEntities(ConnectorDto connector, String authorityUuid, String endEntityProfileName) throws ConnectorException {
+    public List<EndEntityDto> listEntities(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -35,7 +34,7 @@ public class EndEntityApiClient extends BaseApiClient {
                 connector);
     }
 
-    public EndEntityDto getEndEntity(ConnectorDto connector, String authorityUuid, String endEntityProfileName, String endEntityName) throws ConnectorException {
+    public EndEntityDto getEndEntity(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, String endEntityName) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -47,7 +46,7 @@ public class EndEntityApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void createEndEntity(ConnectorDto connector, String authorityUuid, String endEntityProfileName, AddEndEntityRequestDto requestDto) throws ConnectorException {
+    public void createEndEntity(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, AddEndEntityRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -60,7 +59,7 @@ public class EndEntityApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void updateEndEntity(ConnectorDto connector, String authorityUuid, String endEntityProfileName, String endEntityName, EditEndEntityRequestDto requestDto) throws ConnectorException {
+    public void updateEndEntity(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, String endEntityName, EditEndEntityRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -73,7 +72,7 @@ public class EndEntityApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void revokeAndDeleteEndEntity(ConnectorDto connector, String authorityUuid, String endEntityProfileName, String endEntityName) throws ConnectorException {
+    public void revokeAndDeleteEndEntity(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, String endEntityName) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.DELETE, connector, true);
 
         processRequest(r -> r
@@ -85,7 +84,7 @@ public class EndEntityApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void resetPassword(ConnectorDto connector, String authorityUuid, String endEntityProfileName, String endEntityName) throws ConnectorException {
+    public void resetPassword(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, String endEntityName) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.PUT, connector, true);
 
         processRequest(r -> r
