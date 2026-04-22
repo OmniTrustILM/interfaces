@@ -2,7 +2,6 @@ package com.czertainly.api.clients;
 
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.model.common.NameAndIdDto;
-import com.czertainly.api.model.core.connector.ConnectorDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -21,7 +20,7 @@ public class EndEntityProfileApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
-    public List<NameAndIdDto> listEndEntityProfiles(ConnectorDto connector, String authorityUuid) throws ConnectorException {
+    public List<NameAndIdDto> listEndEntityProfiles(ApiClientConnectorInfo connector, String authorityUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -33,7 +32,7 @@ public class EndEntityProfileApiClient extends BaseApiClient {
                 connector);
     }
 
-    public List<NameAndIdDto> listCertificateProfiles(ConnectorDto connector, String authorityUuid, int endEntityProfileId) throws ConnectorException {
+    public List<NameAndIdDto> listCertificateProfiles(ApiClientConnectorInfo connector, String authorityUuid, int endEntityProfileId) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r
@@ -45,7 +44,7 @@ public class EndEntityProfileApiClient extends BaseApiClient {
                 connector);
     }
 
-    public List<NameAndIdDto> listCAsInProfile(ConnectorDto connector, String authorityUuid, int endEntityProfileId) throws ConnectorException {
+    public List<NameAndIdDto> listCAsInProfile(ApiClientConnectorInfo connector, String authorityUuid, int endEntityProfileId) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
         return processRequest(r -> r

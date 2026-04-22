@@ -4,7 +4,6 @@ import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.model.client.connector.v2.HealthInfo;
-import com.czertainly.api.model.core.connector.ConnectorDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -27,7 +26,7 @@ public class HealthApiClient extends BaseApiClient {
                 connector);
     }
 
-    public HealthInfo checkHealthLiveness(ConnectorDto connector) throws ConnectorException {
+    public HealthInfo checkHealthLiveness(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
         return processRequest(r -> r
                         .uri(connector.getUrl() + "/v2/health/liveness")
@@ -38,7 +37,7 @@ public class HealthApiClient extends BaseApiClient {
                 connector);
     }
 
-    public HealthInfo checkHealthReadiness(ConnectorDto connector) throws ConnectorException {
+    public HealthInfo checkHealthReadiness(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
         return processRequest(r -> r
                         .uri(connector.getUrl() + "/v2/health/readiness")
