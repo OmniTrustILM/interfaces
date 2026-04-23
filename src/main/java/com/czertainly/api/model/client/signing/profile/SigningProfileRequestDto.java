@@ -2,6 +2,7 @@ package com.czertainly.api.model.client.signing.profile;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.client.signing.profile.scheme.SigningSchemeRequestDto;
+import com.czertainly.api.model.client.signing.profile.validation.ValidManagedSigningFormatterConnector;
 import com.czertainly.api.model.client.signing.profile.workflow.WorkflowRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.czertainly.api.model.common.validation.ValidName;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Data
 @Schema(name = "SigningProfileRequestDto", description = "Request to create or update a Signing Profile")
+@ValidManagedSigningFormatterConnector
 public class SigningProfileRequestDto {
     @NotBlank
     @ValidName
