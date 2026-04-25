@@ -1,5 +1,6 @@
 package com.czertainly.api.model.messaging.timequality;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,9 +13,13 @@ import java.util.UUID;
 public class TimeQualityResultMessage {
 
     @Schema(description = "UUID of the time quality configuration that produced this result", requiredMode = Schema.RequiredMode.REQUIRED)
-    private UUID profileId;
+    private UUID id;
+
+    @Schema(description = "Display name of the time quality configuration", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String name;
 
     @Schema(description = "Timestamp when the check was performed, in ISO 8601 UTC format", requiredMode = Schema.RequiredMode.REQUIRED)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant timestamp;
 
     @Schema(description = "Overall time quality status. DEGRADED is always set when NTP leap indicators conflict across servers (LeapUnsync), regardless of the profile's leapSecondGuard setting", requiredMode = Schema.RequiredMode.REQUIRED)
