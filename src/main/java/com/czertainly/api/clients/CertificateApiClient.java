@@ -1,6 +1,7 @@
 package com.czertainly.api.clients;
 
 import com.czertainly.api.exception.ConnectorException;
+import com.czertainly.api.interfaces.client.v1.CertificateSyncApiClient;
 import com.czertainly.api.model.core.authority.CertRevocationDto;
 import com.czertainly.api.model.core.authority.CertificateSignRequestDto;
 import com.czertainly.api.model.core.authority.CertificateSignResponseDto;
@@ -10,7 +11,7 @@ import reactor.core.publisher.Mono;
 
 import javax.net.ssl.TrustManager;
 
-public class CertificateApiClient extends BaseApiClient {
+public class CertificateApiClient extends BaseApiClient implements CertificateSyncApiClient {
 
     private static final String CERTIFICATE_BASE_CONTEXT = "/v1/authorityProvider/authorities/{uuid}/endEntityProfiles/{endEntityProfileName}/certificates";
     private static final String CERTIFICATE_ISSUE_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/issue";
@@ -21,6 +22,7 @@ public class CertificateApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
+    @Override
     public CertificateSignResponseDto issueCertificate(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, CertificateSignRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -34,6 +36,7 @@ public class CertificateApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public void revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, String endEntityProfileName, CertRevocationDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 

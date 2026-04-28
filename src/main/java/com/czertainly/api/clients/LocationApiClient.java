@@ -9,10 +9,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import com.czertainly.api.interfaces.client.v1.LocationSyncApiClient;
+
 import javax.net.ssl.TrustManager;
 import java.util.List;
 
-public class LocationApiClient extends BaseApiClient {
+public class LocationApiClient extends BaseApiClient implements LocationSyncApiClient {
 
     private static final String LOCATION_BASE_CONTEXT = "/v1/entityProvider/entities/{entityUuid}/locations";
     private static final String LOCATION_PUSH_CONTEXT = LOCATION_BASE_CONTEXT + "/push";
@@ -31,6 +33,7 @@ public class LocationApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
+    @Override
     public LocationDetailResponseDto getLocationDetail(ApiClientConnectorInfo connector, String entityUuid, LocationDetailRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -44,6 +47,7 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public PushCertificateResponseDto pushCertificateToLocation(ApiClientConnectorInfo connector, String entityUuid, PushCertificateRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -57,6 +61,7 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public List<BaseAttribute> listPushCertificateAttributes(ApiClientConnectorInfo connector, String entityUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
@@ -69,7 +74,8 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void validatePushCertificateAttributes(ApiClientConnectorInfo connector, String entityUuid, List<RequestAttribute>pushAttributes) throws ConnectorException {
+    @Override
+    public void validatePushCertificateAttributes(ApiClientConnectorInfo connector, String entityUuid, List<RequestAttribute> pushAttributes) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
@@ -82,6 +88,7 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public RemoveCertificateResponseDto removeCertificateFromLocation(ApiClientConnectorInfo connector, String entityUuid, RemoveCertificateRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -95,6 +102,7 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public GenerateCsrResponseDto generateCsrLocation(ApiClientConnectorInfo connector, String entityUuid, GenerateCsrRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -108,6 +116,7 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public List<BaseAttribute> listGenerateCsrAttributes(ApiClientConnectorInfo connector, String entityUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
@@ -120,7 +129,8 @@ public class LocationApiClient extends BaseApiClient {
                 connector);
     }
 
-    public void validateGenerateCsrAttributes(ApiClientConnectorInfo connector, String entityUuid, List<RequestAttribute>pushAttributes) throws ConnectorException {
+    @Override
+    public void validateGenerateCsrAttributes(ApiClientConnectorInfo connector, String entityUuid, List<RequestAttribute> pushAttributes) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         processRequest(r -> r
