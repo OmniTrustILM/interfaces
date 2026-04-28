@@ -156,7 +156,7 @@ public interface ProxyClient {
      * <p>This method sends the request without waiting for a response. It is useful for
      * operations that do not require a response, such as notifications or async triggers.</p>
      *
-     * <p>The response, if any, will be handled by a {@code com.czertainly.core.messaging.proxy.handler.MessageTypeResponseHandler}
+     * <p>The response, if any, will be handled by a {@code MessageTypeResponseHandler}
      * registered for the corresponding message type pattern.</p>
      *
      * @param connector Connector configuration with URL, auth, and proxyId
@@ -175,7 +175,7 @@ public interface ProxyClient {
      * Send a fire-and-forget request with custom message type.
      *
      * <p>This method allows overriding the message type for routing purposes.
-     * The message type determines which {@code com.czertainly.core.messaging.proxy.handler.MessageTypeResponseHandler} will
+     * The message type determines which {@code MessageTypeResponseHandler} will
      * handle the response, using RabbitMQ topic exchange pattern matching.</p>
      *
      * @param connector   Connector configuration with URL, auth, and proxyId
