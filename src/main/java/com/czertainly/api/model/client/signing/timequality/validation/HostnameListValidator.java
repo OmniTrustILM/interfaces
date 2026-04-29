@@ -11,8 +11,8 @@ public class HostnameListValidator implements ConstraintValidator<ValidHostnameL
 
     // RFC 1123: labels are 1-63 alphanumeric/hyphen chars, not starting or ending with hyphen; total max 253 chars
     private static final Pattern HOSTNAME_PATTERN = Pattern.compile(
-            "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])\\.)*" +
-                    "([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]{0,61}[A-Za-z0-9])$"
+            "^[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?" +
+                    "(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?)*$"
     );
 
     @Override

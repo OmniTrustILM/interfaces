@@ -1,9 +1,13 @@
 package com.czertainly.api.model.client.signing.timequality;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.client.signing.timequality.validation.ClockDriftConfiguration;
+import com.czertainly.api.model.client.signing.timequality.validation.NtpCheckIntervalConfiguration;
 import com.czertainly.api.model.client.signing.timequality.validation.NtpConfiguration;
 import com.czertainly.api.model.client.signing.timequality.validation.PositiveDuration;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidHostnameList;
+import com.czertainly.api.model.client.signing.timequality.validation.ValidMaxClockDrift;
+import com.czertainly.api.model.client.signing.timequality.validation.ValidNtpCheckTimeout;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidNtpMinReachable;
 import com.czertainly.api.model.common.validation.ValidName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,9 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@ValidMaxClockDrift
+@ValidNtpCheckTimeout
 @ValidNtpMinReachable
 @Schema(name = "TimeQualityConfigurationRequestDto", description = "Request to create or update a Time Quality Configuration")
-public class TimeQualityConfigurationRequestDto implements NtpConfiguration {
+public class TimeQualityConfigurationRequestDto implements ClockDriftConfiguration, NtpCheckIntervalConfiguration, NtpConfiguration {
 
     @NotBlank
     @ValidName
@@ -31,7 +37,7 @@ public class TimeQualityConfigurationRequestDto implements NtpConfiguration {
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Desired accuracy for the time quality, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S", defaultValue = "PT1S")
+    @Schema(description = "Desired accuracy for the time quality, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S")
     private Duration accuracy;
 
     @NotNull
@@ -42,17 +48,17 @@ public class TimeQualityConfigurationRequestDto implements NtpConfiguration {
 
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT30S", defaultValue = "PT30S")
-    private Duration ntpCheckInterval = Duration.ofSeconds(30);
+    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT500MS")
+    private Duration ntpCheckInterval;
 
     @Positive
-    @Schema(description = "Number of NTP samples to take per server during each check", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "4", defaultValue = "4")
-    private int ntpSamplesPerServer = 4;
+    @Schema(description = "Number of NTP samples to take per server during each check", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "3", defaultValue = "3")
+    private int ntpSamplesPerServer = 3;
 
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for a single NTP check, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT5S", defaultValue = "PT5S")
-    private Duration ntpCheckTimeout = Duration.ofSeconds(5);
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT200MS")
+    private Duration ntpCheckTimeout;
 
     @Positive
     @Schema(description = "Minimum number of NTP servers that must be reachable", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "1", defaultValue = "1")
@@ -60,8 +66,8 @@ public class TimeQualityConfigurationRequestDto implements NtpConfiguration {
 
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT1S", defaultValue = "PT1S")
-    private Duration maxClockDrift = Duration.ofSeconds(1);
+    @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S")
+    private Duration maxClockDrift;
 
     @Schema(description = "Whether to guard against leap second anomalies", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "true", defaultValue = "true")
     private boolean leapSecondGuard = true;
