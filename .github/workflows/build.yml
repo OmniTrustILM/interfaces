@@ -1,4 +1,4 @@
-name: Build CZERTAINLY Interfaces
+name: Build interfaces
 on:
   pull_request:
     branches: [main]
@@ -29,7 +29,7 @@ jobs:
       - name: Verify
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-        run: mvn -B verify
+        run: mvn -B verify -f pom.xml
   build:
     if: github.event_name != 'pull_request'
     name: Build
@@ -58,7 +58,7 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-        run: mvn -B verify
+        run: mvn -B -X verify -f pom.xml
       - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         id: interfaces-docs-app-token
         with:
