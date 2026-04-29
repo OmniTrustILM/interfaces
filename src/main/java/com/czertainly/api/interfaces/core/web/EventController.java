@@ -4,7 +4,10 @@ import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.interfaces.AuthProtectedController;
 import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.auth.Resource;
+import com.czertainly.api.model.core.other.NestedPaginationRequestDto;
+import com.czertainly.api.model.core.other.ResourceEvent;
 import com.czertainly.api.model.core.scheduler.PaginationRequestDto;
+import com.czertainly.api.model.core.workflows.EventHistoryDto;
 import com.czertainly.api.model.core.workflows.ObjectEventHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,4 +32,23 @@ public interface EventController extends AuthProtectedController {
             @Parameter(description = "Object UUID", required = true) @PathVariable UUID uuid,
             PaginationRequestDto pagination
     ) throws NotFoundException;
+
+    @Operation(summary = "Get history of event defined in platform settings")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Event history retrieved")})
+    @GetMapping(path = "/history/{event}", produces = {"application/json"})
+    PaginationResponseDto<EventHistoryDto> getEventHistory(
+            @Parameter(description = "Event name", required = true) @PathVariable ResourceEvent event,
+            NestedPaginationRequestDto pagination
+    ) throws NotFoundException;
+
+    @Operation(summary = "Get history of event defined by an object")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Event history retrieved")})
+    @GetMapping(path = "/history/{event}/{resource}/{uuid}", produces = {"application/json"})
+    PaginationResponseDto<EventHistoryDto> getEventHistory(
+            @Parameter(description = "Event name", required = true) @PathVariable ResourceEvent event,
+            @Parameter(description = "Resource", required = true) @PathVariable Resource resource,
+            @Parameter(description = "Object UUID", required = true) @PathVariable UUID uuid,
+            NestedPaginationRequestDto pagination
+    ) throws NotFoundException;
+
 }
