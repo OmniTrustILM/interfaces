@@ -11,7 +11,7 @@ These interfaces have to be generally applied when extending the platform, in ca
 `Core` interfaces are the interfaces that are used by the platform to communicate with the `Connectors` and the clients.
 
 You can find the detailed description of the interfaces in the following sections:
-- [Core interfaces](src/main/java/com/czertainly/api/interfaces/core)
+- [Core interfaces](src/main/java/com/otilm/api/interfaces/core)
 
 ## Protocol interfaces
 
@@ -19,11 +19,11 @@ You can find the detailed description of the interfaces in the following section
 
 The following interfaces are available:
 
-- [ACME interface](src/main/java/com/czertainly/api/interfaces/core/acme/AcmeController.java)
-- [RA Profile ACME interface](src/main/java/com/czertainly/api/interfaces/core/acme/AcmeRaProfileController.java)
+- [ACME interface](src/main/java/com/otilm/api/interfaces/core/acme/AcmeController.java)
+- [RA Profile ACME interface](src/main/java/com/otilm/api/interfaces/core/acme/AcmeRaProfileController.java)
 
-- [SCEP interface](src/main/java/com/czertainly/api/interfaces/core/scep/ScepController.java)
-- [RA Profile SCEP interface](src/main/java/com/czertainly/api/interfaces/core/scep/ScepRaProfileController.java)
+- [SCEP interface](src/main/java/com/otilm/api/interfaces/core/scep/ScepController.java)
+- [RA Profile SCEP interface](src/main/java/com/otilm/api/interfaces/core/scep/ScepRaProfileController.java)
 
-- [CMP interface](src/main/java/com/czertainly/api/interfaces/core/cmp/CmpController.java)
-- [RA Profile CMP interface](src/main/java/com/czertainly/api/interfaces/core/cmp/CmpRaProfileController.java)
+- [CMP interface](src/main/java/com/otilm/api/interfaces/core/cmp/CmpController.java)
+- [RA Profile CMP interface](src/main/java/com/otilm/api/interfaces/core/cmp/CmpRaProfileController.java)
