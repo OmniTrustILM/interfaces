@@ -102,7 +102,10 @@ public enum Resource implements IPlatformEnum {
     // Secrets
     VAULT(Codes.VAULT, "Vault", true, true),
     VAULT_PROFILE(Codes.VAULT_PROFILE, "Vault Profile", true, true),
-    SECRET(Codes.SECRET, "Secret", false, true, true, true)
+    SECRET(Codes.SECRET, "Secret", false, true, true, true),
+
+    // SIGNING
+    TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true)
     ;
 
     private static final Resource[] VALUES;
@@ -240,6 +243,7 @@ public enum Resource implements IPlatformEnum {
         public static final String SECRET = "secrets";
 
         public static final String CBOM = "cboms";
+        public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
 
         private Codes() {
 
