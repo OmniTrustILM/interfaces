@@ -5,21 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.czertainly</groupId>
+        <groupId>com.otilm</groupId>
         <artifactId>dependencies</artifactId>
-        <version>1.4.0</version>
+        <version>1.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>interfaces</artifactId>
     <version>2.17.1-SNAPSHOT</version>
-    <name>CZERTAINLY-Interfaces</name>
+    <name>interfaces</name>
     <packaging>jar</packaging>
 
-    <description>CZERTAINLY - interfaces definitions and common objects for the platform</description>
-    <url>https://github.com/CZERTAINLY/CZERTAINLY-Interfaces</url>
+    <description>ILM - interfaces definitions and common objects for the platform</description>
+    <url>https://github.com/OmniTrustILM/interfaces</url>
 
     <properties>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>ilm</sonar.organization>
         <sonar.projectKey>ilm_interfaces</sonar.projectKey>
@@ -31,23 +32,23 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>https://github.com/CZERTAINLY/CZERTAINLY-Interfaces/blob/develop/LICENSE.md</url>
+            <url>https://github.com/OmniTrustILM/dependencies/blob/main/LICENSE.md</url>
         </license>
     </licenses>
 
     <developers>
         <developer>
-            <name>CZERTAINLY</name>
-            <email>getinfo@czertainly.com</email>
-            <organization>CZERTAINLY s.r.o.</organization>
-            <organizationUrl>https://www.czertainly.com</organizationUrl>
+            <name>ILM</name>
+            <email>ilm@omnitrust.com</email>
+            <organization>OmniTrust</organization>
+            <organizationUrl>https://omnitrust.com</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com:CZERTAINLY/CZERTAINLY-Interfaces.git</connection>
-        <developerConnection>scm:git:ssh://github.com:CZERTAINLY/CZERTAINLY-Interfaces.git</developerConnection>
-        <url>https://github.com/CZERTAINLY/CZERTAINLY-Interfaces</url>
+        <connection>scm:git:git://github.com/OmniTrustILM/interfaces.git</connection>
+        <developerConnection>scm:git:ssh://github.com/OmniTrustILM/interfaces.git</developerConnection>
+        <url>https://github.com/OmniTrustILM/interfaces</url>
     </scm>
 
     <dependencies>
@@ -137,20 +138,29 @@
 
     <profiles>
         <profile>
-            <id>ossrh</id>
+            <id>central</id>
             <distributionManagement>
-                <repository>
-                    <id>ossrh</id>
-                    <name>Central Repository OSSRH</name>
-                    <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2</url>
-                </repository>
+                <!-- No <repository> for releases: the central-publishing-maven-plugin
+                     uploads the bundle to the Portal API, not via mvn deploy's URL. -->
                 <snapshotRepository>
-                    <id>ossrh</id>
+                    <id>central</id>
                     <url>https://central.sonatype.com/repository/maven-snapshots/</url>
                 </snapshotRepository>
             </distributionManagement>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <deploymentName>${project.artifactId}-${project.version}</deploymentName>
+                            <!-- autoPublish defaults to false: deployment waits in
+                                 VALIDATED state for you to click Publish in the Portal UI. -->
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -180,7 +190,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/czertainly/czertainly-interfaces</url>
+                    <url>https://maven.pkg.github.com/omnitrustilm/interfaces</url>
                 </repository>
             </distributionManagement>
         </profile>
@@ -213,13 +223,13 @@
     <repositories>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/czertainly/*</url>
+            <url>https://maven.pkg.github.com/omnitrustilm/*</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
         </repository>
         <repository>
-            <id>ossrh</id>
+            <id>central-snapshots</id>
             <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </repository>
     </repositories>
