@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class CzertainlyBaseApiClient {
+public abstract class PlatformBaseApiClient {
 
-    private static final Log logger = LogFactory.getLog(CzertainlyBaseApiClient.class);
+    private static final Log logger = LogFactory.getLog(PlatformBaseApiClient.class);
 
     protected WebClient client;
 
@@ -53,7 +53,7 @@ public abstract class CzertainlyBaseApiClient {
             } else {
                 client = WebClient
                         .builder()
-                        .filter(ExchangeFilterFunction.ofResponseProcessor(CzertainlyBaseApiClient::handleHttpExceptions))
+                        .filter(ExchangeFilterFunction.ofResponseProcessor(PlatformBaseApiClient::handleHttpExceptions))
                         .baseUrl(getServiceUrl())
                         .build();
             }
@@ -62,7 +62,7 @@ public abstract class CzertainlyBaseApiClient {
     }
 
     protected Function<ClientResponse, Mono<ClientResponse>> getHttpExceptionHandler() {
-        return CzertainlyBaseApiClient::handleHttpExceptions;
+        return PlatformBaseApiClient::handleHttpExceptions;
     }
 
     private static final ParameterizedTypeReference<List<String>> ERROR_LIST_TYPE_REF = new ParameterizedTypeReference<>() {

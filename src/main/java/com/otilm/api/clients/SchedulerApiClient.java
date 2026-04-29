@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @NoArgsConstructor
-public class SchedulerApiClient extends CzertainlyBaseApiClient {
+public class SchedulerApiClient extends PlatformBaseApiClient {
 
     @Value("${scheduler.base-url}")
     private String schedulerBaseUrl;
