@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @OpenAPIDefinition(
         servers = {
                 @Server(
-                        url = "https://demo.czertainly.online/api",
-                        description = "CZERTAINLY Demo server"
+                        url = "https://demo.otilm.com/api",
+                        description = "Platform Demo server"
                 )
         }
 )
@@ -44,8 +44,8 @@ import org.springframework.web.bind.annotation.RestController;
                 name = OpenApiConfig.SESSION_SECURITY_SCHEME_NAME,
                 type = SecuritySchemeType.APIKEY,
                 in = SecuritySchemeIn.COOKIE,
-                paramName = "czertainly-session", // Name of the cookie containing the session ID
-                description = "Session-based authentication with session ID stored in 'czertainly-session' cookie"
+                paramName = "session-id", // Name of the cookie containing the session ID
+                description = "Session-based authentication with session ID stored in 'session-id' cookie"
         ),
 })
 @SecurityRequirements(value = {

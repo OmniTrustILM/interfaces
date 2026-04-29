@@ -16,7 +16,7 @@ public class ProxyInstallInstructionsDto {
     private String uuid;
 
     @Schema(description = "Installation instructions for the Proxy",
-        examples = {"helm install my-proxy ./czertainly-proxy --set proxy.code=my-proxy-123"},
+        examples = {"helm install my-proxy ./proxy --set proxy.code=my-proxy-123"},
         requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String installationInstructions;
 

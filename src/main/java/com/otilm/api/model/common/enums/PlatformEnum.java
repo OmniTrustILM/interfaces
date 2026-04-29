@@ -140,7 +140,7 @@ public enum PlatformEnum implements IPlatformEnum {
     RESOURCE_EVENT(ResourceEvent.class, "Events available for a resource"),
 
     // logging
-    MODULE(Module.class, "CZERTAINLY platform module"),
+    MODULE(Module.class, "Platform module"),
     ACTOR_TYPE(ActorType.class, "Actor type"),
     AUTH_METHOD(AuthMethod.class, "Actor auth method"),
     OPERATION(Operation.class, "Log operation"),

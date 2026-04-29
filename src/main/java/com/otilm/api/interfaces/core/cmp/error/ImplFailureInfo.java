@@ -55,7 +55,7 @@ public enum ImplFailureInfo {
     CMPHANCERTCONF002(1002,"certConf failed - given transactionId and related certificate are not found"),
 
     // -- developer
-    TODO(       -999, "Only for developer purpose - inform czertainly admin")
+    TODO(       -999, "Only for developer purpose - inform platform admin")
     ;
     private final int errorCode;
     private final String errorDescription;

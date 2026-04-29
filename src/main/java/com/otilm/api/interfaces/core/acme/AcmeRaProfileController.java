@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  * This class contains the list of end points supported for the ACME implementation
- * in CZERTAINLY
+ * in Platform
  */
 @RequestMapping("/v1/protocols/acme/raProfile/{raProfileName}")
 @Tag(name = "ACME RA Profile", description = "Interfaces used by ACME clients to request ACME related operations " +

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/v1")
-@Tag(name = "Info", description = "CZERTAINLY Application Information API")
+@Tag(name = "Info", description = "Platform Application Information API")
 @RestController
 @SecurityRequirements
 @ApiResponses(
@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public interface InfoController {
 
     @GetMapping(path = "/info", produces = {"application/json"})
-    @Operation(summary = "Get information about running CZERTAINLY Application")
+    @Operation(summary = "Get information about running Platform Application")
     @SecurityRequirements(value = {
             @SecurityRequirement(name = OpenApiConfig.BEARER_JWT_SECURITY_SCHEME_NAME),
             @SecurityRequirement(name = OpenApiConfig.CERTIFICATE_SECURITY_SCHEME_NAME),
@@ -47,7 +47,7 @@ public interface InfoController {
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "CZERTAINLY Application info retrieved"
+                            description = "Platform Application info retrieved"
                     ),
                     @ApiResponse(
                             responseCode = "401",

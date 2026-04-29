@@ -19,7 +19,7 @@ public class CmpProcessingException extends CmpBaseException {
 
     /**
      * @param failureInfo protocol-based error by rfc4120 (type as ${@link PKIFailureInfo})
-     * @param implFailureInfo implementation-based error (czertainly scope, see ${@link ImplFailureInfo})
+     * @param implFailureInfo implementation-based error (platform scope, see ${@link ImplFailureInfo})
      */
     public CmpProcessingException(int failureInfo, ImplFailureInfo implFailureInfo) {
         this(new DEROctetString("n/a".getBytes()), failureInfo,implFailureInfo, null);
@@ -27,7 +27,7 @@ public class CmpProcessingException extends CmpBaseException {
 
     /**
      * @param failureInfo protocol-based error by rfc4120 (type as ${@link PKIFailureInfo})
-     * @param implFailureInfo implementation-based error (czertainly scope, see ${@link ImplFailureInfo})
+     * @param implFailureInfo implementation-based error (platform scope, see ${@link ImplFailureInfo})
      * @param ex failure reason
      */
     public CmpProcessingException(PKIFailureInfo failureInfo, ImplFailureInfo implFailureInfo, Exception ex) {
@@ -36,7 +36,7 @@ public class CmpProcessingException extends CmpBaseException {
 
     /**
      * @param failureInfo protocol-based error by rfc4120 (type as ${@link PKIFailureInfo})
-     * @param implFailureInfo implementation-based error (czertainly scope, see ${@link ImplFailureInfo})
+     * @param implFailureInfo implementation-based error (platform scope, see ${@link ImplFailureInfo})
      */
     public CmpProcessingException(ASN1OctetString tid, int failureInfo, ImplFailureInfo implFailureInfo) {
         this(tid, failureInfo, implFailureInfo, null);
@@ -69,7 +69,7 @@ public class CmpProcessingException extends CmpBaseException {
 
     /**
      * @param failureInfo protocol-based error by rfc4120 (type as integer, see ${@link PKIFailureInfo})
-     * @param implFailureInfo implementation-based error (czertainly scope, see ${@link ImplFailureInfo})
+     * @param implFailureInfo implementation-based error (platform scope, see ${@link ImplFailureInfo})
      * @param ex failure reason
      */
     public CmpProcessingException(ASN1OctetString tid, int failureInfo, ImplFailureInfo implFailureInfo, Exception ex) {

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * List of end points supported for the ACME implementation in CZERTAINLY
+ * List of end points supported for the ACME implementation in Platform
  */
 @RequestMapping("/v1/protocols/acme/{acmeProfileName}")
 @Tag(name = "ACME operations", description = "Interfaces used by ACME clients to request ACME related operations. " +

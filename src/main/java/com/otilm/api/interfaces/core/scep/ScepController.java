@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * List of end points supported for the SCEP implementation in CZERTAINLY
+ * List of end points supported for the SCEP implementation in Platform
  */
 @RequestMapping("/v1/protocols/scep/{scepProfileName}/pkiclient.exe")
 @Tag(name = "SCEP operations", description = "Interfaces used by SCEP clients to request SCEP related operations. " +

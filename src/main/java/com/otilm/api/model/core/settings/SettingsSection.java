@@ -10,10 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 public enum SettingsSection implements IPlatformEnum {
-    PLATFORM("platform", "Platform", "CZERTAINLY platform settings"),
-    EVENTS("events", "Events", "CZERTAINLY events settings"),
-    AUTHENTICATION("authentication", "Authentication", "CZERTAINLY authentication settings"),
-    LOGGING("logging", "Logging", "CZERTAINLY logging settings");
+    PLATFORM("platform", "Platform", "Platform settings"),
+    EVENTS("events", "Events", "Platform events settings"),
+    AUTHENTICATION("authentication", "Authentication", "Platform authentication settings"),
+    LOGGING("logging", "Logging", "Platform logging settings");
 
     private static final SettingsSection[] VALUES;
 
@@ -36,7 +36,7 @@ public enum SettingsSection implements IPlatformEnum {
 
     @Schema(
             description = "Description",
-            examples = {"CZERTAINLY platform settings"}
+            examples = {"Platform settings"}
     )
     private final String description;
 

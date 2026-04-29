@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 @OpenAPIDefinition(
         servers = {
                 @Server(
-                        url = "https://demo.czertainly.online/api",
-                        description = "CZERTAINLY Demo server"
+                        url = "https://demo.otilm.com/api",
+                        description = "Platform Demo server"
                 )
         }
 )
