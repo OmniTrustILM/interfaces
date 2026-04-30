@@ -3,6 +3,7 @@ package com.czertainly.api.clients.secret;
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
+import com.czertainly.api.interfaces.client.v1.secret.VaultSyncApiClient;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import org.springframework.http.HttpMethod;
@@ -11,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.net.ssl.TrustManager;
 import java.util.List;
 
-public class VaultApiClient extends BaseApiClient {
+public class VaultApiClient extends BaseApiClient implements VaultSyncApiClient {
 
     private static final String VAULT_BASE_PATH = "/v1/secretProvider/vaults";
     private static final String VAULT_PROFILE_BASE_PATH = "/v1/secretProvider/vaultProfiles";

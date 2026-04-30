@@ -22,6 +22,7 @@ public enum Module implements IPlatformEnum {
     PROTOCOLS("protocols", "Protocols", "Protocols management and operations"),
     SCHEDULER("scheduler", "Scheduler", "Scheduled jobs and tasks"),
     SECRETS("secrets", "Secrets", "Secrets management and operations"),
+    SIGNING("signing", "Signing", "Signing management and operations"),
     WORKFLOWS("workflows", "Workflows", "Workflows management");
 
     private static final Module[] VALUES;

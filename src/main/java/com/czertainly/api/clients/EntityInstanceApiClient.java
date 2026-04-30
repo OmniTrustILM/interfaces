@@ -11,10 +11,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import com.czertainly.api.interfaces.client.v1.EntityInstanceSyncApiClient;
+
 import javax.net.ssl.TrustManager;
 import java.util.List;
 
-public class EntityInstanceApiClient extends BaseApiClient {
+public class EntityInstanceApiClient extends BaseApiClient implements EntityInstanceSyncApiClient {
 
     private static final String ENTITY_INSTANCE_BASE_CONTEXT = "/v1/entityProvider/entities";
     private static final String ENTITY_INSTANCE_IDENTIFIED_CONTEXT = ENTITY_INSTANCE_BASE_CONTEXT + "/{entityUuid}";
@@ -29,6 +31,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
+    @Override
     public List<EntityInstanceDto> listEntityInstances(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
@@ -41,6 +44,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public EntityInstanceDto getEntityInstance(ApiClientConnectorInfo connector, String entityUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
@@ -53,6 +57,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public EntityInstanceDto createEntityInstance(ApiClientConnectorInfo connector, EntityInstanceRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -66,6 +71,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public EntityInstanceDto updateEntityInstance(ApiClientConnectorInfo connector, String entityUuid, EntityInstanceRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.PUT, connector, true);
 
@@ -79,6 +85,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public void removeEntityInstance(ApiClientConnectorInfo connector, String entityUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.DELETE, connector, true);
 
@@ -92,6 +99,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
     }
 
 
+    @Override
     public List<BaseAttribute> listLocationAttributes(ApiClientConnectorInfo connector, String entityUuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
@@ -104,6 +112,7 @@ public class EntityInstanceApiClient extends BaseApiClient {
                 connector);
     }
 
+    @Override
     public void validateLocationAttributes(ApiClientConnectorInfo connector, String entityUuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
