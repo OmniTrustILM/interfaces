@@ -25,17 +25,20 @@ public class TimestampingConnectorApiClient implements TimestampingConnectorSync
         this.proxyClient = proxyClient;
     }
 
+    @Override
     public List<BaseAttribute> listFormatterAttributes(ApiClientConnectorInfo connector) throws ConnectorException {
         String path = BASE_PATH + "/attributes";
         BaseAttribute[] result = proxyClient.sendRequest(connector, path, HTTP_METHOD_GET, null, BaseAttribute[].class);
         return Arrays.asList(result);
     }
 
+    @Override
     public FormatDtbsResponseDto formatDtbs(ApiClientConnectorInfo connector, TimestampingFormatDtbsRequestDto requestDto) throws ConnectorException {
         String path = BASE_PATH + "/formatDtbs";
         return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, FormatDtbsResponseDto.class);
     }
 
+    @Override
     public FormattedResponseDto formatSigningResponse(ApiClientConnectorInfo connector, TimestampingFormatResponseRequestDto requestDto) throws ConnectorException {
         String path = BASE_PATH + "/formatResponse";
         return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, FormattedResponseDto.class);

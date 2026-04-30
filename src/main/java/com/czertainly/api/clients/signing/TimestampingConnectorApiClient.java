@@ -27,6 +27,7 @@ public class TimestampingConnectorApiClient extends BaseApiClient implements Tim
         this.defaultTrustManagers = defaultTrustManagers;
     }
 
+    @Override
     public List<BaseAttribute> listFormatterAttributes(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
@@ -39,6 +40,7 @@ public class TimestampingConnectorApiClient extends BaseApiClient implements Tim
                 connector);
     }
 
+    @Override
     public FormatDtbsResponseDto formatDtbs(ApiClientConnectorInfo connector, TimestampingFormatDtbsRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
@@ -52,6 +54,7 @@ public class TimestampingConnectorApiClient extends BaseApiClient implements Tim
                 connector);
     }
 
+    @Override
     public FormattedResponseDto formatSigningResponse(ApiClientConnectorInfo connector, TimestampingFormatResponseRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 

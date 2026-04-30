@@ -11,7 +11,11 @@ import com.czertainly.api.model.connector.signatures.formatter.TimestampingForma
 import java.util.List;
 
 public interface TimestampingConnectorSyncApiClient {
+
     List<BaseAttribute> listFormatterAttributes(ApiClientConnectorInfo connector) throws ConnectorException;
+
     FormatDtbsResponseDto formatDtbs(ApiClientConnectorInfo connector, TimestampingFormatDtbsRequestDto requestDto) throws ConnectorException;
+
     FormattedResponseDto formatSigningResponse(ApiClientConnectorInfo connector, TimestampingFormatResponseRequestDto requestDto) throws ConnectorException;
+
 }
