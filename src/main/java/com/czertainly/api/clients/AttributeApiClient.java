@@ -1,5 +1,6 @@
 package com.czertainly.api.clients;
 
+import com.czertainly.api.interfaces.client.v1.AttributeSyncApiClient;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
@@ -21,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AttributeApiClient extends BaseApiClient {
+public class AttributeApiClient extends BaseApiClient implements AttributeSyncApiClient {
 
     private static final String ATTRIBUTE_BASE_CONTEXT = "/v1/{functionGroup}/{kind}/attributes";
     private static final String ATTRIBUTE_VALIDATION_CONTEXT = ATTRIBUTE_BASE_CONTEXT + "/validate";

@@ -24,6 +24,7 @@ public enum Resource implements IPlatformEnum {
     CONNECTOR(Codes.CONNECTOR, "Connector", true, true),
     ATTRIBUTE(Codes.ATTRIBUTE, "Attribute", true),
     SCHEDULED_JOB("jobs", "Scheduled job"),
+    PROXY(Codes.PROXY, "Proxy", true),
 
     // AUTH
     USER(Codes.USER, "User", false, true, true, false),
@@ -94,6 +95,9 @@ public enum Resource implements IPlatformEnum {
     CMP_TRANSACTION("cmpTransactions", "CMP Transaction"),
     END_ENTITY_PROFILE("endEntityProfiles", "End entity profile"),
     AUTHENTICATION_PROVIDER("authenticationProviders", "Authentication Provider"),
+
+    // SAAS
+    TRUSTED_CERTIFICATE("trustedCertificates", "Trusted Certificate"),
 
     // Secrets
     VAULT(Codes.VAULT, "Vault", true, true),
@@ -235,6 +239,8 @@ public enum Resource implements IPlatformEnum {
         public static final String USER = "users";
         public static final String OID = "oids";
         public static final String ACME_ACCOUNT = "acmeAccounts";
+        public static final String PROXY = "proxies";
+        public static final String TRUSTED_CERTIFICATE = "trustedCertificates";
         public static final String VAULT = "vaults";
         public static final String VAULT_PROFILE = "vaultProfiles";
         public static final String SECRET = "secrets";

@@ -16,7 +16,6 @@ public class ConnectorDto extends ConnectorApiClientDtoV1 {
     @Schema(description = "List of Function Groups implemented by the Connector",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<FunctionGroupDto> functionGroups;
-
     @Schema(description = "List of Custom Attributes")
     private List<ResponseAttribute> customAttributes;
 
@@ -28,6 +27,7 @@ public class ConnectorDto extends ConnectorApiClientDtoV1 {
                 .append("authType", getAuthType())
                 .append("authAttributes", getAuthAttributes())
                 .append("status", getStatus())
+                .append("proxy", getProxy())
                 .append("name", name)
                 .append("uuid", uuid)
                 .append("customAttributes", customAttributes)

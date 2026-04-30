@@ -48,6 +48,14 @@ public class ConnectorRequestDto implements Named {
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<RequestAttribute> customAttributes = new ArrayList<>();
 
+    @Schema(description = "UUID of the Proxy",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String proxyUuid;
+
+    @Schema(description = "Code of the Proxy that forwarded this registration request",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String proxyCode;
+
     @AssertTrue(message = "Authentication Attributes must be provided when Authentication Type is not NONE")
     @JsonIgnore
     public boolean isValid() {
@@ -56,6 +64,6 @@ public class ConnectorRequestDto implements Named {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("name", name).append("url", url).append("authType", authType).append("authAttributes", authAttributes).append("customAttributes", customAttributes).toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("name", name).append("url", url).append("authType", authType).append("authAttributes", authAttributes).append("customAttributes", customAttributes).append("proxyUuid", proxyUuid).append("proxyCode", proxyCode).toString();
     }
 }

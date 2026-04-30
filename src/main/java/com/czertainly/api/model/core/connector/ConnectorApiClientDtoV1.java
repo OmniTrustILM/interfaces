@@ -3,6 +3,7 @@ package com.czertainly.api.model.core.connector;
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
 import com.czertainly.api.model.common.NameAndUuidDto;
+import com.czertainly.api.model.core.proxy.ProxyDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,4 +36,10 @@ public class ConnectorApiClientDtoV1 extends NameAndUuidDto implements ApiClient
             examples = {"CONNECTED"},
             requiredMode = Schema.RequiredMode.REQUIRED)
     private ConnectorStatus status;
+
+    @Schema(description = "Proxy for message queue routing. " +
+            "When set, connector communicates via message queue proxy. " +
+            "When null, connector uses direct REST communication.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ProxyDto proxy;
 }
