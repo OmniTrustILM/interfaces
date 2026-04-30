@@ -3,6 +3,7 @@ package com.czertainly.api.clients.signing;
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
+import com.czertainly.api.interfaces.client.v1.signing.TimestampingConnectorSyncApiClient;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.signatures.formatter.FormatDtbsResponseDto;
 import com.czertainly.api.model.connector.signatures.formatter.FormattedResponseDto;
@@ -15,7 +16,7 @@ import reactor.core.publisher.Mono;
 import javax.net.ssl.TrustManager;
 import java.util.List;
 
-public class TimestampingConnectorApiClient extends BaseApiClient {
+public class TimestampingConnectorApiClient extends BaseApiClient implements TimestampingConnectorSyncApiClient {
 
     private static final String ATTRIBUTES_CONTEXT = "/v1/signatureProvider/formatting/attributes";
     private static final String DTBS_CONTEXT = "/v1/signatureProvider/formatting/formatDtbs";

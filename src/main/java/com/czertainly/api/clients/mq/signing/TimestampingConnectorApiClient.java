@@ -2,6 +2,7 @@ package com.czertainly.api.clients.mq.signing;
 
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.exception.ConnectorException;
+import com.czertainly.api.interfaces.client.v1.signing.TimestampingConnectorSyncApiClient;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.signatures.formatter.FormatDtbsResponseDto;
 import com.czertainly.api.model.connector.signatures.formatter.FormattedResponseDto;
@@ -12,7 +13,7 @@ import com.czertainly.api.clients.mq.ProxyClient;
 import java.util.Arrays;
 import java.util.List;
 
-public class TimestampingConnectorApiClient {
+public class TimestampingConnectorApiClient implements TimestampingConnectorSyncApiClient {
 
     private static final String BASE_PATH = "/v1/signatureProvider/formatting";
     private static final String HTTP_METHOD_GET = "GET";
