@@ -40,7 +40,6 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @Schema(description = "Desired accuracy for the time quality, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S")
     private Duration accuracy;
 
-    @NotNull
     @NotEmpty
     @ValidHostnameList
     @Schema(description = "List of NTP server addresses", requiredMode = Schema.RequiredMode.REQUIRED, example = "[\"pool.ntp.org\", \"time.google.com\"]")
@@ -49,7 +48,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT500MS")
+    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT30S")
     private Duration ntpCheckInterval;
 
     @Positive
@@ -59,7 +58,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT200MS")
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT10S")
     private Duration ntpCheckTimeout;
 
     @Positive
@@ -69,7 +68,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S")
+    @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT500MS")
     private Duration maxClockDrift;
 
     @Schema(description = "Whether to guard against leap second anomalies", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "true", defaultValue = "true")

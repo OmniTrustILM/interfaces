@@ -33,15 +33,15 @@ public class TimeQualityConfigurationDto extends NameAndUuidDto {
     private int ntpSamplesPerServer = 3;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for a single NTP check, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT5S", defaultValue = "PT5S")
-    private Duration ntpCheckTimeout = Duration.ofSeconds(5);
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT10S", defaultValue = "PT10S")
+    private Duration ntpCheckTimeout = Duration.ofSeconds(10);
 
     @Schema(description = "Minimum number of NTP servers that must be reachable", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "1", defaultValue = "1")
     private int ntpServersMinReachable = 1;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT1S", defaultValue = "PT1S")
-    private Duration maxClockDrift = Duration.ofSeconds(1);
+    @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT500MS", defaultValue = "PT500MS")
+    private Duration maxClockDrift = Duration.ofMillis(500);
 
     @Schema(description = "Whether to guard against leap second anomalies", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "true", defaultValue = "true")
     private boolean leapSecondGuard = true;

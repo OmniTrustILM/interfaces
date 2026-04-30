@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * <p>Null and empty string values are considered valid. Combine with {@code @NotBlank} to also reject null, empty, and blank values.
  */
 @Constraint(validatedBy = ValidNameValidator.class)
-@Target({ElementType.METHOD, ElementType.FIELD})
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ValidName {
