@@ -50,33 +50,6 @@ public interface SignatureFormatterController extends AuthProtectedConnectorCont
     List<BaseAttribute> listFormatterAttributes();
 
     @Operation(
-            summary = "Validate Formatter Attributes",
-            operationId = "validateFormatterAttributes"
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "204",
-                            description = "Attributes validated"
-                    ),
-                    @ApiResponse(
-                            responseCode = "422",
-                            description = "Unprocessable Entity",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                                    examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}
-                            )
-                    )
-            }
-    )
-    @PostMapping(
-            path = "/attributes/validate",
-            consumes = {"application/json"},
-            produces = {"application/json"}
-    )
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void validateFormatterAttributes(@Valid @RequestBody List<RequestAttribute> attributes) throws ValidationException;
-
-    @Operation(
             summary = "Compute data-to-be-signed bytes",
             operationId = "formatDtbs"
     )
