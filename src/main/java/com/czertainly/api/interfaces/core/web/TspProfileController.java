@@ -63,6 +63,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "createTspProfile", summary = "Add new TSP Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New TSP Profile added"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
@@ -71,6 +72,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "updateTspProfile", summary = "Update TSP Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "TSP Profile updated"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     TspProfileDto updateTspProfile(@Parameter(description = "TSP Profile UUID") @PathVariable UUID uuid, @RequestBody @Valid TspProfileRequestDto request)
