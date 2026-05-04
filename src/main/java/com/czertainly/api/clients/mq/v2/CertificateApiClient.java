@@ -8,6 +8,7 @@ import com.czertainly.api.interfaces.client.v2.CertificateSyncApiClient;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.v2.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,15 +43,17 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     }
 
     @Override
-    public CertificateDataResponseDto issueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateSignRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> issueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateSignRequestDto requestDto) throws ConnectorException {
         String path = BASE_PATH + "/" + authorityUuid + "/certificates/issue";
-        return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateDataResponseDto.class);
+        CertificateDataResponseDto body = proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateDataResponseDto.class);
+        return ResponseEntity.ok(body);
     }
 
     @Override
-    public CertificateDataResponseDto renewCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateRenewRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> renewCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateRenewRequestDto requestDto) throws ConnectorException {
         String path = BASE_PATH + "/" + authorityUuid + "/certificates/renew";
-        return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateDataResponseDto.class);
+        CertificateDataResponseDto body = proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateDataResponseDto.class);
+        return ResponseEntity.ok(body);
     }
 
     @Override
@@ -67,9 +70,10 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     }
 
     @Override
-    public void revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException {
         String path = BASE_PATH + "/" + authorityUuid + "/certificates/revoke";
         proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+        return ResponseEntity.ok().build();
     }
 
     @Override

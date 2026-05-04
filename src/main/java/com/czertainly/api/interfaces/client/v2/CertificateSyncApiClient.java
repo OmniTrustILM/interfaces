@@ -6,6 +6,7 @@ import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.v2.*;
 import com.czertainly.api.clients.ApiClientConnectorInfo;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -19,15 +20,30 @@ public interface CertificateSyncApiClient {
 
     Boolean validateIssueCertificateAttributes(ApiClientConnectorInfo connector, String authorityUuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException;
 
-    CertificateDataResponseDto issueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateSignRequestDto requestDto) throws ConnectorException;
+    /**
+     * Issue a certificate. Returns a {@link ResponseEntity} so callers can distinguish a
+     * synchronous {@code 200 OK} (body carries the issued certificate) from a non-synchronous
+     * {@code 202 Accepted} (body may carry connector-defined metadata; certificate completion
+     * happens externally).
+     */
+    ResponseEntity<CertificateDataResponseDto> issueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateSignRequestDto requestDto) throws ConnectorException;
 
-    CertificateDataResponseDto renewCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateRenewRequestDto requestDto) throws ConnectorException;
+    /**
+     * Renew a certificate. Same {@code 200}/{@code 202} semantics as {@link #issueCertificate}.
+     */
+    ResponseEntity<CertificateDataResponseDto> renewCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateRenewRequestDto requestDto) throws ConnectorException;
 
     List<BaseAttribute> listRevokeCertificateAttributes(ApiClientConnectorInfo connector, String authorityUuid) throws ConnectorException;
 
     Boolean validateRevokeCertificateAttributes(ApiClientConnectorInfo connector, String authorityUuid, List<RequestAttribute> attributes) throws ValidationException, ConnectorException;
 
-    void revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException;
+    /**
+     * Revoke a certificate. Returns a {@link ResponseEntity} so callers can distinguish a
+     * synchronous {@code 200 OK}/{@code 204 No Content} from a non-synchronous {@code 202
+     * Accepted}. The body is empty in the synchronous case; a {@code 202} body MAY carry
+     * connector-defined metadata in the standard {@code meta} field.
+     */
+    ResponseEntity<CertificateDataResponseDto> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException;
 
     CertificateIdentificationResponseDto identifyCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateIdentificationRequestDto requestDto) throws ValidationException, ConnectorException;
 
