@@ -30,4 +30,12 @@ public interface CertificateSyncApiClient {
     void revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException;
 
     CertificateIdentificationResponseDto identifyCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateIdentificationRequestDto requestDto) throws ValidationException, ConnectorException;
+
+    void cancelIssueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException;
+
+    void cancelRevokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException;
+
+    CertificateOperationStatusResponseDto getIssueCertificateStatus(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationStatusRequestDto requestDto) throws ConnectorException;
+
+    CertificateOperationStatusResponseDto getRevokeCertificateStatus(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationStatusRequestDto requestDto) throws ConnectorException;
 }

@@ -78,6 +78,30 @@ public class CertificateApiClient implements CertificateSyncApiClient {
         return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateIdentificationResponseDto.class);
     }
 
+    @Override
+    public void cancelIssueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
+        String path = BASE_PATH + "/" + authorityUuid + "/certificates/issue/cancel";
+        proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+    }
+
+    @Override
+    public void cancelRevokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
+        String path = BASE_PATH + "/" + authorityUuid + "/certificates/revoke/cancel";
+        proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+    }
+
+    @Override
+    public CertificateOperationStatusResponseDto getIssueCertificateStatus(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+        String path = BASE_PATH + "/" + authorityUuid + "/certificates/issue/status";
+        return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateOperationStatusResponseDto.class);
+    }
+
+    @Override
+    public CertificateOperationStatusResponseDto getRevokeCertificateStatus(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+        String path = BASE_PATH + "/" + authorityUuid + "/certificates/revoke/status";
+        return proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, CertificateOperationStatusResponseDto.class);
+    }
+
     // Async variants
     public CompletableFuture<CertificateDataResponseDto> issueCertificateAsync(ApiClientConnectorInfo connector, String authorityUuid, CertificateSignRequestDto requestDto) {
         String path = BASE_PATH + "/" + authorityUuid + "/certificates/issue";

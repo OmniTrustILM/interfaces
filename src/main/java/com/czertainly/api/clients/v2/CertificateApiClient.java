@@ -32,6 +32,11 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     private static final String CERTIFICATE_REVOKE_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/revoke";
     private static final String CERTIFICATE_IDENTIFY_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/identify";
 
+    private static final String CERTIFICATE_ISSUE_CANCEL_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/issue/cancel";
+    private static final String CERTIFICATE_REVOKE_CANCEL_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/revoke/cancel";
+    private static final String CERTIFICATE_ISSUE_STATUS_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/issue/status";
+    private static final String CERTIFICATE_REVOKE_STATUS_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/revoke/status";
+
     private static final ParameterizedTypeReference<List<RequestAttribute>> ATTRIBUTE_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
     };
 
@@ -145,6 +150,62 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
                         .body(Mono.just(requestDto), CertificateSignRequestDto.class)
                         .retrieve()
                         .toEntity(CertificateIdentificationResponseDto.class)
+                        .block().getBody(),
+                request,
+                connector);
+    }
+
+    @Override
+    public void cancelIssueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        processRequest(r -> r
+                        .uri(connector.getUrl() + CERTIFICATE_ISSUE_CANCEL_CONTEXT, authorityUuid)
+                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
+                        .retrieve()
+                        .toEntity(Void.class)
+                        .block().getBody(),
+                request,
+                connector);
+    }
+
+    @Override
+    public void cancelRevokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        processRequest(r -> r
+                        .uri(connector.getUrl() + CERTIFICATE_REVOKE_CANCEL_CONTEXT, authorityUuid)
+                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
+                        .retrieve()
+                        .toEntity(Void.class)
+                        .block().getBody(),
+                request,
+                connector);
+    }
+
+    @Override
+    public CertificateOperationStatusResponseDto getIssueCertificateStatus(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        return processRequest(r -> r
+                        .uri(connector.getUrl() + CERTIFICATE_ISSUE_STATUS_CONTEXT, authorityUuid)
+                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDto.class)
+                        .retrieve()
+                        .toEntity(CertificateOperationStatusResponseDto.class)
+                        .block().getBody(),
+                request,
+                connector);
+    }
+
+    @Override
+    public CertificateOperationStatusResponseDto getRevokeCertificateStatus(ApiClientConnectorInfo connector, String authorityUuid, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        return processRequest(r -> r
+                        .uri(connector.getUrl() + CERTIFICATE_REVOKE_STATUS_CONTEXT, authorityUuid)
+                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDto.class)
+                        .retrieve()
+                        .toEntity(CertificateOperationStatusResponseDto.class)
                         .block().getBody(),
                 request,
                 connector);
