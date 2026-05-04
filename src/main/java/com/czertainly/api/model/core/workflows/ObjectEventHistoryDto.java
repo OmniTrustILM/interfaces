@@ -2,6 +2,7 @@ package com.czertainly.api.model.core.workflows;
 
 import com.czertainly.api.model.common.NameAndUuidDto;
 import com.czertainly.api.model.core.other.ResourceEvent;
+import com.czertainly.api.model.core.other.ResourceObjectDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -19,7 +20,7 @@ public class ObjectEventHistoryDto {
     private NameAndUuidDto trigger;
 
     @Schema(description = "Origin that caused the event to be triggered.")
-    private TriggeredEventOriginDto triggeredEventOrigin;
+    private ResourceObjectDto origin;
 
     @Schema(description = "All conditions in the trigger have been matched.", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean conditionsMatched;
