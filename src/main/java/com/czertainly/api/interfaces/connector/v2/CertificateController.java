@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,13 +63,23 @@ public interface CertificateController extends AuthProtectedConnectorController 
             @RequestBody List<RequestAttribute>attributes) throws NotFoundException, ValidationException;
 
     @Operation(
-            summary = "Issue Certificate"
+            summary = "Issue Certificate",
+            description = "Issue a certificate. The Authority Provider may complete the operation "
+                    + "synchronously or non-synchronously."
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Certificate issued"
+                            description = "Certificate issued synchronously; response carries the issued certificate."
+                    ),
+                    @ApiResponse(
+                            responseCode = "202",
+                            description = "Issuance is not synchronous; the operation will complete externally. The "
+                                    + "optional response body may carry `MetadataAttribute` entries — technology-"
+                                    + "specific state — that the platform will return on subsequent calls related "
+                                    + "to this operation.",
+                            content = @Content(schema = @Schema(implementation = CertificateDataResponseDto.class))
                     ),
                     @ApiResponse(
                             responseCode = "422",
@@ -83,13 +94,23 @@ public interface CertificateController extends AuthProtectedConnectorController 
             @RequestBody CertificateSignRequestDto request) throws NotFoundException, CertificateOperationException, CertificateRequestException;
 
     @Operation(
-            summary = "Renew Certificate"
+            summary = "Renew Certificate",
+            description = "Renew a certificate. The Authority Provider may complete the operation "
+                    + "synchronously or non-synchronously."
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Certificate renewed"
+                            description = "Certificate renewed synchronously; response carries the new certificate."
+                    ),
+                    @ApiResponse(
+                            responseCode = "202",
+                            description = "Renewal is not synchronous; the operation will complete externally. The "
+                                    + "optional response body may carry `MetadataAttribute` entries — technology-"
+                                    + "specific state — that the platform will return on subsequent calls related "
+                                    + "to this operation.",
+                            content = @Content(schema = @Schema(implementation = CertificateDataResponseDto.class))
                     ),
                     @ApiResponse(
                             responseCode = "422",
@@ -145,13 +166,22 @@ public interface CertificateController extends AuthProtectedConnectorController 
             @RequestBody List<RequestAttribute>attributes) throws NotFoundException, ValidationException;
 
     @Operation(
-            summary = "Revoke Certificate"
+            summary = "Revoke Certificate",
+            description = "Revoke a certificate. The Authority Provider may complete the operation "
+                    + "synchronously or non-synchronously."
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Certificate revoked"
+                            description = "Certificate revoked synchronously."
+                    ),
+                    @ApiResponse(
+                            responseCode = "202",
+                            description = "Revocation is not synchronous; the operation will complete externally. The "
+                                    + "optional response body may carry `MetadataAttribute` entries — technology-"
+                                    + "specific state — that the platform will return on subsequent calls related "
+                                    + "to this operation."
                     ),
                     @ApiResponse(
                             responseCode = "422",
@@ -191,4 +221,132 @@ public interface CertificateController extends AuthProtectedConnectorController 
     CertificateIdentificationResponseDto identifyCertificate(
             @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
             @RequestBody CertificateIdentificationRequestDto request) throws NotFoundException, ValidationException;
+
+    @Operation(
+            summary = "Cancel Certificate Issuance",
+            description = """
+                    Abort an in-flight certificate issuance.
+
+                    Called for a non-synchronous issuance or renewal that previously responded
+                    `202 Accepted`. The request body carries the RA profile attributes and the
+                    same `MetadataAttribute` entries returned in the original `202 Accepted`
+                    response, so the Authority Provider can resolve the operation it must abort.
+                    """
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "The operation has been aborted."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "The Authority Provider does not track this operation (e.g., it was finalized "
+                                    + "externally and forgotten, or the implementation is stateless)."
+                    ),
+                    @ApiResponse(
+                            responseCode = "422",
+                            description = "The Authority Provider tracks the operation but refuses to abort it (e.g., the "
+                                    + "underlying CA does not support cancel, or the issuance is past a point of no "
+                                    + "return).",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                                    examples = {@ExampleObject(value = "[\"CA does not support cancellation\",\"Issuance is past the point of no return\"]")}
+                            ))
+            })
+    @PostMapping(path = "/issue/cancel", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void cancelIssueCertificate(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
+            @RequestBody CertificateOperationCancelRequestDto request) throws NotFoundException, ValidationException;
+
+    @Operation(
+            summary = "Cancel Certificate Revocation",
+            description = """
+                    Abort an in-flight certificate revocation.
+
+                    Called for a non-synchronous revocation that previously responded
+                    `202 Accepted`. The request body carries the RA profile attributes and the
+                    same `MetadataAttribute` entries returned in the original `202 Accepted`
+                    response.
+                    """
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "The operation has been aborted."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "The Authority Provider does not track this operation."
+                    ),
+                    @ApiResponse(
+                            responseCode = "422",
+                            description = "The Authority Provider tracks the operation but refuses to abort it (e.g., the "
+                                    + "revocation has already been submitted to a CRL).",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                                    examples = {@ExampleObject(value = "[\"CA does not support cancellation\",\"Revocation already submitted to CRL\"]")}
+                            ))
+            })
+    @PostMapping(path = "/revoke/cancel", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void cancelRevokeCertificate(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
+            @RequestBody CertificateOperationCancelRequestDto request) throws NotFoundException, ValidationException;
+
+    @Operation(
+            summary = "Get Certificate Issuance Status",
+            description = """
+                    Return the current status of a non-synchronous certificate issuance.
+
+                    Called for a non-synchronous issuance or renewal that previously responded
+                    `202 Accepted`. The request body carries the RA profile attributes and the
+                    same `MetadataAttribute` entries returned in the original `202 Accepted`
+                    response, so the Authority Provider can resolve the operation.
+                    """
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Status retrieved. Response carries one of `IN_PROGRESS`, `COMPLETED`, or "
+                                    + "`FAILED`. When `COMPLETED`, the response includes the issued certificate "
+                                    + "(Base64) in `certificateData`."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "The Authority Provider does not track this operation."
+                    )
+            })
+    @PostMapping(path = "/issue/status", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    CertificateOperationStatusResponseDto getIssueCertificateStatus(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
+            @RequestBody CertificateOperationStatusRequestDto request) throws NotFoundException;
+
+    @Operation(
+            summary = "Get Certificate Revocation Status",
+            description = """
+                    Return the current status of a non-synchronous certificate revocation.
+
+                    Called for a non-synchronous revocation that previously responded
+                    `202 Accepted`. For revocation, the `certificateData` field of the response
+                    is unused (revocation completion carries no payload).
+                    """
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Status retrieved. Response carries one of `IN_PROGRESS`, `COMPLETED`, or "
+                                    + "`FAILED`."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "The Authority Provider does not track this operation."
+                    )
+            })
+    @PostMapping(path = "/revoke/status", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    CertificateOperationStatusResponseDto getRevokeCertificateStatus(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
+            @RequestBody CertificateOperationStatusRequestDto request) throws NotFoundException;
 }
