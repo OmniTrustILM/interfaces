@@ -33,6 +33,9 @@ public class ObjectEventHistoryDto {
     @Schema(description = "Additional message.")
     private String message;
 
+    @Schema(description = "If trigger was sending notifications, confirmation whether notification has been sent successfully or not.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Boolean notificationsSent;
+
     @Schema(description = "List of records for each condition that has not been matched and each action that has not been performed.", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TriggerHistoryRecordDto> records = new ArrayList<>();
 }
