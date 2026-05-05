@@ -179,9 +179,8 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     @ApiResponse(
                             responseCode = "202",
                             description = "Revocation is asynchronous; the operation will complete asynchronously. The "
-                                    + "optional response body may carry `MetadataAttribute` entries — technology-"
-                                    + "specific state — that the platform will return on subsequent calls related "
-                                    + "to this operation."
+                                    + "response body is empty for revocation — the platform tracks the operation by "
+                                    + "transactionId / certificate identity, not by connector-emitted metadata."
                     ),
                     @ApiResponse(
                             responseCode = "422",

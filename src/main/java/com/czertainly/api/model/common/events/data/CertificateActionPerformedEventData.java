@@ -2,15 +2,11 @@ package com.czertainly.api.model.common.events.data;
 
 import com.czertainly.api.model.core.certificate.CertificateState;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class CertificateActionPerformedEventData extends CertificateEventAuthorityData {
@@ -30,5 +26,16 @@ public class CertificateActionPerformedEventData extends CertificateEventAuthori
                     + "was introduced.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateState state;
+
+    public CertificateActionPerformedEventData(String action, String errorMessage) {
+        this.action = action;
+        this.errorMessage = errorMessage;
+    }
+
+    public CertificateActionPerformedEventData(String action, String errorMessage, CertificateState state) {
+        this.action = action;
+        this.errorMessage = errorMessage;
+        this.state = state;
+    }
 
 }
