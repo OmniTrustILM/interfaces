@@ -222,14 +222,15 @@ public interface CertificateController extends AuthProtectedConnectorController 
             @RequestBody CertificateIdentificationRequestDto request) throws NotFoundException, ValidationException;
 
     @Operation(
-            summary = "Cancel Certificate Issuance",
+            summary = "Cancel Certificate Issuance or Renewal",
             description = """
-                    Abort an in-flight certificate issuance.
+                    Abort an in-flight certificate issuance or renewal.
 
-                    Called for an asynchronous issuance or renewal that previously responded
-                    `202 Accepted`. The request body carries the RA profile attributes and the
-                    same `MetadataAttribute` entries returned in the original `202 Accepted`
-                    response, so the Authority Provider can resolve the operation it must abort.
+                    Called for an asynchronous issuance, renewal, or rekey that previously
+                    responded `202 Accepted`. The request body carries the RA profile
+                    attributes and the same `MetadataAttribute` entries returned in the
+                    original `202 Accepted` response, so the Authority Provider can resolve
+                    the operation it must abort.
                     """
     )
     @ApiResponses(

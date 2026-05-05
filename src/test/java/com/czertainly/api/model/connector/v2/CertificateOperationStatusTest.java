@@ -1,10 +1,12 @@
 package com.czertainly.api.model.connector.v2;
 
 import com.czertainly.api.exception.ValidationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CertificateOperationStatusTest {
@@ -30,8 +32,12 @@ class CertificateOperationStatusTest {
 
     @Test
     void unknownCodeThrowsValidationException() {
-        assertThrows(Exception.class,
+        // Jackson wraps the @JsonCreator's ValidationException in JsonMappingException;
+        // assert both the wrapper type and that the underlying cause is ValidationException.
+        JsonMappingException ex = assertThrows(JsonMappingException.class,
                 () -> mapper.readValue("\"bogus\"", CertificateOperationStatus.class));
+        assertInstanceOf(ValidationException.class, ex.getCause(),
+                "expected the underlying cause to be ValidationException, got: " + ex.getCause());
     }
 
     @Test

@@ -29,6 +29,84 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.List;
 
+/**
+ * Client API for certificate lifecycle operations through an RA profile (issue, renew,
+ * rekey, revoke, finalize, confirm-revoke, cancel).
+ *
+ * <h2>Certificate state transitions exposed by this API</h2>
+ *
+ * <p>The following diagram shows the state transitions an operator can drive through
+ * the endpoints on this controller. Synchronous paths complete in a single request;
+ * asynchronous paths leave the certificate in a {@code PENDING_*} state until an
+ * operator finalizes or cancels it.</p>
+ *
+ * <pre>
+ *                                +-----------+
+ *                                | REQUESTED |
+ *                                +-----------+
+ *                              /     |   |    \
+ *            connector 200    /      |   |     \  connector 202
+ *            (sync success)  /       |   |      \ (async accepted)
+ *                           /        |   |       \
+ *                          v         v   v        v
+ *                   +--------+   +-------+   +---------------+
+ *                   | ISSUED |   |FAILED |   | PENDING_ISSUE |
+ *                   +--------+   +-------+   +---------------+
+ *                       ^                       /         \
+ *                       |                      /           \
+ *                       |        manuallyIssue/             \cancelPending
+ *                       |             v                      v
+ *                       +-------- ISSUED                   FAILED
+ *
+ *   ISSUED + revokeCertificate:
+ *     connector 200  -->  REVOKED                                (sync)
+ *     connector 202  -->  PENDING_REVOKE                         (async)
+ *                                /                       \
+ *                manuallyConfirmRevoke              cancelPendingCertificateOperation
+ *                              v                              v
+ *                          REVOKED                          ISSUED
+ * </pre>
+ *
+ * <p>Transitions driven by other controllers (notably {@code Issued → PendingApproval},
+ * {@code PendingApproval → PendingIssue / PendingRevoke / Issued / Revoked / Rejected})
+ * are part of the approval flow and are not shown here.</p>
+ *
+ * <h3>Synchronous paths (connector returns 200 OK)</h3>
+ * <ul>
+ *   <li>{@link #issueCertificate}, {@link #issueRequestedCertificate},
+ *       {@link #renewCertificate}, {@link #rekeyCertificate}: cert moves to
+ *       {@code ISSUED}. If the connector reports a failure during the call the cert
+ *       moves to {@code FAILED} instead.</li>
+ *   <li>{@link #revokeCertificate}: cert moves to {@code REVOKED}.</li>
+ * </ul>
+ *
+ * <h3>Asynchronous paths (connector returns 202 Accepted)</h3>
+ * <ul>
+ *   <li>{@code issueCertificate} / {@code issueRequestedCertificate} /
+ *       {@code renewCertificate} / {@code rekeyCertificate}: cert moves to
+ *       {@code PENDING_ISSUE}. An operator finalizes it via
+ *       {@link #manuallyIssueCertificate} (→ {@code ISSUED}) or aborts via
+ *       {@link #cancelPendingCertificateOperation} (→ {@code FAILED}).</li>
+ *   <li>{@code revokeCertificate}: cert moves to {@code PENDING_REVOKE}. An operator
+ *       confirms it via {@link #manuallyConfirmRevoke} (→ {@code REVOKED}) or aborts
+ *       via {@link #cancelPendingCertificateOperation} (→ {@code ISSUED}, since the
+ *       certificate was never actually revoked upstream).</li>
+ * </ul>
+ *
+ * <p>{@code rekeyCertificate} and {@code issueRequestedCertificate} use the same
+ * authority-provider call as {@code issueCertificate}, so they can complete either
+ * synchronously or asynchronously depending on what the connector returns.</p>
+ *
+ * <h3>Terminal states (no transition via this API)</h3>
+ * <ul>
+ *   <li>{@code REVOKED} — definitive; the certificate cannot be reissued.</li>
+ *   <li>{@code REJECTED} — set by approval / compliance flows; the certificate cannot
+ *       be retried, a new certificate request must be created.</li>
+ *   <li>{@code FAILED} — set when synchronous issuance failed at the connector or when
+ *       an asynchronous issuance was cancelled; a new certificate request must be
+ *       created to retry.</li>
+ * </ul>
+ */
 @RequestMapping("/v2/operations/authorities/{authorityUuid}/raProfiles/{raProfileUuid}")
 @Tag(name = "Client Operations v2", description = "Client Operations v2 API")
 @ApiResponses(

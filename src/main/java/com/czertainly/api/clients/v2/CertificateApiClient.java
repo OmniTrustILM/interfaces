@@ -17,6 +17,15 @@ import reactor.core.publisher.Mono;
 import javax.net.ssl.TrustManager;
 import java.util.List;
 
+/**
+ * WebClient (HTTP) implementation of v2 Certificate API client.
+ *
+ * <p>The path constants below are part of the v2 connector API contract — they describe
+ * the routes a connector implementation must expose, not URIs that are configurable per
+ * environment. This is the same pattern as the sibling MQ-based
+ * {@link com.czertainly.api.clients.mq.v2.CertificateApiClient}.</p>
+ */
+@SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public class CertificateApiClient extends BaseApiClient implements CertificateSyncApiClient {
 
     private static final String CERTIFICATE_BASE_CONTEXT = "/v2/authorityProvider/authorities/{uuid}/certificates";

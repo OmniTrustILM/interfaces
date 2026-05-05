@@ -19,9 +19,13 @@ public class CertificateActionPerformedEventData extends CertificateEventAuthori
 
     @Schema(
             description = "Certificate state observed at the moment the event was emitted. "
-                    + "Subscribers use this to distinguish a synchronous success "
-                    + "(state=ISSUED / REVOKED) from an asynchronous-pending outcome "
-                    + "(state=PENDING_ISSUE / PENDING_REVOKE) for the same action. "
+                    + "Any value of `CertificateState` may appear; the values commonly seen by "
+                    + "subscribers of this event are:\n"
+                    + "- `ISSUED` — synchronous issuance / renewal / rekey completed,\n"
+                    + "- `REVOKED` — synchronous revocation completed or asynchronous revocation confirmed,\n"
+                    + "- `PENDING_ISSUE` — asynchronous issuance / renewal / rekey accepted, awaiting completion,\n"
+                    + "- `PENDING_REVOKE` — asynchronous revocation accepted, awaiting completion,\n"
+                    + "- `FAILED` — asynchronous issuance was cancelled, or issuance failed.\n"
                     + "Optional for backward compatibility with subscribers built before the field "
                     + "was introduced.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
