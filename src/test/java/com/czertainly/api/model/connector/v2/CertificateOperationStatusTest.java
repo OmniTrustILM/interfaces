@@ -32,8 +32,9 @@ class CertificateOperationStatusTest {
 
     @Test
     void unknownCodeThrowsValidationException() {
-        // Jackson wraps the @JsonCreator's ValidationException in JsonMappingException;
-        // assert both the wrapper type and that the underlying cause is ValidationException.
+        // Deserializing an unknown code surfaces a Jackson mapping error whose root
+        // cause carries the validation failure raised by the enum factory method.
+        // The assertion walks the cause chain to verify both layers.
         JsonMappingException ex = assertThrows(JsonMappingException.class,
                 () -> mapper.readValue("\"bogus\"", CertificateOperationStatus.class));
         assertInstanceOf(ValidationException.class, ex.getCause(),
