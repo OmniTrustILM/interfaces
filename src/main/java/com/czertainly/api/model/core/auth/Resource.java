@@ -246,7 +246,6 @@ public enum Resource implements IPlatformEnum {
         public static final String TSP_PROFILE = "tspProfiles";
         public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
 
-
         private Codes() {
 
         }
