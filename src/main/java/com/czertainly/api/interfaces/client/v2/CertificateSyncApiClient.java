@@ -39,11 +39,12 @@ public interface CertificateSyncApiClient {
 
     /**
      * Revoke a certificate. Returns a {@link ResponseEntity} so callers can distinguish a
-     * synchronous {@code 200 OK}/{@code 204 No Content} from an asynchronous {@code 202
-     * Accepted}. The body is empty in the synchronous case; a {@code 202} body MAY carry
-     * connector-defined metadata in the standard {@code meta} field.
+     * synchronous {@code 200 OK} / {@code 204 No Content} from an asynchronous
+     * {@code 202 Accepted}. The body is empty for revoke regardless of status — the
+     * platform tracks the operation by transactionId / certificate identity, not by
+     * connector-emitted metadata.
      */
-    ResponseEntity<CertificateDataResponseDto> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException;
+    ResponseEntity<Void> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException;
 
     CertificateIdentificationResponseDto identifyCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateIdentificationRequestDto requestDto) throws ValidationException, ConnectorException;
 

@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -89,7 +90,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                             ))
             })
     @PostMapping(path = "/issue", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    CertificateDataResponseDto issueCertificate(
+    ResponseEntity<CertificateDataResponseDto> issueCertificate(
             @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
             @RequestBody CertificateSignRequestDto request) throws NotFoundException, CertificateOperationException, CertificateRequestException;
 
@@ -120,7 +121,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                             ))
             })
     @PostMapping(path = "/renew", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    CertificateDataResponseDto renewCertificate(
+    ResponseEntity<CertificateDataResponseDto> renewCertificate(
             @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
             @RequestBody CertificateRenewRequestDto request) throws NotFoundException, CertificateOperationException, CertificateRequestException;
 
@@ -190,7 +191,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                             ))
             })
     @PostMapping(path = "/revoke", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    void revokeCertificate(
+    ResponseEntity<Void> revokeCertificate(
             @Parameter(description = "Authority Instance UUID") @PathVariable String uuid,
             @RequestBody CertRevocationDto request) throws NotFoundException, CertificateOperationException;
 

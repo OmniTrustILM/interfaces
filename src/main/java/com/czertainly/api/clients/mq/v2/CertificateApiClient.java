@@ -95,12 +95,13 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     }
 
     @Override
-    public ResponseEntity<CertificateDataResponseDto> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException {
+    public ResponseEntity<Void> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException {
         String path = authorityPath(authorityUuid, PATH_REVOKE);
         // Preserve the upstream HTTP status so 202 Accepted (asynchronous revoke) is not
-        // collapsed to 200 OK. The body is empty for revoke regardless of status, but the
-        // status is the signal Core uses to decide PENDING_REVOKE vs REVOKED.
-        return proxyClient.sendRequestForEntity(connector, path, HTTP_METHOD_POST, requestDto, CertificateDataResponseDto.class);
+        // collapsed to 200 OK. The body is empty for revoke regardless of status — only
+        // the status is meaningful (Core uses it to decide PENDING_REVOKE vs REVOKED).
+        ResponseEntity<Void> response = proxyClient.sendRequestForEntity(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+        return response;
     }
 
     @Override

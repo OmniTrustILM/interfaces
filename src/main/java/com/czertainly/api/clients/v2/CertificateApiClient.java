@@ -138,14 +138,14 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<CertificateDataResponseDto> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException {
+    public ResponseEntity<Void> revokeCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertRevocationDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> r
                 .uri(connector.getUrl() + CERTIFICATE_REVOKE_CONTEXT, authorityUuid)
                 .body(Mono.just(requestDto), CertRevocationDto.class)
                 .retrieve()
-                .toEntity(CertificateDataResponseDto.class)
+                .toBodilessEntity()
                 .block(),
                 request,
                 connector);
