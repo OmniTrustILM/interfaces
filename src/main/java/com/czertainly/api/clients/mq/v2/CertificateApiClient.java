@@ -16,7 +16,14 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * MQ-based implementation of v2 Certificate API client.
+ *
+ * <p>The path constants below are part of the v2 connector API contract — they describe
+ * the routes a connector implementation must expose, not URIs that are configurable per
+ * environment. This is the same pattern as the sibling WebClient-based
+ * {@link com.czertainly.api.clients.v2.CertificateApiClient}, where paths like
+ * {@code /v2/authorityProvider/authorities/{uuid}/certificates/issue} are also hardcoded.</p>
  */
+@SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public class CertificateApiClient implements CertificateSyncApiClient {
 
     private static final String BASE_PATH = "/v2/authorityProvider/authorities";
