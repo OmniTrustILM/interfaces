@@ -22,9 +22,9 @@ public interface CertificateSyncApiClient {
 
     /**
      * Issue a certificate. Returns a {@link ResponseEntity} so callers can distinguish a
-     * synchronous {@code 200 OK} (body carries the issued certificate) from a non-synchronous
+     * synchronous {@code 200 OK} (body carries the issued certificate) from an asynchronous
      * {@code 202 Accepted} (body may carry connector-defined metadata; certificate completion
-     * happens externally).
+     * is asynchronous).
      */
     ResponseEntity<CertificateDataResponseDto> issueCertificate(ApiClientConnectorInfo connector, String authorityUuid, CertificateSignRequestDto requestDto) throws ConnectorException;
 
@@ -39,7 +39,7 @@ public interface CertificateSyncApiClient {
 
     /**
      * Revoke a certificate. Returns a {@link ResponseEntity} so callers can distinguish a
-     * synchronous {@code 200 OK}/{@code 204 No Content} from a non-synchronous {@code 202
+     * synchronous {@code 200 OK}/{@code 204 No Content} from an asynchronous {@code 202
      * Accepted}. The body is empty in the synchronous case; a {@code 202} body MAY carry
      * connector-defined metadata in the standard {@code meta} field.
      */

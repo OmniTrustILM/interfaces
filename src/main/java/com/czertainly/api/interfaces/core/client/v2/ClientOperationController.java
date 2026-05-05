@@ -91,7 +91,7 @@ public interface ClientOperationController extends AuthProtectedController {
 
 	@Operation(
 			summary = "Issue certificate",
-			description = "Submit a new certificate signing request and trigger issuance through this RA profile. If the issuance is non-synchronous, the certificate is returned in state `PENDING_ISSUE` and must be finalized once it is issued externally."
+			description = "Submit a new certificate signing request and trigger issuance through this RA profile. If the issuance is asynchronous, the certificate is returned in state `PENDING_ISSUE` and must be finalized once it has been issued."
 	)
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate issued"),
 			@ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
@@ -104,7 +104,7 @@ public interface ClientOperationController extends AuthProtectedController {
 
 	@Operation(
 			summary = "Renew certificate",
-			description = "Renew an existing certificate using the same key pair. The original certificate stays in state `ISSUED`; the renewed certificate is returned and, if its issuance is non-synchronous, ends in state `PENDING_ISSUE` until it is finalized."
+			description = "Renew an existing certificate using the same key pair. The original certificate stays in state `ISSUED`; the renewed certificate is returned and, if its issuance is asynchronous, ends in state `PENDING_ISSUE` until it is finalized."
 	)
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Certificate renewed"),
 			@ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
@@ -159,7 +159,7 @@ public interface ClientOperationController extends AuthProtectedController {
 
 	@Operation(
 			summary = "Revoke certificate",
-			description = "Revoke a certificate currently in state `ISSUED`. If the revocation is non-synchronous, the certificate moves to state `PENDING_REVOKE` and must be confirmed once the revocation has been performed externally."
+			description = "Revoke a certificate currently in state `ISSUED`. If the revocation is asynchronous, the certificate moves to state `PENDING_REVOKE` and must be confirmed once the revocation has been performed."
 	)
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "Certificate revoked")})
 	@PostMapping(path = "/certificates/{certificateUuid}/revoke", consumes = {"application/json"}, produces = {"application/json"})
@@ -171,9 +171,9 @@ public interface ClientOperationController extends AuthProtectedController {
 			@RequestBody ClientCertificateRevocationDto request) throws ConnectorException, AttributeException, NotFoundException;
 
 	@Operation(
-			summary = "Finalize a non-synchronous certificate issuance",
+			summary = "Finalize an asynchronous certificate issuance",
 			description = """
-					Upload an externally-issued certificate to finalize a certificate currently in
+					Upload an issued certificate to finalize a certificate currently in
 					state `PENDING_ISSUE`. On success, the certificate transitions to `ISSUED`
 					and is pushed to any pre-associated locations.
 
@@ -201,9 +201,9 @@ public interface ClientOperationController extends AuthProtectedController {
 			throws NotFoundException, CertificateException, AlreadyExistException, ConnectorException, AttributeException;
 
 	@Operation(
-			summary = "Confirm a non-synchronous certificate revocation",
+			summary = "Confirm an asynchronous certificate revocation",
 			description = """
-					Confirm that an externally-revoked certificate has been revoked. The certificate
+					Confirm that a revoked certificate has been revoked. The certificate
 					must be in state `PENDING_REVOKE`. The platform applies the destroy-key flag and
 					revoke attributes from the original revoke request, transitions the certificate
 					to `REVOKED`, and clears the data carried over from the original request.
@@ -236,7 +236,7 @@ public interface ClientOperationController extends AuthProtectedController {
 					progressed beyond a point where cancellation is possible), the response is
 					`422 Unprocessable Entity` with the reason, and the certificate **stays in
 					its pending state**. In that case the operation can still be resolved by
-					waiting for it to complete externally and then finalizing or confirming
+					waiting for it to complete and then finalizing or confirming
 					the certificate, or by retrying the cancel later if circumstances change.
 					"""
 	)

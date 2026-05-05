@@ -65,7 +65,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(
             summary = "Issue Certificate",
             description = "Issue a certificate. The Authority Provider may complete the operation "
-                    + "synchronously or non-synchronously."
+                    + "synchronously or asynchronously."
     )
     @ApiResponses(
             value = {
@@ -75,7 +75,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     ),
                     @ApiResponse(
                             responseCode = "202",
-                            description = "Issuance is not synchronous; the operation will complete externally. The "
+                            description = "Issuance is asynchronous; the operation will complete asynchronously. The "
                                     + "optional response body may carry `MetadataAttribute` entries — technology-"
                                     + "specific state — that the platform will return on subsequent calls related "
                                     + "to this operation.",
@@ -96,7 +96,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(
             summary = "Renew Certificate",
             description = "Renew a certificate. The Authority Provider may complete the operation "
-                    + "synchronously or non-synchronously."
+                    + "synchronously or asynchronously."
     )
     @ApiResponses(
             value = {
@@ -106,7 +106,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     ),
                     @ApiResponse(
                             responseCode = "202",
-                            description = "Renewal is not synchronous; the operation will complete externally. The "
+                            description = "Renewal is asynchronous; the operation will complete asynchronously. The "
                                     + "optional response body may carry `MetadataAttribute` entries — technology-"
                                     + "specific state — that the platform will return on subsequent calls related "
                                     + "to this operation.",
@@ -168,7 +168,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(
             summary = "Revoke Certificate",
             description = "Revoke a certificate. The Authority Provider may complete the operation "
-                    + "synchronously or non-synchronously."
+                    + "synchronously or asynchronously."
     )
     @ApiResponses(
             value = {
@@ -178,7 +178,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     ),
                     @ApiResponse(
                             responseCode = "202",
-                            description = "Revocation is not synchronous; the operation will complete externally. The "
+                            description = "Revocation is asynchronous; the operation will complete asynchronously. The "
                                     + "optional response body may carry `MetadataAttribute` entries — technology-"
                                     + "specific state — that the platform will return on subsequent calls related "
                                     + "to this operation."
@@ -227,7 +227,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
             description = """
                     Abort an in-flight certificate issuance.
 
-                    Called for a non-synchronous issuance or renewal that previously responded
+                    Called for an asynchronous issuance or renewal that previously responded
                     `202 Accepted`. The request body carries the RA profile attributes and the
                     same `MetadataAttribute` entries returned in the original `202 Accepted`
                     response, so the Authority Provider can resolve the operation it must abort.
@@ -241,8 +241,8 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "The Authority Provider does not track this operation (e.g., it was finalized "
-                                    + "externally and forgotten, or the implementation is stateless)."
+                            description = "The Authority Provider does not track this operation (e.g., the operation has "
+                                    + "already completed and was forgotten, or the implementation is stateless)."
                     ),
                     @ApiResponse(
                             responseCode = "422",
@@ -264,7 +264,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
             description = """
                     Abort an in-flight certificate revocation.
 
-                    Called for a non-synchronous revocation that previously responded
+                    Called for an asynchronous revocation that previously responded
                     `202 Accepted`. The request body carries the RA profile attributes and the
                     same `MetadataAttribute` entries returned in the original `202 Accepted`
                     response.
@@ -297,9 +297,9 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(
             summary = "Get Certificate Issuance Status",
             description = """
-                    Return the current status of a non-synchronous certificate issuance.
+                    Return the current status of an asynchronous certificate issuance.
 
-                    Called for a non-synchronous issuance or renewal that previously responded
+                    Called for an asynchronous issuance or renewal that previously responded
                     `202 Accepted`. The request body carries the RA profile attributes and the
                     same `MetadataAttribute` entries returned in the original `202 Accepted`
                     response, so the Authority Provider can resolve the operation.
@@ -326,9 +326,9 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(
             summary = "Get Certificate Revocation Status",
             description = """
-                    Return the current status of a non-synchronous certificate revocation.
+                    Return the current status of an asynchronous certificate revocation.
 
-                    Called for a non-synchronous revocation that previously responded
+                    Called for an asynchronous revocation that previously responded
                     `202 Accepted`. For revocation, the `certificateData` field of the response
                     is unused (revocation completion carries no payload).
                     """

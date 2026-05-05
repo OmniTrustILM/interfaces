@@ -10,16 +10,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 /**
- * Status of a non-synchronous certificate operation reported by an Authority Provider on
+ * Status of an asynchronous certificate operation reported by an Authority Provider on
  * the status-check endpoints. Returned for an issuance, renewal, or revocation that
  * previously responded {@code 202 Accepted}.
  */
 @Schema(enumAsRef = true)
 public enum CertificateOperationStatus implements IPlatformEnum {
 
-    IN_PROGRESS("inProgress", "In progress", "Operation is still being processed externally"),
-    COMPLETED("completed", "Completed", "Operation finished externally; cert data included for issue/renew, no payload for revoke"),
-    FAILED("failed", "Failed", "Operation failed externally; reason field carries detail");
+    IN_PROGRESS("inProgress", "In progress", "Operation is still being processed asynchronously"),
+    COMPLETED("completed", "Completed", "Operation finished; cert data included for issue/renew, no payload for revoke"),
+    FAILED("failed", "Failed", "Operation failed; reason field carries detail");
 
     private static final CertificateOperationStatus[] VALUES;
 

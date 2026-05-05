@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * Request body for the cancel endpoint that aborts an in-flight non-synchronous
+ * Request body for the cancel endpoint that aborts an in-flight asynchronous
  * certificate issuance or revocation.
  *
  * <p>Cancel transitions:</p>
