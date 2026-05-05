@@ -100,8 +100,7 @@ public class CertificateApiClient implements CertificateSyncApiClient {
         // Preserve the upstream HTTP status so 202 Accepted (asynchronous revoke) is not
         // collapsed to 200 OK. The body is empty for revoke regardless of status — only
         // the status is meaningful (Core uses it to decide PENDING_REVOKE vs REVOKED).
-        ResponseEntity<Void> response = proxyClient.sendRequestForEntity(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
-        return response;
+        return proxyClient.sendRequestForEntity(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
     }
 
     @Override
