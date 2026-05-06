@@ -3,6 +3,7 @@ package com.czertainly.api.clients.mq;
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.exception.ConnectorException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.http.ResponseEntity;
 
 import java.time.Duration;
 import java.util.Map;
@@ -41,6 +42,38 @@ public interface ProxyClient {
             Object body,
             Class<T> responseType
     ) throws ConnectorException;
+
+    /**
+     * Send a request to the connector and wait for response synchronously, preserving the
+     * upstream HTTP status. Required for callers that distinguish {@code 200 OK} (synchronous
+     * completion) from {@code 202 Accepted} (asynchronous completion).
+     *
+     * <p>The default implementation falls back to {@link #sendRequest} and wraps the result in
+     * {@code ResponseEntity.ok(...)}, which collapses every successful upstream status to
+     * {@code 200}. Implementations that need true status fidelity (e.g. for the asynchronous
+     * authority-provider operations contract) <b>must</b> override this method and propagate
+     * the actual upstream status code.</p>
+     *
+     * @param connector    Connector configuration with URL, auth, and proxyId
+     * @param path         Request path (e.g., "/v1/health")
+     * @param method       HTTP method (GET, POST, PUT, DELETE, PATCH)
+     * @param body         Request body (can be null for GET requests)
+     * @param responseType Expected response type class
+     * @param <T>          Response type
+     * @return ResponseEntity carrying the upstream status and deserialized body
+     *         (the body may be {@code null} when the upstream response had no body, e.g. 204)
+     * @throws ConnectorException If request fails or times out
+     */
+    default <T> ResponseEntity<T> sendRequestForEntity(
+            ApiClientConnectorInfo connector,
+            String path,
+            String method,
+            Object body,
+            Class<T> responseType
+    ) throws ConnectorException {
+        T result = sendRequest(connector, path, method, body, responseType);
+        return ResponseEntity.ok(result);
+    }
 
     /**
      * Send a request to the connector and wait for response synchronously with custom timeout.
