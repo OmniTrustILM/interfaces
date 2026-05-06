@@ -16,8 +16,11 @@ import java.util.List;
 @Data
 public class CertificateDataResponseDto {
 
-    @Schema(description = "Base64 encoded Certificate content",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Base64 encoded Certificate content. Required for synchronous "
+                    + "(HTTP 200) responses; absent for asynchronous (HTTP 202) responses, "
+                    + "where the operation is still in flight and only optional metadata "
+                    + "may be carried in the body.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String certificateData;
 
     @Schema(description = "UUID of Certificate",

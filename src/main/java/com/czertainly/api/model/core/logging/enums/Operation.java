@@ -103,6 +103,15 @@ public enum Operation implements IPlatformEnum {
     PROMOTE_METADATA("promoteMetadata", "Promote metadata"),
     ARCHIVE("archive", "Archive certificate"),
     UNARCHIVE("unarchive", "Unarchive certificate"),
+    FINALIZE_ISSUE("finalizeIssue", "Finalize certificate issuance",
+            "Operator-driven finalization of an asynchronous issuance: the externally-issued "
+                    + "certificate is uploaded and the certificate moves from PENDING_ISSUE to ISSUED."),
+    CONFIRM_REVOKE("confirmRevoke", "Confirm certificate revocation",
+            "Operator-driven confirmation of an asynchronous revocation: the certificate moves "
+                    + "from PENDING_REVOKE to REVOKED."),
+    CANCEL("cancel", "Cancel pending certificate operation",
+            "Cancel an in-flight asynchronous issuance or revocation. PENDING_ISSUE -> FAILED, "
+                    + "PENDING_REVOKE -> ISSUED."),
     GET_ASSOCIATIONS("getAssociations", "Get associations"),
     LIST_VERSIONS("listVersions", "List versions"),
     GET_PROXY_INSTALLATION("getProxyInstallation", "Get proxy installation instructions"),
