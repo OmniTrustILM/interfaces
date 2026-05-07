@@ -60,8 +60,8 @@ class TimeQualityConstraintValidatorsTest {
 
     static Stream<Duration> invalidMaxClockDriftValues() {
         return Stream.of(
-                Duration.ofMinutes(1),  // equal to accuracy
-                Duration.ofMinutes(2)   // greater than accuracy
+                Duration.ofSeconds(1),  // equal to accuracy
+                Duration.ofSeconds(2)   // greater than accuracy
         );
     }
 
@@ -77,8 +77,8 @@ class TimeQualityConstraintValidatorsTest {
 
     static Stream<Duration> invalidNtpCheckIntervalValues() {
         return Stream.of(
-                Duration.ofMinutes(1),  // equal to accuracy
-                Duration.ofMinutes(2)   // greater than accuracy
+                Duration.ofSeconds(1),  // equal to accuracy
+                Duration.ofSeconds(2)   // greater than accuracy
         );
     }
 
