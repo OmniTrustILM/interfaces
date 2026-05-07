@@ -40,8 +40,8 @@ class TimeQualityConstraintValidatorsTest {
         dto.setName("test-config");
         dto.setAccuracy(Duration.ofSeconds(1));
         dto.setNtpServers(List.of("pool.ntp.org"));
-        dto.setNtpCheckInterval(Duration.ofSeconds(30));
-        dto.setNtpCheckTimeout(Duration.ofSeconds(5));
+        dto.setNtpCheckInterval(Duration.ofMillis(500));
+        dto.setNtpCheckTimeout(Duration.ofMillis(200));
         dto.setNtpServersMinReachable(1);
         dto.setMaxClockDrift(Duration.ofMillis(500));
         return dto;
@@ -60,8 +60,8 @@ class TimeQualityConstraintValidatorsTest {
 
     static Stream<Duration> invalidMaxClockDriftValues() {
         return Stream.of(
-                Duration.ofSeconds(1),  // equal to accuracy
-                Duration.ofSeconds(2)   // greater than accuracy
+                Duration.ofMinutes(1),  // equal to accuracy
+                Duration.ofMinutes(2)   // greater than accuracy
         );
     }
 
@@ -71,6 +71,23 @@ class TimeQualityConstraintValidatorsTest {
         TimeQualityConfigurationRequestDto dto = validRequest();
         dto.setMaxClockDrift(maxClockDrift);
         assertTrue(hasViolationOn(validator.validate(dto), "maxClockDrift"));
+    }
+
+    // --- NtpCheckIntervalAccuracyValidator ---
+
+    static Stream<Duration> invalidNtpCheckIntervalValues() {
+        return Stream.of(
+                Duration.ofMinutes(1),  // equal to accuracy
+                Duration.ofMinutes(2)   // greater than accuracy
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidNtpCheckIntervalValues")
+    void ntpCheckIntervalAtOrAboveAccuracyIsInvalid(Duration ntpCheckInterval) {
+        TimeQualityConfigurationRequestDto dto = validRequest();
+        dto.setNtpCheckInterval(ntpCheckInterval);
+        assertTrue(hasViolationOn(validator.validate(dto), "ntpCheckInterval"));
     }
 
     // --- NtpCheckTimeoutValidator ---
