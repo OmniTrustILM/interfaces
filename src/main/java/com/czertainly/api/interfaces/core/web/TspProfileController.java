@@ -5,6 +5,9 @@ import com.czertainly.api.exception.AttributeException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.interfaces.AuthProtectedController;
 import com.czertainly.api.model.client.certificate.SearchRequestDto;
+import com.czertainly.api.model.client.signing.protocols.tsp.TspProfileDto;
+import com.czertainly.api.model.client.signing.protocols.tsp.TspProfileListDto;
+import com.czertainly.api.model.client.signing.protocols.tsp.TspProfileRequestDto;
 import com.czertainly.api.model.common.BulkActionMessageDto;
 import com.czertainly.api.model.common.ErrorMessageDto;
 import com.czertainly.api.model.common.PaginationResponseDto;
@@ -63,6 +66,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "createTspProfile", summary = "Add new TSP Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New TSP Profile added"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
@@ -71,6 +75,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "updateTspProfile", summary = "Update TSP Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "TSP Profile updated"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     TspProfileDto updateTspProfile(@Parameter(description = "TSP Profile UUID") @PathVariable UUID uuid, @RequestBody @Valid TspProfileRequestDto request)
@@ -87,7 +92,7 @@ public interface TspProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "TSP Profiles deleted"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BulkActionMessageDto> bulkDeleteTspProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+    List<BulkActionMessageDto> bulkDeleteTspProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UUID.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 
     @Operation(operationId = "enableTspProfile", summary = "Enable TSP Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "TSP Profile enabled")})
@@ -101,7 +106,7 @@ public interface TspProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
     })
     @PatchMapping(path = "/enable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BulkActionMessageDto> bulkEnableTspProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+    List<BulkActionMessageDto> bulkEnableTspProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UUID.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 
     @Operation(operationId = "disableTspProfile", summary = "Disable TSP Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "TSP Profile disabled")})
@@ -115,5 +120,5 @@ public interface TspProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
     })
     @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BulkActionMessageDto> bulkDisableTspProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+    List<BulkActionMessageDto> bulkDisableTspProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "TSP Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UUID.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 }

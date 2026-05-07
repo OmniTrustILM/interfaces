@@ -63,6 +63,7 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
     @Operation(operationId = "createTimeQualityConfiguration", summary = "Add new Time Quality Configuration")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Time Quality Configuration added"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
@@ -71,6 +72,7 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
     @Operation(operationId = "updateTimeQualityConfiguration", summary = "Update Time Quality Configuration")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Time Quality Configuration updated"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     TimeQualityConfigurationDto updateTimeQualityConfiguration(@Parameter(description = "Time Quality Configuration UUID") @PathVariable UUID uuid, @RequestBody @Valid TimeQualityConfigurationRequestDto request) throws AlreadyExistException, AttributeException, NotFoundException;
@@ -91,5 +93,5 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
             @ApiResponse(responseCode = "200", description = "Time Quality Configurations deleted"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BulkActionMessageDto> bulkDeleteTimeQualityConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Time Quality Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
+    List<BulkActionMessageDto> bulkDeleteTimeQualityConfigurations(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Time Quality Configuration UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UUID.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 }

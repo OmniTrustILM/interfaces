@@ -8,7 +8,9 @@ public class ValidNameValidator implements ConstraintValidator<ValidName, String
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         // Null is considered valid — @NotBlank is responsible for rejecting null/blank values.
-        if (value == null) return true;
+        if (value == null) {
+            return true;
+        }
         return value.chars().allMatch(c -> isUnreserved((char) c));
     }
 

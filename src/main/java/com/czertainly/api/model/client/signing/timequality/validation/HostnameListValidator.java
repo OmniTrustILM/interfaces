@@ -9,11 +9,8 @@ import java.util.regex.Pattern;
 
 public class HostnameListValidator implements ConstraintValidator<ValidHostnameList, List<String>> {
 
-    // RFC 1123: labels are 1-63 alphanumeric/hyphen chars, not starting or ending with hyphen; total max 253 chars
-    private static final Pattern HOSTNAME_PATTERN = Pattern.compile(
-            "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])\\.)*" +
-                    "([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]{0,61}[A-Za-z0-9])$"
-    );
+    // RFC 1123: label starts/ends with alphanumeric characters, hyphens only in the middle.
+    private static final Pattern LABEL_PATTERN = Pattern.compile("[a-zA-Z0-9](?:-*+[a-zA-Z0-9])*+");
 
     @Override
     public boolean isValid(List<String> hostnames, ConstraintValidatorContext context) {
@@ -31,6 +28,12 @@ public class HostnameListValidator implements ConstraintValidator<ValidHostnameL
         if (IPAddress.isValid(hostname)) {
             return true;
         }
-        return HOSTNAME_PATTERN.matcher(hostname).matches();
+        String[] labels = hostname.split("\\.", -1);
+        for (String label : labels) {
+            if (label.length() > 63 || !LABEL_PATTERN.matcher(label).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
