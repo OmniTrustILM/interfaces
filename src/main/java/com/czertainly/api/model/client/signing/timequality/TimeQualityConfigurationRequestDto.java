@@ -40,7 +40,6 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @Schema(description = "Desired accuracy for the time quality, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S")
     private Duration accuracy;
 
-    @NotNull
     @NotEmpty
     @ValidHostnameList
     @Schema(description = "List of NTP server addresses", requiredMode = Schema.RequiredMode.REQUIRED, example = "[\"pool.ntp.org\", \"time.google.com\"]")
