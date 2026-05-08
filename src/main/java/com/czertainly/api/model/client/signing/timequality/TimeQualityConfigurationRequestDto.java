@@ -48,7 +48,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT30S")
+    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.5S")
     private Duration ntpCheckInterval;
 
     @Positive
@@ -58,7 +58,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT10S")
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.1S")
     private Duration ntpCheckTimeout;
 
     @Positive
