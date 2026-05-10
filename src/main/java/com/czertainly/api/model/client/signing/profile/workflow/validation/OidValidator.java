@@ -7,10 +7,9 @@ import java.util.regex.Pattern;
 
 public class OidValidator implements ConstraintValidator<ValidOid, String> {
 
-    // ASN.1 rule: when the first arc is 0 or 1 the second arc must be 0..39;
-    // when the first arc is 2 the second arc is unrestricted.
+    /** ASN.1 OID: first arc 0/1 requires second arc in 0..39; first arc 2 is unrestricted. */
     private static final Pattern OID_REGEX = Pattern.compile(
-            "^([01]\\.(0|[1-9]|[1-3][0-9])|2\\.(0|[1-9]\\d*))(\\.(0|[1-9]\\d*)){0,49}$");
+            "^([01]\\.(\\d|[1-3]\\d)|2\\.(0|[1-9]\\d*))(\\.(0|[1-9]\\d*)){0,49}$");
 
     @Override
     public boolean isValid(String oid, ConstraintValidatorContext constraintValidatorContext) {
