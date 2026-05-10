@@ -42,6 +42,11 @@ import com.czertainly.api.model.core.notification.RecipientType;
 import com.czertainly.api.model.core.oid.OidCategory;
 import com.czertainly.api.model.core.other.ResourceEvent;
 import com.czertainly.api.model.core.secret.SecretState;
+import com.czertainly.api.model.client.signing.profile.scheme.ManagedSigningType;
+import com.czertainly.api.model.client.signing.profile.scheme.SigningScheme;
+import com.czertainly.api.model.client.signing.profile.workflow.SigningWorkflowType;
+import com.czertainly.api.model.core.certificate.QcType;
+import com.czertainly.api.model.core.signing.SigningProtocol;
 import com.czertainly.api.model.core.workflows.ConditionType;
 import com.czertainly.api.model.core.workflows.ExecutionType;
 import com.czertainly.api.model.core.workflows.TriggerType;
@@ -153,6 +158,13 @@ public enum PlatformEnum implements IPlatformEnum {
     SECRET_TYPE(SecretType.class, "Secret Type"),
     KEY_STORE_TYPE(KeyStoreType.class, "Key Store Type"),
     SECRET_STATE(SecretState.class, "Secret State"),
+
+    // Signing
+    MANAGED_SIGNING_TYPE(ManagedSigningType.class, "Managed Signing Type"),
+    QC_TYPE(QcType.class, "QC Type"),
+    SIGNING_PROTOCOL(SigningProtocol.class, "Signing Protocol"),
+    SIGNING_SCHEME(SigningScheme.class, "Signing Scheme"),
+    SIGNING_WORKFLOW_TYPE(SigningWorkflowType.class, "Signing Workflow Type"),
 
     ;
 

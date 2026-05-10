@@ -1,27 +1,39 @@
-package com.czertainly.api.model.core.connector;
+package com.czertainly.api.model.core.connector.v2;
 
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
-import com.czertainly.api.model.common.NameAndUuidDto;
+import com.czertainly.api.model.core.connector.AuthType;
+import com.czertainly.api.model.core.connector.ConnectorStatus;
 import com.czertainly.api.model.core.proxy.ProxyDto;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-/**
- * Lightweight connector DTO carrying only the fields required by API clients.
- */
-@Setter
-@Getter
-@ToString(callSuper = true)
-public class ConnectorApiClientDto extends NameAndUuidDto implements ApiClientConnectorInfo {
+@Data
+@EqualsAndHashCode
+public class ConnectorApiClientDtoV2 implements ApiClientConnectorInfo {
+
+    @Schema(description = "Connector UUID",
+            examples = {"7b55ge1c-844f-11dc-a8a3-0242ac120002"},
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    protected String uuid;
+
+    @Schema(description = "Connector Name",
+            examples = {"Name"},
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    protected String name;
+
     @Schema(description = "URL of the Connector",
             examples = {"http://network-discovery-provider:8080"},
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String url;
+
+    @Schema(description = "Status of the Connector",
+            examples = {"CONNECTED"},
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ConnectorStatus status;
 
     @Schema(description = "Type of authentication for the Connector",
             examples = {"none"},
@@ -32,15 +44,9 @@ public class ConnectorApiClientDto extends NameAndUuidDto implements ApiClientCo
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> authAttributes;
 
-    @Schema(description = "Status of the Connector",
-            examples = {"CONNECTED"},
-            requiredMode = Schema.RequiredMode.REQUIRED)
-    private ConnectorStatus status;
-
     @Schema(description = "Proxy for message queue routing. " +
             "When set, connector communicates via message queue proxy. " +
             "When null, connector uses direct REST communication.",
-            implementation = ProxyDto.class,
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ProxyDto proxy;
 }

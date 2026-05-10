@@ -11,7 +11,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public class ConnectorDto extends ConnectorApiClientDto {
+public class ConnectorDto extends ConnectorApiClientDtoV1 {
 
     @Schema(description = "List of Function Groups implemented by the Connector",
             requiredMode = Schema.RequiredMode.REQUIRED)
