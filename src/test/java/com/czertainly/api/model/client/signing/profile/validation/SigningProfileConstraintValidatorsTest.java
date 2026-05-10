@@ -103,8 +103,6 @@ class SigningProfileConstraintValidatorsTest {
                 "workflow.signatureFormatterConnectorUuid"));
     }
 
-    // --- ManagedSigningFormatterConnectorValidator ---
-
     @Test
     void managedTimestampingQualifiedTimestampTrueNullTqcUuid_producesViolation() {
         TimestampingWorkflowRequestDto workflow = new TimestampingWorkflowRequestDto();
@@ -164,6 +162,50 @@ class SigningProfileConstraintValidatorsTest {
     @Test
     void nullDefaultPolicyId_noOidViolation() {
         assertFalse(hasViolationOn(validator.validate(new TimestampingWorkflowRequestDto()), "defaultPolicyId"));
+    }
+
+    // ASN.1 arc-constraint tests: first arc 0 or 1 → second arc must be 0..39
+
+    @Test
+    void oidFirstArc1SecondArc39_noOidViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.39.1");
+        assertFalse(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void oidFirstArc0SecondArc0_noOidViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("0.0.1");
+        assertFalse(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void oidFirstArc2SecondArcLarge_noOidViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("2.999.1");
+        assertFalse(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void oidFirstArc1SecondArc40_producesOidViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.40.1");
+        assertTrue(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void oidFirstArc1SecondArc80_producesOidViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.80.1");
+        assertTrue(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void oidFirstArc0SecondArc40_producesOidViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("0.40.1");
+        assertTrue(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
     }
 
     // --- OidListValidator (via TimestampingWorkflowRequestDto.allowedPolicyIds) ---
