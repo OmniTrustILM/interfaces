@@ -1,7 +1,7 @@
 package com.czertainly.api.model.core.proxy;
 
 import com.czertainly.api.model.common.NameAndUuidDto;
-import com.czertainly.api.model.core.connector.ConnectorDto;
+import com.czertainly.api.model.core.connector.ConnectorSummaryDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +37,7 @@ public class ProxyDto extends NameAndUuidDto implements Serializable {
     private OffsetDateTime lastActivity;
 
     @Schema(description = "List of Connectors associated with the Proxy")
-    private List<ConnectorDto> connectors;
+    private List<ConnectorSummaryDto> connectors;
 
     @Override
     public String toString() {

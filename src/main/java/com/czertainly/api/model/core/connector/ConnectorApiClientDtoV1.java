@@ -40,7 +40,6 @@ public class ConnectorApiClientDtoV1 extends NameAndUuidDto implements ApiClient
     @Schema(description = "Proxy for message queue routing. " +
             "When set, connector communicates via message queue proxy. " +
             "When null, connector uses direct REST communication.",
-            implementation = ProxyDto.class,
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ProxyDto proxy;
 }
