@@ -13,7 +13,7 @@ import java.io.Serializable;
  *
  * <p>{@code RAW_SIGNING} carries no additional properties — use {@link RawSigningWorkflowRequestDto}
  * (body: {@code {"type":"raw_signing"}}) to make the workflow type explicit.
- * The {@code workflowConfiguration} field must never be {@code null} on a Signing Profile request.</p>
+ * The {@code workflow} field must never be {@code null} on a Signing Profile request.</p>
  */
 @Schema(
         name = "WorkflowRequestInterface",

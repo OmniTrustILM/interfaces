@@ -31,7 +31,7 @@ import java.io.IOException;
  * to shadow the inherited {@code @JsonDeserialize} and prevent infinite recursion when {@link Deserializer} delegates
  * to them via {@link DeserializationContext#readTreeAsValue}. Concrete subclasses must also carry
  * {@code @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)} to nullify the {@code TypeDeserializer} inherited from
- * {@link SigningSchemeRequestDto}, which would otherwise wrap the bean deserializer and trigger a failed type-id resolution.</p>
+ * {@link SigningSchemeDto}, which would otherwise wrap the bean deserializer and trigger a failed type-id resolution.</p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

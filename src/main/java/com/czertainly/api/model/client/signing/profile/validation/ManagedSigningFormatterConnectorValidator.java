@@ -29,7 +29,7 @@ public class ManagedSigningFormatterConnectorValidator implements ConstraintVali
             if (Boolean.TRUE.equals(tsw.getQualifiedTimestamp()) && tsw.getTimeQualityConfigurationUuid() == null) {
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate("timeQualityConfigurationUuid must be provided when qualifiedTimestamp is true")
-                        .addPropertyNode("workflow.timeQualityConfigurationUuid")
+                        .addPropertyNode("workflow").addPropertyNode("timeQualityConfigurationUuid")
                         .addConstraintViolation();
                 valid = false;
             }
@@ -42,7 +42,7 @@ public class ManagedSigningFormatterConnectorValidator implements ConstraintVali
         if (formatterConnectorUuid == null) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-                    .addPropertyNode("workflow.signatureFormatterConnectorUuid")
+                    .addPropertyNode("workflow").addPropertyNode("signatureFormatterConnectorUuid")
                     .addConstraintViolation();
             valid = false;
         }
