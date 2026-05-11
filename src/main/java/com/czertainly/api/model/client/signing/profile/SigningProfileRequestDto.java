@@ -1,6 +1,8 @@
 package com.czertainly.api.model.client.signing.profile;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.client.signing.profile.record.SigningRecordPolicyRequestDto;
+import com.czertainly.api.model.client.signing.profile.record.validation.ValidSigningRecordPolicy;
 import com.czertainly.api.model.client.signing.profile.scheme.SigningSchemeRequestDto;
 import com.czertainly.api.model.client.signing.profile.validation.ValidManagedSigningFormatterConnector;
 import com.czertainly.api.model.client.signing.profile.workflow.WorkflowRequestDto;
@@ -17,6 +19,7 @@ import java.util.List;
 @Data
 @Schema(name = "SigningProfileRequestDto", description = "Request to create or update a Signing Profile")
 @ValidManagedSigningFormatterConnector
+@ValidSigningRecordPolicy
 public class SigningProfileRequestDto {
     @NotBlank
     @ValidName
@@ -39,4 +42,9 @@ public class SigningProfileRequestDto {
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> customAttributes = new ArrayList<>();
+
+    @Valid
+    @Schema(description = "Signing Record policy. When omitted, defaults are used (no signing record).",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SigningRecordPolicyRequestDto recordPolicy;
 }
