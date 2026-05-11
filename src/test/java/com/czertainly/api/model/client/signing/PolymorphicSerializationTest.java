@@ -1,5 +1,6 @@
 package com.czertainly.api.model.client.signing;
 
+import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.common.NameAndUuidDto;
 import com.czertainly.api.model.client.signing.profile.scheme.DelegatedSigningDto;
 import com.czertainly.api.model.client.signing.profile.scheme.DelegatedSigningRequestDto;
@@ -241,7 +242,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificate": {"uuid": "65418a34-360d-4b4c-ae2c-e716644d4120", "commonName": "Test Certificate"}
                 }
                 """;
@@ -260,7 +261,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificate": {"uuid": "9a616184-d03f-4c81-a681-22f2e35aa11a", "commonName": "Test Certificate"}
                 }
                 """;
@@ -313,7 +314,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
+                  "managedSigningType": "one_time_key",
                   "raProfile": {"uuid": "11111111-1111-1111-1111-222222222222", "name": "RA Profile"},
                   "csrTemplate": {"uuid": "33333333-3333-3333-3333-444444444444", "name": "CSR Template"},
                   "tokenProfile": {"uuid": "55555555-5555-5555-5555-666666666666", "name": "Token"}
@@ -336,7 +337,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
+                  "managedSigningType": "one_time_key",
                   "raProfile": {"uuid": "11111111-1111-1111-1111-222222222222", "name": "RA Profile"},
                   "csrTemplate": {"uuid": "33333333-3333-3333-3333-444444444444", "name": "CSR Template"},
                   "tokenProfile": {"uuid": "55555555-5555-5555-5555-666666666666", "name": "Token"}
@@ -430,7 +431,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificateUuid": "22222222-2222-2222-2222-222222222222"
                 }
                 """;
@@ -449,7 +450,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificateUuid": "22222222-2222-2222-2222-222222222222"
                 }
                 """;
@@ -496,7 +497,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
+                  "managedSigningType": "one_time_key",
                   "raProfileUuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                   "csrTemplateUuid": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                   "tokenProfileUuid": "cccccccc-cccc-cccc-cccc-cccccccccccc"
@@ -519,7 +520,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
+                  "managedSigningType": "one_time_key",
                   "raProfileUuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                   "csrTemplateUuid": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                   "tokenProfileUuid": "cccccccc-cccc-cccc-cccc-cccccccccccc"
@@ -714,7 +715,7 @@ class PolymorphicSerializationTest {
     void missingSigningScheme_throwsOnDeserialization() {
         String json = """
                 {
-                  "managedSigningType": "staticKey"
+                  "managedSigningType": "static_key"
                 }
                 """;
 
@@ -736,7 +737,7 @@ class PolymorphicSerializationTest {
     void missingSigningScheme_throwsOnRequestDtoDeserialization() {
         String json = """
                 {
-                  "managedSigningType": "staticKey"
+                  "managedSigningType": "static_key"
                 }
                 """;
 

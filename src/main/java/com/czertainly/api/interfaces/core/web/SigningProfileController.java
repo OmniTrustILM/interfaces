@@ -175,7 +175,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @GetMapping(path = "/signatureFormatterConnectors/{connectorUuid}/formatterAttributes", produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listSignatureFormatterConnectorAttributes(
             @Parameter(description = "Signature Formatter Connector UUID") @PathVariable UUID connectorUuid,
-            @Parameter(description = "Signing Profile UUID — used for authorization purposes only", in = ParameterIn.QUERY) @RequestParam UUID signingProfileUuid) throws AttributeException, ConnectorException, NotFoundException;
+            @Parameter(description = "Signing Profile UUID — used for authorization purposes only", in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid) throws AttributeException, ConnectorException, NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Protocols

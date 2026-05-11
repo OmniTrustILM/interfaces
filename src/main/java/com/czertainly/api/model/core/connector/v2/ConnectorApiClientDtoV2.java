@@ -13,6 +13,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode
+@Schema(name = "ConnectorApiClientDtoV2", description = "Connector API client details (V2)")
 public class ConnectorApiClientDtoV2 implements ApiClientConnectorInfo {
 
     @Schema(description = "Connector UUID",

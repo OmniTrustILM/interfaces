@@ -68,8 +68,8 @@ public enum ManagedSigningType implements IPlatformEnum {
     }
 
     public static class Codes {
-        public static final String STATIC_KEY = "staticKey";
-        public static final String ONE_TIME_KEY = "oneTimeKey";
+        public static final String STATIC_KEY = "static_key";
+        public static final String ONE_TIME_KEY = "one_time_key";
 
         private Codes() {
         }
