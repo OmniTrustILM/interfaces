@@ -40,4 +40,20 @@ public class SigningRecordDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private byte[] signatureValue;
+
+    @Schema(description = "Signed document bytes (Base64-encoded), if recorded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private byte[] signedDocument;
+
+    @Schema(description = "Data-to-be-signed bytes (Base64-encoded), if recorded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private byte[] dtbs;
+
+    @Schema(description = "Captured request metadata (JSON), if recorded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String requestMetadataJson;
+
+    @Schema(description = "Time the signed document was first served via CSC retrieval, if any",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private java.time.ZonedDateTime signedDocumentRetrievedAt;
 }
