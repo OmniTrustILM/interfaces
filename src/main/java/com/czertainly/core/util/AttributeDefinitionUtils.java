@@ -170,6 +170,13 @@ public class AttributeDefinitionUtils {
         return getObjectAttributeContentData(name, attributes, NameAndUuidDto.class).get(0);
     }
 
+    public static List<NameAndUuidDto> getNameAndUuidDataList(String name, List<RequestAttribute> attributes) {
+        if (attributes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return getObjectAttributeContentData(name, attributes, NameAndUuidDto.class);
+    }
+
     public static CredentialAttributeContentData getCredentialContent(String name, List<RequestAttribute> attributes) {
         List<CredentialAttributeContentV2> content = AttributeDefinitionUtils.getAttributeContent(name, attributes, CredentialAttributeContentV2.class);
         if (content != null && !content.isEmpty()) {

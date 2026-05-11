@@ -93,6 +93,16 @@ class AttributeDefinitionUtilsTest {
         Assertions.assertNotNull(dto);
         Assertions.assertEquals(attribute2Value.get("uuid"), dto.getUuid());
         Assertions.assertEquals(attribute2Value.get("name"), dto.getName());
+
+        List<RequestAttribute> attributes2 = new ArrayList<>(attributes);
+        attributes2.add(new RequestAttributeV2(UUID.randomUUID(), "wrongName", AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2("wrongName", attribute2Value))));
+        List<NameAndUuidDto> dto2 = getNameAndUuidDataList(attribute1Name, attributes2);
+
+        Assertions.assertNotNull(dto2);
+        for (NameAndUuidDto dtoItem : dto2) {
+            Assertions.assertEquals(attribute2Value.get("uuid"), dtoItem.getUuid());
+            Assertions.assertEquals(attribute2Value.get("name"), dtoItem.getName());
+        }
     }
 
     @Test
