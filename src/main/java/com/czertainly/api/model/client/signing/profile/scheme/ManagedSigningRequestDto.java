@@ -48,7 +48,7 @@ public abstract class ManagedSigningRequestDto extends SigningSchemeRequestDto i
 
         @Override
         public ManagedSigningRequestDto deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            ObjectNode tree = p.readValueAsTree();
+            ObjectNode tree = ManagedSigningDeserializerUtil.readObjectNode(p, ManagedSigningRequestDto.class);
             JsonNode typeNode = tree.get("managedSigningType");
             String typeId = (typeNode != null && !typeNode.isNull()) ? typeNode.asText() : null;
 

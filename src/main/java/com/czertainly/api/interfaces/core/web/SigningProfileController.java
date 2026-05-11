@@ -60,7 +60,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Supported protocols retrieved")})
     @GetMapping(path = "/supportedProtocols", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SigningProtocol> listSupportedProtocols(
-            @Parameter(description = "Signing workflow type code (e.g. 'timestamping')", required = true) @RequestParam SigningWorkflowType workflowType);
+            @Parameter(description = "Signing workflow type code (e.g. 'timestamping')", required = true) @RequestParam SigningWorkflowType signingWorkflowType);
 
     @Operation(operationId = "listSigningProfiles", summary = "List of available Signing Profiles")
     @ApiResponses(value = {
