@@ -4,7 +4,7 @@ import com.czertainly.api.model.core.connector.ConnectorDto;
 import lombok.Getter;
 
 @Getter
-public class NotFoundException extends Exception {
+public class NotFoundException extends Exception implements PlatformException {
 
     private ConnectorDto connector;
 
