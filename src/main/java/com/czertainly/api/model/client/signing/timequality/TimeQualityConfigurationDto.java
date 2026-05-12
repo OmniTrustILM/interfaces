@@ -20,21 +20,21 @@ public class TimeQualityConfigurationDto extends NameAndUuidDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Declared accuracy of the profile, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT1S", defaultValue = "PT1S")
-    private Duration accuracy = Duration.ofSeconds(10);
+    private Duration accuracy = Duration.ofSeconds(1);
 
     @Schema(description = "List of NTP server addresses", requiredMode = Schema.RequiredMode.REQUIRED, example = "[\"pool.ntp.org\", \"time.google.com\"]")
     private List<String> ntpServers;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT30S", defaultValue = "PT30S")
-    private Duration ntpCheckInterval = Duration.ofSeconds(5);
+    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT0.5S", defaultValue = "PT0.5S")
+    private Duration ntpCheckInterval = Duration.ofMillis(500);
 
     @Schema(description = "Number of NTP samples to take per server during each check", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "3", defaultValue = "3")
     private int ntpSamplesPerServer = 3;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT10S", defaultValue = "PT10S")
-    private Duration ntpCheckTimeout = Duration.ofSeconds(2);
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT0.1S", defaultValue = "PT0.1S")
+    private Duration ntpCheckTimeout = Duration.ofMillis(100);
 
     @Schema(description = "Minimum number of NTP servers that must be reachable", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "1", defaultValue = "1")
     private int ntpServersMinReachable = 1;
