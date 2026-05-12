@@ -1,6 +1,6 @@
 package com.czertainly.api.exception;
 
-public class NotDeletableException extends Exception {
+public class NotDeletableException extends Exception implements PlatformException {
 
     private final String objectType;
 

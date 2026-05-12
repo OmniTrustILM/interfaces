@@ -1,6 +1,6 @@
 package com.czertainly.api.exception;
 
-public class LocationException extends Exception {
+public class LocationException extends Exception implements PlatformException {
 
     public LocationException() {
         super();
