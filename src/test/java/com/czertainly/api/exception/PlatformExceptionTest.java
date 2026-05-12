@@ -58,9 +58,9 @@ class PlatformExceptionTest {
                     .map(p -> loadClass(root.relativize(p).toString()
                             .replace(File.separatorChar, '.')
                             .replaceAll("\\.class$", "")))
+                    .filter(Throwable.class::isAssignableFrom)
                     .filter(cls -> !cls.isInterface())
                     .filter(cls -> !Modifier.isAbstract(cls.getModifiers()))
-                    .filter(Throwable.class::isAssignableFrom)
                     .forEach(into::add);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to walk: " + pkgDir, e);
@@ -69,7 +69,8 @@ class PlatformExceptionTest {
 
     private static Class<?> loadClass(String fqName) {
         try {
-            return Class.forName(fqName);
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            return Class.forName(fqName, false, cl);
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Cannot load class: " + fqName, e);
         }
