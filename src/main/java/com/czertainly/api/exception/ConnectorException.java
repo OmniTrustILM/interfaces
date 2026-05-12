@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConnectorException extends Exception {
+public class ConnectorException extends Exception implements PlatformException {
 
     protected ApiClientConnectorInfo connector;
 
