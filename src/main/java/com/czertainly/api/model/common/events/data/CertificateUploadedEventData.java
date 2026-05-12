@@ -1,7 +1,6 @@
 package com.czertainly.api.model.common.events.data;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
-import jdk.jfr.Event;
 import lombok.Data;
 
 import java.security.cert.X509Certificate;
