@@ -82,27 +82,31 @@ class AttributeDefinitionUtilsTest {
     void testGetAttributeNameAndUuidContent() {
         String attribute1Name = "testAttribute1";
 
-        HashMap<String, Object> attribute2Value = new HashMap<>();
-        attribute2Value.put("uuid", UUID.randomUUID().toString());
-        attribute2Value.put("name", "testName");
+        HashMap<String, Object> attribute1Value = new HashMap<>();
+        attribute1Value.put("uuid", UUID.randomUUID().toString());
+        attribute1Value.put("name", "testName");
 
-        List<RequestAttribute> attributes = List.of(new RequestAttributeV2(UUID.randomUUID(), attribute1Name, AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2(attribute1Name, attribute2Value))));
+        List<RequestAttribute> attributes = List.of(new RequestAttributeV2(UUID.randomUUID(), attribute1Name, AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2(attribute1Name, attribute1Value))));
 
         NameAndUuidDto dto = getNameAndUuidData(attribute1Name, attributes);
 
         Assertions.assertNotNull(dto);
-        Assertions.assertEquals(attribute2Value.get("uuid"), dto.getUuid());
-        Assertions.assertEquals(attribute2Value.get("name"), dto.getName());
+        Assertions.assertEquals(attribute1Value.get("uuid"), dto.getUuid());
+        Assertions.assertEquals(attribute1Value.get("name"), dto.getName());
 
-        List<RequestAttribute> attributes2 = new ArrayList<>(attributes);
-        attributes2.add(new RequestAttributeV2(UUID.randomUUID(), "wrongName", AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2("wrongName", attribute2Value))));
-        List<NameAndUuidDto> dto2 = getNameAndUuidDataList(attribute1Name, attributes2);
+
+        HashMap<String, Object> attribute2Value = new HashMap<>();
+        attribute2Value.put("uuid", UUID.randomUUID().toString());
+        attribute2Value.put("name", "testName2");
+        attributes = List.of(new RequestAttributeV2(UUID.randomUUID(), attribute1Name, AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2(attribute1Name, attribute1Value), new ObjectAttributeContentV2(attribute1Name, attribute2Value))));
+        List<NameAndUuidDto> dto2 = getNameAndUuidDataList(attribute1Name, attributes);
 
         Assertions.assertNotNull(dto2);
-        for (NameAndUuidDto dtoItem : dto2) {
-            Assertions.assertEquals(attribute2Value.get("uuid"), dtoItem.getUuid());
-            Assertions.assertEquals(attribute2Value.get("name"), dtoItem.getName());
-        }
+        Assertions.assertEquals(2, dto2.size());
+        Assertions.assertEquals(attribute1Value.get("uuid"), dto2.get(0).getUuid());
+        Assertions.assertEquals(attribute1Value.get("name"), dto2.get(0).getName());
+        Assertions.assertEquals(attribute2Value.get("uuid"), dto2.get(1).getUuid());
+        Assertions.assertEquals(attribute2Value.get("name"), dto2.get(1).getName());
     }
 
     @Test
