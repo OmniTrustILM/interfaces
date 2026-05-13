@@ -74,6 +74,21 @@ public enum SignatureAlgorithm implements IPlatformEnum {
             "Ed448", "Pure EdDSA with Edwards448", "Edwards-curve DSA with Curve448",
             new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.3.101.113")),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_shake256_len, new ASN1Integer(512)), true
+    ),
+    FALCON_1024(
+            "FALCON-1024", "FALCON-1024", "Post-quantum FALCON-1024 lattice-based signature scheme",
+            new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.3.9999.3.14")),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true
+    ),
+    ML_DSA_65(
+            "ML-DSA-65", "ML-DSA-65 (Dilithium)", "Post-quantum Module-Lattice-Based digital signature, NIST FIPS 204 level 3",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_ml_dsa_65),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true
+    ),
+    SLH_DSA_SHA2_128F(
+            "SLH-DSA-SHA2-128F", "SLH-DSA-SHA2-128F (SPHINCS+)", "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-128F",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_128f),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), true
     );
 
     private static final SignatureAlgorithm[] VALUES;
