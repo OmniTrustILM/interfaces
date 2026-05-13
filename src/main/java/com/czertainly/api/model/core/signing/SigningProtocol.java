@@ -58,7 +58,7 @@ public enum SigningProtocol implements IPlatformEnum {
     }
 
     public static class Codes {
-        public static final String CSC_API = "cscApi";
+        public static final String CSC_API = "csc_api";
         public static final String TSP = "tsp";
 
         private Codes() {

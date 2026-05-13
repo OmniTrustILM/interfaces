@@ -12,7 +12,7 @@ import lombok.ToString;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(title = "RawSigningWorkflowDto", description = "Raw signing workflow configuration.")
+@Schema(name = "RawSigningWorkflowDto", description = "Raw signing workflow configuration.")
 @ToString(callSuper = true)
 public class RawSigningWorkflowDto extends WorkflowDto {
 

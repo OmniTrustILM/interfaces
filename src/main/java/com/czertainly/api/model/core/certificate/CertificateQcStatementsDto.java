@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
+@Schema(name = "CertificateQcStatementsDto", description = "Parsed QC Statements from a qualified certificate")
 public class CertificateQcStatementsDto {
 
     @Schema(description = "Certificate is a qualified certificate per ETSI EN 319 412 (id-etsi-qcs-QcCompliance, OID 0.4.0.1862.1.1)")

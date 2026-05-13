@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(title = "ContentSigningWorkflowDto", description = "Content signing workflow configuration")
+@Schema(name = "ContentSigningWorkflowDto", description = "Content signing workflow configuration")
 @ToString(callSuper = true)
 public class ContentSigningWorkflowDto extends WorkflowDto {
 

@@ -1,5 +1,6 @@
 package com.czertainly.api.model.client.signing.profile.scheme;
 
+import com.czertainly.api.exception.ValidationException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +32,7 @@ import java.io.IOException;
  * to shadow the inherited {@code @JsonDeserialize} and prevent infinite recursion when {@link Deserializer} delegates
  * to them via {@link DeserializationContext#readTreeAsValue}. Concrete subclasses must also carry
  * {@code @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)} to nullify the {@code TypeDeserializer} inherited from
- * {@link SigningSchemeRequestDto}, which would otherwise wrap the bean deserializer and trigger a failed type-id resolution.</p>
+ * {@link SigningSchemeDto}, which would otherwise wrap the bean deserializer and trigger a failed type-id resolution.</p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -64,16 +65,22 @@ public abstract class ManagedSigningDto extends SigningSchemeDto implements Mana
 
         @Override
         public ManagedSigningDto deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            ObjectNode tree = p.readValueAsTree();
+            ObjectNode tree = ManagedSigningDeserializerUtil.readObjectNode(p, ManagedSigningDto.class);
             JsonNode typeNode = tree.get("managedSigningType");
             String typeId = (typeNode != null && !typeNode.isNull()) ? typeNode.asText() : null;
-            if (ManagedSigningType.Codes.STATIC_KEY.equals(typeId)) {
-                return ctxt.readTreeAsValue(tree, StaticKeyManagedSigningDto.class);
-            } else if (ManagedSigningType.Codes.ONE_TIME_KEY.equals(typeId)) {
-                return ctxt.readTreeAsValue(tree, OneTimeKeyManagedSigningDto.class);
+
+            ManagedSigningType type;
+            try {
+                type = ManagedSigningType.findByCode(typeId);
+            } catch (ValidationException e) {
+                String errorMessage = typeId == null ? "Missing managedSigningType" : "Unknown managedSigningType: " + typeId;
+                throw InvalidTypeIdException.from(p, errorMessage, ctxt.constructType(ManagedSigningDto.class), typeId);
             }
-            String errorMessage = typeId == null ? "Missing managedSigningType" : "Unknown managedSigningType: " + typeId;
-            throw InvalidTypeIdException.from(p, errorMessage, ctxt.constructType(ManagedSigningDto.class), typeId);
+
+            return switch (type) {
+                case STATIC_KEY -> ctxt.readTreeAsValue(tree, StaticKeyManagedSigningDto.class);
+                case ONE_TIME_KEY -> ctxt.readTreeAsValue(tree, OneTimeKeyManagedSigningDto.class);
+            };
         }
     }
 }

@@ -89,6 +89,4 @@ public enum DigestAlgorithm implements IPlatformEnum {
                 .orElseThrow(() ->
                         new ValidationException(ValidationError.create("Unknown digest algorithm OID {}", oid)));
     }
-
-
 }

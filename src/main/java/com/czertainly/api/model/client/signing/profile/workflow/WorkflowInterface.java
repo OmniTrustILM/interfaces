@@ -14,7 +14,7 @@ import java.io.Serializable;
  *
  * <p>{@code RAW_SIGNING} carries no additional properties; its concrete subtype
  * {@link RawSigningWorkflowDto} holds only the {@code type} discriminator,
- * ensuring {@code workflowConfiguration} is never {@code null} on a Signing Profile.</p>
+ * ensuring {@code workflow} is never {@code null} on a Signing Profile.</p>
  */
 @Schema(
         name = "WorkflowInterface",

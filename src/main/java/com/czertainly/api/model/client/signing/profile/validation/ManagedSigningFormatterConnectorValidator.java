@@ -20,26 +20,32 @@ public class ManagedSigningFormatterConnectorValidator implements ConstraintVali
             return true;
         }
 
-        UUID formatterUuid = null;
-        String propertyNode = null;
+        boolean valid = true;
+
+        UUID formatterConnectorUuid = null;
 
         if (dto.getWorkflow() instanceof TimestampingWorkflowRequestDto tsw) {
-            formatterUuid = tsw.getSignatureFormatterConnectorUuid();
-            propertyNode = "workflow.signatureFormatterConnectorUuid";
+            formatterConnectorUuid = tsw.getSignatureFormatterConnectorUuid();
+            if (Boolean.TRUE.equals(tsw.getQualifiedTimestamp()) && tsw.getTimeQualityConfigurationUuid() == null) {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("timeQualityConfigurationUuid must be provided when qualifiedTimestamp is true")
+                        .addPropertyNode("workflow").addPropertyNode("timeQualityConfigurationUuid")
+                        .addConstraintViolation();
+                valid = false;
+            }
         } else if (dto.getWorkflow() instanceof ContentSigningWorkflowRequestDto csw) {
-            formatterUuid = csw.getSignatureFormatterConnectorUuid();
-            propertyNode = "workflow.signatureFormatterConnectorUuid";
+            formatterConnectorUuid = csw.getSignatureFormatterConnectorUuid();
         } else {
             return true;
         }
 
-        if (formatterUuid == null) {
+        if (formatterConnectorUuid == null) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-                    .addPropertyNode(propertyNode)
+                    .addPropertyNode("workflow").addPropertyNode("signatureFormatterConnectorUuid")
                     .addConstraintViolation();
-            return false;
+            valid = false;
         }
-        return true;
+        return valid;
     }
 }

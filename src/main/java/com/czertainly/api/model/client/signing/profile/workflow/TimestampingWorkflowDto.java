@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(title = "TimestampingWorkflowDto", description = "Timestamping workflow configuration")
+@Schema(name = "TimestampingWorkflowDto", description = "Timestamping workflow configuration")
 @ToString(callSuper = true)
 public class TimestampingWorkflowDto extends WorkflowDto {
 

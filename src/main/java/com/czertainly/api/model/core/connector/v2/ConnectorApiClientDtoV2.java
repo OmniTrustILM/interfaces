@@ -10,10 +10,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @EqualsAndHashCode
+@Schema(name = "ConnectorApiClientDtoV2", description = "Connector API client details (V2)")
 public class ConnectorApiClientDtoV2 implements ApiClientConnectorInfo {
 
     @Schema(description = "Connector UUID",

@@ -1,5 +1,6 @@
 package com.czertainly.api.model.client.signing.profile.scheme;
 
+import com.czertainly.api.exception.ValidationException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,16 +48,22 @@ public abstract class ManagedSigningRequestDto extends SigningSchemeRequestDto i
 
         @Override
         public ManagedSigningRequestDto deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            ObjectNode tree = p.readValueAsTree();
+            ObjectNode tree = ManagedSigningDeserializerUtil.readObjectNode(p, ManagedSigningRequestDto.class);
             JsonNode typeNode = tree.get("managedSigningType");
             String typeId = (typeNode != null && !typeNode.isNull()) ? typeNode.asText() : null;
-            if (ManagedSigningType.Codes.STATIC_KEY.equals(typeId)) {
-                return ctxt.readTreeAsValue(tree, StaticKeyManagedSigningRequestDto.class);
-            } else if (ManagedSigningType.Codes.ONE_TIME_KEY.equals(typeId)) {
-                return ctxt.readTreeAsValue(tree, OneTimeKeyManagedSigningRequestDto.class);
+
+            ManagedSigningType type;
+            try {
+                type = ManagedSigningType.findByCode(typeId);
+            } catch (ValidationException e) {
+                String errorMessage = typeId == null ? "Missing managedSigningType" : "Unknown managedSigningType: " + typeId;
+                throw InvalidTypeIdException.from(p, errorMessage, ctxt.constructType(ManagedSigningRequestDto.class), typeId);
             }
-            String errorMessage = typeId == null ? "Missing managedSigningType" : "Unknown managedSigningType: " + typeId;
-            throw InvalidTypeIdException.from(p, errorMessage, ctxt.constructType(ManagedSigningRequestDto.class), typeId);
+
+            return switch (type) {
+                case STATIC_KEY -> ctxt.readTreeAsValue(tree, StaticKeyManagedSigningRequestDto.class);
+                case ONE_TIME_KEY -> ctxt.readTreeAsValue(tree, OneTimeKeyManagedSigningRequestDto.class);
+            };
         }
     }
 }

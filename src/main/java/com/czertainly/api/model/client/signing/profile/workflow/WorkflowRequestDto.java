@@ -14,7 +14,7 @@ import lombok.Data;
  * workflow configuration is identical in both cases.</p>
  *
  * <p>{@code RAW_SIGNING} carries no additional properties — use {@link RawSigningWorkflowRequestDto}
- * (body: {@code {"type":"raw_signing"}}) to make the workflow type explicit. The {@code workflowConfiguration}
+ * (body: {@code {"type":"raw_signing"}}) to make the workflow type explicit. The {@code workflow}
  * field on the Signing Profile request must never be {@code null}.</p>
  */
 @Data

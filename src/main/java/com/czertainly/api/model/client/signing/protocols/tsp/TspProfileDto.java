@@ -23,7 +23,7 @@ public class TspProfileDto extends NameAndUuidDto {
     @Schema(description = "Enabled flag of the TSP Profile", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
     private boolean enabled;
 
-    @Schema(description = "Default Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
+    @Schema(description = "Default Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private SimplifiedSigningProfileDto defaultSigningProfile;
 
     @Schema(

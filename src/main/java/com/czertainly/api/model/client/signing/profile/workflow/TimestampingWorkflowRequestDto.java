@@ -3,7 +3,6 @@ package com.czertainly.api.model.client.signing.profile.workflow;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.client.signing.profile.workflow.validation.ValidOid;
 import com.czertainly.api.model.client.signing.profile.workflow.validation.ValidOidList;
-import com.czertainly.api.model.client.signing.profile.workflow.validation.ValidTimestampingQualification;
 import com.czertainly.api.model.common.enums.cryptography.DigestAlgorithm;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -27,7 +26,6 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Schema(name = "TimestampingWorkflowRequestDto", description = "Timestamping workflow configuration request")
 @ToString(callSuper = true)
-@ValidTimestampingQualification
 public class TimestampingWorkflowRequestDto extends WorkflowRequestDto {
 
     // --------------------------------------------------------------------------------

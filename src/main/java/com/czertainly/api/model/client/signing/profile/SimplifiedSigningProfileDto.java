@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+@Schema(name = "SimplifiedSigningProfileDto", description = "Simplified Signing Profile")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

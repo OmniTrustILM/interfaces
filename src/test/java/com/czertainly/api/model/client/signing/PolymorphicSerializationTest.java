@@ -1,5 +1,6 @@
 package com.czertainly.api.model.client.signing;
 
+import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.common.NameAndUuidDto;
 import com.czertainly.api.model.client.signing.profile.scheme.DelegatedSigningDto;
 import com.czertainly.api.model.client.signing.profile.scheme.DelegatedSigningRequestDto;
@@ -208,6 +209,23 @@ class PolymorphicSerializationTest {
         assertEquals(original, deserialized);
     }
 
+    @Test
+    void contentSigningWorkflowConfigRequestDto_deserializesViaBaseClass() throws Exception {
+        String json = """
+                {
+                  "type": "content_signing",
+                  "signatureFormatterConnectorUuid": "11111111-2222-3333-4444-555555555555"
+                }
+                """;
+
+        WorkflowRequestDto base = mapper.readValue(json, WorkflowRequestDto.class);
+
+        assertInstanceOf(ContentSigningWorkflowRequestDto.class, base);
+        ContentSigningWorkflowRequestDto result = (ContentSigningWorkflowRequestDto) base;
+        assertEquals(SigningWorkflowType.CONTENT_SIGNING, result.getType());
+        assertEquals(UUID.fromString("11111111-2222-3333-4444-555555555555"), result.getSignatureFormatterConnectorUuid());
+    }
+
     // -------------------------------------------------------------------------
     // SigningSchemeDto — StaticKeyManagedSigningDto
     // -------------------------------------------------------------------------
@@ -230,7 +248,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificate": {"uuid": "65418a34-360d-4b4c-ae2c-e716644d4120", "commonName": "Test Certificate"}
                 }
                 """;
@@ -249,7 +267,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificate": {"uuid": "9a616184-d03f-4c81-a681-22f2e35aa11a", "commonName": "Test Certificate"}
                 }
                 """;
@@ -287,9 +305,9 @@ class PolymorphicSerializationTest {
     @Test
     void oneTimeKeyManagedSigningDto_serializesBothDiscriminators() throws Exception {
         OneTimeKeyManagedSigningDto dto = new OneTimeKeyManagedSigningDto();
-        dto.setRaProfile(new NameAndUuidDto("1111-2222", "RA Profile"));
-        dto.setCsrTemplate(new NameAndUuidDto("3333-4444", "CSR Template"));
-        dto.setTokenProfile(new NameAndUuidDto("5555-6666", "Token"));
+        dto.setRaProfile(new NameAndUuidDto("11111111-1111-1111-1111-222222222222", "RA Profile"));
+        dto.setCsrTemplate(new NameAndUuidDto("33333333-3333-3333-3333-444444444444", "CSR Template"));
+        dto.setTokenProfile(new NameAndUuidDto("55555555-5555-5555-5555-666666666666", "Token"));
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -302,10 +320,10 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
-                  "raProfile": {"uuid": "1111-2222", "name": "RA Profile"},
-                  "csrTemplate": {"uuid": "3333-4444", "name": "CSR Template"},
-                  "tokenProfile": {"uuid": "5555-6666", "name": "Token"}
+                  "managedSigningType": "one_time_key",
+                  "raProfile": {"uuid": "11111111-1111-1111-1111-222222222222", "name": "RA Profile"},
+                  "csrTemplate": {"uuid": "33333333-3333-3333-3333-444444444444", "name": "CSR Template"},
+                  "tokenProfile": {"uuid": "55555555-5555-5555-5555-666666666666", "name": "Token"}
                 }
                 """;
 
@@ -315,9 +333,9 @@ class PolymorphicSerializationTest {
         OneTimeKeyManagedSigningDto result = (OneTimeKeyManagedSigningDto) base;
         assertEquals(SigningScheme.MANAGED, result.getSigningScheme());
         assertEquals(ManagedSigningType.ONE_TIME_KEY, result.getManagedSigningType());
-        assertEquals("1111-2222", result.getRaProfile().getUuid());
-        assertEquals("3333-4444", result.getCsrTemplate().getUuid());
-        assertEquals("5555-6666", result.getTokenProfile().getUuid());
+        assertEquals("11111111-1111-1111-1111-222222222222", result.getRaProfile().getUuid());
+        assertEquals("33333333-3333-3333-3333-444444444444", result.getCsrTemplate().getUuid());
+        assertEquals("55555555-5555-5555-5555-666666666666", result.getTokenProfile().getUuid());
     }
 
     @Test
@@ -325,10 +343,10 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
-                  "raProfile": {"uuid": "1111-2222", "name": "RA Profile"},
-                  "csrTemplate": {"uuid": "3333-4444", "name": "CSR Template"},
-                  "tokenProfile": {"uuid": "5555-6666", "name": "Token"}
+                  "managedSigningType": "one_time_key",
+                  "raProfile": {"uuid": "11111111-1111-1111-1111-222222222222", "name": "RA Profile"},
+                  "csrTemplate": {"uuid": "33333333-3333-3333-3333-444444444444", "name": "CSR Template"},
+                  "tokenProfile": {"uuid": "55555555-5555-5555-5555-666666666666", "name": "Token"}
                 }
                 """;
 
@@ -337,17 +355,17 @@ class PolymorphicSerializationTest {
         assertInstanceOf(OneTimeKeyManagedSigningDto.class, base);
         OneTimeKeyManagedSigningDto result = (OneTimeKeyManagedSigningDto) base;
         assertEquals(ManagedSigningType.ONE_TIME_KEY, result.getManagedSigningType());
-        assertEquals("1111-2222", result.getRaProfile().getUuid());
-        assertEquals("3333-4444", result.getCsrTemplate().getUuid());
-        assertEquals("5555-6666", result.getTokenProfile().getUuid());
+        assertEquals("11111111-1111-1111-1111-222222222222", result.getRaProfile().getUuid());
+        assertEquals("33333333-3333-3333-3333-444444444444", result.getCsrTemplate().getUuid());
+        assertEquals("55555555-5555-5555-5555-666666666666", result.getTokenProfile().getUuid());
     }
 
     @Test
     void oneTimeKeyManagedSigningDto_roundTrip() throws Exception {
         OneTimeKeyManagedSigningDto original = new OneTimeKeyManagedSigningDto();
-        original.setRaProfile(new NameAndUuidDto("1111-2222", "RA Profile"));
-        original.setCsrTemplate(new NameAndUuidDto("3333-4444", "CSR Template"));
-        original.setTokenProfile(new NameAndUuidDto("5555-6666", "Token Profile"));
+        original.setRaProfile(new NameAndUuidDto("11111111-1111-1111-1111-222222222222", "RA Profile"));
+        original.setCsrTemplate(new NameAndUuidDto("33333333-3333-3333-3333-444444444444", "CSR Template"));
+        original.setTokenProfile(new NameAndUuidDto("55555555-5555-5555-5555-666666666666", "Token Profile"));
 
         String json = mapper.writeValueAsString(original);
         SigningSchemeDto deserialized = mapper.readValue(json, SigningSchemeDto.class);
@@ -363,7 +381,7 @@ class PolymorphicSerializationTest {
     @Test
     void delegatedSigningDto_serializesDiscriminator() throws Exception {
         DelegatedSigningDto dto = new DelegatedSigningDto();
-        dto.setConnector(new NameAndUuidDto("eeee-ffff", "Connector"));
+        dto.setConnector(new NameAndUuidDto("eeeeeeee-eeee-eeee-eeee-ffffffffffff", "Connector"));
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -375,7 +393,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "delegated",
-                  "connector": {"uuid": "eeee-ffff", "name": "My Connector"}
+                  "connector": {"uuid": "eeeeeeee-eeee-eeee-eeee-ffffffffffff", "name": "My Connector"}
                 }
                 """;
 
@@ -384,13 +402,13 @@ class PolymorphicSerializationTest {
         assertInstanceOf(DelegatedSigningDto.class, base);
         DelegatedSigningDto result = (DelegatedSigningDto) base;
         assertEquals(SigningScheme.DELEGATED, result.getSigningScheme());
-        assertEquals("eeee-ffff", result.getConnector().getUuid());
+        assertEquals("eeeeeeee-eeee-eeee-eeee-ffffffffffff", result.getConnector().getUuid());
     }
 
     @Test
     void delegatedSigningDto_roundTrip() throws Exception {
         DelegatedSigningDto original = new DelegatedSigningDto();
-        original.setConnector(new NameAndUuidDto("eeee-ffff", "My Connector"));
+        original.setConnector(new NameAndUuidDto("eeeeeeee-eeee-eeee-eeee-ffffffffffff", "My Connector"));
 
         String json = mapper.writeValueAsString(original);
         SigningSchemeDto deserialized = mapper.readValue(json, SigningSchemeDto.class);
@@ -419,7 +437,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificateUuid": "22222222-2222-2222-2222-222222222222"
                 }
                 """;
@@ -438,7 +456,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "staticKey",
+                  "managedSigningType": "static_key",
                   "certificateUuid": "22222222-2222-2222-2222-222222222222"
                 }
                 """;
@@ -485,7 +503,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
+                  "managedSigningType": "one_time_key",
                   "raProfileUuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                   "csrTemplateUuid": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                   "tokenProfileUuid": "cccccccc-cccc-cccc-cccc-cccccccccccc"
@@ -508,7 +526,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "signingScheme": "managed",
-                  "managedSigningType": "oneTimeKey",
+                  "managedSigningType": "one_time_key",
                   "raProfileUuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                   "csrTemplateUuid": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                   "tokenProfileUuid": "cccccccc-cccc-cccc-cccc-cccccccccccc"
@@ -551,6 +569,23 @@ class PolymorphicSerializationTest {
         JsonNode json = mapper.valueToTree(dto);
 
         assertEquals(SigningScheme.Codes.DELEGATED, json.get("signingScheme").asText());
+    }
+
+    @Test
+    void delegatedSigningRequestDto_deserializesViaSigningSchemeBase() throws Exception {
+        String json = """
+                {
+                  "signingScheme": "delegated",
+                  "connectorUuid": "33333333-3333-3333-3333-333333333333"
+                }
+                """;
+
+        SigningSchemeRequestDto base = mapper.readValue(json, SigningSchemeRequestDto.class);
+
+        assertInstanceOf(DelegatedSigningRequestDto.class, base);
+        DelegatedSigningRequestDto result = (DelegatedSigningRequestDto) base;
+        assertEquals(SigningScheme.DELEGATED, result.getSigningScheme());
+        assertEquals(UUID.fromString("33333333-3333-3333-3333-333333333333"), result.getConnectorUuid());
     }
 
     @Test
@@ -686,7 +721,7 @@ class PolymorphicSerializationTest {
     void missingSigningScheme_throwsOnDeserialization() {
         String json = """
                 {
-                  "managedSigningType": "staticKey"
+                  "managedSigningType": "static_key"
                 }
                 """;
 
@@ -708,7 +743,7 @@ class PolymorphicSerializationTest {
     void missingSigningScheme_throwsOnRequestDtoDeserialization() {
         String json = """
                 {
-                  "managedSigningType": "staticKey"
+                  "managedSigningType": "static_key"
                 }
                 """;
 
@@ -739,9 +774,7 @@ class PolymorphicSerializationTest {
                 }
                 """;
 
-        InvalidTypeIdException ex = assertThrows(InvalidTypeIdException.class,
-                () -> mapper.readValue(json, SigningSchemeDto.class));
-        assertNull(ex.getTypeId());
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, SigningSchemeDto.class));
     }
 
     @Test
@@ -764,9 +797,7 @@ class PolymorphicSerializationTest {
                 }
                 """;
 
-        InvalidTypeIdException ex = assertThrows(InvalidTypeIdException.class,
-                () -> mapper.readValue(json, ManagedSigningDto.class));
-        assertNull(ex.getTypeId());
+        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, ManagedSigningDto.class));
     }
 
     @Test

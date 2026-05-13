@@ -13,7 +13,7 @@ public class OidListValidator implements ConstraintValidator<ValidOidList, List<
         if (oids == null) {
             return true;
         }
-        return oids.stream().allMatch(OidValidator::isValidOid);
+        return oids.stream().allMatch(oid -> oid != null && OidValidator.isValidOid(oid));
     }
 
 }

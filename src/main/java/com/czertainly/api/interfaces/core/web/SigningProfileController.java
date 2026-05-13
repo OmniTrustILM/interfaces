@@ -62,7 +62,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Supported protocols retrieved")})
     @GetMapping(path = "/supportedProtocols", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SigningProtocol> listSupportedProtocols(
-            @Parameter(description = "Signing workflow type code (e.g. 'timestamping')", required = true) @RequestParam SigningWorkflowType workflowType);
+            @Parameter(description = "Signing workflow type code (e.g. 'timestamping')", required = true) @RequestParam SigningWorkflowType signingWorkflowType);
 
     @Operation(operationId = "listSigningProfiles", summary = "List of available Signing Profiles")
     @ApiResponses(value = {
@@ -81,6 +81,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "createSigningProfile", summary = "Add new Signing Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Signing Profile added"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))
     })
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -93,6 +94,7 @@ public interface SigningProfileController extends AuthProtectedController {
             Otherwise updates the latest version in-place.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Signing Profile updated"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     SigningProfileDto updateSigningProfile(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid, @RequestBody @Valid SigningProfileRequestDto request)
@@ -203,7 +205,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @GetMapping(path = "/signatureFormatterConnectors/{connectorUuid}/formatterAttributes", produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listSignatureFormatterConnectorAttributes(
             @Parameter(description = "Signature Formatter Connector UUID") @PathVariable UUID connectorUuid,
-            @Parameter(description = "Signing Profile UUID — used for authorization purposes only", in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid) throws NotFoundException, ConnectorException, AttributeException;
+            @Parameter(description = "Signing Profile UUID — used for authorization purposes only", in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid) throws AttributeException, ConnectorException, NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Signing Records
@@ -227,11 +229,12 @@ public interface SigningProfileController extends AuthProtectedController {
             @RequestBody SearchRequestDto request
     ) throws NotFoundException;
 
-// -----------------------------------------------------------------------------------------------------------------
-// Protocols
-// -----------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+    // Protocols
+    // -----------------------------------------------------------------------------------------------------------------
 
-    @Operation(summary = "Get the activation details of the Timestamping Protocol (TSP) for Signing Profile")
+    @Operation(summary = "Get the activation details of the Timestamping Protocol (TSP) for Signing Profile",
+            operationId = "getTspActivationDetails")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "TSP details retrieved"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })

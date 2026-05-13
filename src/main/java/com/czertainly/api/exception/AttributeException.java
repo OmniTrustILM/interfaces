@@ -4,7 +4,7 @@ import com.czertainly.api.model.common.attribute.common.AttributeType;
 import lombok.Getter;
 
 @Getter
-public class AttributeException extends Exception {
+public class AttributeException extends Exception implements PlatformException {
 
     private String uuid;
     private String name;

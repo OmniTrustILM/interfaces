@@ -1,5 +1,6 @@
 package com.czertainly.api.interfaces.core.tsp.error;
 
+import com.czertainly.api.exception.PlatformException;
 import lombok.Getter;
 
 /**
@@ -10,7 +11,7 @@ import lombok.Getter;
  * @see <a href="https://www.rfc-editor.org/rfc/rfc3161#section-2.4.2">RFC 3161 section 2.4.2</a>
  */
 @Getter
-public class TspException extends Exception {
+public class TspException extends Exception implements PlatformException {
 
     private final TspFailureInfo failureInfo;
     private final String clientMessage;

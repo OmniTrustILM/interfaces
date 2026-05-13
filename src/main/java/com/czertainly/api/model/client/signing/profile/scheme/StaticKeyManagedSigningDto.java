@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,11 +21,9 @@ import java.util.List;
 @ToString(callSuper = true)
 public class StaticKeyManagedSigningDto extends ManagedSigningDto {
 
-    @NotNull
     @Schema(description = "Certificate and the associated key(s) used for signing", requiredMode = Schema.RequiredMode.REQUIRED)
     private CertificateSimpleDto certificate;
 
-    @NotNull
     @Schema(description = "List of attributes required for signing operations (such as digest algorithm), provided by the Cryptography Provider Connector",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> signingOperationAttributes = new ArrayList<>();
