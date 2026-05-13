@@ -1,6 +1,7 @@
 package com.czertainly.api.model.client.signing.protocols.tsp;
 
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
+import com.czertainly.api.model.client.signing.profile.SimplifiedSigningProfileDto;
 import com.czertainly.api.model.common.NameAndUuidDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -21,6 +22,9 @@ public class TspProfileDto extends NameAndUuidDto {
 
     @Schema(description = "Enabled flag of the TSP Profile", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
     private boolean enabled;
+
+    @Schema(description = "Default Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SimplifiedSigningProfileDto defaultSigningProfile;
 
     @Schema(
             description = "TSP URL for signing",
