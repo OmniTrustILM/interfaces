@@ -16,6 +16,30 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PlatformExceptionTest {
 
+    // -- safeMessage() tests --
+
+    private static class SafeException extends RuntimeException implements PlatformException {
+        SafeException(String msg) { super(msg); }
+        SafeException() { super((String) null); }
+    }
+
+    @Test
+    void safeMessage_returnsPlatformExceptionMessage_whenPresent() {
+        assertEquals("domain error", PlatformException.safeMessage(new SafeException("domain error"), "fallback"));
+    }
+
+    @Test
+    void safeMessage_returnsFallback_whenPlatformExceptionMessageIsNull() {
+        assertEquals("fallback", PlatformException.safeMessage(new SafeException(), "fallback"));
+    }
+
+    @Test
+    void safeMessage_returnsFallback_forNonPlatformException() {
+        assertEquals("fallback", PlatformException.safeMessage(new RuntimeException("raw detail"), "fallback"));
+    }
+
+    // -- hierarchy completeness test --
+
     @Test
     void allConcreteThrowables_implementPlatformException() {
         List<Class<?>> found = new ArrayList<>();
