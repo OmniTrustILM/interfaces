@@ -7,7 +7,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ToString
-public class MessageHandlingException extends Exception {
+public class MessageHandlingException extends Exception implements PlatformException {
 
     private String queueName;
     private Object messageData;

@@ -7,6 +7,8 @@ import com.czertainly.api.model.client.signing.timequality.validation.NtpConfigu
 import com.czertainly.api.model.client.signing.timequality.validation.PositiveDuration;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidHostnameList;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidMaxClockDrift;
+import com.czertainly.api.model.client.signing.timequality.validation.NtpIntervalAccuracyConfiguration;
+import com.czertainly.api.model.client.signing.timequality.validation.ValidNtpCheckInterval;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidNtpCheckTimeout;
 import com.czertainly.api.model.client.signing.timequality.validation.ValidNtpMinReachable;
 import com.czertainly.api.model.common.validation.ValidName;
@@ -24,10 +26,11 @@ import java.util.List;
 
 @Data
 @ValidMaxClockDrift
+@ValidNtpCheckInterval
 @ValidNtpCheckTimeout
 @ValidNtpMinReachable
 @Schema(name = "TimeQualityConfigurationRequestDto", description = "Request to create or update a Time Quality Configuration")
-public class TimeQualityConfigurationRequestDto implements ClockDriftConfiguration, NtpCheckIntervalConfiguration, NtpConfiguration {
+public class TimeQualityConfigurationRequestDto implements ClockDriftConfiguration, NtpCheckIntervalConfiguration, NtpConfiguration, NtpIntervalAccuracyConfiguration {
 
     @NotBlank
     @ValidName
@@ -48,7 +51,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT30S")
+    @Schema(description = "Interval between NTP checks, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.5S")
     private Duration ntpCheckInterval;
 
     @Positive
@@ -58,7 +61,7 @@ public class TimeQualityConfigurationRequestDto implements ClockDriftConfigurati
     @NotNull
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT10S")
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.1S")
     private Duration ntpCheckTimeout;
 
     @Positive
