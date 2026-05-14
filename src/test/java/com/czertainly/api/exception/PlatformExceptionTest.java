@@ -43,6 +43,19 @@ class PlatformExceptionTest {
         assertEquals("fallback", PlatformException.safeMessage(null, "fallback"));
     }
 
+    @Test
+    void safeMessage_returnsFallback_whenMessageIsDerivedFromCause() {
+        // ConnectorException(Throwable) calls super(cause), so getMessage() == cause.toString() — raw infrastructure detail
+        RuntimeException cause = new RuntimeException("raw SQL detail");
+        ConnectorException e = new ConnectorException(cause);
+        assertEquals("fallback", PlatformException.safeMessage(e, "fallback"));
+    }
+
+    @Test
+    void safeMessage_throwsNullPointerException_whenFallbackIsNull() {
+        assertThrows(NullPointerException.class, () -> PlatformException.safeMessage(null, null));
+    }
+
     // -- hierarchy completeness test --
 
     @Test
