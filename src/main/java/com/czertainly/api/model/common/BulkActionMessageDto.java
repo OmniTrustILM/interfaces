@@ -13,6 +13,13 @@ public class BulkActionMessageDto extends NameAndUuidDto {
         return new BulkActionMessageDto(uuid, name, PlatformException.safeMessage(t, fallback));
     }
 
+    /**
+     * Variant of {@link #failure(String, String, Throwable, String)} for cases where there is no exception.
+     */
+    public static BulkActionMessageDto failure(String uuid, String name, String message) {
+        return new BulkActionMessageDto(uuid, name, message);
+    }
+
     @Schema(description = "Message describing the associations of the Objects which is preventing the bulk operation",
             examples = {"Object is associated with other items"},
             requiredMode = Schema.RequiredMode.REQUIRED)
