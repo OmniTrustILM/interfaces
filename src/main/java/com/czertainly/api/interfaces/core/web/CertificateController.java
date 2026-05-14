@@ -97,7 +97,7 @@ public interface CertificateController extends AuthProtectedController {
     @PostMapping(path = "/upload", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     void upload(@RequestBody UploadCertificateRequestDto request)
-            throws AlreadyExistException, CertificateException, NoSuchAlgorithmException, NotFoundException, AttributeException;
+            throws AlreadyExistException, CertificateException;
 
     @Operation(summary = "Delete multiple certificates", description = "In this operation, when the list of " +
             "Certificate UUIDs are provided and the filter is left as null or undefined, then the change will " +
