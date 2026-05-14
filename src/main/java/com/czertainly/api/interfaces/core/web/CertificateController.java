@@ -93,8 +93,9 @@ public interface CertificateController extends AuthProtectedController {
             throws NotFoundException, NotSupportedException;
 
     @Operation(summary = "Upload a new Certificate")
-    @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "Certificate accepted for processing of upload", content = @Content(schema = @Schema(implementation = UuidDto.class)))})
-    @PostMapping(path = "/upload", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "Certificate accepted for processing of upload")})
+    @PostMapping(path = "/upload", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.ACCEPTED)
     void upload(@RequestBody UploadCertificateRequestDto request)
             throws AlreadyExistException, CertificateException, NoSuchAlgorithmException, NotFoundException, AttributeException;
 
