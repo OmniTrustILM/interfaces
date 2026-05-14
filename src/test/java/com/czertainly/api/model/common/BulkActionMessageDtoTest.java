@@ -28,9 +28,17 @@ class BulkActionMessageDtoTest {
     }
 
     @Test
-    void failure_propagatesUuidAndName() {
+    void failure_propagatesUuidAndName_forNonPlatformException() {
         BulkActionMessageDto dto = BulkActionMessageDto.failure("abc", "Widget",
                 new RuntimeException(), "err");
+        assertEquals("abc", dto.getUuid());
+        assertEquals("Widget", dto.getName());
+    }
+
+    @Test
+    void failure_propagatesUuidAndName_forPlatformException() {
+        BulkActionMessageDto dto = BulkActionMessageDto.failure("abc", "Widget",
+                new DomainException("domain msg"), "fallback");
         assertEquals("abc", dto.getUuid());
         assertEquals("Widget", dto.getName());
     }

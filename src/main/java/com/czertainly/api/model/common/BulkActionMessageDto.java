@@ -14,9 +14,11 @@ public class BulkActionMessageDto extends NameAndUuidDto {
     }
 
     /**
-     * Variant of {@link #failure(String, String, Throwable, String)} for cases where there is no exception.
+     * Variant for cases where there is no exception and the caller supplies a pre-formed message.
+     * <strong>The caller is responsible for ensuring {@code message} contains no raw exception detail.</strong>
+     * Never pass {@code e.getMessage()} directly — use {@link #failure(String, String, Throwable, String)} instead.
      */
-    public static BulkActionMessageDto failure(String uuid, String name, String message) {
+    public static BulkActionMessageDto failureWithMessage(String uuid, String name, String message) {
         return new BulkActionMessageDto(uuid, name, message);
     }
 

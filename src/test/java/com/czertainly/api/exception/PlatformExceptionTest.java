@@ -38,6 +38,11 @@ class PlatformExceptionTest {
         assertEquals("fallback", PlatformException.safeMessage(new RuntimeException("raw detail"), "fallback"));
     }
 
+    @Test
+    void safeMessage_returnsFallback_whenThrowableIsNull() {
+        assertEquals("fallback", PlatformException.safeMessage(null, "fallback"));
+    }
+
     // -- hierarchy completeness test --
 
     @Test
