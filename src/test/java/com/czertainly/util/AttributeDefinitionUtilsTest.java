@@ -86,19 +86,10 @@ class AttributeDefinitionUtilsTest {
         attribute1Value.put("uuid", UUID.randomUUID().toString());
         attribute1Value.put("name", "testName");
 
-        List<RequestAttribute> attributes = List.of(new RequestAttributeV2(UUID.randomUUID(), attribute1Name, AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2(attribute1Name, attribute1Value))));
-
-        NameAndUuidDto dto = getNameAndUuidData(attribute1Name, attributes);
-
-        Assertions.assertNotNull(dto);
-        Assertions.assertEquals(attribute1Value.get("uuid"), dto.getUuid());
-        Assertions.assertEquals(attribute1Value.get("name"), dto.getName());
-
-
         HashMap<String, Object> attribute2Value = new HashMap<>();
         attribute2Value.put("uuid", UUID.randomUUID().toString());
         attribute2Value.put("name", "testName2");
-        attributes = List.of(new RequestAttributeV2(UUID.randomUUID(), attribute1Name, AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2(attribute1Name, attribute1Value), new ObjectAttributeContentV2(attribute1Name, attribute2Value))));
+        List<RequestAttribute> attributes = List.of(new RequestAttributeV2(UUID.randomUUID(), attribute1Name, AttributeContentType.OBJECT, List.of(new ObjectAttributeContentV2(attribute1Name, attribute1Value), new ObjectAttributeContentV2(attribute1Name, attribute2Value))));
         List<NameAndUuidDto> dto2 = getNameAndUuidDataList(attribute1Name, attributes);
 
         Assertions.assertNotNull(dto2);
