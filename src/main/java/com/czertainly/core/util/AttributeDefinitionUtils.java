@@ -162,12 +162,7 @@ public class AttributeDefinitionUtils {
         return getObjectAttributeContentData(name, attributes, NameAndIdDto.class).get(0);
     }
 
-
-
     public static List<NameAndUuidDto> getNameAndUuidDataList(String name, List<RequestAttribute> attributes) {
-        if (attributes == null || attributes.isEmpty()) {
-            return Collections.emptyList();
-        }
         return getObjectAttributeContentData(name, attributes, NameAndUuidDto.class);
     }
 
