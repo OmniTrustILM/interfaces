@@ -180,7 +180,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/czertainly/czertainly-interfaces</url>
+                    <url>https://maven.pkg.github.com/omnitrustilm/interfaces</url>
                 </repository>
             </distributionManagement>
         </profile>
@@ -213,7 +213,7 @@
     <repositories>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/czertainly/*</url>
+            <url>https://maven.pkg.github.com/omnitrustilm/*</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>

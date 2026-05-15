@@ -1,6 +1,6 @@
 package com.czertainly.api.exception;
 
-public class CertificateRequestException extends Exception {
+public class CertificateRequestException extends Exception implements PlatformException {
 
     public CertificateRequestException(String message) {
         super(message);
