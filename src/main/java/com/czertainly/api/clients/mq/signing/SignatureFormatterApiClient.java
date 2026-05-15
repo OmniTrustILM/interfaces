@@ -24,6 +24,6 @@ public class SignatureFormatterApiClient implements SignatureFormatterSyncApiCli
     public List<BaseAttribute> listFormatterAttributes(ApiClientConnectorInfo connector) throws ConnectorException {
         String path = BASE_PATH + "/attributes";
         BaseAttribute[] result = proxyClient.sendRequest(connector, path, HTTP_METHOD_GET, null, BaseAttribute[].class);
-        return Arrays.asList(result);
+        return result == null ? List.of() : Arrays.asList(result);
     }
 }
