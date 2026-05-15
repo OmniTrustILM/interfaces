@@ -16,6 +16,48 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PlatformExceptionTest {
 
+    // -- safeMessage() tests --
+
+    private static class SafeException extends RuntimeException implements PlatformException {
+        SafeException(String msg) { super(msg); }
+        SafeException() { super((String) null); }
+    }
+
+    @Test
+    void safeMessage_returnsPlatformExceptionMessage_whenPresent() {
+        assertEquals("domain error", PlatformException.safeMessage(new SafeException("domain error"), "fallback"));
+    }
+
+    @Test
+    void safeMessage_returnsFallback_whenPlatformExceptionMessageIsNull() {
+        assertEquals("fallback", PlatformException.safeMessage(new SafeException(), "fallback"));
+    }
+
+    @Test
+    void safeMessage_returnsFallback_forNonPlatformException() {
+        assertEquals("fallback", PlatformException.safeMessage(new RuntimeException("raw detail"), "fallback"));
+    }
+
+    @Test
+    void safeMessage_returnsFallback_whenThrowableIsNull() {
+        assertEquals("fallback", PlatformException.safeMessage(null, "fallback"));
+    }
+
+    @Test
+    void safeMessage_returnsFallback_whenMessageIsDerivedFromCause() {
+        // ConnectorException(Throwable) calls super(cause), so getMessage() == cause.toString() — raw infrastructure detail
+        RuntimeException cause = new RuntimeException("raw SQL detail");
+        ConnectorException e = new ConnectorException(cause);
+        assertEquals("fallback", PlatformException.safeMessage(e, "fallback"));
+    }
+
+    @Test
+    void safeMessage_throwsNullPointerException_whenFallbackIsNull() {
+        assertThrows(NullPointerException.class, () -> PlatformException.safeMessage(null, null));
+    }
+
+    // -- hierarchy completeness test --
+
     @Test
     void allConcreteThrowables_implementPlatformException() {
         List<Class<?>> found = new ArrayList<>();
