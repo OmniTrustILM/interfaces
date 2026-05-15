@@ -1,5 +1,6 @@
 package com.czertainly.api.interfaces.core.cmp.error;
 
+import com.czertainly.api.exception.PlatformException;
 import com.czertainly.api.interfaces.core.cmp.PkiMessageError;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cmp.PKIBody;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see <a href="https://www.rfc-editor.org/rfc/rfc4210#section-5.3.21">...</a>
  */
-public class CmpBaseException extends Exception {
+public class CmpBaseException extends Exception implements PlatformException {
 
     private static final Logger LOG = LoggerFactory.getLogger(CmpBaseException.class.getName());
 

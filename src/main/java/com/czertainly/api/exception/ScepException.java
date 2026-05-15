@@ -2,7 +2,7 @@ package com.czertainly.api.exception;
 
 import com.czertainly.api.model.core.scep.FailInfo;
 
-public class ScepException extends Exception {
+public class ScepException extends Exception implements PlatformException {
 
     private FailInfo failInfo;
 
