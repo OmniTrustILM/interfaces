@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Dummy controller interface that documents the RabbitMQ message contracts between Core and Time Quality Monitor.
  *
  * <p>There are no real HTTP endpoints behind these paths. The controller exists solely so the OpenAPI generator
- * can discover the messaging DTO schemas and emit them into the {@code doc-openapi-messaging-signing} group.
+ * can discover the messaging DTO schemas and include them in the generated OpenAPI documentation.
  * Each operation represents one RabbitMQ message flow; the direction (publisher → consumer) is stated in the
  * operation summary and is reinforced by the {@code x-transport: rabbitmq} extension.</p>
  */
