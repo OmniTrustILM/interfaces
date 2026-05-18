@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @Schema(name = "TimeQualityConfig", description = "NTP-based time quality configuration carried within a configuration snapshot")
 // Compared to TimeQualityConfigurationDto, accuracy is intentionally missing. It is only relevant for `TSTInfo` construction and has no bearing on time quality monitoring.
- public class TimeQualityConfig implements Serializable {
+public class TimeQualityConfig implements Serializable {
 
     @NotNull
     @Schema(description = "Unique identifier of the time quality configuration", requiredMode = Schema.RequiredMode.REQUIRED)

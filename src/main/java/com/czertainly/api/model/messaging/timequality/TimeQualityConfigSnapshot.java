@@ -28,6 +28,6 @@ public class TimeQualityConfigSnapshot implements Serializable {
 
     @NotNull
     @Valid
-    @Schema(description = "Complete list of active NTP-based time quality configuration; always a full snapshot, never a delta", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Complete list of active NTP-based time quality configurations; always a full snapshot, never a delta", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TimeQualityConfig> configurations = new ArrayList<>();
 }
