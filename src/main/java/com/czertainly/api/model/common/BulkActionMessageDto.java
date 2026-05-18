@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 public class BulkActionMessageDto extends NameAndUuidDto {
-    @Schema(description = "Message describing the associations of the Objects which is preventing the bulk operation",
+    @Schema(description = "Message describing the associations of the objects that are preventing the bulk operation",
             examples = {"Object is associated with other items"},
             requiredMode = Schema.RequiredMode.REQUIRED)
     @Getter
