@@ -31,11 +31,13 @@ public class SignatureFormatterApiClient extends BaseApiClient implements Signat
     public List<BaseAttribute> listFormatterAttributes(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
-        return processRequest(r -> r
-                .uri(connector.getUrl() + ATTRIBUTES_CONTEXT)
-                .retrieve()
-                .toEntityList(BaseAttribute.class)
-                .block().getBody(),
+        return processRequest(r -> {
+                    var entity = r.uri(connector.getUrl() + ATTRIBUTES_CONTEXT)
+                            .retrieve()
+                            .toEntityList(BaseAttribute.class)
+                            .block();
+                    return entity != null && entity.getBody() != null ? entity.getBody() : List.of();
+                },
                 request,
                 connector);
     }

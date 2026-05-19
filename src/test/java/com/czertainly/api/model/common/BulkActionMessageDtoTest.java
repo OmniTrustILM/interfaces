@@ -1,11 +1,28 @@
 package com.czertainly.api.model.common;
 
 import com.czertainly.api.exception.PlatformException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BulkActionMessageDtoTest {
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    @Test
+    void roundTrip_serializesAndDeserializesAllFields() throws Exception {
+        BulkActionMessageDto original = BulkActionMessageDto.failureWithMessage(
+                "uuid-42", "Widget", "Object is associated with other items");
+
+        String json = mapper.writeValueAsString(original);
+        BulkActionMessageDto restored = mapper.readValue(json, BulkActionMessageDto.class);
+
+        assertEquals(original.getUuid(), restored.getUuid());
+        assertEquals(original.getName(), restored.getName());
+        assertEquals(original.getMessage(), restored.getMessage());
+    }
+
 
     private static class DomainException extends RuntimeException implements PlatformException {
         DomainException(String msg) {
