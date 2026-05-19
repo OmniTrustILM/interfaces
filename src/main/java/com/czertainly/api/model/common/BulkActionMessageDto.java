@@ -1,9 +1,17 @@
 package com.czertainly.api.model.common;
 
 import com.czertainly.api.exception.PlatformException;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 public class BulkActionMessageDto extends NameAndUuidDto {
+    @Schema(description = "Message describing the associations of the objects that are preventing the bulk operation",
+            examples = {"Object is associated with other items"},
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Getter
+    private final String message;
 
     /**
      * Safe factory for exception-driven bulk failures. Uses {@link PlatformException#safeMessage}
@@ -22,23 +30,11 @@ public class BulkActionMessageDto extends NameAndUuidDto {
         return new BulkActionMessageDto(uuid, name, message);
     }
 
-    @Schema(description = "Message describing the associations of the Objects which is preventing the bulk operation",
-            examples = {"Object is associated with other items"},
-            requiredMode = Schema.RequiredMode.REQUIRED)
-    private String message;
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public BulkActionMessageDto() {
-    }
-
-    public BulkActionMessageDto(String uuid, String name, String message) {
+    @JsonCreator
+    private BulkActionMessageDto(
+            @JsonProperty("uuid") String uuid,
+            @JsonProperty("name") String name,
+            @JsonProperty("message") String message) {
         super(uuid, name);
         this.message = message;
     }
