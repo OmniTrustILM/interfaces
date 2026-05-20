@@ -1,0 +1,42 @@
+package com.czertainly.api.model.connector.v3.certificate;
+
+import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
+import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.core.authority.CertificateRevocationReason;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
+
+/**
+ * Body for v3 /revoke. Cert identity is parsed from `certificate` (serial + issuer DN);
+ * no separate identifier is needed for revocation. Optional meta supports CAs that
+ * track revocation by an upstream handle (e.g. DigiCert order ID).
+ */
+@Getter
+@Setter
+@ToString(callSuper = true)
+public class CertificateRevocationRequestDto extends V3AuthorityScopedRequestDto {
+
+    @Schema(description = "Base64 of cert to revoke. Serial + issuer DN parsed from this constitute the cert identity at the CA.",
+            format = "byte",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String certificate;
+
+    @Schema(description = "Revocation reason",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private CertificateRevocationReason reason;
+
+    @Schema(description = "Revoke-specific dynamic attributes",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<RequestAttribute> attributes;
+
+    @Schema(description = "Optional connector-defined metadata. Populated when Core has the original issue meta. "
+                  + "CAs that revoke purely by serial+issuer ignore it; CAs that track revocation via an upstream "
+                  + "handle (e.g. DigiCert order ID) consume it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<MetadataAttribute> meta;
+}

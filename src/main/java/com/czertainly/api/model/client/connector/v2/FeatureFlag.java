@@ -19,7 +19,8 @@ public enum FeatureFlag implements IPlatformEnum {
     SECRET_VERSIONING("secretVersioning", "Secret Versioning", "Supports versioning of secrets, allowing to keep track of history of secrets.", List.of(ConnectorInterface.SECRET)),
     SECRET_ROTATION("secretRotation", "Secret Rotation", "Supports triggering rotation of secrets", List.of(ConnectorInterface.SECRET)),
     CONTENT_SIGNING("contentSigning", "Content Signing", "Supports content signing workflows", List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
-    TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING));
+    TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
+    CERTIFICATE_PRE_REGISTRATION("certificatePreRegistration", "Certificate Pre-Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", List.of(ConnectorInterface.AUTHORITY));
 
     private static final FeatureFlag[] VALUES;
 

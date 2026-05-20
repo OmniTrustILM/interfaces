@@ -1,0 +1,52 @@
+package com.czertainly.api.model.connector.v3.certificate;
+
+import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
+import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.core.enums.CertificateRequestFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
+
+/**
+ * Body for v3 /renew. Cert identity is parsed from existingCertificate (serial + issuer DN).
+ * Optional meta carries the connector's tracking handle from the original issue/renew/register
+ * so stateless connectors (e.g. EJBCA) can resolve the upstream end-entity without an extra lookup.
+ */
+@Getter
+@Setter
+@ToString(callSuper = true)
+public class CertificateRenewRequestDto extends V3AuthorityScopedRequestDto {
+
+    @Schema(description = "Certificate signing request, Base64-encoded. Optional when reuseKey=true.",
+            format = "byte",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String request;
+
+    @Schema(description = "CSR format",
+            defaultValue = "pkcs10",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestFormat format;
+
+    @Schema(description = "Base64 of cert to renew. Serial + issuer DN parsed from this constitute the cert identity at the CA.",
+            format = "byte",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String existingCertificate;
+
+    @Schema(description = "When true, request (CSR) is optional. Proof-of-possession is delegated to the upstream CA's renewal policy.",
+            defaultValue = "false",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private boolean reuseKey;
+
+    @Schema(description = "Renew-specific dynamic attributes (schema from shared /issue/attributes endpoint)",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<RequestAttribute> attributes;
+
+    @Schema(description = "Optional connector-defined metadata returned by the original issue/renew/register response. "
+                  + "Replayed here so a stateless connector can resolve the upstream end-entity without an extra lookup.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<MetadataAttribute> meta;
+}
