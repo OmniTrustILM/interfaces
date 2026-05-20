@@ -12,7 +12,7 @@ import java.util.Arrays;
 @Schema(enumAsRef = true)
 public enum LeapSecondWarning implements IPlatformEnum {
 
-    NONE(Codes.NONE, "None", "No leap second announced or leap indicators conflicting"),
+    NONE(Codes.NONE, "None", "No leap second announced; also set when NTP leap indicators conflict across servers — the conflict is reflected by TimeQualityStatus.DEGRADED"),
     POSITIVE(Codes.POSITIVE, "Positive", "Positive leap second announced: one second will be inserted at end of day"),
     NEGATIVE(Codes.NEGATIVE, "Negative", "Negative leap second announced: one second will be deleted at end of day"),
     ;

@@ -1,5 +1,7 @@
 package com.czertainly.api.model.messaging.timequality;
 
+import com.czertainly.api.model.client.signing.timequality.validation.NtpConfiguration;
+import com.czertainly.api.model.client.signing.timequality.validation.ValidNtpMinReachable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -14,9 +16,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@ValidNtpMinReachable
 @Schema(name = "TimeQualityConfig", description = "NTP-based time quality configuration carried within a configuration snapshot")
 // Compared to TimeQualityConfigurationDto, accuracy is intentionally missing. It is only relevant for `TSTInfo` construction and has no bearing on time quality monitoring.
-public class TimeQualityConfig implements Serializable {
+public class TimeQualityConfig implements Serializable, NtpConfiguration {
 
     @NotNull
     @Schema(description = "Unique identifier of the time quality configuration", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -41,7 +44,7 @@ public class TimeQualityConfig implements Serializable {
 
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @Schema(description = "Timeout for a single NTP check, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.1S")
+    @Schema(description = "Timeout for the entire NTP check cycle, in ISO 8601 duration format", requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.1S")
     private Duration ntpCheckTimeout;
 
     @Positive

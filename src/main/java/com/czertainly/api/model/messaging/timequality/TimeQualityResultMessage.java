@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
@@ -48,7 +49,7 @@ public class TimeQualityResultMessage implements Serializable {
     @Schema(description = "Leap second warning derived from NTP leap indicators. Set to NONE when indicators conflict", requiredMode = Schema.RequiredMode.REQUIRED)
     private LeapSecondWarning leapSecondWarning;
 
-    @NotNull
+    @NotEmpty
     @Valid
     @Schema(description = "Per-server measurement details for this check", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<NtpServerMeasurementResult> measurements;
