@@ -20,7 +20,14 @@ public enum ErrorCode {
     UNAUTHORIZED(ProblemTypeCategory.COMMON, null, "Unauthorized", HttpStatus.UNAUTHORIZED, false),
     FORBIDDEN(ProblemTypeCategory.COMMON, null, "Forbidden", HttpStatus.FORBIDDEN, false),
     RATE_LIMIT_EXCEEDED(ProblemTypeCategory.COMMON, null, "Rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS, true),
-    GATEWAY_TIMEOUT(ProblemTypeCategory.COMMON, null, "Gateway timeout", HttpStatus.GATEWAY_TIMEOUT, true)
+    GATEWAY_TIMEOUT(ProblemTypeCategory.COMMON, null, "Gateway timeout", HttpStatus.GATEWAY_TIMEOUT, true),
+
+    // CONNECTOR general — cross-interface
+    UPSTREAM_ERROR(ProblemTypeCategory.CONNECTOR, null, "Upstream system returned an error", HttpStatus.BAD_GATEWAY, false),
+    CREDENTIAL_INVALID(ProblemTypeCategory.CONNECTOR, null, "Credentials invalid for upstream system", HttpStatus.UNAUTHORIZED, false),
+    POLICY_VIOLATION(ProblemTypeCategory.CONNECTOR, null, "Policy violation at upstream system", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    OPERATION_PAST_POINT_OF_NO_RETURN(ProblemTypeCategory.CONNECTOR, null, "Cancel refused — operation past point of no return", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    OPERATION_NOT_TRACKED(ProblemTypeCategory.CONNECTOR, null, "Async operation no longer tracked by connector", HttpStatus.NOT_FOUND, false)
     ;
 
     private final ProblemTypeCategory category;

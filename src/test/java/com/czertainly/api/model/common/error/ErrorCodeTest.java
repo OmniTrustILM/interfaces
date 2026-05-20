@@ -27,6 +27,25 @@ class ErrorCodeTest {
     }
 
     @Test
+    void connectorGeneralEntries() {
+        for (ErrorCode code : new ErrorCode[]{
+                ErrorCode.UPSTREAM_ERROR,
+                ErrorCode.CREDENTIAL_INVALID,
+                ErrorCode.POLICY_VIOLATION,
+                ErrorCode.OPERATION_PAST_POINT_OF_NO_RETURN,
+                ErrorCode.OPERATION_NOT_TRACKED}) {
+            assertEquals(ProblemTypeCategory.CONNECTOR, code.getCategory(), code.name() + " category");
+            assertNull(code.getInterfaceCode(), code.name() + " interfaceCode");
+            assertFalse(code.isRetryable(), code.name() + " retryable");
+        }
+        assertEquals(HttpStatus.BAD_GATEWAY, ErrorCode.UPSTREAM_ERROR.getStatus());
+        assertEquals(HttpStatus.UNAUTHORIZED, ErrorCode.CREDENTIAL_INVALID.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.POLICY_VIOLATION.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.OPERATION_PAST_POINT_OF_NO_RETURN.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, ErrorCode.OPERATION_NOT_TRACKED.getStatus());
+    }
+
+    @Test
     void retryableTrueOnlyForTransientCodes() {
         // Transient infrastructure / rate-limit recovery → retryable
         assertTrue(ErrorCode.REQUEST_TIMEOUT.isRetryable());
