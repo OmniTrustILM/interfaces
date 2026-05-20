@@ -1,0 +1,43 @@
+package com.czertainly.api.model.connector.v3.certificate;
+
+import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
+import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.core.enums.CertificateRequestFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
+
+/**
+ * Body for v3 /issue. Supports fresh issuance and register-bound issuance via
+ * the optional registrationMeta field (= the meta returned by a prior /register call).
+ */
+@Getter
+@Setter
+@ToString(callSuper = true)
+public class CertificateSignRequestDto extends V3AuthorityScopedRequestDto {
+
+    @Schema(description = "Certificate signing request, Base64-encoded",
+            format = "byte",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String request;
+
+    @Schema(description = "CSR format",
+            defaultValue = "pkcs10",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestFormat format;
+
+    @Schema(description = "Issue-specific dynamic attributes (from shared /issue/attributes schema endpoint)",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<RequestAttribute> attributes;
+
+    @Schema(description = "Connector-defined metadata returned by a prior /register response. "
+                  + "Null/empty = fresh issuance (connector creates end-entity if its CA requires). "
+                  + "Populated = issue against the prior registration using the meta to resolve "
+                  + "the upstream end-entity.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<MetadataAttribute> registrationMeta;
+}
