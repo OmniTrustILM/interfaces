@@ -94,7 +94,7 @@ public interface CertificateController extends AuthProtectedController {
 
     @Operation(summary = "Upload a new Certificate")
     @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "Certificate accepted for processing of upload")})
-    @PostMapping(path = "/upload/async", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/upload/async", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     FingerprintDto uploadAsync(@RequestBody UploadCertificateRequestDto request)
             throws AlreadyExistException, CertificateException;

@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Fingerprint DTO for certificate operations")
 public class FingerprintDto {
 
     @Schema(description = "Fingerprint of the certificate", requiredMode = Schema.RequiredMode.REQUIRED)
