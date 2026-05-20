@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Schema(name = "TimeQualityResult", description = "NTP time quality check result, published by Time Quality Monitor and consumed by Core")
-public class TimeQualityResult implements Serializable {
+@Schema(name = "TimeQualityResultMessage", description = "NTP time quality check result, published by Time Quality Monitor and consumed by Core")
+public class TimeQualityResultMessage implements Serializable {
 
     @NotNull
     @Schema(description = "UUID of the time quality configuration that produced this result", requiredMode = Schema.RequiredMode.REQUIRED)

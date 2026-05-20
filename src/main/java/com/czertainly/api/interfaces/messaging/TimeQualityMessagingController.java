@@ -3,7 +3,7 @@ package com.czertainly.api.interfaces.messaging;
 import com.czertainly.api.interfaces.NoAuthController;
 import com.czertainly.api.model.messaging.timequality.TimeQualityConfigRequest;
 import com.czertainly.api.model.messaging.timequality.TimeQualityConfigSnapshot;
-import com.czertainly.api.model.messaging.timequality.TimeQualityResult;
+import com.czertainly.api.model.messaging.timequality.TimeQualityResultMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
@@ -42,7 +42,7 @@ public interface TimeQualityMessagingController extends NoAuthController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Message accepted")})
     @PostMapping(path = "/result", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void receiveTimeQualityResult(@Valid @RequestBody TimeQualityResult message);
+    void receiveTimeQualityResult(@Valid @RequestBody TimeQualityResultMessage message);
 
     @Operation(
             operationId = "receiveTimeQualityConfigRequest",
