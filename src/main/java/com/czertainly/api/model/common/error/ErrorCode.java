@@ -8,18 +8,19 @@ import org.springframework.http.HttpStatus;
 @Getter
 @Schema(enumAsRef = true)
 public enum ErrorCode {
-    VALIDATION_FAILED(ProblemTypeCategory.COMMON, null, "Validation failed", HttpStatus.UNPROCESSABLE_ENTITY, true),
-    RESOURCE_NOT_FOUND(ProblemTypeCategory.COMMON, null, "Resource not found", HttpStatus.NOT_FOUND, true),
-    RESOURCE_ALREADY_EXISTS(ProblemTypeCategory.COMMON, null, "Resource already exists", HttpStatus.CONFLICT, true),
+    VALIDATION_FAILED(ProblemTypeCategory.COMMON, null, "Validation failed", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    RESOURCE_NOT_FOUND(ProblemTypeCategory.COMMON, null, "Resource not found", HttpStatus.NOT_FOUND, false),
+    RESOURCE_ALREADY_EXISTS(ProblemTypeCategory.COMMON, null, "Resource already exists", HttpStatus.CONFLICT, false),
     REQUEST_TIMEOUT(ProblemTypeCategory.COMMON, null, "Request timeout", HttpStatus.REQUEST_TIMEOUT, true),
-    OPERATION_NOT_SUPPORTED(ProblemTypeCategory.COMMON, null, "Operation not supported", HttpStatus.NOT_IMPLEMENTED, true),
-    ATTRIBUTES_ERROR(ProblemTypeCategory.COMMON, null, "Attributes handling error", HttpStatus.BAD_REQUEST, true),
+    OPERATION_NOT_SUPPORTED(ProblemTypeCategory.COMMON, null, "Operation not supported", HttpStatus.NOT_IMPLEMENTED, false),
+    ATTRIBUTES_ERROR(ProblemTypeCategory.COMMON, null, "Attributes handling error", HttpStatus.BAD_REQUEST, false),
     SERVICE_UNAVAILABLE(ProblemTypeCategory.COMMON, null, "Service unavailable", HttpStatus.SERVICE_UNAVAILABLE, true),
     INTERNAL_SERVER_ERROR(ProblemTypeCategory.COMMON, null, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR, false),
-    BAD_REQUEST(ProblemTypeCategory.COMMON, null, "Bad Request", HttpStatus.BAD_REQUEST, true),
-    UNAUTHORIZED(ProblemTypeCategory.COMMON, null, "Unauthorized", HttpStatus.UNAUTHORIZED, true),
-    FORBIDDEN(ProblemTypeCategory.COMMON, null, "Forbidden", HttpStatus.FORBIDDEN, true),
-    RATE_LIMIT_EXCEEDED(ProblemTypeCategory.COMMON, null, "Rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS, true)
+    BAD_REQUEST(ProblemTypeCategory.COMMON, null, "Bad Request", HttpStatus.BAD_REQUEST, false),
+    UNAUTHORIZED(ProblemTypeCategory.COMMON, null, "Unauthorized", HttpStatus.UNAUTHORIZED, false),
+    FORBIDDEN(ProblemTypeCategory.COMMON, null, "Forbidden", HttpStatus.FORBIDDEN, false),
+    RATE_LIMIT_EXCEEDED(ProblemTypeCategory.COMMON, null, "Rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS, true),
+    GATEWAY_TIMEOUT(ProblemTypeCategory.COMMON, null, "Gateway timeout", HttpStatus.GATEWAY_TIMEOUT, true)
     ;
 
     private final ProblemTypeCategory category;
