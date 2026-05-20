@@ -27,7 +27,15 @@ public enum ErrorCode {
     CREDENTIAL_INVALID(ProblemTypeCategory.CONNECTOR, null, "Credentials invalid for upstream system", HttpStatus.UNAUTHORIZED, false),
     POLICY_VIOLATION(ProblemTypeCategory.CONNECTOR, null, "Policy violation at upstream system", HttpStatus.UNPROCESSABLE_ENTITY, false),
     OPERATION_PAST_POINT_OF_NO_RETURN(ProblemTypeCategory.CONNECTOR, null, "Cancel refused — operation past point of no return", HttpStatus.UNPROCESSABLE_ENTITY, false),
-    OPERATION_NOT_TRACKED(ProblemTypeCategory.CONNECTOR, null, "Async operation no longer tracked by connector", HttpStatus.NOT_FOUND, false)
+    OPERATION_NOT_TRACKED(ProblemTypeCategory.CONNECTOR, null, "Async operation no longer tracked by connector", HttpStatus.NOT_FOUND, false),
+
+    // CONNECTOR + AUTHORITY — interface-specific
+    CSR_MALFORMED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "CSR malformed", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    REVOCATION_NOT_ALLOWED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "Revocation not allowed by upstream CA", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    REGISTRATION_NOT_FOUND(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "Pre-registration reference not tracked by upstream CA", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    RENEWAL_SOURCE_NOT_FOUND(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "Source certificate for renewal not found at upstream CA", HttpStatus.NOT_FOUND, false),
+    CSR_SUBJECT_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "CSR subject does not match the pre-registration", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    CERTIFICATE_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "Certificate belongs to a different authority than requested", HttpStatus.UNPROCESSABLE_ENTITY, false)
     ;
 
     private final ProblemTypeCategory category;

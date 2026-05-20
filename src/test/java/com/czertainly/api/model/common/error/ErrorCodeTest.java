@@ -46,6 +46,27 @@ class ErrorCodeTest {
     }
 
     @Test
+    void connectorAuthorityEntries() {
+        for (ErrorCode code : new ErrorCode[]{
+                ErrorCode.CSR_MALFORMED,
+                ErrorCode.REVOCATION_NOT_ALLOWED,
+                ErrorCode.REGISTRATION_NOT_FOUND,
+                ErrorCode.RENEWAL_SOURCE_NOT_FOUND,
+                ErrorCode.CSR_SUBJECT_MISMATCH,
+                ErrorCode.CERTIFICATE_MISMATCH}) {
+            assertEquals(ProblemTypeCategory.CONNECTOR, code.getCategory(), code.name() + " category");
+            assertEquals(ConnectorInterface.AUTHORITY, code.getInterfaceCode(), code.name() + " interfaceCode");
+            assertFalse(code.isRetryable(), code.name() + " retryable");
+        }
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.CSR_MALFORMED.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.REVOCATION_NOT_ALLOWED.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.REGISTRATION_NOT_FOUND.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, ErrorCode.RENEWAL_SOURCE_NOT_FOUND.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.CSR_SUBJECT_MISMATCH.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.CERTIFICATE_MISMATCH.getStatus());
+    }
+
+    @Test
     void retryableTrueOnlyForTransientCodes() {
         // Transient infrastructure / rate-limit recovery → retryable
         assertTrue(ErrorCode.REQUEST_TIMEOUT.isRetryable());
