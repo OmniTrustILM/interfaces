@@ -1,8 +1,8 @@
 package com.czertainly.api.interfaces.messaging;
 
 import com.czertainly.api.interfaces.NoAuthController;
-import com.czertainly.api.model.messaging.timequality.TimeQualityConfigRequestMessage;
-import com.czertainly.api.model.messaging.timequality.TimeQualityConfigSnapshotMessage;
+import com.czertainly.api.model.messaging.timequality.TimeQualityConfigRequest;
+import com.czertainly.api.model.messaging.timequality.TimeQualityConfigSnapshot;
 import com.czertainly.api.model.messaging.timequality.TimeQualityResultMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Dummy controller interface that documents the RabbitMQ message contracts between Core and Time Quality Monitor.
  *
  * <p>There are no real HTTP endpoints behind these paths. The controller exists solely so the OpenAPI generator
- * can discover the messaging DTO schemas and emit them into the {@code doc-openapi-messaging-signing} group.
+ * can discover the messaging DTO schemas and include them in the generated OpenAPI documentation.
  * Each operation represents one RabbitMQ message flow; the direction (publisher → consumer) is stated in the
  * operation summary and is reinforced by the {@code x-transport: rabbitmq} extension.</p>
  */
@@ -41,19 +42,19 @@ public interface TimeQualityMessagingController extends NoAuthController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Message accepted")})
     @PostMapping(path = "/result", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void receiveTimeQualityResult(@RequestBody TimeQualityResultMessage message);
+    void receiveTimeQualityResult(@Valid @RequestBody TimeQualityResultMessage message);
 
     @Operation(
             operationId = "receiveTimeQualityConfigRequest",
             summary = "Time Quality Config Request [RabbitMQ: Monitor → Core]",
             description = "Message sent by Time Quality Monitor to Core requesting a fresh snapshot of all active time quality " +
-                    "configurations. Core responds by publishing a TimeQualityConfigSnapshotMessage.",
+                    "configurations. Core responds by publishing a TimeQualityConfigSnapshot.",
             extensions = @Extension(properties = @ExtensionProperty(name = "x-transport", value = "rabbitmq"))
     )
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Message accepted")})
     @PostMapping(path = "/configRequest", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void receiveTimeQualityConfigRequest(@RequestBody TimeQualityConfigRequestMessage message);
+    void receiveTimeQualityConfigRequest(@Valid @RequestBody TimeQualityConfigRequest message);
 
     @Operation(
             operationId = "receiveTimeQualityConfigSnapshot",
@@ -65,5 +66,5 @@ public interface TimeQualityMessagingController extends NoAuthController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Message accepted")})
     @PostMapping(path = "/configSnapshot", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void receiveTimeQualityConfigSnapshot(@RequestBody TimeQualityConfigSnapshotMessage message);
+    void receiveTimeQualityConfigSnapshot(@Valid @RequestBody TimeQualityConfigSnapshot message);
 }
