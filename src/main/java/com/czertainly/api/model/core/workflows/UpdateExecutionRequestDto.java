@@ -1,6 +1,7 @@
 package com.czertainly.api.model.core.workflows;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -13,8 +14,9 @@ public class UpdateExecutionRequestDto {
             description = "Name of the execution",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @NotBlank(message = "Name cannot be blank")
     private String name;
-    
+
     @Schema(
             description = "Description of the execution"
     )

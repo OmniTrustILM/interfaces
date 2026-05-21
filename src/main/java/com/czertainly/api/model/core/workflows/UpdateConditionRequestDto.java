@@ -1,6 +1,7 @@
 package com.czertainly.api.model.core.workflows;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public class UpdateConditionRequestDto {
             description = "Name of the condition",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
 
