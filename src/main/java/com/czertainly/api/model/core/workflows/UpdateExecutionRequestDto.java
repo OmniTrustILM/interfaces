@@ -10,6 +10,12 @@ import java.util.List;
 public class UpdateExecutionRequestDto {
 
     @Schema(
+            description = "Name of the execution",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String name;
+    
+    @Schema(
             description = "Description of the execution"
     )
     private String description;

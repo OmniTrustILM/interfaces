@@ -9,6 +9,9 @@ import java.util.List;
 @Data
 public class UpdateRuleRequestDto {
 
+    @Schema(description = "Name of the Rule", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String name;
+
     @Schema(
             description = "Description of the Rule"
     )

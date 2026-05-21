@@ -9,6 +9,13 @@ import java.util.List;
 public class UpdateConditionRequestDto {
 
     @Schema(
+            description = "Name of the condition",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String name;
+
+
+    @Schema(
             description = "Description of the condition"
     )
     private String description;

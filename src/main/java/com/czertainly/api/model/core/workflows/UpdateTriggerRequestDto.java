@@ -12,6 +12,12 @@ import java.util.List;
 public class UpdateTriggerRequestDto {
 
     @Schema(
+            description = "Name of the trigger",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String name;
+
+    @Schema(
             description = "Description of the trigger"
     )
     private String description;

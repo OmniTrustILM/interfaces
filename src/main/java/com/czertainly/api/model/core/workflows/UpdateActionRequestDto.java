@@ -10,6 +10,12 @@ import java.util.List;
 public class UpdateActionRequestDto {
 
     @Schema(
+            description = "Name of the action",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String name;
+
+    @Schema(
             description = "Description of the action"
     )
     private String description;
