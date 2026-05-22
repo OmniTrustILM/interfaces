@@ -2,7 +2,6 @@ package com.czertainly.api.interfaces.connector.signing;
 
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
-import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.signatures.formatter.FormatDtbsRequestDto;
 import com.czertainly.api.model.connector.signatures.formatter.FormatDtbsResponseDto;

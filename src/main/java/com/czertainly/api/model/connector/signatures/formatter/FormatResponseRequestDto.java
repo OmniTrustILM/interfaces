@@ -23,6 +23,8 @@ import java.util.List;
 @Schema(implementation = FormatResponseInterface.class)
 public abstract class FormatResponseRequestDto implements FormatResponseInterface {
 
+    @NotNull
+    @Schema(description = "Signing workflow type discriminator", requiredMode = Schema.RequiredMode.REQUIRED)
     private final SigningWorkflowType type;
 
     @NotNull

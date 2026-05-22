@@ -20,47 +20,47 @@ import java.util.Arrays;
 
 @Schema(enumAsRef = true)
 public enum SignatureAlgorithm implements IPlatformEnum {
-    SHA256withRSA(
+    SHA256_WITH_RSA(
             "SHA256withRSA", "RSASSA-PKCS_v1.5 using SHA256", "RSA signature with SHA-256 digest",
             new AlgorithmIdentifier(PKCSObjectIdentifiers.sha256WithRSAEncryption, DERNull.INSTANCE),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), false
     ),
-    SHA384withRSA(
+    SHA384_WITH_RSA(
             "SHA384withRSA", "RSASSA-PKCS_v1.5 using SHA384", "RSA signature with SHA-384 digest",
             new AlgorithmIdentifier(PKCSObjectIdentifiers.sha384WithRSAEncryption, DERNull.INSTANCE),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384), false
     ),
-    SHA512withRSA(
+    SHA512_WITH_RSA(
             "SHA512withRSA", "RSASSA-PKCS_v1.5 using SHA512", "RSA signature with SHA-512 digest",
             new AlgorithmIdentifier(PKCSObjectIdentifiers.sha512WithRSAEncryption, DERNull.INSTANCE),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), false
     ),
-    SHA256withRSAPSS(
+    SHA256_WITH_RSA_PSS(
             "SHA256withRSAandMGF1", "RSASSA-PSS using SHA256", "RSA-PSS signature with SHA-256 digest",
             createPssAlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, 32),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), false
     ),
-    SHA384withRSAPSS(
+    SHA384_WITH_RSA_PSS(
             "SHA384withRSAandMGF1", "RSASSA-PSS using SHA384", "RSA-PSS signature with SHA-384 digest",
             createPssAlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, 48),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384), false
     ),
-    SHA512withRSAPSS(
+    SHA512_WITH_RSA_PSS(
             "SHA512withRSAandMGF1", "RSASSA-PSS using SHA512", "RSA-PSS signature with SHA-512 digest",
             createPssAlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, 64),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), false
     ),
-    SHA256withECDSA(
+    SHA256_WITH_ECDSA(
             "SHA256withECDSA", "ECDSA using SHA256", "ECDSA signature with SHA-256 digest",
             new AlgorithmIdentifier(X9ObjectIdentifiers.ecdsa_with_SHA256),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), false
     ),
-    SHA384withECDSA(
+    SHA384_WITH_ECDSA(
             "SHA384withECDSA", "ECDSA using SHA384", "ECDSA signature with SHA-384 digest",
             new AlgorithmIdentifier(X9ObjectIdentifiers.ecdsa_with_SHA384),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384), false
     ),
-    SHA512withECDSA(
+    SHA512_WITH_ECDSA(
             "SHA512withECDSA", "ECDSA using SHA512", "ECDSA signature with SHA-512 digest",
             new AlgorithmIdentifier(X9ObjectIdentifiers.ecdsa_with_SHA512),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), false
@@ -148,14 +148,5 @@ public enum SignatureAlgorithm implements IPlatformEnum {
                 .findFirst()
                 .orElseThrow(() ->
                         new ValidationException(ValidationError.create("Unknown signature algorithm code {}", code)));
-    }
-
-    public static SignatureAlgorithm findByAlgorithmIdentifier(AlgorithmIdentifier algorithmIdentifier) {
-        String oid = algorithmIdentifier.getAlgorithm().getId();
-        return Arrays.stream(VALUES)
-                .filter(k -> k.algorithmIdentifier.getAlgorithm().getId().equals(oid))
-                .findFirst()
-                .orElseThrow(() ->
-                        new ValidationException(ValidationError.create("Unknown signature algorithm OID {}", oid)));
     }
 }

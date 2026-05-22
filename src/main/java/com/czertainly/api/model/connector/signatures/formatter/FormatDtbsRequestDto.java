@@ -23,6 +23,8 @@ import java.util.List;
 @Schema(implementation = FormatDtbsInterface.class)
 public abstract class FormatDtbsRequestDto implements FormatDtbsInterface {
 
+    @NotNull
+    @Schema(description = "Signing workflow type discriminator", requiredMode = Schema.RequiredMode.REQUIRED)
     private final SigningWorkflowType type;
 
     @NotEmpty
