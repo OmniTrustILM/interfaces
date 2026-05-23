@@ -20,10 +20,9 @@ import java.util.List;
  * <p>Carries all timestamping-specific fields needed to rebuild the TimeStampRequest and TSTInfo internally,
  * so that {@code formatSigningResponse} is self-contained and does not depend on server-side state from phase 1.</p>
  *
- * <p>The timestamping-specific fields declared here are duplicated verbatim in
- * {@link TimestampingFormatDtbsRequestDto}, which cannot be a shared base class due to the separate
- * polymorphic hierarchies ({@link FormatDtbsRequestDto} vs {@link FormatResponseRequestDto}).
- * A field-parity test in {@code TimestampingDtoFieldParityTest} guards against the two sets drifting.</p>
+ * <p>The timestamping-specific fields declared here are duplicated in {@link TimestampingFormatDtbsRequestDto}.
+ * {@code TimestampingDtoFieldParityTest} enforces that shared fields have identical Java types and annotation
+ * types across the two DTOs.</p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

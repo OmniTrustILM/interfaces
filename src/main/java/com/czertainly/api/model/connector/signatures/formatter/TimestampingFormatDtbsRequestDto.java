@@ -23,9 +23,9 @@ import java.util.List;
  * {@code accuracy} (captured from the time quality system).
  * </p>
  *
- * <p>The timestamping-specific fields declared here are duplicated verbatim in
- * {@link TimestampingFormatResponseRequestDto}, which must be self-contained.
- * A field-parity test in {@code TimestampingDtoFieldParityTest} guards against the two sets drifting.</p>
+ * <p>The timestamping-specific fields declared here are duplicated in {@link TimestampingFormatResponseRequestDto}.
+ * {@code TimestampingDtoFieldParityTest} enforces that shared fields have identical Java types and annotation
+ * types across the two DTOs.</p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

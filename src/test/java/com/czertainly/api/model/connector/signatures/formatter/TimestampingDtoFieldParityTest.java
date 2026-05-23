@@ -17,6 +17,16 @@ class TimestampingDtoFieldParityTest {
             "policy", "nonce", "includeSignerCertificate", "qualifiedTimestamp", "requestExtensions");
 
     @Test
+    void sharedFieldsHaveIdenticalFieldTypes() {
+        for (String fieldName : SHARED_FIELDS) {
+            Class<?> dtbsType = fieldType(TimestampingFormatDtbsRequestDto.class, fieldName);
+            Class<?> responseType = fieldType(TimestampingFormatResponseRequestDto.class, fieldName);
+            assertEquals(dtbsType, responseType,
+                    "Field type mismatch on shared field '" + fieldName + "'");
+        }
+    }
+
+    @Test
     void sharedFieldsHaveIdenticalAnnotationTypes() {
         for (String fieldName : SHARED_FIELDS) {
             Set<Class<? extends Annotation>> dtbsAnnotations = annotationTypes(TimestampingFormatDtbsRequestDto.class, fieldName);
@@ -38,6 +48,14 @@ class TimestampingDtoFieldParityTest {
                 "TimestampingFormatDtbsRequestDto is missing shared fields: " + difference(SHARED_FIELDS, dtbsShared));
         assertEquals(SHARED_FIELDS, responseShared,
                 "TimestampingFormatResponseRequestDto is missing shared fields: " + difference(SHARED_FIELDS, responseShared));
+    }
+
+    private static Class<?> fieldType(Class<?> clazz, String fieldName) {
+        try {
+            return clazz.getDeclaredField(fieldName).getType();
+        } catch (NoSuchFieldException e) {
+            throw new AssertionError("Field '" + fieldName + "' not found in " + clazz.getSimpleName(), e);
+        }
     }
 
     private static Set<Class<? extends Annotation>> annotationTypes(Class<?> clazz, String fieldName) {
