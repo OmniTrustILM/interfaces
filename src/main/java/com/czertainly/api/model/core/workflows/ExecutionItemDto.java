@@ -35,4 +35,17 @@ public class ExecutionItemDto {
     )
     private Serializable data;
 
+    @Schema(
+            description = "Source field source for attribute mapping (META, DATA, or CUSTOM)",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private FilterFieldSource sourceFieldSource;
+
+    @Schema(
+            description = "Source field identifier for attribute mapping (format: name|ContentType)",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private String sourceFieldIdentifier;   
+
+
 }
