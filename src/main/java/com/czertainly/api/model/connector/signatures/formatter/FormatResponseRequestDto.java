@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -21,26 +23,32 @@ import java.util.List;
 @Schema(implementation = FormatResponseInterface.class)
 public abstract class FormatResponseRequestDto implements FormatResponseInterface {
 
+    @NotNull
+    @Schema(description = "Signing workflow type discriminator", requiredMode = Schema.RequiredMode.REQUIRED)
     private final SigningWorkflowType type;
 
+    @NotNull
     @Schema(
             description = "Data-to-be-signed bytes returned by formatDtbs (already contains serialNumber, signingTime, etc.)",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private byte[] dtbs;
 
+    @NotNull
     @Schema(
             description = "Raw signature bytes from the Cryptography Provider",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private byte[] signature;
 
+    @NotEmpty
     @Schema(
             description = "Certificate chain where the first element is the signer certificate",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private List<byte[]> certificateChain;
 
+    @NotNull
     @Schema(
             description = "Formatter-specific parameters, same attributes as passed to formatDtbs",
             requiredMode = Schema.RequiredMode.REQUIRED

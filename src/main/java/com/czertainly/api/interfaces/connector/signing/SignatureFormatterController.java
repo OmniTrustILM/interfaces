@@ -2,7 +2,6 @@ package com.czertainly.api.interfaces.connector.signing;
 
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
-import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.signatures.formatter.FormatDtbsRequestDto;
 import com.czertainly.api.model.connector.signatures.formatter.FormatDtbsResponseDto;
@@ -17,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +23,7 @@ import java.util.List;
 @RequestMapping("/v1/signatureProvider/formatting")
 @Tag(
         name = "Signature Formatter",
-        description = "Signature Formatter API defines operations for protocol-specific formatting of signing requests. " +
+        description = "Signature Formatter API defines operations for protocol-specific formatting of digital signing requests. " +
                 "The formatter is stateless and handles the conversion between raw signing material and " +
                 "protocol-specific formats (e.g. TSA TimeStampToken, AdES signature containers)."
 )
@@ -73,7 +71,7 @@ public interface SignatureFormatterController extends AuthProtectedConnectorCont
             consumes = {"application/json"},
             produces = {"application/json"}
     )
-    FormatDtbsResponseDto formatDtbs(@Valid @RequestBody FormatDtbsRequestDto request);
+    FormatDtbsResponseDto formatDtbs(@Valid @RequestBody FormatDtbsRequestDto request) throws ValidationException;
 
     @Operation(
             summary = "Assemble final formatted output",
@@ -99,6 +97,5 @@ public interface SignatureFormatterController extends AuthProtectedConnectorCont
             consumes = {"application/json"},
             produces = {"application/json"}
     )
-    FormattedResponseDto formatSigningResponse(@Valid @RequestBody FormatResponseRequestDto request);
-
+    FormattedResponseDto formatSigningResponse(@Valid @RequestBody FormatResponseRequestDto request) throws ValidationException;
 }

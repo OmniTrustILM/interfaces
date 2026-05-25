@@ -17,5 +17,4 @@ public class FormatDtbsResponseDto {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private byte[] dtbs;
-
 }

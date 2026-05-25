@@ -16,12 +16,27 @@ public class TspException extends Exception implements PlatformException {
     private final TspFailureInfo failureInfo;
     private final String clientMessage;
 
+    /**
+     * @param failureInfo   RFC 3161 PKIFailureInfo bit position
+     * @param message       internal message for logging — may include runtime detail
+     * @param clientMessage safe text for PKIFreeText in the rejection TimeStampResp —
+     *                      must be a static, hardcoded string; never pass {@code e.getMessage()}
+     *                      or any runtime-derived value here
+     */
     public TspException(TspFailureInfo failureInfo, String message, String clientMessage) {
         super(message);
         this.failureInfo = failureInfo;
         this.clientMessage = clientMessage;
     }
 
+    /**
+     * @param failureInfo   RFC 3161 PKIFailureInfo bit position
+     * @param message       internal message for logging — may include runtime detail
+     * @param cause         underlying exception
+     * @param clientMessage safe text for PKIFreeText in the rejection TimeStampResp —
+     *                      must be a static, hardcoded string; never pass {@code e.getMessage()}
+     *                      or any runtime-derived value here
+     */
     public TspException(TspFailureInfo failureInfo, String message, Throwable cause, String clientMessage) {
         super(message, cause);
         this.failureInfo = failureInfo;
