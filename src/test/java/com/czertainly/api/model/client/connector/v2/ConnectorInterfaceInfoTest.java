@@ -16,7 +16,7 @@ class ConnectorInterfaceInfoTest {
         ConnectorInterfaceInfo info = new ConnectorInterfaceInfo(
                 ConnectorInterface.AUTHORITY,
                 "v3",
-                List.of(FeatureFlag.CERTIFICATE_PRE_REGISTRATION));
+                List.of(FeatureFlag.CERTIFICATE_REGISTRATION));
         assertEquals(ConnectorInterface.AUTHORITY, info.getCode());
         assertEquals("v3", info.getVersion());
         assertEquals(1, info.getFeatures().size());
@@ -26,7 +26,7 @@ class ConnectorInterfaceInfoTest {
     void roundTripsThroughJackson() throws Exception {
         ConnectorInterfaceInfo info = new ConnectorInterfaceInfo(
                 ConnectorInterface.AUTHORITY, "v3",
-                List.of(FeatureFlag.CERTIFICATE_PRE_REGISTRATION));
+                List.of(FeatureFlag.CERTIFICATE_REGISTRATION));
         String json = mapper.writeValueAsString(info);
         ConnectorInterfaceInfo back = mapper.readValue(json, ConnectorInterfaceInfo.class);
         assertEquals(info, back);

@@ -11,16 +11,31 @@ import java.util.Arrays;
 import java.util.List;
 
 
+/**
+ * Capability advertisements emitted by connectors beyond the version contract.
+ *
+ * <p><b>Opt-in semantic for ENFORCED flags:</b> a feature is supported only if the connector
+ * explicitly lists it. Absent = NOT supported. Core enforces this gate before invoking
+ * capability-dependent operations.</p>
+ *
+ * <p><b>INFORMATIONAL flags</b> are advertisement-only metadata. Core handles all behaviors
+ * regardless of whether they are advertised.</p>
+ */
 @Schema(enumAsRef = true)
 public enum FeatureFlag implements IPlatformEnum {
 
-    STATELESS("stateless", "Stateless", "A stateless connector does not require persistence layer (e.g. database)"),
-    OPEN_METRICS("openMetrics", "OpenMetrics", "Metrics are exposed in OpenMetrics format", List.of(ConnectorInterface.METRICS)),
-    SECRET_VERSIONING("secretVersioning", "Secret Versioning", "Supports versioning of secrets, allowing to keep track of history of secrets.", List.of(ConnectorInterface.SECRET)),
-    SECRET_ROTATION("secretRotation", "Secret Rotation", "Supports triggering rotation of secrets", List.of(ConnectorInterface.SECRET)),
-    CONTENT_SIGNING("contentSigning", "Content Signing", "Supports content signing workflows", List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
-    TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
-    CERTIFICATE_PRE_REGISTRATION("certificatePreRegistration", "Certificate Pre-Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", List.of(ConnectorInterface.AUTHORITY));
+    STATELESS("stateless", "Stateless", "A stateless connector does not require persistence layer (e.g. database)", FeatureFlagBehavior.INFORMATIONAL, null),
+    OPEN_METRICS("openMetrics", "OpenMetrics", "Metrics are exposed in OpenMetrics format", FeatureFlagBehavior.INFORMATIONAL, List.of(ConnectorInterface.METRICS)),
+    SECRET_VERSIONING("secretVersioning", "Secret Versioning", "Supports versioning of secrets, allowing to keep track of history of secrets.", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SECRET)),
+    SECRET_ROTATION("secretRotation", "Secret Rotation", "Supports triggering rotation of secrets", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SECRET)),
+    CONTENT_SIGNING("contentSigning", "Content Signing", "Supports content signing workflows", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
+    TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
+    CERTIFICATE_REGISTRATION("certificateRegistration", "Certificate Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY));
+
+    public enum FeatureFlagBehavior {
+        ENFORCED,
+        INFORMATIONAL
+    }
 
     private static final FeatureFlag[] VALUES;
 
@@ -31,16 +46,14 @@ public enum FeatureFlag implements IPlatformEnum {
     private final String code;
     private final String label;
     private final String description;
+    private final FeatureFlagBehavior behavior;
     private final List<ConnectorInterface> applicableInterfaces;
 
-    FeatureFlag(String code, String label, String description) {
-        this(code, label, description, null);
-    }
-
-    FeatureFlag(String code, String label, String description, List<ConnectorInterface> applicableInterfaces) {
+    FeatureFlag(String code, String label, String description, FeatureFlagBehavior behavior, List<ConnectorInterface> applicableInterfaces) {
         this.code = code;
         this.label = label;
         this.description = description;
+        this.behavior = behavior;
         this.applicableInterfaces = applicableInterfaces;
     }
 
@@ -58,6 +71,10 @@ public enum FeatureFlag implements IPlatformEnum {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    public FeatureFlagBehavior getBehavior() {
+        return behavior;
     }
 
     public List<ConnectorInterface> getApplicableInterfaces() {

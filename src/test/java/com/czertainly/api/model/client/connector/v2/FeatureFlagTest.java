@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FeatureFlagTest {
 
     @Test
-    void certificatePreRegistrationFlagExists() {
-        FeatureFlag flag = FeatureFlag.CERTIFICATE_PRE_REGISTRATION;
-        assertEquals("certificatePreRegistration", flag.getCode());
+    void certificateRegistrationFlagExists() {
+        FeatureFlag flag = FeatureFlag.CERTIFICATE_REGISTRATION;
+        assertEquals("certificateRegistration", flag.getCode());
         assertEquals(List.of(ConnectorInterface.AUTHORITY), flag.getApplicableInterfaces());
     }
 
