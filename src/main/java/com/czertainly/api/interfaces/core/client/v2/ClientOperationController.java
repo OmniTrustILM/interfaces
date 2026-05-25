@@ -329,4 +329,45 @@ public interface ClientOperationController extends AuthProtectedController {
 			@RequestBody(required = false) CancelPendingCertificateRequestDto request)
 			throws NotFoundException;
 
+	@Operation(
+			summary = "Pre-register a certificate with the upstream CA",
+			description = """
+					Reserves a slot at the CA for a certificate that will be issued later. Returns
+					a tracking handle (in metadata) that can be used to complete the issuance via
+					the standard issue flow.
+
+					Only supported on v3 authorities advertising the `CERTIFICATE_REGISTRATION`
+					feature flag. The operation may complete synchronously (200) or asynchronously
+					(202 with status polling).
+					"""
+	)
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Registration accepted; tracking handle returned"),
+			@ApiResponse(responseCode = "422", description = "Authority does not support registration",
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))
+	})
+	@PostMapping(path = "/certificates/register", consumes = {"application/json"}, produces = {"application/json"})
+	ClientCertificateDataResponseDto registerCertificate(
+			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
+			@RequestBody ClientCertificateRegistrationDto request)
+			throws NotFoundException, ValidationException;
+
+	@Operation(
+			summary = "List operations supported by this authority/RA profile",
+			description = """
+					Returns per-operation support flags (issue/renew/revoke/register) including whether
+					each may complete asynchronously and whether each can be cancelled mid-flight. Operators
+					use this to drive UI affordances and validate flows before invoking them.
+					"""
+	)
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Capability advertisement returned")
+	})
+	@GetMapping(path = "/availableOperations", produces = {"application/json"})
+	AvailableOperationsDto listAvailableOperations(
+			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid)
+			throws NotFoundException;
+
 }
