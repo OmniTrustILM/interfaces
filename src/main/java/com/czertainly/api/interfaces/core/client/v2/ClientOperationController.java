@@ -351,7 +351,7 @@ public interface ClientOperationController extends AuthProtectedController {
 			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
 			@RequestBody ClientCertificateRegistrationDto request)
-			throws NotFoundException, ValidationException;
+			throws NotFoundException, ValidationException, ConnectorException;
 
 	@Operation(
 			summary = "List operations supported by this authority/RA profile",
