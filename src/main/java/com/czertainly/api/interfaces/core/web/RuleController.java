@@ -46,7 +46,8 @@ public interface RuleController extends AuthProtectedController {
     @Operation(summary = "Update Condition")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Condition updated"),
-            @ApiResponse(responseCode = "404", description = "Condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+            @ApiResponse(responseCode = "404", description = "Condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Condition already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PutMapping(path = "/conditions/{conditionUuid}", consumes = {"application/json"}, produces = {"application/json"})
     ConditionDto updateCondition(@Parameter(description = "Condition UUID") @PathVariable String conditionUuid, @RequestBody @Valid UpdateConditionRequestDto request) throws NotFoundException, AlreadyExistException;
@@ -86,7 +87,8 @@ public interface RuleController extends AuthProtectedController {
     @Operation(summary = "Update Rule")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rule details updated"),
-            @ApiResponse(responseCode = "404", description = "Rule or condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+            @ApiResponse(responseCode = "404", description = "Rule or condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Rule already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PutMapping(path = "/rules/{ruleUuid}", consumes = {"application/json"}, produces = {"application/json"})
     RuleDetailDto updateRule(@Parameter(description = "Rule UUID") @PathVariable String ruleUuid, @RequestBody @Valid UpdateRuleRequestDto request) throws NotFoundException, AlreadyExistException;
