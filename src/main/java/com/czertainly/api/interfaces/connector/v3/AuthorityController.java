@@ -6,7 +6,6 @@ import com.czertainly.api.model.connector.v3.authority.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +24,7 @@ public interface AuthorityController {
 
     @Operation(summary = "Validate authority attributes by attempting to reach the upstream CA")
     @ApiResponse(responseCode = "204", description = "Upstream CA is reachable with these attributes")
-    @PostMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> checkAuthorityConnection(@RequestBody List<RequestAttribute> body);
 
     @Operation(summary = "RA profile attribute schema given authority context")

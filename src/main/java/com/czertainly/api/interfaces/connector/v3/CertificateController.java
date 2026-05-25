@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +44,6 @@ public interface CertificateController {
         @ApiResponse(responseCode = "422", description = "Refused — past point of no return")
     })
     @PostMapping(path = "/issue/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     ResponseEntity<Void> cancelIssue(@RequestBody CertificateOperationCancelRequestDto body);
 
     // ---- Renew (status/cancel via /issue/*) ----
@@ -74,7 +72,6 @@ public interface CertificateController {
 
     @Operation(summary = "Cancel an in-flight async revoke operation")
     @PostMapping(path = "/revoke/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     ResponseEntity<Void> cancelRevoke(@RequestBody CertificateOperationCancelRequestDto body);
 
     // ---- Register ----
@@ -93,7 +90,6 @@ public interface CertificateController {
 
     @Operation(summary = "Cancel an in-flight async register operation")
     @PostMapping(path = "/register/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     ResponseEntity<Void> cancelRegister(@RequestBody CertificateOperationCancelRequestDto body);
 
     // ---- Identify ----
