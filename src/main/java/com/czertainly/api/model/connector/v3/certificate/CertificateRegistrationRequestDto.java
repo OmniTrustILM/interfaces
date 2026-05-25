@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * Body for v3 /register. Pre-registers a certificate's identity at the upstream CA
- * before a CSR exists. /issue later binds a CSR to this registration via registrationMeta.
+ * before a CSR exists. /issue later binds a CSR to this registration via meta.
  */
 @Getter
 @Setter

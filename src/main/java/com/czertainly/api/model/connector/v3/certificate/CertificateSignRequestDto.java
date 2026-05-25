@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Body for v3 /issue. Supports fresh issuance and register-bound issuance via
- * the optional registrationMeta field (= the meta returned by a prior /register call).
+ * the optional meta field (= the meta returned by a prior /register call).
  */
 @Getter
 @Setter
@@ -34,10 +34,10 @@ public class CertificateSignRequestDto extends V3AuthorityScopedRequestDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> attributes;
 
-    @Schema(description = "Connector-defined metadata returned by a prior /register response. "
-                  + "Null/empty = fresh issuance (connector creates end-entity if its CA requires). "
-                  + "Populated = issue against the prior registration using the meta to resolve "
-                  + "the upstream end-entity.",
+    @Schema(description = "Connector-defined metadata. On issue against a prior registration, "
+                  + "this carries the meta returned by the /register response (replayed so the "
+                  + "stateless connector can resolve the upstream end-entity). "
+                  + "Null/empty = fresh issuance.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<MetadataAttribute> registrationMeta;
+    private List<MetadataAttribute> meta;
 }

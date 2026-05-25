@@ -21,7 +21,7 @@ class CertificateSignRequestDtoTest {
         dto.setRequest("MIICij...");
         dto.setFormat(CertificateRequestFormat.PKCS10);
         dto.setAttributes(List.of());
-        dto.setRegistrationMeta(List.of());
+        dto.setMeta(List.of());
 
         String json = mapper.writeValueAsString(dto);
         CertificateSignRequestDto back = mapper.readValue(json, CertificateSignRequestDto.class);
@@ -30,9 +30,9 @@ class CertificateSignRequestDtoTest {
     }
 
     @Test
-    void registrationMetaOptional() throws Exception {
+    void metaOptional() throws Exception {
         String json = "{\"authorityAttributes\":[],\"raProfileAttributes\":[],\"request\":\"X\"}";
         CertificateSignRequestDto back = mapper.readValue(json, CertificateSignRequestDto.class);
-        assertNull(back.getRegistrationMeta());
+        assertNull(back.getMeta());
     }
 }
