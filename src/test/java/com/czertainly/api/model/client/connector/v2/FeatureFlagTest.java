@@ -21,6 +21,5 @@ class FeatureFlagTest {
         for (FeatureFlag f : FeatureFlag.values()) {
             assertEquals(f, FeatureFlag.findByCode(f.getCode()));
         }
-        assertTrue(true);
     }
 }

@@ -21,9 +21,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-class CertificateApiClientTest {
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
-    private static final int PORT = 3669;
+class CertificateApiClientTest {
 
     private CertificateApiClient client;
     private ConnectorDto connector;
@@ -33,12 +33,12 @@ class CertificateApiClientTest {
     void setUp() {
         client = new CertificateApiClient(BaseApiClient.prepareWebClient(), null);
 
-        mockServer = new WireMockServer(PORT);
+        mockServer = new WireMockServer(options().dynamicPort());
         mockServer.start();
         WireMock.configureFor("localhost", mockServer.port());
 
         connector = new ConnectorDto();
-        connector.setUrl("http://localhost:" + PORT);
+        connector.setUrl("http://localhost:" + mockServer.port());
         connector.setStatus(ConnectorStatus.CONNECTED);
     }
 

@@ -29,10 +29,13 @@ import java.util.List;
  * WebClient (HTTP) implementation of v3 Certificate API client. Mirror of
  * {@link com.czertainly.api.clients.mq.v3.CertificateApiClient}.
  *
- * <p>Sync vs async responses are distinguished by inspecting the returned {@link ResponseEntity}'s
- * status code — 200 means a synchronous result, 202 means the connector accepted the operation
- * asynchronously and the body's {@code meta} field is the tracking handle to replay on subsequent
- * status/cancel calls.</p>
+ * <p>Response semantics by operation:</p>
+ * <ul>
+ *   <li><b>issue / renew / register:</b> 200 OK = sync result (cert in body); 202 Accepted = async accepted (meta as tracking handle).</li>
+ *   <li><b>revoke:</b> 204 No Content = sync success; 202 Accepted = async accepted with meta.</li>
+ *   <li><b>cancel endpoints:</b> 204 No Content = success; 404 / 422 surface via {@link com.czertainly.api.exception.ConnectorProblemException}.</li>
+ *   <li><b>identify / getCrl / getCaCertificates / status / attribute list:</b> 200 OK with body; always synchronous.</li>
+ * </ul>
  */
 @SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public class CertificateApiClient extends BaseApiClient implements CertificateSyncApiClient {

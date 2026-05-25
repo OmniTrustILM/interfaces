@@ -37,9 +37,9 @@ public class CertificateDataResponseDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
 
-    @Schema(description = "Type hint for the certificate. Default X509. Set explicitly when issuing non-X509 "
+    @Schema(description = "Type hint for the certificate. Default X.509. Set explicitly when issuing non-X.509 "
                   + "certificates (e.g. SSH certificates) so Core does not need to infer type from certificateData.",
-            defaultValue = "X509",
+            defaultValue = "X.509",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateType certificateType;
 }
