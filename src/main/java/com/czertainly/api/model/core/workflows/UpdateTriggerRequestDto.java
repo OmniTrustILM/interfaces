@@ -1,9 +1,9 @@
 package com.czertainly.api.model.core.workflows;
 
+import com.czertainly.api.model.common.validation.NullableNotBlank;
 import com.czertainly.api.model.core.auth.Resource;
 import com.czertainly.api.model.core.other.ResourceEvent;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -15,9 +15,9 @@ public class UpdateTriggerRequestDto {
 
     @Schema(
             description = "Name of the trigger",
-            requiredMode = Schema.RequiredMode.REQUIRED
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
-    @NotBlank(message = "Name cannot be blank")
+    @NullableNotBlank
     private String name;
 
     @Schema(
