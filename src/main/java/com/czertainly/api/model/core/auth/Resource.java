@@ -65,7 +65,7 @@ public enum Resource implements IPlatformEnum {
 
     // APPROVALS
     APPROVAL_PROFILE("approvalProfiles", "Approval profile"),
-    APPROVAL("approvals", "Approval"),
+    APPROVAL(Codes.APPROVAL, "Approval"),
 
     // NOTIFICATIONS
     NOTIFICATION_PROFILE("notificationProfiles", "Notification profile"),
@@ -217,6 +217,7 @@ public enum Resource implements IPlatformEnum {
 
     public static class Codes {
         public static final String AUTHORITY = "authorities";
+        public static final String APPROVAL = "approvals";
         public static final String RA_PROFILE = "raProfiles";
         public static final String CERTIFICATE = "certificates";
         public static final String CERTIFICATE_REQUEST = "certificateRequests";
