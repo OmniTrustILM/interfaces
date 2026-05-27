@@ -43,21 +43,32 @@ public class ExecutionItemRequestDto {
     )
     private String sourceFieldIdentifier;
 
-    @AssertTrue(message = "Field source and field identifier are required (set field execution) or notification profile UUID (send notification execution). " +
-            "When sourceFieldSource is set, sourceFieldIdentifier is also required (and vice versa), fieldSource must be CUSTOM, sourceFieldSource must be META/DATA/CUSTOM, and data must be null.")
+    @AssertTrue(message = "Field source and field identifier are required (set field execution) or notification profile UUID (send notification execution).")
     private boolean isExecutionItemValid() {
-        boolean baseValid = (fieldSource != null && fieldIdentifier != null) || notificationProfileUuid != null;
-        if (!baseValid) return false;
-
-        boolean hasSourceRef = sourceFieldSource != null || sourceFieldIdentifier != null;
-        if (!hasSourceRef) return true;
-
-        if (sourceFieldSource == null || sourceFieldIdentifier == null) return false;
-        if (fieldSource != FilterFieldSource.CUSTOM) return false;
-        if (sourceFieldSource != FilterFieldSource.META
-                && sourceFieldSource != FilterFieldSource.DATA
-                && sourceFieldSource != FilterFieldSource.CUSTOM) return false;
-        return data == null;
+        return (fieldSource != null && fieldIdentifier != null) || notificationProfileUuid != null;
     }
 
+    @AssertTrue(message = "sourceFieldSource and sourceFieldIdentifier must both be set or both be absent")
+    private boolean sourceFieldsMatch() {
+        return (sourceFieldSource == null) == (sourceFieldIdentifier == null);
+    }
+
+    @AssertTrue(message = "When sourceFieldSource and sourceFieldIdentifier are set, fieldSource must be CUSTOM")
+    private boolean isTargetCustomWhenSourceRefSet() {
+        return sourceFieldsNotDefined() || fieldSource == FilterFieldSource.CUSTOM;
+    }
+
+    @AssertTrue(message = "sourceFieldSource cannot be PROPERTY")
+    private boolean sourceFieldSourceValid() {
+        return sourceFieldSource != FilterFieldSource.PROPERTY;
+    }
+
+    @AssertTrue(message = "data must be null when sourceFieldSource and sourceFieldIdentifier are defined")
+    private boolean sourceFieldsNullData() {
+        return sourceFieldsNotDefined() || data == null;
+    }
+
+    private boolean sourceFieldsNotDefined() {
+        return sourceFieldSource == null || sourceFieldIdentifier == null;
+    }
 }
