@@ -45,7 +45,5 @@ public class ExecutionItemDto {
             description = "Source field identifier for attribute mapping (format: name|ContentType)",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
-    private String sourceFieldIdentifier;   
-
-
+    private String sourceFieldIdentifier;
 }
