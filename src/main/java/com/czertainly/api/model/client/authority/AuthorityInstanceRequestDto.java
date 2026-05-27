@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -28,6 +29,14 @@ public class AuthorityInstanceRequestDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorUuid;
 
+    @Schema(description = "UUID of the Connector Interface (AUTHORITY) to bind this instance to. "
+            + "Required to select a specific version when the connector exposes more than one "
+            + "AUTHORITY interface (e.g. v2 and v3 side-by-side). "
+            + "When null, the authority targets a legacy v1 connector that declares no connector "
+            + "interface; if such a connector exposes exactly one AUTHORITY interface it is used.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private UUID interfaceUuid;
+
     @Schema(description = "Authority instance Kind",
             examples = {"LegacyEjbca, ADCS, etc"},
             requiredMode = Schema.RequiredMode.REQUIRED)
@@ -39,6 +48,7 @@ public class AuthorityInstanceRequestDto {
                 .append("name", name)
                 .append("attributes", attributes)
                 .append("connectorUuid", connectorUuid)
+                .append("interfaceUuid", interfaceUuid)
                 .append("kind", kind)
                 .append("customAttributes", customAttributes)
                 .toString();
