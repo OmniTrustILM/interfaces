@@ -52,11 +52,10 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     public List<BaseAttribute> listAuthorityAttributes(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_ATTRIBUTES_CONTEXT)
                         .retrieve()
-                        .toEntityList(BaseAttribute.class)
-                        .block().getBody(),
+                        .toEntityList(BaseAttribute.class), "listAuthorityAttributes"),
                 request,
                 connector);
     }
@@ -65,12 +64,11 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     public ResponseEntity<Void> checkAuthorityConnection(ApiClientConnectorInfo connector, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        return processRequest(r -> r
+        return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + AUTHORITY_BASE_CONTEXT)
                         .body(Mono.just(attributes), ATTRIBUTE_LIST_TYPE_REF)
                         .retrieve()
-                        .toBodilessEntity()
-                        .block(),
+                        .toBodilessEntity(), "checkAuthorityConnection"),
                 request,
                 connector);
     }
@@ -79,12 +77,11 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     public List<BaseAttribute> listRaProfileAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_RA_PROFILE_ATTRIBUTES_CONTEXT)
                         .body(Mono.just(authorityAttributes), ATTRIBUTE_LIST_TYPE_REF)
                         .retrieve()
-                        .toEntityList(BaseAttribute.class)
-                        .block().getBody(),
+                        .toEntityList(BaseAttribute.class), "listRaProfileAttributes"),
                 request,
                 connector);
     }
@@ -93,12 +90,11 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     public CrlResponseDto getCrl(ApiClientConnectorInfo connector, CrlRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_CRL_CONTEXT)
                         .body(Mono.just(requestDto), CrlRequestDto.class)
                         .retrieve()
-                        .toEntity(CrlResponseDto.class)
-                        .block().getBody(),
+                        .toEntity(CrlResponseDto.class), "getCrl"),
                 request,
                 connector);
     }
@@ -107,12 +103,11 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     public CaCertificatesResponseDto getCaCertificates(ApiClientConnectorInfo connector, CaCertificatesRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_CA_CERTIFICATES_CONTEXT)
                         .body(Mono.just(requestDto), CaCertificatesRequestDto.class)
                         .retrieve()
-                        .toEntity(CaCertificatesResponseDto.class)
-                        .block().getBody(),
+                        .toEntity(CaCertificatesResponseDto.class), "getCaCertificates"),
                 request,
                 connector);
     }

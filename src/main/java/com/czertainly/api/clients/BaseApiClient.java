@@ -16,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.*;
 import reactor.core.Exceptions;
@@ -180,6 +181,34 @@ public abstract class BaseApiClient {
                 .filter(ExchangeFilterFunction.ofResponseProcessor(BaseApiClient::handleHttpExceptions))
                 .exchangeStrategies(strategies)
                 .build();
+    }
+
+    /**
+     * Block on a {@code Mono<ResponseEntity<T>>} and guarantee a non-null response entity.
+     * {@code Mono.block()} returns null when the publisher completes empty; dereferencing that
+     * would throw an opaque NPE. Surfacing a clear IllegalStateException at the call site makes
+     * a misbehaving connector (no response) diagnosable instead of producing a bare NPE.
+     */
+    protected static <T> ResponseEntity<T> requireResponse(Mono<ResponseEntity<T>> mono, String context) {
+        ResponseEntity<T> entity = mono.block();
+        if (entity == null) {
+            throw new IllegalStateException("No response received from connector for " + context);
+        }
+        return entity;
+    }
+
+    /**
+     * Like {@link #requireResponse} but also requires a non-null body — for endpoints whose 2xx
+     * response must carry a payload (attribute lists, operation status, identify, CRL, CA certs).
+     * An empty body on success is a connector contract violation; fail clearly rather than
+     * returning null to the caller (which would NPE later, far from the cause).
+     */
+    protected static <T> T requireBody(Mono<ResponseEntity<T>> mono, String context) {
+        ResponseEntity<T> entity = requireResponse(mono, context);
+        if (entity.getBody() == null) {
+            throw new IllegalStateException("Connector returned an empty body for " + context);
+        }
+        return entity.getBody();
     }
 
     public static <T, R> R processRequest(Function<T, R> func, T request, ApiClientConnectorInfo connector) throws ConnectorException {
