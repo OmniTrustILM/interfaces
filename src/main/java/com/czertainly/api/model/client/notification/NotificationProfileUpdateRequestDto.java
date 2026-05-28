@@ -51,14 +51,9 @@ public class NotificationProfileUpdateRequestDto {
                 || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.MAPPED && recipientUuids != null && !recipientUuids.isEmpty());
     }
 
-    @AssertFalse(message = "Cannot send internal notification to recipient of type Mapped")
-    private boolean isInternalNotificationInvalidForObjectContact() {
-        return recipientType == RecipientType.MAPPED && internalNotification;
-    }
-
-    @AssertFalse(message = "Cannot send internal notification to recipient of type None and Default")
+    @AssertFalse(message = "Cannot send internal notification to recipient of type None, Default or Mapped")
     private boolean isInternalNotificationPossible() {
-        return (recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT) && internalNotification;
+        return (recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.MAPPED) && internalNotification;
     }
 
     @AssertTrue(message = "Notification instance and/or internal notification is required")
