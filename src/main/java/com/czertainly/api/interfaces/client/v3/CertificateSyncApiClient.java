@@ -2,8 +2,8 @@ package com.czertainly.api.interfaces.client.v3;
 
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.exception.ConnectorException;
-import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
+import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateDataResponseDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationResponseDto;
@@ -35,7 +35,7 @@ public interface CertificateSyncApiClient {
 
     // ---- Issue ----
 
-    List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException;
+    List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException;
 
     ResponseEntity<CertificateDataResponseDto> issue(ApiClientConnectorInfo connector, CertificateSignRequestDto requestDto) throws ConnectorException;
 
@@ -49,7 +49,7 @@ public interface CertificateSyncApiClient {
 
     // ---- Revoke ----
 
-    List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException;
+    List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException;
 
     ResponseEntity<CertificateDataResponseDto> revoke(ApiClientConnectorInfo connector, CertificateRevocationRequestDto requestDto) throws ConnectorException;
 
@@ -59,7 +59,7 @@ public interface CertificateSyncApiClient {
 
     // ---- Register ----
 
-    List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException;
+    List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException;
 
     ResponseEntity<CertificateDataResponseDto> register(ApiClientConnectorInfo connector, CertificateRegistrationRequestDto requestDto) throws ConnectorException;
 

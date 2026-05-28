@@ -4,8 +4,8 @@ import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.clients.mq.ProxyClient;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.interfaces.client.v3.CertificateSyncApiClient;
-import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
+import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateDataResponseDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationResponseDto;
@@ -63,8 +63,8 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     // ---- Issue ----
 
     @Override
-    public List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
-        BaseAttribute[] result = proxyClient.sendRequest(connector, PATH_ISSUE_ATTRIBUTES, HTTP_METHOD_POST, authorityAttributes, BaseAttribute[].class);
+    public List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
+        BaseAttribute[] result = proxyClient.sendRequest(connector, PATH_ISSUE_ATTRIBUTES, HTTP_METHOD_POST, requestDto, BaseAttribute[].class);
         return Arrays.asList(result);
     }
 
@@ -93,8 +93,8 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     // ---- Revoke ----
 
     @Override
-    public List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
-        BaseAttribute[] result = proxyClient.sendRequest(connector, PATH_REVOKE_ATTRIBUTES, HTTP_METHOD_POST, authorityAttributes, BaseAttribute[].class);
+    public List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
+        BaseAttribute[] result = proxyClient.sendRequest(connector, PATH_REVOKE_ATTRIBUTES, HTTP_METHOD_POST, requestDto, BaseAttribute[].class);
         return Arrays.asList(result);
     }
 
@@ -116,8 +116,8 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     // ---- Register ----
 
     @Override
-    public List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
-        BaseAttribute[] result = proxyClient.sendRequest(connector, PATH_REGISTER_ATTRIBUTES, HTTP_METHOD_POST, authorityAttributes, BaseAttribute[].class);
+    public List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
+        BaseAttribute[] result = proxyClient.sendRequest(connector, PATH_REGISTER_ATTRIBUTES, HTTP_METHOD_POST, requestDto, BaseAttribute[].class);
         return Arrays.asList(result);
     }
 

@@ -1,6 +1,5 @@
 package com.czertainly.api.interfaces.connector.v3;
 
-import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.v3.certificate.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
@@ -23,7 +24,11 @@ public interface CertificateController {
     @Operation(summary = "List dynamic attributes for issue (also used for renew, future rekey)")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Schema retrieved"))
     @PostMapping(path = "/issue/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listIssueAttributes(@RequestBody List<RequestAttribute> body);
+    List<BaseAttribute> listIssueAttributes(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Authority + RA-profile context used to scope the returned issue-attribute schema.",
+                    required = true)
+            @RequestBody CertificateAttributeListRequestDto request);
 
     @Operation(summary = "Issue a certificate (sync 200 or async 202)")
     @ApiResponses({
@@ -56,7 +61,11 @@ public interface CertificateController {
 
     @Operation(summary = "List dynamic attributes for revoke")
     @PostMapping(path = "/revoke/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRevokeAttributes(@RequestBody List<RequestAttribute> body);
+    List<BaseAttribute> listRevokeAttributes(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Authority + RA-profile context used to scope the returned revoke-attribute schema.",
+                    required = true)
+            @RequestBody CertificateAttributeListRequestDto request);
 
     @Operation(summary = "Revoke a certificate (sync 204 or async 202)")
     @ApiResponses({
@@ -78,7 +87,11 @@ public interface CertificateController {
 
     @Operation(summary = "List dynamic attributes for register")
     @PostMapping(path = "/register/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRegisterAttributes(@RequestBody List<RequestAttribute> body);
+    List<BaseAttribute> listRegisterAttributes(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Authority + RA-profile context used to scope the returned register-attribute schema.",
+                    required = true)
+            @RequestBody CertificateAttributeListRequestDto request);
 
     @Operation(summary = "Pre-register a certificate's identity at the upstream CA (no CSR)")
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

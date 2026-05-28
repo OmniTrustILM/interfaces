@@ -4,8 +4,8 @@ import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.interfaces.client.v3.CertificateSyncApiClient;
-import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
+import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateDataResponseDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationResponseDto;
@@ -16,7 +16,6 @@ import com.czertainly.api.model.connector.v3.certificate.CertificateRegistration
 import com.czertainly.api.model.connector.v3.certificate.CertificateRenewRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateRevocationRequestDto;
 import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDto;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -61,9 +60,6 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
 
     private static final String CERTIFICATE_IDENTIFY_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/identify";
 
-    private static final ParameterizedTypeReference<List<RequestAttribute>> ATTRIBUTE_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
-    };
-
     public CertificateApiClient(WebClient webClient, TrustManager[] defaultTrustManagers) {
         this.webClient = webClient;
         this.defaultTrustManagers = defaultTrustManagers;
@@ -72,12 +68,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Issue ----
 
     @Override
-    public List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
+    public List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_ISSUE_ATTRIBUTES_CONTEXT)
-                        .body(Mono.just(authorityAttributes), ATTRIBUTE_LIST_TYPE_REF)
+                        .body(Mono.just(requestDto), CertificateAttributeListRequestDto.class)
                         .retrieve()
                         .toEntityList(BaseAttribute.class), "listIssueAttributes"),
                 request,
@@ -141,12 +137,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Revoke ----
 
     @Override
-    public List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
+    public List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_REVOKE_ATTRIBUTES_CONTEXT)
-                        .body(Mono.just(authorityAttributes), ATTRIBUTE_LIST_TYPE_REF)
+                        .body(Mono.just(requestDto), CertificateAttributeListRequestDto.class)
                         .retrieve()
                         .toEntityList(BaseAttribute.class), "listRevokeAttributes"),
                 request,
@@ -195,12 +191,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Register ----
 
     @Override
-    public List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException {
+    public List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_REGISTER_ATTRIBUTES_CONTEXT)
-                        .body(Mono.just(authorityAttributes), ATTRIBUTE_LIST_TYPE_REF)
+                        .body(Mono.just(requestDto), CertificateAttributeListRequestDto.class)
                         .retrieve()
                         .toEntityList(BaseAttribute.class), "listRegisterAttributes"),
                 request,
