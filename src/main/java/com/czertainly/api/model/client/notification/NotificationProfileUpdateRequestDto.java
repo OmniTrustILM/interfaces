@@ -45,10 +45,15 @@ public class NotificationProfileUpdateRequestDto {
     @Schema(description = "Maximum number of repetitions of same notification", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer repetitions;
 
-    @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None or Default")
+    @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None, Default or Object Contact")
     private boolean isRecipientValid() {
-        return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT) && (recipientUuids == null || recipientUuids.isEmpty()))
-                || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientUuids != null && !recipientUuids.isEmpty());
+        return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.OBJECT_CONTACT) && (recipientUuids == null || recipientUuids.isEmpty()))
+                || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.OBJECT_CONTACT && recipientUuids != null && !recipientUuids.isEmpty());
+    }
+
+    @AssertFalse(message = "Cannot send internal notification to recipient of type Object Contact")
+    private boolean isInternalNotificationInvalidForObjectContact() {
+        return recipientType == RecipientType.OBJECT_CONTACT && internalNotification;
     }
 
     @AssertFalse(message = "Cannot send internal notification to recipient of type None and Default")
