@@ -47,13 +47,13 @@ public class NotificationProfileUpdateRequestDto {
 
     @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None, Default or Object Contact")
     private boolean isRecipientValid() {
-        return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.OBJECT_CONTACT) && (recipientUuids == null || recipientUuids.isEmpty()))
-                || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.OBJECT_CONTACT && recipientUuids != null && !recipientUuids.isEmpty());
+        return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.MAPPED) && (recipientUuids == null || recipientUuids.isEmpty()))
+                || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.MAPPED && recipientUuids != null && !recipientUuids.isEmpty());
     }
 
     @AssertFalse(message = "Cannot send internal notification to recipient of type Object Contact")
     private boolean isInternalNotificationInvalidForObjectContact() {
-        return recipientType == RecipientType.OBJECT_CONTACT && internalNotification;
+        return recipientType == RecipientType.MAPPED && internalNotification;
     }
 
     @AssertFalse(message = "Cannot send internal notification to recipient of type None and Default")
