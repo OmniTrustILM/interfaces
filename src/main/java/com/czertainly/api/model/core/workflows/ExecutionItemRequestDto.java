@@ -53,9 +53,9 @@ public class ExecutionItemRequestDto {
         return (sourceFieldSource == null) == (sourceFieldIdentifier == null);
     }
 
-    @AssertTrue(message = "When sourceFieldSource and sourceFieldIdentifier are set, fieldSource must be CUSTOM")
+    @AssertTrue(message = "When sourceFieldSource and sourceFieldIdentifier are set, fieldSource must be CUSTOM and fieldIdentifier must be non-null")
     private boolean isTargetCustomWhenSourceRefSet() {
-        return sourceFieldsNotDefined() || fieldSource == FilterFieldSource.CUSTOM;
+        return sourceFieldsNotDefined() || (fieldSource == FilterFieldSource.CUSTOM && fieldIdentifier != null);
     }
 
     @AssertTrue(message = "sourceFieldSource cannot be PROPERTY")
