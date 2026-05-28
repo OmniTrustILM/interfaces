@@ -5,6 +5,8 @@ import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
 import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
 import com.czertainly.api.model.core.enums.CertificateRequestFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -34,6 +36,7 @@ public class CertificateRenewRequestDto extends V3AuthorityScopedRequestDto {
     @Schema(description = "Base64 of cert to renew. Serial + issuer DN parsed from this constitute the cert identity at the CA.",
             format = "byte",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "existingCertificate is required for renew")
     private String existingCertificate;
 
     @Schema(description = "When true, request (CSR) is optional. Proof-of-possession is delegated to the upstream CA's renewal policy.",
@@ -49,4 +52,14 @@ public class CertificateRenewRequestDto extends V3AuthorityScopedRequestDto {
                   + "Replayed here so a stateless connector can resolve the upstream end-entity without an extra lookup.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
+
+    /**
+     * Renew requires a CSR unless {@code reuseKey=true} (in which case proof-of-possession is
+     * delegated to the upstream CA's renewal policy).
+     */
+    @AssertTrue(message = "request (CSR) is required for renew unless reuseKey=true")
+    @Schema(hidden = true)
+    public boolean isRequestProvidedOrKeyReused() {
+        return reuseKey || (request != null && !request.isBlank());
+    }
 }

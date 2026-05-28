@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -350,7 +351,7 @@ public interface ClientOperationController extends AuthProtectedController {
 	ClientCertificateDataResponseDto registerCertificate(
 			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
-			@RequestBody ClientCertificateRegistrationDto request)
+			@RequestBody @Valid ClientCertificateRegistrationDto request)
 			throws NotFoundException, ValidationException, ConnectorException;
 
 	@Operation(

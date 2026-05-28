@@ -2,6 +2,8 @@ package com.czertainly.api.model.client.authority;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -16,10 +18,12 @@ public class AuthorityInstanceRequestDto {
 
     @Schema(description = "Authority instance name",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Authority instance name is required")
     private String name;
 
     @Schema(description = "List of Authority instance Attributes",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "attributes is required (may be empty list, but must be present)")
     private List<RequestAttribute> attributes;
 
     @Schema(description = "List of Custom Attributes")
@@ -27,6 +31,7 @@ public class AuthorityInstanceRequestDto {
 
     @Schema(description = "UUID of Authority provider",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "connectorUuid is required")
     private String connectorUuid;
 
     @Schema(description = "UUID of the Connector Interface (AUTHORITY) to bind this instance to. "
@@ -40,6 +45,7 @@ public class AuthorityInstanceRequestDto {
     @Schema(description = "Authority instance Kind",
             examples = {"LegacyEjbca, ADCS, etc"},
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "kind is required")
     private String kind;
 
     @Override

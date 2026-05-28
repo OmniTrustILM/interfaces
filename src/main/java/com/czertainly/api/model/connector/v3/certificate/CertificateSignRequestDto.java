@@ -5,6 +5,7 @@ import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
 import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
 import com.czertainly.api.model.core.enums.CertificateRequestFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,6 +24,7 @@ public class CertificateSignRequestDto extends V3AuthorityScopedRequestDto {
     @Schema(description = "Certificate signing request, Base64-encoded",
             format = "byte",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "CSR (request) is required for issue")
     private String request;
 
     @Schema(description = "CSR format",

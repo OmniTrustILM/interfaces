@@ -2,6 +2,7 @@ package com.czertainly.api.model.connector.v3;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,9 +19,11 @@ public abstract class V3AuthorityScopedRequestDto {
 
     @Schema(description = "Authority attribute blob — full set of values Core stored when the authority was created",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "authorityAttributes is required (may be empty list, but must be present)")
     private List<RequestAttribute> authorityAttributes;
 
     @Schema(description = "RA profile attribute blob — full set of values Core stored when the RA profile was created",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "raProfileAttributes is required (may be empty list, but must be present)")
     private List<RequestAttribute> raProfileAttributes;
 }

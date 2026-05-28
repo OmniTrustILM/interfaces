@@ -5,6 +5,8 @@ import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
 import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
 import com.czertainly.api.model.core.authority.CertificateRevocationReason;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -24,10 +26,12 @@ public class CertificateRevocationRequestDto extends V3AuthorityScopedRequestDto
     @Schema(description = "Base64 of cert to revoke. Serial + issuer DN parsed from this constitute the cert identity at the CA.",
             format = "byte",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "certificate is required for revoke")
     private String certificate;
 
     @Schema(description = "Revocation reason",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Revocation reason is required")
     private CertificateRevocationReason reason;
 
     @Schema(description = "Revoke-specific dynamic attributes",
