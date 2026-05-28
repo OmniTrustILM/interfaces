@@ -156,17 +156,31 @@ public interface ClientOperationController extends AuthProtectedController {
 			@RequestBody List<RequestAttribute>attributes) throws NotFoundException, ConnectorException, ValidationException;
 
 	@Operation(
-			summary = "Issue an existing certificate request",
-			description = "Trigger issuance for a certificate already in state `REQUESTED`. Used after the certificate request has been created (typically via a protocol such as ACME, SCEP, or CMP) and any approval and compliance flows have completed."
+			summary = "Issue an existing certificate (REQUESTED or REGISTERED)",
+			description = """
+					Trigger issuance for an existing certificate. Behavior depends on cert state:
+					- `REQUESTED` (no body): the certificate already has a CSR attached (typically from
+					  a protocol layer such as ACME, SCEP, or CMP, or after an approval/compliance cycle).
+					  Issuance is triggered with the existing CSR.
+					- `REGISTERED` (body required): the certificate was pre-registered (v3 authorities with
+					  `CERTIFICATE_REGISTRATION` capability) and is now being finalized with an operator-
+					  supplied CSR. The CSR + sign attributes from the body are attached to the existing
+					  certificate row, then issuance is triggered. The cert's identity (subject DN, SAN,
+					  extensions) and connector-supplied metadata from the registration are preserved.
+					"""
 	)
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate issued"),
 			@ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
 					examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
-	@PostMapping(path = "/certificates/{certificateUuid}/issue", produces = {"application/json"})
-	ClientCertificateDataResponseDto issueRequestedCertificate(
+	@PostMapping(path = "/certificates/{certificateUuid}/issue", consumes = {"application/json"}, produces = {"application/json"})
+	ClientCertificateDataResponseDto issueExistingCertificate(
 			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
-			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException;
+			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(
+					description = "Sign request body. Required when cert state is REGISTERED (carries the operator's CSR + sign attributes); must be omitted when cert state is REQUESTED.",
+					required = false)
+			@RequestBody(required = false) @Valid ClientCertificateSignRequestDto request) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException, AttributeException;
 
 	@Operation(
 			summary = "Issue certificate",
