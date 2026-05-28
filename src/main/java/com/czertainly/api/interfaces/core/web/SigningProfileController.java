@@ -141,34 +141,6 @@ public interface SigningProfileController extends AuthProtectedController {
     @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BulkActionMessageDto> bulkDisableSigningProfiles(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Signing Profile UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 
-    @Operation(operationId = "getAssociatedApprovalProfiles", summary = "List of Approval Profiles associated with the Signing Profile")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Approval Profiles retrieved"),
-            @ApiResponse(responseCode = "404", description = "Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
-    })
-    @GetMapping(path = "/{uuid}/approvalProfiles", produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<ApprovalProfileDto> getAssociatedApprovalProfiles(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid) throws NotFoundException;
-
-    @Operation(operationId = "associateWithApprovalProfile", summary = "Associate Signing Profile with the Approval Profile")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Approval Profile associated with the Signing Profile"),
-            @ApiResponse(responseCode = "404", description = "Signing Profile or Approval Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
-    })
-    @PatchMapping(path = "/{signingProfileUuid}/approvalProfiles/{approvalProfileUuid}", produces = {"application/json"})
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void associateWithApprovalProfile(@Parameter(description = "Signing Profile UUID") @PathVariable UUID signingProfileUuid,
-                                      @Parameter(description = "Approval Profile UUID") @PathVariable UUID approvalProfileUuid) throws NotFoundException;
-
-    @Operation(operationId = "disassociateFromApprovalProfile", summary = "Disassociate Signing Profile with the Approval Profile")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Approval Profile disassociated from the the Signing Profile"),
-            @ApiResponse(responseCode = "404", description = "Signing Profile or Approval Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
-    })
-    @DeleteMapping(path = "/{signingProfileUuid}/approvalProfiles/{approvalProfileUuid}", produces = {"application/json"})
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void disassociateFromApprovalProfile(@Parameter(description = "Signing Profile UUID") @PathVariable UUID signingProfileUuid,
-                                         @Parameter(description = "Approval Profile UUID") @PathVariable UUID approvalProfileUuid) throws NotFoundException;
-
     @Operation(operationId = "listSigningCertificates", summary = "Get list of certificates eligible to be used for digital signing")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of certificates retrieved")})
     @GetMapping(path = "/signingCertificates", produces = MediaType.APPLICATION_JSON_VALUE)
