@@ -45,13 +45,13 @@ public class NotificationProfileUpdateRequestDto {
     @Schema(description = "Maximum number of repetitions of same notification", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer repetitions;
 
-    @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None, Default or Object Contact")
+    @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None, Default or Mapped")
     private boolean isRecipientValid() {
         return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.MAPPED) && (recipientUuids == null || recipientUuids.isEmpty()))
                 || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.MAPPED && recipientUuids != null && !recipientUuids.isEmpty());
     }
 
-    @AssertFalse(message = "Cannot send internal notification to recipient of type Object Contact")
+    @AssertFalse(message = "Cannot send internal notification to recipient of type Mapped")
     private boolean isInternalNotificationInvalidForObjectContact() {
         return recipientType == RecipientType.MAPPED && internalNotification;
     }
