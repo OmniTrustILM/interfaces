@@ -18,7 +18,9 @@ public enum RecipientType implements IPlatformEnum {
     USER("user", "User", "Recipient is registered user", Resource.USER),
     GROUP("group", "Group", "Recipient is group from inventory", Resource.GROUP),
     ROLE("role", "Role", "Recipient is registered role", Resource.ROLE),
-    OWNER("owner", "Owner", "Recipient is user that is associated as owner of resource object that is connected with notification", Resource.USER);
+    OWNER("owner", "Owner", "Recipient is user that is associated as owner of resource object that is connected with notification", Resource.USER),
+    MAPPED("mapped", "Mapped", "Notification is sent to the contact resolved via the notification instance's mapping attributes", null)
+    ;
 
     private static final RecipientType[] VALUES;
 
