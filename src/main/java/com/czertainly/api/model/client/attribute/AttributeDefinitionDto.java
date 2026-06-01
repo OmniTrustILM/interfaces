@@ -32,6 +32,12 @@ public class AttributeDefinitionDto implements Loggable {
     private String name;
 
     /**
+     * Attribute Label
+     */
+    @Schema(description = "Attribute Label", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String label;
+
+    /**
      * Content Type of the Attribute
      */
     @Schema(description = "Attribute Content Type", requiredMode = Schema.RequiredMode.REQUIRED)

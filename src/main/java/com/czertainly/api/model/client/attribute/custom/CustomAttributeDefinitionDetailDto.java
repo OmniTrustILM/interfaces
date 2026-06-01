@@ -26,16 +26,6 @@ public class CustomAttributeDefinitionDetailDto extends AttributeDefinitionDto {
     private AttributeType type;
 
     /**
-     * Friendly name of the Attribute
-     **/
-    @Schema(
-            description = "Friendly name of the the Attribute",
-            examples = {"Attribute Name"},
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private String label;
-
-    /**
      * Boolean determining if the Attribute is required. If true, the Attribute must be provided.
      **/
     @Schema(
@@ -115,7 +105,7 @@ public class CustomAttributeDefinitionDetailDto extends AttributeDefinitionDto {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("type", type)
-                .append("label", label)
+                .append("label", getLabel())
                 .append("visible", visible)
                 .append("group", group)
                 .append("readOnly", readOnly)
