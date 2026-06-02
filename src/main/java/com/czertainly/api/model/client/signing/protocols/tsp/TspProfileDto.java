@@ -3,6 +3,7 @@ package com.czertainly.api.model.client.signing.protocols.tsp;
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
 import com.czertainly.api.model.client.signing.profile.SimplifiedSigningProfileDto;
 import com.czertainly.api.model.common.NameAndUuidDto;
+import com.czertainly.api.model.core.signing.TspAuthenticationMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,6 +33,13 @@ public class TspProfileDto extends NameAndUuidDto {
             example = "https://ilm.otilm.com/api/v1/protocols/tsp/tsp-profile-1/sign"
     )
     private String signingUrl;
+
+    @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
+
+    @Schema(description = "Read-only Basic credentials configured on this profile in case BASIC_PASSWORD authentication method " +
+            "is configured. Secret is never returned to the client.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<TspBasicCredentialDto> basicCredentials = new ArrayList<>();
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();

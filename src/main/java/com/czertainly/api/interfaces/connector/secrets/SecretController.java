@@ -54,6 +54,35 @@ public interface SecretController extends AuthProtectedConnectorController {
     @PostMapping(path = "/content", consumes = {"application/json"}, produces = {"application/json"})
     SecretContentResponseDto getSecretContent(@Parameter(description = "Secret request") @Valid @RequestBody SecretRequestDto request, @RequestParam(required = false, name = "version") String version) throws NotFoundException;
 
+    @Operation(summary = "Verify Secret Content",
+            description = "Verify the provided secret content against the stored secret. The match flag in the response indicates " +
+                    "whether the provided content matches the stored secret. This operation does not return the stored secret content for security reasons. " +
+                    "This is optional operation gated by the 'secretContentVerification' feature flag.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Verification performed; see match flag in the response"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found. Secret or secret version not found",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Service Unavailable",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)
+                    )
+            )})
+    @PostMapping(path = "/content/verify", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    SecretVerificationResponseDto verifySecretContent(@Parameter(description = "Secret verification request") @Valid @RequestBody SecretVerificationRequestDto request,
+                                                      @RequestParam(required = false, name = "version") String version) throws NotFoundException;
+
     @Operation(summary = "Create Secret")
     @ApiResponses(value = {
             @ApiResponse(
