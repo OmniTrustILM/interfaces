@@ -29,7 +29,7 @@ public abstract class FormatDtbsRequestDto implements FormatDtbsInterface {
 
     @NotEmpty
     @Schema(
-            description = "Certificate chain where the first element is the signer certificate. Individual certificates must be Base64 DER encoded X.509 certificates.",
+            description = "Certificate chain where the first element is the signer certificate. Individual certificates are DER encoded X.509 certificates (represented as Base64 strings in the JSON transport).",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private List<byte[]> certificateChain;
