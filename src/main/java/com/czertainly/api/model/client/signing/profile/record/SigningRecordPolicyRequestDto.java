@@ -31,6 +31,6 @@ public class SigningRecordPolicyRequestDto {
     @Schema(description = "Delete the signed document after CSC API async retrieval succeeds")
     private boolean deleteAfterRetrieval;
 
-    @Schema(description = "Persistence-mode trade-off between latency and durability", defaultValue = "DEFERRED_DURABLE")
+    @Schema(description = "Persistence-mode trade-off between latency and durability", defaultValue = "deferred_durable")
     private SigningRecordPersistenceMode persistenceMode = SigningRecordPersistenceMode.DEFERRED_DURABLE;
 }
