@@ -8,13 +8,12 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Schema(name = "SigningRecordDto", description = "Signing Record detail")
-public class SigningRecordDto extends NameAndUuidDto {
+@Schema(name = "SigningRecordListDto", description = "Signing Record details for listing")
+public class SigningRecordListDto extends NameAndUuidDto {
 
     @Schema(description = "Signing Profile used to produce this Signing Record", requiredMode = Schema.RequiredMode.REQUIRED)
     private SigningProfileListDto signingProfile;
@@ -33,28 +32,4 @@ public class SigningRecordDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Instant createdAt;
-
-    @Schema(
-            description = "Raw signature value as a byte array (e.g. the DER-encoded CMS SignedData structure " +
-                    "for CAdES, or the detached XML signature element for XAdES). " +
-                    "May be null if the signature value was not retained by the platform.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED
-    )
-    private byte[] signatureValue;
-
-    @Schema(description = "Signed document bytes (Base64-encoded), if recorded",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private byte[] signedDocument;
-
-    @Schema(description = "Data-to-be-signed bytes (Base64-encoded), if recorded",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private byte[] dtbs;
-
-    @Schema(description = "Captured request metadata (JSON), if recorded",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private String requestMetadataJson;
-
-    @Schema(description = "Time the signed document was first served via CSC retrieval, if any",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Instant signedDocumentRetrievedAt;
 }

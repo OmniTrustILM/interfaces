@@ -106,6 +106,7 @@ public enum Resource implements IPlatformEnum {
 
     // SIGNING
     SIGNING_PROFILE(Codes.SIGNING_PROFILE, "Signing Profile", true, true),
+    SIGNING_RECORD(Codes.SIGNING_RECORD, "Signing Record", true, true),
     TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
     TSP_PROFILE(Codes.TSP_PROFILE, "Timestamping Protocol Profile", true, true),
     ;
@@ -113,7 +114,7 @@ public enum Resource implements IPlatformEnum {
     private static final Resource[] VALUES;
     private static final EnumSet<Resource> complianceSubjects = EnumSet.of(Resource.CERTIFICATE, Resource.CERTIFICATE_REQUEST, Resource.CRYPTOGRAPHIC_KEY, Resource.SECRET);
     private static final EnumSet<Resource> complianceProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.TOKEN_PROFILE, Resource.VAULT_PROFILE);
-    private static final EnumSet<Resource> approvalProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.VAULT_PROFILE);
+    private static final EnumSet<Resource> approvalProfilesAssignable = EnumSet.of(Resource.RA_PROFILE, Resource.SIGNING_PROFILE, Resource.VAULT_PROFILE);
 
     static {
         VALUES = values();
@@ -248,6 +249,7 @@ public enum Resource implements IPlatformEnum {
         public static final String SIGNING_PROFILE = "signingProfiles";
         public static final String TSP_PROFILE = "tspProfiles";
         public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
+        public static final String SIGNING_RECORD = "signingRecords";
 
         private Codes() {
 
