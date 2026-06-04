@@ -4,6 +4,7 @@ import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
 import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import com.czertainly.api.model.core.enums.CertificateRequestFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -58,6 +59,7 @@ public class CertificateRenewRequestDtoV3 extends AuthorityV3ScopedRequestDto {
      * delegated to the upstream CA's renewal policy).
      */
     @AssertTrue(message = "request (CSR) is required for renew unless reuseKey=true")
+    @JsonIgnore
     @Schema(hidden = true)
     public boolean isRequestProvidedOrKeyReused() {
         return reuseKey || (request != null && !request.isBlank());

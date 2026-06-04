@@ -2,6 +2,7 @@ package com.czertainly.api.model.connector.v3.certificate;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -50,6 +51,7 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
      * — but cannot be empty in both.
      */
     @AssertTrue(message = "At least one of subjectDn or subjectAltName must be non-empty (RFC 5280 §4.1.2.6)")
+    @JsonIgnore
     @Schema(hidden = true)
     public boolean isSubjectIdentificationProvided() {
         return (subjectDn != null && !subjectDn.isBlank())
