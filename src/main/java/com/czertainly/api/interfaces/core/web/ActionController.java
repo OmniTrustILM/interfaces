@@ -41,9 +41,10 @@ public interface ActionController extends AuthProtectedController {
     ExecutionDto getExecution(@Parameter(description = "Execution UUID") @PathVariable String executionUuid) throws NotFoundException;
 
     @Operation(summary = "Update Execution")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Execution updated"), @ApiResponse(responseCode = "404", description = "Execution not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Execution updated"), @ApiResponse(responseCode = "404", description = "Execution not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Execution already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PutMapping(path = "/executions/{executionUuid}", consumes = {"application/json"}, produces = {"application/json"})
-    ExecutionDto updateExecution(@Parameter(description = "Execution UUID") @PathVariable String executionUuid, @Valid @RequestBody UpdateExecutionRequestDto request) throws NotFoundException;
+    ExecutionDto updateExecution(@Parameter(description = "Execution UUID") @PathVariable String executionUuid, @RequestBody @Valid UpdateExecutionRequestDto request) throws NotFoundException, AlreadyExistException;
 
     @Operation(summary = "Delete Execution")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Execution deleted"), @ApiResponse(responseCode = "404", description = "Execution not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
@@ -69,9 +70,10 @@ public interface ActionController extends AuthProtectedController {
     ActionDetailDto getAction(@Parameter(description = "Action UUID") @PathVariable String actionUuid) throws NotFoundException;
 
     @Operation(summary = "Update Action")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Action updated"), @ApiResponse(responseCode = "404", description = "Action or Execution not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Action updated"), @ApiResponse(responseCode = "404", description = "Action or Execution not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Action already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PutMapping(path = "/actions/{actionUuid}", consumes = {"application/json"}, produces = {"application/json"})
-    ActionDetailDto updateAction(@Parameter(description = "Action UUID") @PathVariable String actionUuid, @RequestBody UpdateActionRequestDto request) throws NotFoundException;
+    ActionDetailDto updateAction(@Parameter(description = "Action UUID") @PathVariable String actionUuid, @RequestBody @Valid UpdateActionRequestDto request) throws NotFoundException, AlreadyExistException;
 
     @Operation(summary = "Delete Action")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Action deleted"), @ApiResponse(responseCode = "404", description = "Action not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})

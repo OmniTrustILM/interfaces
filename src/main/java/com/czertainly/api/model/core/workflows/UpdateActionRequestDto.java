@@ -1,5 +1,6 @@
 package com.czertainly.api.model.core.workflows;
 
+import com.czertainly.api.model.common.validation.NullableNotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -8,6 +9,13 @@ import java.util.List;
 
 @Data
 public class UpdateActionRequestDto {
+
+    @Schema(
+            description = "Name of the action",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    @NullableNotBlank
+    private String name;
 
     @Schema(
             description = "Description of the action"

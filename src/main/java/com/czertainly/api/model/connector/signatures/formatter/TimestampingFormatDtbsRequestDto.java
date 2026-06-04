@@ -50,10 +50,10 @@ public class TimestampingFormatDtbsRequestDto extends FormatDtbsRequestDto {
     )
     private Instant signingTime;
 
-    @NotNull
     @Schema(
-            description = "Accuracy of the signing time, captured by Core from the time quality system (ISO 8601 duration, e.g. PT0.001S for 1 ms)",
-            requiredMode = Schema.RequiredMode.REQUIRED,
+            description = "Accuracy of the signing time, captured by Core from the time quality system (ISO 8601 duration, e.g. PT0.001S for 1 ms). "
+                    + "Optional per RFC 3161 — absent when no Time Quality Configuration applies (e.g. a non-qualified local-clock timestamp).",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             type = "string",
             example = "PT0.001S"
     )

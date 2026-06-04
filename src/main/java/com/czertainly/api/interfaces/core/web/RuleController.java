@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,10 +46,11 @@ public interface RuleController extends AuthProtectedController {
     @Operation(summary = "Update Condition")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Condition updated"),
-            @ApiResponse(responseCode = "404", description = "Condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+            @ApiResponse(responseCode = "404", description = "Condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Condition already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PutMapping(path = "/conditions/{conditionUuid}", consumes = {"application/json"}, produces = {"application/json"})
-    ConditionDto updateCondition(@Parameter(description = "Condition UUID") @PathVariable String conditionUuid, @RequestBody UpdateConditionRequestDto request) throws NotFoundException;
+    ConditionDto updateCondition(@Parameter(description = "Condition UUID") @PathVariable String conditionUuid, @RequestBody @Valid UpdateConditionRequestDto request) throws NotFoundException, AlreadyExistException;
 
     @Operation(summary = "Delete Condition")
     @ApiResponses(value = {
@@ -85,10 +87,11 @@ public interface RuleController extends AuthProtectedController {
     @Operation(summary = "Update Rule")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rule details updated"),
-            @ApiResponse(responseCode = "404", description = "Rule or condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+            @ApiResponse(responseCode = "404", description = "Rule or condition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Rule already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PutMapping(path = "/rules/{ruleUuid}", consumes = {"application/json"}, produces = {"application/json"})
-    RuleDetailDto updateRule(@Parameter(description = "Rule UUID") @PathVariable String ruleUuid, @RequestBody UpdateRuleRequestDto request) throws NotFoundException;
+    RuleDetailDto updateRule(@Parameter(description = "Rule UUID") @PathVariable String ruleUuid, @RequestBody @Valid UpdateRuleRequestDto request) throws NotFoundException, AlreadyExistException;
 
     @Operation(summary = "Delete Rule")
     @ApiResponses(value = {
