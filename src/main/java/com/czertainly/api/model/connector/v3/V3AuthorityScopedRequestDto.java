@@ -17,12 +17,12 @@ import java.util.List;
 @Setter
 public abstract class V3AuthorityScopedRequestDto {
 
-    @Schema(description = "Authority attribute blob — full set of values Core stored when the authority was created",
+    @Schema(description = "Authority attributes",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "authorityAttributes is required (may be empty list, but must be present)")
     private List<RequestAttribute> authorityAttributes;
 
-    @Schema(description = "RA profile attribute blob — full set of values Core stored when the RA profile was created",
+    @Schema(description = "RA profile attributes",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "raProfileAttributes is required (may be empty list, but must be present)")
     private List<RequestAttribute> raProfileAttributes;

@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/** No additional fields — chain returned for the authority resolved from inherited attributes. */
 @Getter
 @Setter
 @ToString(callSuper = true)

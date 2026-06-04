@@ -40,7 +40,8 @@ public interface CertificateController extends AuthProtectedConnectorController 
             })
     @GetMapping(path = "/issue/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BaseAttribute> listIssueCertificateAttributes(
-            @Parameter(description = "Authority Instance UUID") @PathVariable String uuid) throws NotFoundException;
+            @Parameter(description = "Authority Inst" +
+                    "ance UUID") @PathVariable String uuid) throws NotFoundException;
 
     @Operation(
             summary = "Validate list of Attributes to issue Certificate"

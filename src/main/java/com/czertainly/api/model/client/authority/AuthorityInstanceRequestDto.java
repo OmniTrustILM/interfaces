@@ -42,10 +42,11 @@ public class AuthorityInstanceRequestDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID interfaceUuid;
 
-    @Schema(description = "Authority instance Kind",
-            examples = {"LegacyEjbca, ADCS, etc"},
-            requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "kind is required")
+    @Schema(description = "Authority instance Kind. Used only by v1 connectors (framework V1), which "
+            + "implement the legacy AttributesController and carry kind in the wire path. v2 connectors "
+            + "ignore it (they dispatch on connector interface).",
+            examples = {"LegacyEjbca", "ADCS"},
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String kind;
 
     @Override

@@ -17,24 +17,20 @@ import java.util.List;
 
 @RequestMapping("/v3/authorityProvider/certificates")
 @Tag(name = "v3 Certificate Operations",
-     description = "Stateless v3 certificate operations — every body carries authorityAttributes + raProfileAttributes")
+        description = "Stateless v3 certificate operations — every body carries authorityAttributes + raProfileAttributes")
 public interface CertificateController {
 
     // ---- Issue ----
 
-    @Operation(summary = "List dynamic attributes for issue (also used for renew, future rekey)")
+    @Operation(summary = "List attributes for issue operation")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Schema retrieved"))
     @PostMapping(path = "/issue/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listIssueAttributes(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Authority + RA-profile context used to scope the returned issue-attribute schema.",
-                    required = true)
-            @RequestBody @Valid CertificateAttributeListRequestDto request);
+    List<BaseAttribute> listIssueAttributes(@RequestBody @Valid CertificateAttributeListRequestDto request);
 
     @Operation(summary = "Issue a certificate (sync 200 or async 202)")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Issued synchronously"),
-        @ApiResponse(responseCode = "202", description = "Issuance accepted asynchronously; body carries meta tracking handle")
+            @ApiResponse(responseCode = "200", description = "Issued synchronously"),
+            @ApiResponse(responseCode = "202", description = "Issuance accepted asynchronously; body carries meta tracking handle")
     })
     @PostMapping(path = "/issue", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<CertificateDataResponseDto> issue(@RequestBody @Valid CertificateSignRequestDto request);
@@ -45,9 +41,9 @@ public interface CertificateController {
 
     @Operation(summary = "Cancel an in-flight async issue/renew/rekey operation")
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Aborted"),
-        @ApiResponse(responseCode = "404", description = "Operation not tracked — treat as terminal cancellation"),
-        @ApiResponse(responseCode = "422", description = "Refused — past point of no return")
+            @ApiResponse(responseCode = "204", description = "Aborted"),
+            @ApiResponse(responseCode = "404", description = "Operation not tracked — treat as terminal cancellation"),
+            @ApiResponse(responseCode = "422", description = "Refused — past point of no return")
     })
     @PostMapping(path = "/issue/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> cancelIssue(@RequestBody @Valid CertificateOperationCancelRequestDto request);
@@ -62,16 +58,12 @@ public interface CertificateController {
 
     @Operation(summary = "List dynamic attributes for revoke")
     @PostMapping(path = "/revoke/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRevokeAttributes(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Authority + RA-profile context used to scope the returned revoke-attribute schema.",
-                    required = true)
-            @RequestBody @Valid CertificateAttributeListRequestDto request);
+    List<BaseAttribute> listRevokeAttributes(@RequestBody @Valid CertificateAttributeListRequestDto request);
 
     @Operation(summary = "Revoke a certificate (sync 204 or async 202)")
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Revoked synchronously"),
-        @ApiResponse(responseCode = "202", description = "Revocation accepted asynchronously; body carries meta tracking handle")
+            @ApiResponse(responseCode = "204", description = "Revoked synchronously"),
+            @ApiResponse(responseCode = "202", description = "Revocation accepted asynchronously; body carries meta tracking handle")
     })
     @PostMapping(path = "/revoke", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<CertificateDataResponseDto> revoke(@RequestBody @Valid CertificateRevocationRequestDto request);
@@ -88,11 +80,7 @@ public interface CertificateController {
 
     @Operation(summary = "List dynamic attributes for register")
     @PostMapping(path = "/register/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRegisterAttributes(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Authority + RA-profile context used to scope the returned register-attribute schema.",
-                    required = true)
-            @RequestBody @Valid CertificateAttributeListRequestDto request);
+    List<BaseAttribute> listRegisterAttributes(@RequestBody @Valid CertificateAttributeListRequestDto request);
 
     @Operation(summary = "Pre-register a certificate's identity at the upstream CA (no CSR)")
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

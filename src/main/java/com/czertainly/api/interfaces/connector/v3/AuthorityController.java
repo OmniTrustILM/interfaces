@@ -25,17 +25,21 @@ public interface AuthorityController {
     @Operation(summary = "Validate authority attributes by attempting to reach the upstream CA")
     @ApiResponse(responseCode = "204", description = "Upstream CA is reachable with these attributes")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> checkAuthorityConnection(@RequestBody List<RequestAttribute> body);
+    ResponseEntity<Void> checkAuthorityConnection(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authority attributes", required = true)
+            @RequestBody List<RequestAttribute> attributes);
 
     @Operation(summary = "RA profile attribute schema given authority context")
     @PostMapping(path = "/raProfile/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRaProfileAttributes(@RequestBody List<RequestAttribute> body);
+    List<BaseAttribute> listRaProfileAttributes(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authority attributes", required = true)
+            @RequestBody List<RequestAttribute> attributes);
 
     @Operation(summary = "Fetch CRL (full or delta) from the upstream CA")
     @PostMapping(path = "/crl", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CrlResponseDto getCrl(@RequestBody CrlRequestDto body);
+    CrlResponseDto getCrl(@RequestBody CrlRequestDto request);
 
     @Operation(summary = "Fetch CA certificate chain from the upstream CA")
     @PostMapping(path = "/caCertificates", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CaCertificatesResponseDto getCaCertificates(@RequestBody CaCertificatesRequestDto body);
+    CaCertificatesResponseDto getCaCertificates(@RequestBody CaCertificatesRequestDto request);
 }
