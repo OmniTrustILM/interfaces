@@ -8,12 +8,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class V3AuthorityScopedRequestDtoTest {
+class AuthorityV3ScopedRequestDtoTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     /** Concrete subclass for testing the abstract base. */
-    static class Probe extends V3AuthorityScopedRequestDto {}
+    static class Probe extends AuthorityV3ScopedRequestDto {}
 
     @Test
     void roundTripsEmptyLists() throws Exception {

@@ -1,7 +1,7 @@
 package com.czertainly.api.model.connector.v3.certificate;
 
 import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
-import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class CertificateOperationCancelRequestDto extends V3AuthorityScopedRequestDto {
+public class CertificateOperationCancelRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Connector-defined metadata returned in the original 202 Accepted response",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)

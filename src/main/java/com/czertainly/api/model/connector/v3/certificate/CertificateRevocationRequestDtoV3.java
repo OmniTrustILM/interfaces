@@ -2,7 +2,7 @@ package com.czertainly.api.model.connector.v3.certificate;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
-import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import com.czertainly.api.model.core.authority.CertificateRevocationReason;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class CertificateRevocationRequestDto extends V3AuthorityScopedRequestDto {
+public class CertificateRevocationRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Base64 of cert to revoke. Serial + issuer DN parsed from this constitute the cert identity at the CA.",
             format = "byte",

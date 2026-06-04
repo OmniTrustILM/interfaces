@@ -14,12 +14,12 @@ class CrlDtosTest {
 
     @Test
     void requestRoundTripsDeltaFlag() throws Exception {
-        CrlRequestDto dto = new CrlRequestDto();
+        CrlRequestDtoV3 dto = new CrlRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setDelta(true);
         String json = mapper.writeValueAsString(dto);
-        CrlRequestDto back = mapper.readValue(json, CrlRequestDto.class);
+        CrlRequestDtoV3 back = mapper.readValue(json, CrlRequestDtoV3.class);
         assertTrue(back.isDelta());
     }
 

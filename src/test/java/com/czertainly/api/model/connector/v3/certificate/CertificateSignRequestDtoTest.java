@@ -15,7 +15,7 @@ class CertificateSignRequestDtoTest {
 
     @Test
     void roundTripsAllFields() throws Exception {
-        CertificateSignRequestDto dto = new CertificateSignRequestDto();
+        CertificateSignRequestDtoV3 dto = new CertificateSignRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setRequest("MIICij...");
@@ -24,7 +24,7 @@ class CertificateSignRequestDtoTest {
         dto.setMeta(List.of());
 
         String json = mapper.writeValueAsString(dto);
-        CertificateSignRequestDto back = mapper.readValue(json, CertificateSignRequestDto.class);
+        CertificateSignRequestDtoV3 back = mapper.readValue(json, CertificateSignRequestDtoV3.class);
         assertEquals("MIICij...", back.getRequest());
         assertEquals(CertificateRequestFormat.PKCS10, back.getFormat());
     }
@@ -32,7 +32,7 @@ class CertificateSignRequestDtoTest {
     @Test
     void metaOptional() throws Exception {
         String json = "{\"authorityAttributes\":[],\"raProfileAttributes\":[],\"request\":\"X\"}";
-        CertificateSignRequestDto back = mapper.readValue(json, CertificateSignRequestDto.class);
+        CertificateSignRequestDtoV3 back = mapper.readValue(json, CertificateSignRequestDtoV3.class);
         assertNull(back.getMeta());
     }
 }

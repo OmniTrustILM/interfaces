@@ -28,25 +28,25 @@ class StatusDtosTest {
 
     @Test
     void statusRequestRoundTrips() throws Exception {
-        CertificateOperationStatusRequestDto dto = new CertificateOperationStatusRequestDto();
+        CertificateOperationStatusRequestDtoV3 dto = new CertificateOperationStatusRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setMeta(List.of());
         String json = mapper.writeValueAsString(dto);
-        CertificateOperationStatusRequestDto back =
-                mapper.readValue(json, CertificateOperationStatusRequestDto.class);
+        CertificateOperationStatusRequestDtoV3 back =
+                mapper.readValue(json, CertificateOperationStatusRequestDtoV3.class);
         assertEquals(0, back.getMeta().size());
     }
 
     @Test
     void cancelRequestRoundTrips() throws Exception {
-        CertificateOperationCancelRequestDto dto = new CertificateOperationCancelRequestDto();
+        CertificateOperationCancelRequestDtoV3 dto = new CertificateOperationCancelRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setMeta(List.of());
         String json = mapper.writeValueAsString(dto);
-        CertificateOperationCancelRequestDto back =
-                mapper.readValue(json, CertificateOperationCancelRequestDto.class);
+        CertificateOperationCancelRequestDtoV3 back =
+                mapper.readValue(json, CertificateOperationCancelRequestDtoV3.class);
         assertEquals(0, back.getMeta().size());
     }
 }

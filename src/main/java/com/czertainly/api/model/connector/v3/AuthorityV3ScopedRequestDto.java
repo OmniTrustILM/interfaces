@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public abstract class V3AuthorityScopedRequestDto {
+public abstract class AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Authority attributes",
             requiredMode = Schema.RequiredMode.REQUIRED)

@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @RequestMapping("/v3/authorityProvider/certificates")
-@Tag(name = "v3 Certificate Operations",
-        description = "Stateless v3 certificate operations — every body carries authorityAttributes + raProfileAttributes")
+@Tag(name = "Certificate Management v3",
+        description = "Stateless v3 certificate operations by utilizing attributes in request for identifying authority or RA profile")
 public interface CertificateController {
 
     // ---- Issue ----
@@ -25,7 +25,7 @@ public interface CertificateController {
     @Operation(summary = "List attributes for issue operation")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Schema retrieved"))
     @PostMapping(path = "/issue/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listIssueAttributes(@RequestBody @Valid CertificateAttributeListRequestDto request);
+    List<BaseAttribute> listIssueAttributes(@RequestBody @Valid CertificateAttributeListRequestDtoV3 request);
 
     @Operation(summary = "Issue a certificate (sync 200 or async 202)")
     @ApiResponses({
@@ -33,11 +33,11 @@ public interface CertificateController {
             @ApiResponse(responseCode = "202", description = "Issuance accepted asynchronously; body carries meta tracking handle")
     })
     @PostMapping(path = "/issue", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CertificateDataResponseDto> issue(@RequestBody @Valid CertificateSignRequestDto request);
+    ResponseEntity<CertificateDataResponseDto> issue(@RequestBody @Valid CertificateSignRequestDtoV3 request);
 
     @Operation(summary = "Get status of an async issue/renew/rekey operation")
     @PostMapping(path = "/issue/status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CertificateOperationStatusResponseDto getIssueStatus(@RequestBody @Valid CertificateOperationStatusRequestDto request);
+    CertificateOperationStatusResponseDto getIssueStatus(@RequestBody @Valid CertificateOperationStatusRequestDtoV3 request);
 
     @Operation(summary = "Cancel an in-flight async issue/renew/rekey operation")
     @ApiResponses({
@@ -46,19 +46,19 @@ public interface CertificateController {
             @ApiResponse(responseCode = "422", description = "Refused — past point of no return")
     })
     @PostMapping(path = "/issue/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> cancelIssue(@RequestBody @Valid CertificateOperationCancelRequestDto request);
+    ResponseEntity<Void> cancelIssue(@RequestBody @Valid CertificateOperationCancelRequestDtoV3 request);
 
     // ---- Renew (status/cancel via /issue/*) ----
 
     @Operation(summary = "Renew a certificate (sync 200 or async 202)")
     @PostMapping(path = "/renew", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CertificateDataResponseDto> renew(@RequestBody @Valid CertificateRenewRequestDto request);
+    ResponseEntity<CertificateDataResponseDto> renew(@RequestBody @Valid CertificateRenewRequestDtoV3 request);
 
     // ---- Revoke ----
 
     @Operation(summary = "List dynamic attributes for revoke")
     @PostMapping(path = "/revoke/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRevokeAttributes(@RequestBody @Valid CertificateAttributeListRequestDto request);
+    List<BaseAttribute> listRevokeAttributes(@RequestBody @Valid CertificateAttributeListRequestDtoV3 request);
 
     @Operation(summary = "Revoke a certificate (sync 204 or async 202)")
     @ApiResponses({
@@ -66,37 +66,37 @@ public interface CertificateController {
             @ApiResponse(responseCode = "202", description = "Revocation accepted asynchronously; body carries meta tracking handle")
     })
     @PostMapping(path = "/revoke", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CertificateDataResponseDto> revoke(@RequestBody @Valid CertificateRevocationRequestDto request);
+    ResponseEntity<CertificateDataResponseDto> revoke(@RequestBody @Valid CertificateRevocationRequestDtoV3 request);
 
     @Operation(summary = "Get status of an async revoke operation")
     @PostMapping(path = "/revoke/status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CertificateOperationStatusResponseDto getRevokeStatus(@RequestBody @Valid CertificateOperationStatusRequestDto request);
+    CertificateOperationStatusResponseDto getRevokeStatus(@RequestBody @Valid CertificateOperationStatusRequestDtoV3 request);
 
     @Operation(summary = "Cancel an in-flight async revoke operation")
     @PostMapping(path = "/revoke/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> cancelRevoke(@RequestBody @Valid CertificateOperationCancelRequestDto request);
+    ResponseEntity<Void> cancelRevoke(@RequestBody @Valid CertificateOperationCancelRequestDtoV3 request);
 
     // ---- Register ----
 
     @Operation(summary = "List dynamic attributes for register")
     @PostMapping(path = "/register/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRegisterAttributes(@RequestBody @Valid CertificateAttributeListRequestDto request);
+    List<BaseAttribute> listRegisterAttributes(@RequestBody @Valid CertificateAttributeListRequestDtoV3 request);
 
     @Operation(summary = "Pre-register a certificate's identity at the upstream CA (no CSR)")
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CertificateDataResponseDto> register(@RequestBody @Valid CertificateRegistrationRequestDto request);
+    ResponseEntity<CertificateDataResponseDto> register(@RequestBody @Valid CertificateRegistrationRequestDtoV3 request);
 
     @Operation(summary = "Get status of an async register operation")
     @PostMapping(path = "/register/status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CertificateOperationStatusResponseDto getRegisterStatus(@RequestBody @Valid CertificateOperationStatusRequestDto request);
+    CertificateOperationStatusResponseDto getRegisterStatus(@RequestBody @Valid CertificateOperationStatusRequestDtoV3 request);
 
     @Operation(summary = "Cancel an in-flight async register operation")
     @PostMapping(path = "/register/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> cancelRegister(@RequestBody @Valid CertificateOperationCancelRequestDto request);
+    ResponseEntity<Void> cancelRegister(@RequestBody @Valid CertificateOperationCancelRequestDtoV3 request);
 
     // ---- Identify ----
 
     @Operation(summary = "Identify a certificate at the upstream CA (always synchronous)")
     @PostMapping(path = "/identify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CertificateIdentificationResponseDto identify(@RequestBody @Valid CertificateIdentificationRequestDto request);
+    CertificateIdentificationResponseDto identify(@RequestBody @Valid CertificateIdentificationRequestDtoV3 request);
 }

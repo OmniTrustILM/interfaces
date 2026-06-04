@@ -15,7 +15,7 @@ class CertificateRenewRequestDtoTest {
 
     @Test
     void roundTripsAllFields() throws Exception {
-        CertificateRenewRequestDto dto = new CertificateRenewRequestDto();
+        CertificateRenewRequestDtoV3 dto = new CertificateRenewRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setRequest("MIICij...");
@@ -26,7 +26,7 @@ class CertificateRenewRequestDtoTest {
         dto.setMeta(List.of());
 
         String json = mapper.writeValueAsString(dto);
-        CertificateRenewRequestDto back = mapper.readValue(json, CertificateRenewRequestDto.class);
+        CertificateRenewRequestDtoV3 back = mapper.readValue(json, CertificateRenewRequestDtoV3.class);
         assertEquals("MIICij...", back.getRequest());
         assertEquals("MIIBkjCCATs...", back.getExistingCertificate());
         assertEquals(false, back.isReuseKey());
@@ -35,7 +35,7 @@ class CertificateRenewRequestDtoTest {
     @Test
     void reuseKeyDefaultsFalse() throws Exception {
         String json = "{\"authorityAttributes\":[],\"raProfileAttributes\":[],\"existingCertificate\":\"X\"}";
-        CertificateRenewRequestDto back = mapper.readValue(json, CertificateRenewRequestDto.class);
+        CertificateRenewRequestDtoV3 back = mapper.readValue(json, CertificateRenewRequestDtoV3.class);
         assertTrue(!back.isReuseKey());
     }
 }

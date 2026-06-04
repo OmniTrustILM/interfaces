@@ -3,17 +3,17 @@ package com.czertainly.api.interfaces.client.v3;
 import com.czertainly.api.clients.ApiClientConnectorInfo;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
-import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDtoV3;
 import com.czertainly.api.model.connector.v3.certificate.CertificateDataResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDtoV3;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateOperationCancelRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateOperationStatusRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateOperationCancelRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateOperationStatusRequestDtoV3;
 import com.czertainly.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateRegistrationRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateRenewRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateRevocationRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -35,39 +35,39 @@ public interface CertificateSyncApiClient {
 
     // ---- Issue ----
 
-    List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException;
+    List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDtoV3 requestDto) throws ConnectorException;
 
-    ResponseEntity<CertificateDataResponseDto> issue(ApiClientConnectorInfo connector, CertificateSignRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<CertificateDataResponseDto> issue(ApiClientConnectorInfo connector, CertificateSignRequestDtoV3 requestDto) throws ConnectorException;
 
-    CertificateOperationStatusResponseDto getIssueStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDto requestDto) throws ConnectorException;
+    CertificateOperationStatusResponseDto getIssueStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDtoV3 requestDto) throws ConnectorException;
 
-    ResponseEntity<Void> cancelIssue(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<Void> cancelIssue(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDtoV3 requestDto) throws ConnectorException;
 
     // ---- Renew (status/cancel via /issue/*) ----
 
-    ResponseEntity<CertificateDataResponseDto> renew(ApiClientConnectorInfo connector, CertificateRenewRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<CertificateDataResponseDto> renew(ApiClientConnectorInfo connector, CertificateRenewRequestDtoV3 requestDto) throws ConnectorException;
 
     // ---- Revoke ----
 
-    List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException;
+    List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDtoV3 requestDto) throws ConnectorException;
 
-    ResponseEntity<CertificateDataResponseDto> revoke(ApiClientConnectorInfo connector, CertificateRevocationRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<CertificateDataResponseDto> revoke(ApiClientConnectorInfo connector, CertificateRevocationRequestDtoV3 requestDto) throws ConnectorException;
 
-    CertificateOperationStatusResponseDto getRevokeStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDto requestDto) throws ConnectorException;
+    CertificateOperationStatusResponseDto getRevokeStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDtoV3 requestDto) throws ConnectorException;
 
-    ResponseEntity<Void> cancelRevoke(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<Void> cancelRevoke(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDtoV3 requestDto) throws ConnectorException;
 
     // ---- Register ----
 
-    List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException;
+    List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDtoV3 requestDto) throws ConnectorException;
 
-    ResponseEntity<CertificateDataResponseDto> register(ApiClientConnectorInfo connector, CertificateRegistrationRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<CertificateDataResponseDto> register(ApiClientConnectorInfo connector, CertificateRegistrationRequestDtoV3 requestDto) throws ConnectorException;
 
-    CertificateOperationStatusResponseDto getRegisterStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDto requestDto) throws ConnectorException;
+    CertificateOperationStatusResponseDto getRegisterStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDtoV3 requestDto) throws ConnectorException;
 
-    ResponseEntity<Void> cancelRegister(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDto requestDto) throws ConnectorException;
+    ResponseEntity<Void> cancelRegister(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDtoV3 requestDto) throws ConnectorException;
 
     // ---- Identify ----
 
-    CertificateIdentificationResponseDto identify(ApiClientConnectorInfo connector, CertificateIdentificationRequestDto requestDto) throws ConnectorException;
+    CertificateIdentificationResponseDto identify(ApiClientConnectorInfo connector, CertificateIdentificationRequestDtoV3 requestDto) throws ConnectorException;
 }

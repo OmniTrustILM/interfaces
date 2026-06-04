@@ -14,7 +14,7 @@ class CertificateRevocationRequestDtoTest {
 
     @Test
     void roundTripsAllFields() throws Exception {
-        CertificateRevocationRequestDto dto = new CertificateRevocationRequestDto();
+        CertificateRevocationRequestDtoV3 dto = new CertificateRevocationRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setCertificate("MIIBkjCCATs...");
@@ -23,8 +23,8 @@ class CertificateRevocationRequestDtoTest {
         dto.setMeta(List.of());
 
         String json = mapper.writeValueAsString(dto);
-        CertificateRevocationRequestDto back =
-                mapper.readValue(json, CertificateRevocationRequestDto.class);
+        CertificateRevocationRequestDtoV3 back =
+                mapper.readValue(json, CertificateRevocationRequestDtoV3.class);
         assertEquals("MIIBkjCCATs...", back.getCertificate());
         assertEquals(CertificateRevocationReason.KEY_COMPROMISE, back.getReason());
     }

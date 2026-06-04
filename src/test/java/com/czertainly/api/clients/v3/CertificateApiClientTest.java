@@ -5,8 +5,8 @@ import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.exception.ConnectorProblemException;
 import com.czertainly.api.model.common.error.ErrorCode;
 import com.czertainly.api.model.connector.v3.certificate.CertificateDataResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateOperationCancelRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateOperationCancelRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import com.czertainly.api.model.core.connector.ConnectorDto;
 import com.czertainly.api.model.core.connector.ConnectorStatus;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -55,7 +55,7 @@ class CertificateApiClientTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{\"certificateData\":\"MIIBkjCCATs...\",\"certificateType\":\"X.509\"}")));
 
-        CertificateSignRequestDto req = new CertificateSignRequestDto();
+        CertificateSignRequestDtoV3 req = new CertificateSignRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
         req.setRequest("MIICij...");
@@ -75,7 +75,7 @@ class CertificateApiClientTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{\"certificateData\":null,\"meta\":[]}")));
 
-        CertificateSignRequestDto req = new CertificateSignRequestDto();
+        CertificateSignRequestDtoV3 req = new CertificateSignRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
         req.setRequest("MIICij...");
@@ -92,7 +92,7 @@ class CertificateApiClientTest {
         mockServer.stubFor(WireMock.post("/v3/authorityProvider/certificates/issue/cancel")
                 .willReturn(WireMock.aResponse().withStatus(204)));
 
-        CertificateOperationCancelRequestDto req = new CertificateOperationCancelRequestDto();
+        CertificateOperationCancelRequestDtoV3 req = new CertificateOperationCancelRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
         req.setMeta(List.of());
@@ -123,7 +123,7 @@ class CertificateApiClientTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE)
                         .withBody(problemJson)));
 
-        CertificateSignRequestDto req = new CertificateSignRequestDto();
+        CertificateSignRequestDtoV3 req = new CertificateSignRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
         req.setRequest("bogus");

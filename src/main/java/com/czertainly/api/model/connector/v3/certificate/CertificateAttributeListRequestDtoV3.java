@@ -1,6 +1,6 @@
 package com.czertainly.api.model.connector.v3.certificate;
 
-import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,5 +11,5 @@ import lombok.ToString;
 @Setter
 @ToString(callSuper = true)
 @Schema(description = "Authority + RA-profile context for listing the dynamic-attribute schema.")
-public class CertificateAttributeListRequestDto extends V3AuthorityScopedRequestDto {
+public class CertificateAttributeListRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 }

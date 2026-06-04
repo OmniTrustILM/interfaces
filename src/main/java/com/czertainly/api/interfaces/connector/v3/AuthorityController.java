@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequestMapping("/v3/authorityProvider/authorities")
-@Tag(name = "v3 Authority Operations",
-     description = "Stateless v3 authority operations — no createAuthorityInstance / lifecycle; "
-                 + "authority identity is the attribute blob in the body")
+@Tag(name = "Authority Management v3",
+     description = "Stateless v3 authority operations achieved by utilizing attributes in requests")
 public interface AuthorityController {
 
     @Operation(summary = "Top-level authority attribute schema (for the create-authority UI)")
@@ -37,9 +36,9 @@ public interface AuthorityController {
 
     @Operation(summary = "Fetch CRL (full or delta) from the upstream CA")
     @PostMapping(path = "/crl", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CrlResponseDto getCrl(@RequestBody CrlRequestDto request);
+    CrlResponseDto getCrl(@RequestBody CrlRequestDtoV3 request);
 
     @Operation(summary = "Fetch CA certificate chain from the upstream CA")
     @PostMapping(path = "/caCertificates", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    CaCertificatesResponseDto getCaCertificates(@RequestBody CaCertificatesRequestDto request);
+    CaCertificatesResponseDto getCaCertificates(@RequestBody CaCertificatesRequestDtoV3 request);
 }

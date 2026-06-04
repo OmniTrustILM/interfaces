@@ -15,11 +15,11 @@ class CaCertificatesDtosTest {
 
     @Test
     void requestRoundTrips() throws Exception {
-        CaCertificatesRequestDto dto = new CaCertificatesRequestDto();
+        CaCertificatesRequestDtoV3 dto = new CaCertificatesRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         String json = mapper.writeValueAsString(dto);
-        CaCertificatesRequestDto back = mapper.readValue(json, CaCertificatesRequestDto.class);
+        CaCertificatesRequestDtoV3 back = mapper.readValue(json, CaCertificatesRequestDtoV3.class);
         assertEquals(0, back.getAuthorityAttributes().size());
     }
 

@@ -4,9 +4,9 @@ import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.exception.ConnectorProblemException;
 import com.czertainly.api.model.common.error.ErrorCode;
-import com.czertainly.api.model.connector.v3.authority.CaCertificatesRequestDto;
+import com.czertainly.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.czertainly.api.model.connector.v3.authority.CaCertificatesResponseDto;
-import com.czertainly.api.model.connector.v3.authority.CrlRequestDto;
+import com.czertainly.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.czertainly.api.model.connector.v3.authority.CrlResponseDto;
 import com.czertainly.api.model.core.connector.ConnectorDto;
 import com.czertainly.api.model.core.connector.ConnectorStatus;
@@ -66,7 +66,7 @@ class AuthorityApiClientTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{\"crl\":\"MIIBkjCCATs...\"}")));
 
-        CrlRequestDto req = new CrlRequestDto();
+        CrlRequestDtoV3 req = new CrlRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
         req.setDelta(false);
@@ -83,7 +83,7 @@ class AuthorityApiClientTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{\"certificates\":[{\"certificateData\":\"issuing-base64\",\"certificateType\":\"X.509\"},{\"certificateData\":\"root-base64\",\"certificateType\":\"X.509\"}]}")));
 
-        CaCertificatesRequestDto req = new CaCertificatesRequestDto();
+        CaCertificatesRequestDtoV3 req = new CaCertificatesRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
 
@@ -113,7 +113,7 @@ class AuthorityApiClientTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE)
                         .withBody(problemJson)));
 
-        CrlRequestDto req = new CrlRequestDto();
+        CrlRequestDtoV3 req = new CrlRequestDtoV3();
         req.setAuthorityAttributes(List.of());
         req.setRaProfileAttributes(List.of());
 

@@ -1,7 +1,7 @@
 package com.czertainly.api.model.connector.v3.certificate;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
-import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -18,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class CertificateRegistrationRequestDto extends V3AuthorityScopedRequestDto {
+public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Subject DN. Optional per RFC 5280 §4.1.2.6: an empty subject is permitted "
                   + "when subject naming information is carried entirely in the Subject Alternative "

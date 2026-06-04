@@ -2,7 +2,7 @@ package com.czertainly.api.model.connector.v3.certificate;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.MetadataAttribute;
-import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import com.czertainly.api.model.core.enums.CertificateRequestFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class CertificateRenewRequestDto extends V3AuthorityScopedRequestDto {
+public class CertificateRenewRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Certificate signing request, Base64-encoded. Optional when reuseKey=true.",
             format = "byte",

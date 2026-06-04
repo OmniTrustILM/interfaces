@@ -5,9 +5,9 @@ import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
-import com.czertainly.api.model.connector.v3.authority.CaCertificatesRequestDto;
+import com.czertainly.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.czertainly.api.model.connector.v3.authority.CaCertificatesResponseDto;
-import com.czertainly.api.model.connector.v3.authority.CrlRequestDto;
+import com.czertainly.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.czertainly.api.model.connector.v3.authority.CrlResponseDto;
 import org.springframework.http.ResponseEntity;
 
@@ -32,7 +32,7 @@ public interface AuthoritySyncApiClient {
 
     List<BaseAttribute> listRaProfileAttributes(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ConnectorException;
 
-    CrlResponseDto getCrl(ApiClientConnectorInfo connector, CrlRequestDto requestDto) throws ConnectorException;
+    CrlResponseDto getCrl(ApiClientConnectorInfo connector, CrlRequestDtoV3 requestDto) throws ConnectorException;
 
-    CaCertificatesResponseDto getCaCertificates(ApiClientConnectorInfo connector, CaCertificatesRequestDto requestDto) throws ConnectorException;
+    CaCertificatesResponseDto getCaCertificates(ApiClientConnectorInfo connector, CaCertificatesRequestDtoV3 requestDto) throws ConnectorException;
 }

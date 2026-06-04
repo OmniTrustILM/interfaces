@@ -5,17 +5,17 @@ import com.czertainly.api.clients.BaseApiClient;
 import com.czertainly.api.exception.ConnectorException;
 import com.czertainly.api.interfaces.client.v3.CertificateSyncApiClient;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
-import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateAttributeListRequestDtoV3;
 import com.czertainly.api.model.connector.v3.certificate.CertificateDataResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationRequestDtoV3;
 import com.czertainly.api.model.connector.v3.certificate.CertificateIdentificationResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateOperationCancelRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateOperationStatusRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateOperationCancelRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateOperationStatusRequestDtoV3;
 import com.czertainly.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateRegistrationRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateRenewRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateRevocationRequestDto;
-import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDto;
+import com.czertainly.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
+import com.czertainly.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -68,12 +68,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Issue ----
 
     @Override
-    public List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
+    public List<BaseAttribute> listIssueAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_ISSUE_ATTRIBUTES_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateAttributeListRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateAttributeListRequestDtoV3.class)
                         .retrieve()
                         .toEntityList(BaseAttribute.class), "listIssueAttributes"),
                 request,
@@ -81,12 +81,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<CertificateDataResponseDto> issue(ApiClientConnectorInfo connector, CertificateSignRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> issue(ApiClientConnectorInfo connector, CertificateSignRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_ISSUE_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateSignRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateSignRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateDataResponseDto.class), "issue"),
                 request,
@@ -94,12 +94,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public CertificateOperationStatusResponseDto getIssueStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+    public CertificateOperationStatusResponseDto getIssueStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_ISSUE_STATUS_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateOperationStatusResponseDto.class), "getIssueStatus"),
                 request,
@@ -107,12 +107,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<Void> cancelIssue(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<Void> cancelIssue(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_ISSUE_CANCEL_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDtoV3.class)
                         .retrieve()
                         .toBodilessEntity(), "cancelIssue"),
                 request,
@@ -122,12 +122,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Renew (status/cancel via /issue/*) ----
 
     @Override
-    public ResponseEntity<CertificateDataResponseDto> renew(ApiClientConnectorInfo connector, CertificateRenewRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> renew(ApiClientConnectorInfo connector, CertificateRenewRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_RENEW_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateRenewRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateRenewRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateDataResponseDto.class), "renew"),
                 request,
@@ -137,12 +137,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Revoke ----
 
     @Override
-    public List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
+    public List<BaseAttribute> listRevokeAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_REVOKE_ATTRIBUTES_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateAttributeListRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateAttributeListRequestDtoV3.class)
                         .retrieve()
                         .toEntityList(BaseAttribute.class), "listRevokeAttributes"),
                 request,
@@ -150,12 +150,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<CertificateDataResponseDto> revoke(ApiClientConnectorInfo connector, CertificateRevocationRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> revoke(ApiClientConnectorInfo connector, CertificateRevocationRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_REVOKE_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateRevocationRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateRevocationRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateDataResponseDto.class), "revoke"),
                 request,
@@ -163,12 +163,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public CertificateOperationStatusResponseDto getRevokeStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+    public CertificateOperationStatusResponseDto getRevokeStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_REVOKE_STATUS_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateOperationStatusResponseDto.class), "getRevokeStatus"),
                 request,
@@ -176,12 +176,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<Void> cancelRevoke(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<Void> cancelRevoke(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_REVOKE_CANCEL_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDtoV3.class)
                         .retrieve()
                         .toBodilessEntity(), "cancelRevoke"),
                 request,
@@ -191,12 +191,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Register ----
 
     @Override
-    public List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDto requestDto) throws ConnectorException {
+    public List<BaseAttribute> listRegisterAttributes(ApiClientConnectorInfo connector, CertificateAttributeListRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_REGISTER_ATTRIBUTES_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateAttributeListRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateAttributeListRequestDtoV3.class)
                         .retrieve()
                         .toEntityList(BaseAttribute.class), "listRegisterAttributes"),
                 request,
@@ -204,12 +204,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<CertificateDataResponseDto> register(ApiClientConnectorInfo connector, CertificateRegistrationRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<CertificateDataResponseDto> register(ApiClientConnectorInfo connector, CertificateRegistrationRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_REGISTER_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateRegistrationRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateRegistrationRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateDataResponseDto.class), "register"),
                 request,
@@ -217,12 +217,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public CertificateOperationStatusResponseDto getRegisterStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDto requestDto) throws ConnectorException {
+    public CertificateOperationStatusResponseDto getRegisterStatus(ApiClientConnectorInfo connector, CertificateOperationStatusRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_REGISTER_STATUS_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateOperationStatusRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateOperationStatusResponseDto.class), "getRegisterStatus"),
                 request,
@@ -230,12 +230,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     }
 
     @Override
-    public ResponseEntity<Void> cancelRegister(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDto requestDto) throws ConnectorException {
+    public ResponseEntity<Void> cancelRegister(ApiClientConnectorInfo connector, CertificateOperationCancelRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + CERTIFICATE_REGISTER_CANCEL_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateOperationCancelRequestDtoV3.class)
                         .retrieve()
                         .toBodilessEntity(), "cancelRegister"),
                 request,
@@ -245,12 +245,12 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     // ---- Identify ----
 
     @Override
-    public CertificateIdentificationResponseDto identify(ApiClientConnectorInfo connector, CertificateIdentificationRequestDto requestDto) throws ConnectorException {
+    public CertificateIdentificationResponseDto identify(ApiClientConnectorInfo connector, CertificateIdentificationRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CERTIFICATE_IDENTIFY_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateIdentificationRequestDto.class)
+                        .body(Mono.just(requestDto), CertificateIdentificationRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CertificateIdentificationResponseDto.class), "identify"),
                 request,

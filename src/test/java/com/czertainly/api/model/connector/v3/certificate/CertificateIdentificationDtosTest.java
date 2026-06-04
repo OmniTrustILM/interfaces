@@ -13,13 +13,13 @@ class CertificateIdentificationDtosTest {
 
     @Test
     void requestRoundTrips() throws Exception {
-        CertificateIdentificationRequestDto dto = new CertificateIdentificationRequestDto();
+        CertificateIdentificationRequestDtoV3 dto = new CertificateIdentificationRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setCertificate("MIIBkjCCATs...");
         String json = mapper.writeValueAsString(dto);
-        CertificateIdentificationRequestDto back =
-                mapper.readValue(json, CertificateIdentificationRequestDto.class);
+        CertificateIdentificationRequestDtoV3 back =
+                mapper.readValue(json, CertificateIdentificationRequestDtoV3.class);
         assertEquals("MIIBkjCCATs...", back.getCertificate());
     }
 

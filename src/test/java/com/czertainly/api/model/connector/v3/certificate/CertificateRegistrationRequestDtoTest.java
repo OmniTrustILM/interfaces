@@ -18,7 +18,7 @@ class CertificateRegistrationRequestDtoTest {
         ext.setCritical(false);
         ext.setValueBase64("MA0GCysGAQQBgjcVAQUDAg==");
 
-        CertificateRegistrationRequestDto dto = new CertificateRegistrationRequestDto();
+        CertificateRegistrationRequestDtoV3 dto = new CertificateRegistrationRequestDtoV3();
         dto.setAuthorityAttributes(List.of());
         dto.setRaProfileAttributes(List.of());
         dto.setSubjectDn("CN=device-7,O=Acme");
@@ -27,8 +27,8 @@ class CertificateRegistrationRequestDtoTest {
         dto.setAttributes(List.of());
 
         String json = mapper.writeValueAsString(dto);
-        CertificateRegistrationRequestDto back =
-                mapper.readValue(json, CertificateRegistrationRequestDto.class);
+        CertificateRegistrationRequestDtoV3 back =
+                mapper.readValue(json, CertificateRegistrationRequestDtoV3.class);
         assertEquals("CN=device-7,O=Acme", back.getSubjectDn());
         assertEquals("DNS:device-7.acme.local", back.getSubjectAltName());
         assertEquals(1, back.getExtensions().size());

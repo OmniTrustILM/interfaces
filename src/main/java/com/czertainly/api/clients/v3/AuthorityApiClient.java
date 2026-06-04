@@ -7,9 +7,9 @@ import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.client.v3.AuthoritySyncApiClient;
 import com.czertainly.api.model.client.attribute.RequestAttribute;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
-import com.czertainly.api.model.connector.v3.authority.CaCertificatesRequestDto;
+import com.czertainly.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.czertainly.api.model.connector.v3.authority.CaCertificatesResponseDto;
-import com.czertainly.api.model.connector.v3.authority.CrlRequestDto;
+import com.czertainly.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.czertainly.api.model.connector.v3.authority.CrlResponseDto;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -61,12 +61,12 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     }
 
     @Override
-    public ResponseEntity<Void> checkAuthorityConnection(ApiClientConnectorInfo connector, List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
+    public ResponseEntity<Void> checkAuthorityConnection(ApiClientConnectorInfo connector, List<RequestAttribute> authorityAttributes) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireResponse(r
                         .uri(connector.getUrl() + AUTHORITY_BASE_CONTEXT)
-                        .body(Mono.just(attributes), ATTRIBUTE_LIST_TYPE_REF)
+                        .body(Mono.just(authorityAttributes), ATTRIBUTE_LIST_TYPE_REF)
                         .retrieve()
                         .toBodilessEntity(), "checkAuthorityConnection"),
                 request,
@@ -87,12 +87,12 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     }
 
     @Override
-    public CrlResponseDto getCrl(ApiClientConnectorInfo connector, CrlRequestDto requestDto) throws ConnectorException {
+    public CrlResponseDto getCrl(ApiClientConnectorInfo connector, CrlRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_CRL_CONTEXT)
-                        .body(Mono.just(requestDto), CrlRequestDto.class)
+                        .body(Mono.just(requestDto), CrlRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CrlResponseDto.class), "getCrl"),
                 request,
@@ -100,12 +100,12 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
     }
 
     @Override
-    public CaCertificatesResponseDto getCaCertificates(ApiClientConnectorInfo connector, CaCertificatesRequestDto requestDto) throws ConnectorException {
+    public CaCertificatesResponseDto getCaCertificates(ApiClientConnectorInfo connector, CaCertificatesRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
         return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_CA_CERTIFICATES_CONTEXT)
-                        .body(Mono.just(requestDto), CaCertificatesRequestDto.class)
+                        .body(Mono.just(requestDto), CaCertificatesRequestDtoV3.class)
                         .retrieve()
                         .toEntity(CaCertificatesResponseDto.class), "getCaCertificates"),
                 request,

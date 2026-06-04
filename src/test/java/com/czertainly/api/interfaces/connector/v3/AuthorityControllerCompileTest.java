@@ -17,8 +17,8 @@ class AuthorityControllerCompileTest {
         public List<BaseAttribute> listAuthorityAttributes() { return List.of(); }
         public ResponseEntity<Void> checkAuthorityConnection(List<RequestAttribute> body) { return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); }
         public List<BaseAttribute> listRaProfileAttributes(List<RequestAttribute> body) { return List.of(); }
-        public CrlResponseDto getCrl(CrlRequestDto body) { return new CrlResponseDto(); }
-        public CaCertificatesResponseDto getCaCertificates(CaCertificatesRequestDto body) { return new CaCertificatesResponseDto(); }
+        public CrlResponseDto getCrl(CrlRequestDtoV3 body) { return new CrlResponseDto(); }
+        public CaCertificatesResponseDto getCaCertificates(CaCertificatesRequestDtoV3 body) { return new CaCertificatesResponseDto(); }
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.czertainly.api.model.connector.v3.authority;
 
-import com.czertainly.api.model.connector.v3.V3AuthorityScopedRequestDto;
+import com.czertainly.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,5 +8,5 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class CaCertificatesRequestDto extends V3AuthorityScopedRequestDto {
+public class CaCertificatesRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 }
