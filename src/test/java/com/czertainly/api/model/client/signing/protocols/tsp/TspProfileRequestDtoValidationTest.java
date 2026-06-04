@@ -47,12 +47,27 @@ class TspProfileRequestDtoValidationTest {
     }
 
     @Test
-    void basicPasswordAllowed_withCredentials_isValid() {
+    void basicPasswordAllowed_withCredentialsAndVaultProfile_isValid() {
         TspProfileRequestDto dto = validBase();
         dto.setAllowedAuthenticationMethods(List.of(TspAuthenticationMethod.BASIC_PASSWORD));
         dto.setBasicCredentials(List.of(credential()));
+        dto.setVaultProfileUuid(UUID.fromString("6b55de1c-844f-11ec-a8a3-0242ac120002"));
 
         assertTrue(validator.validate(dto).isEmpty());
+    }
+
+    @Test
+    void basicPasswordAllowed_withCredentialsButNoVaultProfile_isInvalid() {
+        TspProfileRequestDto dto = validBase();
+        dto.setAllowedAuthenticationMethods(List.of(TspAuthenticationMethod.BASIC_PASSWORD));
+        dto.setBasicCredentials(List.of(credential()));
+        // vaultProfileUuid intentionally left null
+
+        Set<ConstraintViolation<TspProfileRequestDto>> violations = validator.validate(dto);
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v ->
+                v.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName()
+                        .equals("BasicCredentialsRequiredIfBasicPassword")));
     }
 
     @Test

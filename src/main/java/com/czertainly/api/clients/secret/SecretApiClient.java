@@ -118,4 +118,25 @@ public class SecretApiClient extends BaseApiClient {
                 connector
         );
     }
+
+    public SecretVerificationResponseDto verifySecretContent(ApiClientConnectorInfo connector, SecretVerificationRequestDto request, String version) throws ConnectorException {
+        return processRequest(
+                req -> {
+                    UriComponentsBuilder uriBuilder = UriComponentsBuilder
+                            .fromUriString(connector.getUrl() + SECRET_BASE_PATH + "/content/verify");
+                    if (version != null) {
+                        uriBuilder.queryParam("version", version);
+                    }
+
+                    return prepareRequest(HttpMethod.POST, connector, true)
+                            .uri(uriBuilder.build().toUri())
+                            .bodyValue(req)
+                            .retrieve()
+                            .bodyToMono(SecretVerificationResponseDto.class)
+                            .block();
+                },
+                request,
+                connector
+        );
+    }
 }

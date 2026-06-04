@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * Class-level constraint: if {@code allowedAuthenticationMethods} contains {@code BASIC_PASSWORD},
- * {@code basicCredentials} must be non-empty.
+ * {@code basicCredentials} must be non-empty AND {@code vaultProfileUuid} must be set.
  */
 @Constraint(validatedBy = BasicCredentialsRequiredIfBasicPasswordValidator.class)
 @Target(ElementType.TYPE)
@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface BasicCredentialsRequiredIfBasicPassword {
 
-    String message() default "basicCredentials must contain at least one entry when BASIC_PASSWORD is an allowed authentication method";
+    String message() default "when BASIC_PASSWORD is an allowed authentication method, basicCredentials must contain at least one entry and vaultProfileUuid must be set";
 
     Class<?>[] groups() default {};
 

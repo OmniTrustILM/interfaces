@@ -2,6 +2,7 @@ package com.czertainly.api.interfaces.connector.secrets;
 
 import com.czertainly.api.exception.AlreadyExistException;
 import com.czertainly.api.exception.NotFoundException;
+import com.czertainly.api.exception.SecretOperationException;
 import com.czertainly.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.common.error.ProblemDetailExtended;
@@ -57,7 +58,10 @@ public interface SecretController extends AuthProtectedConnectorController {
     @Operation(summary = "Verify Secret Content",
             description = "Verify the provided secret content against the stored secret. The match flag in the response indicates " +
                     "whether the provided content matches the stored secret. This operation does not return the stored secret content for security reasons. " +
-                    "This is optional operation gated by the 'secretContentVerification' feature flag.")
+                    "This is optional operation gated by the 'secretContentVerification' feature flag. " +
+                    "Verification is supported for the secret types basicAuth, apiKey, jwtToken, privateKey, secretKey and generic. " +
+                    "The secret types keyStore and keyValue are not verifiable: a keyStore blob is not byte-stable and " +
+                    "a keyValue map has no canonical match semantics.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -66,6 +70,14 @@ public interface SecretController extends AuthProtectedConnectorController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Not Found. Secret or secret version not found",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Unprocessable Entity. Content verification is not supported for the requested secret type (keyStore, keyValue)",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)
@@ -81,7 +93,7 @@ public interface SecretController extends AuthProtectedConnectorController {
             )})
     @PostMapping(path = "/content/verify", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     SecretVerificationResponseDto verifySecretContent(@Parameter(description = "Secret verification request") @Valid @RequestBody SecretVerificationRequestDto request,
-                                                      @RequestParam(required = false, name = "version") String version) throws NotFoundException;
+                                                      @RequestParam(required = false, name = "version") String version) throws NotFoundException, SecretOperationException;
 
     @Operation(summary = "Create Secret")
     @ApiResponses(value = {

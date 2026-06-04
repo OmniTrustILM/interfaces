@@ -34,6 +34,10 @@ public class TspProfileDto extends NameAndUuidDto {
     )
     private String signingUrl;
 
+    @Schema(description = "Vault profile that stores this profile's Basic credentials; required when Basic credentials are configured",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
+    private java.util.UUID vaultProfileUuid;
+
     @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
 

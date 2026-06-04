@@ -31,6 +31,10 @@ public class TspProfileRequestDto implements BasicPasswordConstrained {
     @Schema(description = "UUID of the default Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
     private UUID defaultSigningProfileUuid;
 
+    @Schema(description = "Vault profile that stores this profile's Basic credentials; required when Basic credentials are configured",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
+    private UUID vaultProfileUuid;
+
     @NotEmpty
     @Schema(description = "Authentication methods this TSP Profile accepts on the TSP protocol endpoints. Must be non-empty.",
             requiredMode = Schema.RequiredMode.REQUIRED)

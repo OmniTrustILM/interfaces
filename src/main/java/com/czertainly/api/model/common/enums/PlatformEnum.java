@@ -47,6 +47,7 @@ import com.czertainly.api.model.client.signing.profile.scheme.SigningScheme;
 import com.czertainly.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import com.czertainly.api.model.core.certificate.QcType;
 import com.czertainly.api.model.core.signing.SigningProtocol;
+import com.czertainly.api.model.core.signing.TspAuthenticationMethod;
 import com.czertainly.api.model.core.workflows.ConditionType;
 import com.czertainly.api.model.core.workflows.ExecutionType;
 import com.czertainly.api.model.core.workflows.TriggerType;
@@ -165,6 +166,7 @@ public enum PlatformEnum implements IPlatformEnum {
     SIGNING_PROTOCOL(SigningProtocol.class, "Signing Protocol"),
     SIGNING_SCHEME(SigningScheme.class, "Signing Scheme"),
     SIGNING_WORKFLOW_TYPE(SigningWorkflowType.class, "Signing Workflow Type"),
+    TSP_AUTHENTICATION_METHOD(TspAuthenticationMethod.class, "TSP Authentication Method"),
 
     ;
 

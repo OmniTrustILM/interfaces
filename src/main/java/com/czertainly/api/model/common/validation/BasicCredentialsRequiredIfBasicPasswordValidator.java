@@ -19,6 +19,9 @@ public class BasicCredentialsRequiredIfBasicPasswordValidator
             return true;
         }
         Collection<?> credentials = value.getBasicCredentials();
-        return credentials != null && !credentials.isEmpty();
+        if (credentials == null || credentials.isEmpty()) {
+            return false;
+        }
+        return value.getVaultProfileUuid() != null;
     }
 }
