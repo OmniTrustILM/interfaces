@@ -1,5 +1,6 @@
 package com.czertainly.api.interfaces.connector.v3;
 
+import com.czertainly.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
 import com.czertainly.api.model.common.attribute.common.BaseAttribute;
 import com.czertainly.api.model.connector.v3.certificate.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequestMapping("/v3/authorityProvider/certificates")
 @Tag(name = "Certificate Management v3",
         description = "Stateless v3 certificate operations by utilizing attributes in request for identifying authority or RA profile")
-public interface CertificateController {
+public interface CertificateController extends AuthProtectedConnectorController {
 
     // ---- Issue ----
 
