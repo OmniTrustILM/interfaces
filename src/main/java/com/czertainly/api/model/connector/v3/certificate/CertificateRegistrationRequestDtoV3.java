@@ -28,7 +28,7 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
-    @Schema(description = "Subject Alternative Name in RFC 5280 textual form (e.g. DNS:foo,IP:1.2.3.4,email:x@y). "
+    @Schema(description = "Subject Alternative Name in OpenSSL convention textual form (e.g. DNS:foo,IP:1.2.3.4,email:x@y). "
                   + "SAN MUST be carried here ONLY — do not duplicate it as OID 2.5.29.17 in extensions[]. "
                   + "Connectors reject duplicate-source requests with VALIDATION_FAILED. "
                   + "Required when subjectDn is empty (see RFC 5280 §4.1.2.6).",
