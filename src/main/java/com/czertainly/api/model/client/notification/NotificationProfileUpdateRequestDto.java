@@ -45,15 +45,15 @@ public class NotificationProfileUpdateRequestDto {
     @Schema(description = "Maximum number of repetitions of same notification", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer repetitions;
 
-    @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None, Default or Mapped")
+    @AssertTrue(message = "Recipient UUID is required when recipient type is not Owner, None, Default or Object")
     private boolean isRecipientValid() {
-        return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.MAPPED) && (recipientUuids == null || recipientUuids.isEmpty()))
-                || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.MAPPED && recipientUuids != null && !recipientUuids.isEmpty());
+        return ((recipientType == RecipientType.OWNER || recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.OBJECT) && (recipientUuids == null || recipientUuids.isEmpty()))
+                || (recipientType != RecipientType.OWNER && recipientType != RecipientType.NONE && recipientType != RecipientType.DEFAULT && recipientType != RecipientType.OBJECT && recipientUuids != null && !recipientUuids.isEmpty());
     }
 
-    @AssertFalse(message = "Cannot send internal notification to recipient of type None, Default or Mapped")
+    @AssertFalse(message = "Cannot send internal notification to recipient of type None, Default or Object")
     private boolean isInternalNotificationPossible() {
-        return (recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.MAPPED) && internalNotification;
+        return (recipientType == RecipientType.NONE || recipientType == RecipientType.DEFAULT || recipientType == RecipientType.OBJECT) && internalNotification;
     }
 
     @AssertTrue(message = "Notification instance and/or internal notification is required")
