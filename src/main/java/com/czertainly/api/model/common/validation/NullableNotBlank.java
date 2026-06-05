@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface NullableNotBlank {
 
-    String message() default "Value cannot be blank if provided";
+    String message() default "Name cannot be blank if provided";
 
     Class<?>[] groups() default {};
 

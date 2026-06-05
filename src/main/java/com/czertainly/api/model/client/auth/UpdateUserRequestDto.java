@@ -24,7 +24,7 @@ public class UpdateUserRequestDto {
 
     @Schema(description = "Email of the user")
     @Email
-    @NullableNotBlank
+    @NullableNotBlank(message = "Email cannot be blank if provided")
     private String email;
 
     @Schema(description = "Groups UUIDs of the user (set to empty list to remove certificate from all groups)")
