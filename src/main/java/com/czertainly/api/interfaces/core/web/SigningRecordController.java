@@ -9,7 +9,6 @@ import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.core.signing.signingrecord.SigningRecordDto;
 import com.czertainly.api.model.core.signing.signingrecord.SigningRecordListDto;
-import com.czertainly.api.model.core.signing.signingrecord.SigningRecordValidationResultDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -55,18 +54,6 @@ public interface SigningRecordController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signing Record details retrieved")})
     @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     SigningRecordDto getSigningRecord(@Parameter(description = "Signing Record UUID") @PathVariable UUID uuid) throws NotFoundException;
-
-    @Operation(
-            operationId = "validateSigningRecord",
-            summary = "Validate a Signing Record",
-            description = "Triggers a full validation of the Signing Record: cryptographic integrity, " +
-                    "certificate chain, and revocation status of all involved certificates at the time of signing. " +
-                    "Returns the highest ETSI conformance level that was successfully verified, along with " +
-                    "any warnings or errors encountered."
-    )
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Validation completed (check 'valid' field for the outcome)")})
-    @PostMapping(path = "/{uuid}/validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    SigningRecordValidationResultDto validateSigningRecord(@Parameter(description = "Signing Record UUID") @PathVariable UUID uuid) throws NotFoundException;
 
     @Operation(operationId = "deleteSigningRecord", summary = "Delete Signing Record")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Signing Record deleted")})
