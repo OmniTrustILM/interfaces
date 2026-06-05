@@ -1,9 +1,9 @@
 package com.czertainly.api.model.client.auth;
 
 import com.czertainly.api.model.client.attribute.RequestAttribute;
+import com.czertainly.api.model.common.validation.NullableNotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -24,7 +24,7 @@ public class UpdateUserRequestDto {
 
     @Schema(description = "Email of the user")
     @Email
-    @Size(min = 1)
+    @NullableNotBlank
     private String email;
 
     @Schema(description = "Groups UUIDs of the user (set to empty list to remove certificate from all groups)")
