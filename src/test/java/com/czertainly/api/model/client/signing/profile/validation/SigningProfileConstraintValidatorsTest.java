@@ -230,4 +230,47 @@ class SigningProfileConstraintValidatorsTest {
         dto.setAllowedPolicyIds(null);
         assertFalse(hasViolationOn(validator.validate(dto), "allowedPolicyIds"));
     }
+
+    // --- DefaultPolicyIdValidator ---
+
+    @Test
+    void defaultPolicyNotInAllowedPolicies_producesViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.2.3.4.7");
+        dto.setAllowedPolicyIds(java.util.List.of("1.2.3.4.5", "1.2.3.4.6"));
+        assertTrue(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void defaultPolicyInAllowedPolicies_noViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.2.3.4.5");
+        dto.setAllowedPolicyIds(java.util.List.of("1.2.3.4.5", "1.2.3.4.6"));
+        assertFalse(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void defaultPolicyWithEmptyAllowedPolicies_noViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setDefaultPolicyId("1.2.3.4.5");
+        dto.setAllowedPolicyIds(java.util.List.of());
+        assertFalse(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void nullDefaultPolicyWithAllowedPolicies_noViolation() {
+        TimestampingWorkflowRequestDto dto = new TimestampingWorkflowRequestDto();
+        dto.setAllowedPolicyIds(java.util.List.of("1.2.3.4.5"));
+        assertFalse(hasViolationOn(validator.validate(dto), "defaultPolicyId"));
+    }
+
+    @Test
+    void defaultPolicyNotInAllowedPolicies_violationSurfacesThroughProfileRequest() {
+        TimestampingWorkflowRequestDto workflow = new TimestampingWorkflowRequestDto();
+        workflow.setSignatureFormatterConnectorUuid(UUID.randomUUID());
+        workflow.setDefaultPolicyId("1.2.3.4.7");
+        workflow.setAllowedPolicyIds(java.util.List.of("1.2.3.4.5"));
+        assertTrue(hasViolationOn(validator.validate(profileRequest(managedScheme(), workflow)),
+                "workflow.defaultPolicyId"));
+    }
 }
