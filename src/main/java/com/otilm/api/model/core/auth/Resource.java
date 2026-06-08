@@ -106,7 +106,7 @@ public enum Resource implements IPlatformEnum {
 
     // SIGNING
     SIGNING_PROFILE(Codes.SIGNING_PROFILE, "Signing Profile", true, true),
-    SIGNING_RECORD(Codes.SIGNING_RECORD, "Signing Record", true, true),
+    SIGNING_RECORD(Codes.SIGNING_RECORD, "Signing Record"),
     TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
     TSP_PROFILE(Codes.TSP_PROFILE, "Timestamping Protocol Profile", true, true),
     ;
