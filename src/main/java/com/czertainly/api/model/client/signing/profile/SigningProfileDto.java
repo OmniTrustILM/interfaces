@@ -1,6 +1,7 @@
 package com.czertainly.api.model.client.signing.profile;
 
 import com.czertainly.api.model.client.attribute.ResponseAttribute;
+import com.czertainly.api.model.client.signing.profile.record.SigningRecordPolicyDto;
 import com.czertainly.api.model.common.NameAndUuidDto;
 import com.czertainly.api.model.core.signing.SigningProtocol;
 import com.czertainly.api.model.client.signing.profile.scheme.SigningSchemeDto;
@@ -40,4 +41,7 @@ public class SigningProfileDto extends NameAndUuidDto {
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
+
+    @Schema(description = "Effective Signing Record policy", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SigningRecordPolicyDto recordPolicy;
 }
