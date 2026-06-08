@@ -9,9 +9,6 @@ import lombok.Data;
         description = "Per-profile policy for what to record about each signing operation")
 public class SigningRecordPolicyRequestDto {
 
-    @Schema(description = "Content policy: capture base record metadata (signer identity, success/failure)")
-    private boolean recordMetadata;
-
     @Schema(description = "Content policy: capture inbound request parameters (algorithm, policy IDs, claimed signer)")
     private boolean recordRequestMetadata;
 
