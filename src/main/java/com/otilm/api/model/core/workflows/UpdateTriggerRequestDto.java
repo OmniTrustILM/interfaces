@@ -1,8 +1,10 @@
 package com.otilm.api.model.core.workflows;
 
+import com.otilm.api.model.common.validation.NullableNotBlank;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.other.ResourceEvent;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -10,6 +12,13 @@ import java.util.List;
 
 @Data
 public class UpdateTriggerRequestDto {
+
+    @Schema(
+            description = "Name of the trigger",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    @NullableNotBlank
+    private String name;
 
     @Schema(
             description = "Description of the trigger"
@@ -26,6 +35,7 @@ public class UpdateTriggerRequestDto {
             description = "Resource associated with the trigger",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @NotNull
     private Resource resource;
 
     @Schema(

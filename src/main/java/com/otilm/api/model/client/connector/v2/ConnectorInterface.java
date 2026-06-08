@@ -22,7 +22,9 @@ public enum ConnectorInterface implements IPlatformEnum {
     COMPLIANCE("compliance", "Compliance"),
     CRYPTOGRAPHY("cryptography", "Cryptography"),
     NOTIFICATION("notification", "Notification"),
-    SECRET("secret", "Secret");
+    SECRET("secret", "Secret"),
+    SIGNATURE_FORMATTING("signatureFormatting", "Signature Formatting"),
+    SIGNING("signing", "Signing");
 
     private static final ConnectorInterface[] VALUES;
 

@@ -2,7 +2,7 @@ package com.otilm.api.exception;
 
 import com.otilm.api.model.core.scep.FailInfo;
 
-public class ScepException extends Exception {
+public class ScepException extends Exception implements PlatformException {
 
     private FailInfo failInfo;
 

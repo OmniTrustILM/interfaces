@@ -1,6 +1,6 @@
 package com.otilm.api.exception;
 
-public class NotDeletableException extends Exception {
+public class NotDeletableException extends Exception implements PlatformException {
 
     private final String objectType;
 

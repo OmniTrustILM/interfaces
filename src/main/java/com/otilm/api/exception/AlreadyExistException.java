@@ -1,6 +1,6 @@
 package com.otilm.api.exception;
 
-public class AlreadyExistException extends Exception {
+public class AlreadyExistException extends Exception implements PlatformException {
 
     public AlreadyExistException() {
         super();

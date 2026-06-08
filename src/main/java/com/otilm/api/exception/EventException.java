@@ -4,7 +4,7 @@ import com.otilm.api.model.core.other.ResourceEvent;
 import lombok.Getter;
 
 @Getter
-public class EventException extends Exception {
+public class EventException extends Exception implements PlatformException {
 
     private final ResourceEvent event;
 

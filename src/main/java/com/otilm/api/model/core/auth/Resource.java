@@ -65,7 +65,7 @@ public enum Resource implements IPlatformEnum {
 
     // APPROVALS
     APPROVAL_PROFILE("approvalProfiles", "Approval profile"),
-    APPROVAL("approvals", "Approval"),
+    APPROVAL(Codes.APPROVAL, "Approval"),
 
     // NOTIFICATIONS
     NOTIFICATION_PROFILE("notificationProfiles", "Notification profile"),
@@ -102,7 +102,13 @@ public enum Resource implements IPlatformEnum {
     // Secrets
     VAULT(Codes.VAULT, "Vault", true, true),
     VAULT_PROFILE(Codes.VAULT_PROFILE, "Vault Profile", true, true),
-    SECRET(Codes.SECRET, "Secret", false, true, true, true)
+    SECRET(Codes.SECRET, "Secret", false, true, true, true),
+
+    // SIGNING
+    SIGNING_PROFILE(Codes.SIGNING_PROFILE, "Signing Profile", true, true),
+    SIGNING_RECORD(Codes.SIGNING_RECORD, "Signing Record", true, true),
+    TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
+    TSP_PROFILE(Codes.TSP_PROFILE, "Timestamping Protocol Profile", true, true),
     ;
 
     private static final Resource[] VALUES;
@@ -212,6 +218,7 @@ public enum Resource implements IPlatformEnum {
 
     public static class Codes {
         public static final String AUTHORITY = "authorities";
+        public static final String APPROVAL = "approvals";
         public static final String RA_PROFILE = "raProfiles";
         public static final String CERTIFICATE = "certificates";
         public static final String CERTIFICATE_REQUEST = "certificateRequests";
@@ -238,8 +245,11 @@ public enum Resource implements IPlatformEnum {
         public static final String VAULT = "vaults";
         public static final String VAULT_PROFILE = "vaultProfiles";
         public static final String SECRET = "secrets";
-
         public static final String CBOM = "cboms";
+        public static final String SIGNING_PROFILE = "signingProfiles";
+        public static final String TSP_PROFILE = "tspProfiles";
+        public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
+        public static final String SIGNING_RECORD = "signingRecords";
 
         private Codes() {
 

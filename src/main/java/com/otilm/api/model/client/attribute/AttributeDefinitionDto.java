@@ -20,7 +20,7 @@ import java.util.UUID;
 public class AttributeDefinitionDto implements Loggable {
 
     /**
-     * Name of the Attribute
+     * UUID of the Attribute
      */
     @Schema(description = "UUID of the Attribute", requiredMode = Schema.RequiredMode.REQUIRED)
     private String uuid;
@@ -30,6 +30,12 @@ public class AttributeDefinitionDto implements Loggable {
      */
     @Schema(description = "Name of the Attribute", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
+
+    /**
+     * Friendly name of the Attribute
+      **/
+    @Schema(description = "Friendly name of the Attribute", examples = {"Attribute Name"}, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String label;
 
     /**
      * Content Type of the Attribute

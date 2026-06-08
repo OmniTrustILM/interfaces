@@ -6,7 +6,7 @@ import org.springframework.http.ProblemDetail;
 import java.util.Objects;
 
 @Getter
-public class CbomRepositoryException extends Exception {
+public class CbomRepositoryException extends Exception implements PlatformException {
     private final ProblemDetail problemDetail;
 
     public CbomRepositoryException(String message) {

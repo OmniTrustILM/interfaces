@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,10 +49,11 @@ public interface TriggerController extends AuthProtectedController {
     @Operation(summary = "Update Trigger")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Trigger updated"),
-            @ApiResponse(responseCode = "404", description = "Trigger, Rule or Action not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
+            @ApiResponse(responseCode = "404", description = "Trigger, Rule or Action not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Trigger already exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PutMapping(path = "/triggers/{triggerUuid}", consumes = {"application/json"}, produces = {"application/json"})
-    TriggerDetailDto updateTrigger(@Parameter(description = "Trigger UUID") @PathVariable String triggerUuid, @RequestBody UpdateTriggerRequestDto request) throws NotFoundException;
+    TriggerDetailDto updateTrigger(@Parameter(description = "Trigger UUID") @PathVariable String triggerUuid, @RequestBody @Valid UpdateTriggerRequestDto request) throws NotFoundException, AlreadyExistException;
 
     @Operation(summary = "Delete Trigger")
     @ApiResponses(value = {

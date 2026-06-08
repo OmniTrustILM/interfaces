@@ -24,5 +24,9 @@ public class CertificateEventData implements EventData {
     @Schema(description = "Issuer DN of the Certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerDn;
 
+    @Override
+    public String toString() {
+        return "Certificate: {certificateUuid=%s, fingerprint='%s', serialNumber='%s', subjectDn='%s', issuerDn='%s'}".formatted(certificateUuid, fingerprint, serialNumber, subjectDn, issuerDn);
+    }
 
 }

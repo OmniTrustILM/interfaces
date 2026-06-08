@@ -121,6 +121,9 @@ public class CertificateDetailDto extends CertificateDto {
     private List<CertificateDto> relatedCertificates = new ArrayList<>();
 
     @Schema(description = "Information about protocol used to issue the certificate")
-    private  CertificateProtocolDto protocolInfo;
+    private CertificateProtocolDto protocolInfo;
 
+    @Schema(description = "Parsed ETSI QCStatements extension (RFC 3739 / ETSI EN 319 412-5). "
+            + "Absent when the extension is not present in the certificate.")
+    private CertificateQcStatementsDto qcStatements;
 }

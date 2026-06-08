@@ -1,6 +1,6 @@
 package com.otilm.api.exception;
 
-public class DiscoveryException  extends Exception {
+public class DiscoveryException extends Exception implements PlatformException {
 
     public DiscoveryException() {
         super();
