@@ -16,19 +16,25 @@ public class SigningRecordPolicyValidator
         if (dto == null || dto.getRecordPolicy() == null) {
             return true;
         }
+
         SigningRecordPolicyRequestDto policy = dto.getRecordPolicy();
         if (!policy.isRecordSignedDocument()) {
             return true;
         }
+
         WorkflowRequestDto wf = dto.getWorkflow();
-        boolean ok = wf instanceof ContentSigningWorkflowRequestDto
+        if (wf == null) {
+            return true;
+        }
+
+        boolean isSupportedWorkflow = wf instanceof ContentSigningWorkflowRequestDto
                   || wf instanceof TimestampingWorkflowRequestDto;
-        if (!ok) {
+        if (!isSupportedWorkflow) {
             ctx.disableDefaultConstraintViolation();
             ctx.buildConstraintViolationWithTemplate(ctx.getDefaultConstraintMessageTemplate())
                     .addPropertyNode("recordPolicy").addPropertyNode("recordSignedDocument")
                     .addConstraintViolation();
         }
-        return ok;
+        return isSupportedWorkflow;
     }
 }
