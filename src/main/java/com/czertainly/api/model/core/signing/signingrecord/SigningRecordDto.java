@@ -19,9 +19,7 @@ public class SigningRecordDto extends NameAndUuidDto {
     private SigningProfileListDto signingProfile;
 
     @Schema(
-            description = "Claimed signing time embedded in the signature structure by the signing operation. " +
-                    "This is the local time reported by the signer and may not be trusted unless " +
-                    "corroborated by a timestamp token (see signingProtocol).",
+            description = "Claimed signing time embedded in the signature structure by the signing operation.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Instant signingTime;
@@ -34,9 +32,7 @@ public class SigningRecordDto extends NameAndUuidDto {
     private Instant createdAt;
 
     @Schema(
-            description = "Raw signature value as a byte array (e.g. the DER-encoded CMS SignedData structure " +
-                    "for CAdES, or the detached XML signature element for XAdES). " +
-                    "May be null if the signature value was not retained by the platform.",
+            description = "Raw signature value bytes (Base64-encoded),if recorded.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private byte[] signatureValue;

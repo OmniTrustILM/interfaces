@@ -19,9 +19,7 @@ public class SigningRecordListDto extends NameAndUuidDto {
     private SigningProfileListDto signingProfile;
 
     @Schema(
-            description = "Claimed signing time embedded in the signature structure by the signing operation. " +
-                    "This is the local time reported by the signer and may not be trusted unless " +
-                    "corroborated by a timestamp token (see signingProtocol).",
+            description = "Claimed signing time embedded in the signature structure by the signing operation.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Instant signingTime;
