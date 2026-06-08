@@ -24,6 +24,10 @@ public class SigningRecordDto extends NameAndUuidDto {
     )
     private Instant signingTime;
 
+    @Schema(description = "Identity of the user that requested the signing operation",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private NameAndUuidDto requestedBy;
+
     @Schema(
             description = "Server time at which the Signing Record was created in the system. " +
                     "This timestamp is set by the platform and is independent of the cryptographic signing time.",

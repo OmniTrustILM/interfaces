@@ -7,8 +7,9 @@ import lombok.Data;
 @Schema(name = "SigningRecordPolicyDto",
         description = "Effective Signing Record policy on a Signing Profile")
 public class SigningRecordPolicyDto {
-    @Schema(description = "Content policy: capture base record metadata (signer identity, success/failure)")
-    private boolean recordMetadata;
+    @Schema(description = "Master switch: when false, no Signing Record is created at all for this profile, "
+            + "regardless of the content policy below")
+    private boolean recordingEnabled;
 
     @Schema(description = "Content policy: capture inbound request parameters (algorithm, policy IDs, claimed signer)")
     private boolean recordRequestMetadata;
