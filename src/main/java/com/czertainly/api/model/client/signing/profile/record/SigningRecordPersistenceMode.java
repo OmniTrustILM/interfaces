@@ -9,12 +9,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Arrays;
 
-@Schema(description = "Persistence mode for Signing Records, ordered by descending durability")
+@Schema(enumAsRef = true, description = "Persistence mode for Signing Records, ordered by descending durability")
 public enum SigningRecordPersistenceMode implements IPlatformEnum {
 
-    IMMEDIATE("immediate", "Immediate", "Record is written synchronously before the response is returned; highest durability, highest latency"),
-    DEFERRED_DURABLE("deferred_durable", "Deferred Durable", "Record is written asynchronously but guaranteed to be persisted; balanced latency and durability"),
-    BEST_EFFORT("best_effort", "Best Effort", "Record is written on a best-effort basis with no durability guarantee; lowest latency");
+    IMMEDIATE(Codes.IMMEDIATE, "Immediate", "Record is written synchronously before the response is returned; highest durability, highest latency"),
+    DEFERRED_DURABLE(Codes.DEFERRED_DURABLE, "Deferred Durable", "Record is written asynchronously but guaranteed to be persisted; balanced latency and durability"),
+    BEST_EFFORT(Codes.BEST_EFFORT, "Best Effort", "Record is written on a best-effort basis with no durability guarantee; lowest latency");
 
     private final String code;
     private final String label;
@@ -51,5 +51,14 @@ public enum SigningRecordPersistenceMode implements IPlatformEnum {
                 .findFirst()
                 .orElseThrow(() ->
                         new ValidationException(ValidationError.create("Unknown signing record persistence mode {}", code)));
+    }
+
+    public static class Codes {
+        public static final String IMMEDIATE = "immediate";
+        public static final String DEFERRED_DURABLE = "deferred_durable";
+        public static final String BEST_EFFORT = "best_effort";
+
+        private Codes() {
+        }
     }
 }
