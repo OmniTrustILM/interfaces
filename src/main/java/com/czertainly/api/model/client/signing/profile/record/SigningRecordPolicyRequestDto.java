@@ -9,6 +9,11 @@ import lombok.Data;
         description = "Per-profile policy for what to record about each signing operation")
 public class SigningRecordPolicyRequestDto {
 
+    @Schema(description = "Master switch: when false, no Signing Record is created at all for this profile, "
+            + "regardless of the content policy below. When true, a record is always created (capturing the "
+            + "content selected below, or metadata-only if none is selected).", defaultValue = "true")
+    private boolean recordingEnabled = true;
+
     @Schema(description = "Content policy: capture inbound request parameters (algorithm, policy IDs, claimed signer)")
     private boolean recordRequestMetadata;
 
