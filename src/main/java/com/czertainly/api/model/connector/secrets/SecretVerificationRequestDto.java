@@ -28,13 +28,9 @@ public class SecretVerificationRequestDto implements SecretOperationRequest {
     @Schema(description = "Name of the secret", requiredMode = Schema.RequiredMode.REQUIRED, examples = {"MyServerCredentials"})
     private String name;
 
-    @NotNull
-    @Schema(description = "Secret type", requiredMode = Schema.RequiredMode.REQUIRED, examples = {SecretType.Codes.BASIC_AUTH})
-    private SecretType type;
-
     @Valid
     @NotNull
-    @Schema(description = "Candidate secret content to verify against the stored value (server-side constant-time compare)",
+    @Schema(description = "Candidate secret content to verify against the stored value (server-side constant-time compare).",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private SecretContent candidate;
 
