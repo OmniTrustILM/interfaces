@@ -9,7 +9,6 @@ import com.czertainly.api.model.common.PaginationResponseDto;
 import com.czertainly.api.model.core.search.SearchFieldDataByGroupDto;
 import com.czertainly.api.model.core.signing.signingrecord.SigningRecordDto;
 import com.czertainly.api.model.core.signing.signingrecord.SigningRecordListDto;
-import com.czertainly.api.model.core.signing.signingrecord.SigningRecordValidationResultDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -27,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,20 +55,16 @@ public interface SigningRecordController extends AuthProtectedController {
     @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     SigningRecordDto getSigningRecord(@Parameter(description = "Signing Record UUID") @PathVariable UUID uuid) throws NotFoundException;
 
-    @Operation(
-            operationId = "validateSigningRecord",
-            summary = "Validate a Signing Record",
-            description = "Triggers a full validation of the Signing Record: cryptographic integrity, " +
-                    "certificate chain, and revocation status of all involved certificates at the time of signing. " +
-                    "Returns the highest ETSI conformance level that was successfully verified, along with " +
-                    "any warnings or errors encountered."
-    )
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Validation completed (check 'valid' field for the outcome)")})
-    @PostMapping(path = "/{uuid}/validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    SigningRecordValidationResultDto validateSigningRecord(
-            @Parameter(description = "Signing Record UUID") @PathVariable UUID uuid
-    ) throws NotFoundException;
+    @Operation(operationId = "deleteSigningRecord", summary = "Delete Signing Record")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Signing Record deleted")})
+    @DeleteMapping(path = "/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteSigningRecord(@Parameter(description = "Signing Record UUID") @PathVariable UUID uuid) throws NotFoundException;
 
-    // :TODO: Deletion endpoints: need to clarify first the retention/archival policy. Perhaps archive first and delete after period of time?
-    // :TODO: Do we need legal hold?
+    @Operation(operationId = "bulkDeleteSigningRecords", summary = "Delete multiple Signing Records")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Signing Records deleted"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+    @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<BulkActionMessageDto> bulkDeleteSigningRecords(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Signing Record UUIDs", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<UUID> uuids);
 }

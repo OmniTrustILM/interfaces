@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,25 +19,41 @@ public class SigningRecordDto extends NameAndUuidDto {
     private SigningProfileListDto signingProfile;
 
     @Schema(
-            description = "Claimed signing time embedded in the signature structure by the signing operation. " +
-                    "This is the local time reported by the signer and may not be trusted unless " +
-                    "corroborated by a timestamp token (see signingProtocol).",
+            description = "Claimed signing time embedded in the signature structure by the signing operation.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private ZonedDateTime signingTime;
+    private Instant signingTime;
+
+    @Schema(description = "Identity of the user that requested the signing operation",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private NameAndUuidDto requestedBy;
 
     @Schema(
             description = "Server time at which the Signing Record was created in the system. " +
                     "This timestamp is set by the platform and is independent of the cryptographic signing time.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private ZonedDateTime createdAt;
+    private Instant createdAt;
 
     @Schema(
-            description = "Raw signature value as a byte array (e.g. the DER-encoded CMS SignedData structure " +
-                    "for CAdES, or the detached XML signature element for XAdES). " +
-                    "May be null if the signature value was not retained by the platform.",
+            description = "Raw signature value bytes (Base64-encoded),if recorded.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private byte[] signatureValue;
+
+    @Schema(description = "Signed document bytes (Base64-encoded), if recorded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private byte[] signedDocument;
+
+    @Schema(description = "Data-to-be-signed bytes (Base64-encoded), if recorded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private byte[] dtbs;
+
+    @Schema(description = "Captured request metadata (JSON), if recorded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String requestMetadataJson;
+
+    @Schema(description = "Time the signed document was first served via CSC retrieval, if any",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Instant signedDocumentRetrievedAt;
 }
