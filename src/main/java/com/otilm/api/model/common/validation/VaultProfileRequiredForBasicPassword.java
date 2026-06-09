@@ -11,15 +11,15 @@ import java.lang.annotation.Target;
 
 /**
  * Class-level constraint: if {@code allowedAuthenticationMethods} contains {@code BASIC_PASSWORD},
- * {@code basicCredentials} must be non-empty AND {@code vaultProfileUuid} must be set.
+ * {@code vaultProfileUuid} must be set.
  */
-@Constraint(validatedBy = BasicCredentialsRequiredIfBasicPasswordValidator.class)
+@Constraint(validatedBy = VaultProfileRequiredForBasicPasswordValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface BasicCredentialsRequiredIfBasicPassword {
+public @interface VaultProfileRequiredForBasicPassword {
 
-    String message() default "when BASIC_PASSWORD is an allowed authentication method, basicCredentials must contain at least one entry and vaultProfileUuid must be set";
+    String message() default "when BASIC_PASSWORD is an allowed authentication method, vaultProfileUuid must be set";
 
     Class<?>[] groups() default {};
 

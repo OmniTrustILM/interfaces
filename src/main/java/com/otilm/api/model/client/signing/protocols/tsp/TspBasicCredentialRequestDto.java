@@ -14,10 +14,6 @@ import java.util.UUID;
         + "The password is write-only: provide it to create or rotate the credential; leave it blank on update to keep the existing secret.")
 public class TspBasicCredentialRequestDto {
 
-    @Schema(description = "UUID of an existing credential to update. Omit to create a new credential.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
-    private UUID uuid;
-
     @NotBlank
     @Schema(description = "Basic username; unique within the TSP profile.",
             requiredMode = Schema.RequiredMode.REQUIRED, example = "svc-account")

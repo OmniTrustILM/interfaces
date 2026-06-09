@@ -41,10 +41,6 @@ public class TspProfileDto extends NameAndUuidDto {
     @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
 
-    @Schema(description = "Read-only Basic credentials configured on this profile in case BASIC_PASSWORD authentication method " +
-            "is configured. Secret is never returned to the client.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<TspBasicCredentialDto> basicCredentials = new ArrayList<>();
-
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
 }

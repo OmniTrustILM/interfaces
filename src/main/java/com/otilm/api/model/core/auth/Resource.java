@@ -109,6 +109,7 @@ public enum Resource implements IPlatformEnum {
     SIGNING_RECORD(Codes.SIGNING_RECORD, "Signing Record"),
     TIME_QUALITY_CONFIGURATION(Codes.TIME_QUALITY_CONFIGURATION, "Time Quality Configuration", true, true),
     TSP_PROFILE(Codes.TSP_PROFILE, "Timestamping Protocol Profile", true, true),
+    TSP_PROFILE_BASIC_CREDENTIAL(Codes.TSP_PROFILE_BASIC_CREDENTIAL, "TSP Profile Basic Credential", true, true),
     ;
 
     private static final Resource[] VALUES;
@@ -248,6 +249,7 @@ public enum Resource implements IPlatformEnum {
         public static final String CBOM = "cboms";
         public static final String SIGNING_PROFILE = "signingProfiles";
         public static final String TSP_PROFILE = "tspProfiles";
+        public static final String TSP_PROFILE_BASIC_CREDENTIAL = "tspProfileBasicCredentials";
         public static final String TIME_QUALITY_CONFIGURATION = "timeQualityConfigurations";
         public static final String SIGNING_RECORD = "signingRecords";
 

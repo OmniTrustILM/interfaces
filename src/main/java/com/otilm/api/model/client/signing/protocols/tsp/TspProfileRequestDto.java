@@ -1,12 +1,11 @@
 package com.otilm.api.model.client.signing.protocols.tsp;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
-import com.otilm.api.model.common.validation.BasicCredentialsRequiredIfBasicPassword;
-import com.otilm.api.model.common.validation.BasicPasswordConstrained;
+import com.otilm.api.model.common.validation.VaultProfileRequiredForBasicPassword;
+import com.otilm.api.model.common.validation.VaultProfileConstrained;
 import com.otilm.api.model.common.validation.ValidName;
 import com.otilm.api.model.core.signing.TspAuthenticationMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -16,9 +15,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@BasicCredentialsRequiredIfBasicPassword
+@VaultProfileRequiredForBasicPassword
 @Schema(name = "TspProfileRequestDto", description = "Request to create or update a TSP (Timestamping Protocol) Profile")
-public class TspProfileRequestDto implements BasicPasswordConstrained {
+public class TspProfileRequestDto implements VaultProfileConstrained {
 
     @NotBlank
     @ValidName
@@ -39,12 +38,6 @@ public class TspProfileRequestDto implements BasicPasswordConstrained {
     @Schema(description = "Authentication methods this TSP Profile accepts on the TSP protocol endpoints. Must be non-empty.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
-
-    @Valid
-    @Schema(description = "Basic (username/password) credentials for this profile. Required (>=1) when BASIC_PASSWORD is allowed. "
-            + "Reconciled per row by uuid; password is write-only (blank on update keeps the existing secret).",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<TspBasicCredentialRequestDto> basicCredentials = new ArrayList<>();
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> customAttributes = new ArrayList<>();

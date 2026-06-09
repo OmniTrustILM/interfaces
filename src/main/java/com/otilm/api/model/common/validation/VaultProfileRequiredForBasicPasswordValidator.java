@@ -6,21 +6,17 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Collection;
 
-public class BasicCredentialsRequiredIfBasicPasswordValidator
-        implements ConstraintValidator<BasicCredentialsRequiredIfBasicPassword, BasicPasswordConstrained> {
+public class VaultProfileRequiredForBasicPasswordValidator
+        implements ConstraintValidator<VaultProfileRequiredForBasicPassword, VaultProfileConstrained> {
 
     @Override
-    public boolean isValid(BasicPasswordConstrained value, ConstraintValidatorContext context) {
+    public boolean isValid(VaultProfileConstrained value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
         Collection<TspAuthenticationMethod> methods = value.getAllowedAuthenticationMethods();
         if (methods == null || !methods.contains(TspAuthenticationMethod.BASIC_PASSWORD)) {
             return true;
-        }
-        Collection<?> credentials = value.getBasicCredentials();
-        if (credentials == null || credentials.isEmpty()) {
-            return false;
         }
         return value.getVaultProfileUuid() != null;
     }
