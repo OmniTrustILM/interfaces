@@ -4,6 +4,7 @@ import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.signing.profile.SimplifiedSigningProfileDto;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.core.signing.TspAuthenticationMethod;
+import com.otilm.api.model.core.vaultprofile.VaultProfileDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,8 +36,8 @@ public class TspProfileDto extends NameAndUuidDto {
     private String signingUrl;
 
     @Schema(description = "Vault profile that stores this profile's Basic credentials; required when Basic credentials are configured",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
-    private java.util.UUID vaultProfileUuid;
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private VaultProfileDto vaultProfile;
 
     @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
