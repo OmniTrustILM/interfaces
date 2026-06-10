@@ -1,9 +1,9 @@
 name: Publish signing package to GitHub Packages
 
-# Publishes the feat/signing artifact to GitHub Packages so that downstream builds (e.g. CZERTAINLY-Core feat/signing)
-# can resolve com.czertainly:interfaces as a dependency.
+# Publishes the feat/signing artifact to GitHub Packages so that downstream builds (e.g. Core feat/signing)
+# can resolve com.otilm:interfaces as a dependency.
 #
-# NOTE: this workflow intentionally skips Maven Central / OSSRH – feature-branch
+# NOTE: this workflow intentionally skips Maven Central – feature-branch
 # builds are published to GitHub Packages only.
 
 on:

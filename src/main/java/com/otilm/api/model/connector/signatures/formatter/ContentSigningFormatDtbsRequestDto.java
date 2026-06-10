@@ -1,0 +1,24 @@
+package com.otilm.api.model.connector.signatures.formatter;
+
+import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+/**
+ * DTBS formatting request for the Content Signing workflow.
+ *
+ * <p>No additional Core-provided fields beyond the base at this time.
+ * Reserved for future content-signing-specific properties.</p>
+ */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Schema(title = "ContentSigningFormatDtbsRequestDto", description = "DTBS formatting request for Content Signing")
+public class ContentSigningFormatDtbsRequestDto extends FormatDtbsRequestDto {
+
+    public ContentSigningFormatDtbsRequestDto() {
+        super(SigningWorkflowType.CONTENT_SIGNING);
+    }
+}
