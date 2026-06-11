@@ -34,9 +34,10 @@ public class TspProfileRequestDto implements VaultProfileConstrained {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "6b55de1c-844f-11ec-a8a3-0242ac120002")
     private UUID vaultProfileUuid;
 
-    @NotEmpty
-    @Schema(description = "Authentication methods this TSP Profile accepts on the TSP protocol endpoints. Must be non-empty.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    // During transitional period, the authentication methods are optional. Once the consumers are migrated, add @NotEmpty and REQUIRED.
+    @Schema(description = "Authentication methods this TSP Profile accepts on the TSP protocol endpoints. " +
+            "Allowed to be empty for the transitional period.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)

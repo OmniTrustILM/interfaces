@@ -44,14 +44,20 @@ public interface TspProfileBasicCredentialController extends AuthProtectedContro
                               @Parameter(description = "Basic credential UUID") @PathVariable UUID uuid) throws NotFoundException;
 
     @Operation(operationId = "createTspProfileBasicCredential", summary = "Create a Basic credential")
-    @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Basic credential created")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Basic credential created"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+    })
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     TspBasicCredentialDto create(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
                                  @RequestBody @Valid TspBasicCredentialRequestDto request) throws NotFoundException;
 
     @Operation(operationId = "updateTspProfileBasicCredential", summary = "Update a Basic credential")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Basic credential updated")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Basic credential updated"),
+            @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+    })
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     TspBasicCredentialDto update(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
                                  @Parameter(description = "Basic credential UUID") @PathVariable UUID uuid,

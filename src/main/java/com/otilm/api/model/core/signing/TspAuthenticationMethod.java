@@ -55,7 +55,7 @@ public enum TspAuthenticationMethod implements IPlatformEnum {
                 .filter(k -> k.code.equals(code))
                 .findFirst()
                 .orElseThrow(() ->
-                        new ValidationException(ValidationError.create("Unknown TSP authentication method code")));
+                        new ValidationException(ValidationError.create("Unknown TSP authentication method {}", code)));
     }
 
     @Override
