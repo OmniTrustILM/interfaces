@@ -3,6 +3,8 @@ package com.otilm.api.model.client.signing.protocols.tsp;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.signing.profile.SimplifiedSigningProfileDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.signing.TspAuthenticationMethod;
+import com.otilm.api.model.core.vaultprofile.VaultProfileDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,6 +34,13 @@ public class TspProfileDto extends NameAndUuidDto {
             example = "https://ilm.otilm.com/api/v1/protocols/tsp/tsp-profile-1/sign"
     )
     private String signingUrl;
+
+    @Schema(description = "Vault profile that stores this profile's Basic credentials; required when Basic credentials are configured",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private VaultProfileDto vaultProfile;
+
+    @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
