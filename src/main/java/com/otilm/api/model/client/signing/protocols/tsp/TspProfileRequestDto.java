@@ -7,7 +7,6 @@ import com.otilm.api.model.common.validation.ValidName;
 import com.otilm.api.model.core.signing.TspAuthenticationMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.ArrayList;

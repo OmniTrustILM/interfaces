@@ -18,6 +18,13 @@ public class VaultProfileRequiredForBasicPasswordValidator
         if (methods == null || !methods.contains(TspAuthenticationMethod.BASIC_PASSWORD)) {
             return true;
         }
-        return value.getVaultProfileUuid() != null;
+        boolean valid = value.getVaultProfileUuid() != null;
+        if (!valid) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
+                    .addPropertyNode("vaultProfileUuid")
+                    .addConstraintViolation();
+        }
+        return valid;
     }
 }
