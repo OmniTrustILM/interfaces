@@ -31,7 +31,7 @@ public class TspProfileDto extends NameAndUuidDto {
     @Schema(
             description = "TSP URL for signing",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
-            example = "https://ilm.otilm.com/api/v1/protocols/tsp/tsp-profile-1/sign"
+            example = "https://ilm.otilm.com/api/v1/protocols/tsp/tsp-profile-1"
     )
     private String signingUrl;
 

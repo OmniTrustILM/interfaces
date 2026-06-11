@@ -77,7 +77,6 @@ public interface TspController extends NoAuthController {
             )
     })
     @PostMapping(
-            value = "/sign",
             consumes = "application/timestamp-query",
             produces = "application/timestamp-reply"
     )
