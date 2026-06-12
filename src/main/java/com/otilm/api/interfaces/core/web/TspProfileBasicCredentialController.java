@@ -1,5 +1,8 @@
 package com.otilm.api.interfaces.core.web;
 
+import com.otilm.api.exception.AlreadyExistException;
+import com.otilm.api.exception.AttributeException;
+import com.otilm.api.exception.ConnectorCommunicationException;
 import com.otilm.api.exception.NotFoundException;
 import com.otilm.api.interfaces.AuthProtectedController;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialDto;
@@ -7,7 +10,9 @@ import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialReques
 import com.otilm.api.model.common.ErrorMessageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -46,27 +51,37 @@ public interface TspProfileBasicCredentialController extends AuthProtectedContro
     @Operation(operationId = "createTspProfileBasicCredential", summary = "Create a Basic credential")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Basic credential created"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
+            @ApiResponse(responseCode = "503", description = "Vault Connector Unavailable", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
     })
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     TspBasicCredentialDto create(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
-                                 @RequestBody @Valid TspBasicCredentialRequestDto request) throws NotFoundException;
+                                 @RequestBody @Valid TspBasicCredentialRequestDto request) throws AlreadyExistException, AttributeException, ConnectorCommunicationException, NotFoundException;
 
     @Operation(operationId = "updateTspProfileBasicCredential", summary = "Update a Basic credential")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Basic credential updated"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "409", description = "Already Exists", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
+            @ApiResponse(responseCode = "503", description = "Vault Connector Unavailable", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
     })
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     TspBasicCredentialDto update(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
                                  @Parameter(description = "Basic credential UUID") @PathVariable UUID uuid,
-                                 @RequestBody @Valid TspBasicCredentialRequestDto request) throws NotFoundException;
+                                 @RequestBody @Valid TspBasicCredentialRequestDto request) throws AlreadyExistException, AttributeException, ConnectorCommunicationException, NotFoundException;
 
     @Operation(operationId = "deleteTspProfileBasicCredential", summary = "Delete a Basic credential")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Basic credential deleted")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Basic credential deleted"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Vault Connector Unavailable", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+    })
     @DeleteMapping(path = "/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
-                @Parameter(description = "Basic credential UUID") @PathVariable UUID uuid) throws NotFoundException;
+                @Parameter(description = "Basic credential UUID") @PathVariable UUID uuid) throws AttributeException, ConnectorCommunicationException, NotFoundException;
 }

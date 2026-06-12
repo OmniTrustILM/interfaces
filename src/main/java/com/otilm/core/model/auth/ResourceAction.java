@@ -48,7 +48,6 @@ public enum ResourceAction implements IPlatformEnum {
     DECRYPT("decrypt", "Decrypt"),
     VERIFY("verify", "Verify"),
     SIGN("sign", "Sign"),
-    TSP_SIGN("tspSign", "TSP Sign"),
 
     // PROXY
     GET_PROXY_INSTALLATION("getProxyInstallation", "Get proxy installation"),

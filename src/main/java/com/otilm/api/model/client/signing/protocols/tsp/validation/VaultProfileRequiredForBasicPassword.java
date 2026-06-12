@@ -1,4 +1,4 @@
-package com.otilm.api.model.common.validation;
+package com.otilm.api.model.client.signing.protocols.tsp.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
