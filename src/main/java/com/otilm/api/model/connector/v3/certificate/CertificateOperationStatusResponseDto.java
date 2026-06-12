@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@Schema(name = "CertificateOperationStatusResponseDtoV3")
 public class CertificateOperationStatusResponseDto {
 
     @Schema(description = "Operation status as known to the connector",

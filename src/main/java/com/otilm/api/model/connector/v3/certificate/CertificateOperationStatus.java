@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Arrays;
 
-@Schema(enumAsRef = true)
+@Schema(name = "CertificateOperationStatusV3", enumAsRef = true)
 public enum CertificateOperationStatus implements IPlatformEnum {
 
     IN_PROGRESS("inProgress", "In progress", "Operation is still running at the upstream CA"),

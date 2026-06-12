@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@Schema(name = "CertificateIdentificationResponseDtoV3")
 public class CertificateIdentificationResponseDto {
 
     @Schema(description = "Connector-defined metadata describing the cert as known to the upstream CA "

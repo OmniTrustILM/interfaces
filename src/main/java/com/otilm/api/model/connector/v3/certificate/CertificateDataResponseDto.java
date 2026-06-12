@@ -23,6 +23,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@Schema(name = "CertificateDataResponseDtoV3")
 public class CertificateDataResponseDto {
 
     @Schema(description = "Base64-encoded certificate content. Populated only for issue/renew sync 200. "

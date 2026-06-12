@@ -23,10 +23,10 @@ import lombok.NoArgsConstructor;
 public class OperationSupport {
 
     @Schema(
-            description = "Operation kind (e.g. ISSUE, RENEW, REVOKE, REGISTER).",
+            description = "Operation kind (ISSUE, RENEW, REVOKE, REGISTER).",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private String operation;
+    private CertificateOperationKind operation;
 
     @Schema(
             description = "Whether the operation is supported by this authority."
