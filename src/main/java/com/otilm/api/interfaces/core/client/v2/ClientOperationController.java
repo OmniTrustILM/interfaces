@@ -74,7 +74,7 @@ import java.util.List;
  *
  * <h3>Synchronous paths (connector returns 200 OK)</h3>
  * <ul>
- *   <li>{@link #issueCertificate}, {@link #issueRequestedCertificate},
+ *   <li>{@link #issueCertificate}, {@link #issueExistingCertificate},
  *       {@link #renewCertificate}, {@link #rekeyCertificate}: cert moves to
  *       {@code ISSUED}. If the connector reports a failure during the call the cert
  *       moves to {@code FAILED} instead.</li>
@@ -83,7 +83,7 @@ import java.util.List;
  *
  * <h3>Asynchronous paths (connector returns 202 Accepted)</h3>
  * <ul>
- *   <li>{@code issueCertificate} / {@code issueRequestedCertificate} /
+ *   <li>{@code issueCertificate} / {@code issueExistingCertificate} /
  *       {@code renewCertificate} / {@code rekeyCertificate}: cert moves to
  *       {@code PENDING_ISSUE}. An operator finalizes it via
  *       {@link #manuallyIssueCertificate} (→ {@code ISSUED}) or aborts via
@@ -94,7 +94,7 @@ import java.util.List;
  *       certificate was never actually revoked upstream).</li>
  * </ul>
  *
- * <p>{@code rekeyCertificate} and {@code issueRequestedCertificate} use the same
+ * <p>{@code rekeyCertificate} and {@code issueExistingCertificate} use the same
  * authority-provider call as {@code issueCertificate}, so they can complete either
  * synchronously or asynchronously depending on what the connector returns.</p>
  *
