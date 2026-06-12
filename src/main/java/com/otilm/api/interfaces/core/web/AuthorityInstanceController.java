@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +61,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                     examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
-    ResponseEntity<?> createAuthorityInstance(@RequestBody AuthorityInstanceRequestDto request)
+    ResponseEntity<?> createAuthorityInstance(@RequestBody @Valid AuthorityInstanceRequestDto request)
             throws AlreadyExistException, ConnectorException, AttributeException, NotFoundException;
 
     @Operation(summary = "Edit Authority instance")
@@ -69,7 +70,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
                     examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", consumes = {"application/json"}, produces = {
             "application/json"})
-    AuthorityInstanceDto editAuthorityInstance(@Parameter(description = "Authority instance UUID") @PathVariable String uuid, @RequestBody AuthorityInstanceUpdateRequestDto request)
+    AuthorityInstanceDto editAuthorityInstance(@Parameter(description = "Authority instance UUID") @PathVariable String uuid, @RequestBody @Valid AuthorityInstanceUpdateRequestDto request)
             throws ConnectorException, AttributeException, NotFoundException;
 
     @Operation(summary = "Delete Authority instance")

@@ -16,6 +16,8 @@ public enum CertificateState implements IPlatformEnum {
 	PENDING_APPROVAL("pending_approval", "Pending approval"),
 	PENDING_ISSUE("pending_issue", "Pending issue", "Issue action pending (CA approval)"),
 	PENDING_REVOKE("pending_revoke", "Pending revoke", "Revoke action pending (CA approval)"),
+	PENDING_REGISTRATION("pending_registration", "Pending registration", "Registration action pending (CA approval / async)"),
+	REGISTERED("registered", "Registered", "Pre-registered; awaiting issue"),
 	FAILED("failed", "Failed", "Issue action failed"),
 	ISSUED("issued", "Issued"),
 	REVOKED("revoked", "Revoked")

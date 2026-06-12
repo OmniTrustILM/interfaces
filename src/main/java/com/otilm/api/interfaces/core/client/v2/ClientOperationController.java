@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -155,17 +156,31 @@ public interface ClientOperationController extends AuthProtectedController {
 			@RequestBody List<RequestAttribute>attributes) throws NotFoundException, ConnectorException, ValidationException;
 
 	@Operation(
-			summary = "Issue an existing certificate request",
-			description = "Trigger issuance for a certificate already in state `REQUESTED`. Used after the certificate request has been created (typically via a protocol such as ACME, SCEP, or CMP) and any approval and compliance flows have completed."
+			summary = "Issue an existing certificate (REQUESTED or REGISTERED)",
+			description = """
+					Trigger issuance for an existing certificate. Behavior depends on cert state:
+					- `REQUESTED` (no body): the certificate already has a CSR attached (typically from
+					  a protocol layer such as ACME, SCEP, or CMP, or after an approval/compliance cycle).
+					  Issuance is triggered with the existing CSR.
+					- `REGISTERED` (body required): the certificate was pre-registered (v3 authorities with
+					  `CERTIFICATE_REGISTRATION` capability) and is now being finalized with an operator-
+					  supplied CSR. The CSR + sign attributes from the body are attached to the existing
+					  certificate row, then issuance is triggered. The cert's identity (subject DN, SAN,
+					  extensions) and connector-supplied metadata from the registration are preserved.
+					"""
 	)
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate issued"),
 			@ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
 					examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
-	@PostMapping(path = "/certificates/{certificateUuid}/issue", produces = {"application/json"})
-	ClientCertificateDataResponseDto issueRequestedCertificate(
+	@PostMapping(path = "/certificates/{certificateUuid}/issue", consumes = {"application/json"}, produces = {"application/json"})
+	ClientCertificateDataResponseDto issueExistingCertificate(
 			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
-			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException;
+			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(
+					description = "Sign request body. Required when cert state is REGISTERED (carries the operator's CSR + sign attributes); must be omitted when cert state is REQUESTED.",
+					required = false)
+			@RequestBody(required = false) @Valid ClientCertificateSignRequestDto request) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException, AttributeException;
 
 	@Operation(
 			summary = "Issue certificate",
@@ -327,6 +342,47 @@ public interface ClientOperationController extends AuthProtectedController {
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
 			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,
 			@RequestBody(required = false) CancelPendingCertificateRequestDto request)
+			throws NotFoundException;
+
+	@Operation(
+			summary = "Pre-register a certificate with the upstream CA",
+			description = """
+					Reserves a slot at the CA for a certificate that will be issued later. Returns
+					a tracking handle (in metadata) that can be used to complete the issuance via
+					the standard issue flow.
+
+					Only supported on v3 authorities advertising the `CERTIFICATE_REGISTRATION`
+					feature flag. The operation may complete synchronously (200) or asynchronously
+					(202 with status polling).
+					"""
+	)
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Registration accepted; tracking handle returned"),
+			@ApiResponse(responseCode = "422", description = "Authority does not support registration",
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))
+	})
+	@PostMapping(path = "/certificates/register", consumes = {"application/json"}, produces = {"application/json"})
+	ClientCertificateDataResponseDto registerCertificate(
+			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
+			@RequestBody @Valid ClientCertificateRegistrationDto request)
+			throws NotFoundException, ValidationException, ConnectorException;
+
+	@Operation(
+			summary = "List operations supported by this authority/RA profile",
+			description = """
+					Returns per-operation support flags (issue/renew/revoke/register) including whether
+					each may complete asynchronously and whether each can be cancelled mid-flight. Operators
+					use this to drive UI affordances and validate flows before invoking them.
+					"""
+	)
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Capability advertisement returned")
+	})
+	@GetMapping(path = "/availableOperations", produces = {"application/json"})
+	AvailableOperationsDto listAvailableOperations(
+			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid)
 			throws NotFoundException;
 
 }
