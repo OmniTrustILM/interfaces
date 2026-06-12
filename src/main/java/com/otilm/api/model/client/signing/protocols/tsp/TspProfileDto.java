@@ -39,7 +39,8 @@ public class TspProfileDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private VaultProfileDto vaultProfile;
 
-    @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.REQUIRED)
+    // Once the consumers are migrated, change mode to REQUIRED. Refer to TspProfileRequestDto.
+    @Schema(description = "Authentication methods this TSP Profile accepts", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<TspAuthenticationMethod> allowedAuthenticationMethods = new ArrayList<>();
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)

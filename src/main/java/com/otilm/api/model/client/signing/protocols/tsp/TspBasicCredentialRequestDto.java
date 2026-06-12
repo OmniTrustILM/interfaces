@@ -21,7 +21,8 @@ public class TspBasicCredentialRequestDto {
 
     @ToString.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Schema(description = "Basic password (write-only). Blank on update keeps the existing secret; a value creates/rotates it.",
+    @Schema(description = "Basic password (write-only). On create a value is required — there is no existing secret to keep. "
+            + "On update, blank keeps the existing secret and a value rotates it.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, accessMode = Schema.AccessMode.WRITE_ONLY)
     private String password;
 

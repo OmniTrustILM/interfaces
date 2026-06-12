@@ -1,4 +1,4 @@
-package com.otilm.api.model.common.validation;
+package com.otilm.api.model.client.signing.protocols.tsp.validation;
 
 import com.otilm.api.model.core.signing.TspAuthenticationMethod;
 import jakarta.validation.ConstraintValidator;
@@ -18,6 +18,13 @@ public class VaultProfileRequiredForBasicPasswordValidator
         if (methods == null || !methods.contains(TspAuthenticationMethod.BASIC_PASSWORD)) {
             return true;
         }
-        return value.getVaultProfileUuid() != null;
+        boolean valid = value.getVaultProfileUuid() != null;
+        if (!valid) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
+                    .addPropertyNode("vaultProfileUuid")
+                    .addConstraintViolation();
+        }
+        return valid;
     }
 }
