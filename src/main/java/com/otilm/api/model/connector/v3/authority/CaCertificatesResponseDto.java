@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@Schema(name = "CaCertificatesResponseDtoV3")
 public class CaCertificatesResponseDto {
 
     @Schema(description = "CA certificate chain. Each entry reuses the issued-cert envelope so per-CA meta "
