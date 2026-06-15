@@ -8,6 +8,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Schema(name = "CrlResponseDtoV3")
 public class CrlResponseDto {
 
     @Schema(description = "Base64-encoded CRL (DER). Core parses nextUpdate, issuer, and revoked-entry data from the CRL itself.",
