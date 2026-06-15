@@ -2,7 +2,6 @@ package com.otilm.api.interfaces.core.cmp;
 
 import com.otilm.api.interfaces.InBandResponseController;
 import com.otilm.api.interfaces.core.cmp.error.CmpBaseException;
-import com.otilm.api.model.core.acme.ProblemDocument;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,32 +17,6 @@ import org.springframework.web.bind.annotation.*;
         "on top of RA Profile. CMP Profile defines the behaviour for the specific CMP configuration. CMP Profile is " +
         "bound with specific RA Profile and it can be used by the CMP clients to request operations on their specific " +
         "URL. These operations are always specific only for the RA Profile.")
-@ApiResponses(
-        value = {
-                @ApiResponse(
-                        responseCode = "400",
-                        description = "Bad Request",
-                        content = @Content(mediaType = "application/problem+json",
-                                schema = @Schema(implementation = ProblemDocument.class))
-                ),
-                @ApiResponse(
-                        responseCode = "401",
-                        description = "Unauthorized",
-                        content = @Content(mediaType = "application/problem+json",
-                                schema = @Schema(implementation = ProblemDocument.class))
-                ),
-                @ApiResponse(
-                        responseCode = "403",
-                        description = "Forbidden",
-                        content = @Content(mediaType = "application/problem+json",
-                                schema = @Schema(implementation = ProblemDocument.class))
-                ),
-                @ApiResponse(
-                        responseCode = "500",
-                        description = "Internal Server Error",
-                        content = @Content
-                )
-        })
 public interface CmpRaProfileController extends InBandResponseController {
 
     @Operation(summary = "CMP Get Operations")
