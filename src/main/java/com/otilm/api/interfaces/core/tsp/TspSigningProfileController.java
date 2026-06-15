@@ -1,7 +1,6 @@
 package com.otilm.api.interfaces.core.tsp;
 
 import com.otilm.api.interfaces.NoAuthController;
-import com.otilm.api.interfaces.core.tsp.error.TspException;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,13 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * RFC 3161 Timestamp Protocol endpoint — routed by Signing Profile name.
  * The identified Signing Profile must have TSP activated.
  *
- * <p>Spring MVC note: the static segment "signingProfiles" here takes precedence
- * over the path variable in {@link TspController}, so the two mappings never conflict.</p>
- *
- * <p>SpringDoc note: the class-level {@code @ApiResponses} below override the
- * 400/500 entries inherited from {@link NoAuthController}. SpringDoc merges
- * annotations from parent interfaces; if the same response code appears in both,
- * the subtype's declaration wins for that code.</p>
+ * <p>This is a binary RFC 3161 protocol endpoint, not a REST resource. Every
+ * request is answered with HTTP 200 and a DER-encoded {@code TimeStampResp}
+ * ({@code application/timestamp-reply}); both success and failure are conveyed
+ * in-band via the response's {@code PKIStatus} (RFC 3161 section 2.4.2):
+ * {@code granted}/{@code grantedWithMods} on success, {@code rejection} with a
+ * {@code PKIFailureInfo} reason on failure. The endpoint does not surface
+ * REST-style HTTP error codes — a malformed or unacceptable request still
+ * returns a 200 {@code TimeStampResp} carrying a rejection status.</p>
  *
  * @see <a href="https://www.rfc-editor.org/rfc/rfc3161">RFC 3161</a>
  */
@@ -34,25 +34,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Tag(
         name = "TSP — by signing profile name",
         description = "RFC 3161 Timestamp Protocol endpoint. Routed by Signing Profile name. " +
-                "The Signing Profile must have TSP activated. All responses — including errors — " +
-                "are returned as application/timestamp-reply per RFC 3161 section 3."
+                "The Signing Profile must have TSP activated. Always returns HTTP 200 with an " +
+                "application/timestamp-reply TimeStampResp; success and rejection are encoded " +
+                "in-band via PKIStatus per RFC 3161."
 )
 @ApiResponses(value = {
         @ApiResponse(
                 responseCode = "200",
-                description = "TimeStampResp returned (check PKIStatus inside the response for success or rejection)",
-                content = @Content(mediaType = "application/timestamp-reply",
-                        schema = @Schema(type = "string", format = "binary"))
-        ),
-        @ApiResponse(
-                responseCode = "400",
-                description = "Request could not be processed; rejection returned as TimeStampResp",
-                content = @Content(mediaType = "application/timestamp-reply",
-                        schema = @Schema(type = "string", format = "binary"))
-        ),
-        @ApiResponse(
-                responseCode = "500",
-                description = "Internal error; rejection returned as TimeStampResp with systemFailure",
+                description = "TimeStampResp returned. PKIStatus conveys the outcome: " +
+                        "granted/grantedWithMods on success, rejection with PKIFailureInfo on failure.",
                 content = @Content(mediaType = "application/timestamp-reply",
                         schema = @Schema(type = "string", format = "binary"))
         )
