@@ -1,6 +1,6 @@
 package com.otilm.api.interfaces.core.cmp;
 
-import com.otilm.api.interfaces.NoAuthController;
+import com.otilm.api.interfaces.InBandResponseController;
 import com.otilm.api.interfaces.core.cmp.error.CmpBaseException;
 import com.otilm.api.model.core.acme.ProblemDocument;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.*;
                         content = @Content
                 )
         })
-public interface CmpRaProfileController extends NoAuthController {
+public interface CmpRaProfileController extends InBandResponseController {
 
     @Operation(summary = "CMP Get Operations")
     @ApiResponses(value = {
