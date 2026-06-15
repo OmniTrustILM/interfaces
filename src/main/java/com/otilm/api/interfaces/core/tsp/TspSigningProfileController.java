@@ -1,6 +1,5 @@
 package com.otilm.api.interfaces.core.tsp;
 
-import com.otilm.api.interfaces.NoAuthController;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,7 +46,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
                         schema = @Schema(type = "string", format = "binary"))
         )
 })
-public interface TspSigningProfileController extends NoAuthController {
+public interface TspSigningProfileController {
 
     @Operation(
             summary = "Request a timestamp token",
