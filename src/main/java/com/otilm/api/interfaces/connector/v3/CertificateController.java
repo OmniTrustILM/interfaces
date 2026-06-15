@@ -37,7 +37,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     ResponseEntity<CertificateDataResponseDto> issue(@RequestBody @Valid CertificateSignRequestDtoV3 request);
 
     @Operation(summary = "Get async issue operation status", description = "Get status of an async issue/renew/rekey operation")
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Operation status retrieved"))
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Issue operation status retrieved"))
     @PostMapping(path = "/issue/status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     CertificateOperationStatusResponseDto getIssueStatus(@RequestBody @Valid CertificateOperationStatusRequestDtoV3 request);
 
