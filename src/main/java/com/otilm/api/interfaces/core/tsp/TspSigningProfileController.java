@@ -85,5 +85,5 @@ public interface TspSigningProfileController extends NoAuthController {
             @PathVariable String signingProfileName,
             @RequestBody @Schema(description = "DER-encoded TimeStampReq", type = "string", format = "binary")
             byte[] request
-    ) throws TspException;
+    );
 }

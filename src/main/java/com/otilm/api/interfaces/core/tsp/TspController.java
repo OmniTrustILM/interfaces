@@ -85,5 +85,5 @@ public interface TspController extends NoAuthController {
             @PathVariable String tspProfileName,
             @RequestBody @Schema(description = "DER-encoded TimeStampReq", type = "string", format = "binary")
             byte[] request
-    ) throws TspException;
+    );
 }
