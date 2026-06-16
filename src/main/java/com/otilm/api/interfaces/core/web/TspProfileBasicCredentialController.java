@@ -5,8 +5,9 @@ import com.otilm.api.exception.AttributeException;
 import com.otilm.api.exception.ConnectorCommunicationException;
 import com.otilm.api.exception.NotFoundException;
 import com.otilm.api.interfaces.AuthProtectedController;
+import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialCreateRequestDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialDto;
-import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialRequestDto;
+import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialUpdateRequestDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -59,7 +60,7 @@ public interface TspProfileBasicCredentialController extends AuthProtectedContro
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     TspBasicCredentialDto create(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
-                                 @RequestBody @Valid TspBasicCredentialRequestDto request) throws AlreadyExistException, AttributeException, ConnectorCommunicationException, NotFoundException;
+                                 @RequestBody @Valid TspBasicCredentialCreateRequestDto request) throws AlreadyExistException, AttributeException, ConnectorCommunicationException, NotFoundException;
 
     @Operation(operationId = "updateTspProfileBasicCredential", summary = "Update a Basic credential")
     @ApiResponses(value = {
@@ -72,7 +73,7 @@ public interface TspProfileBasicCredentialController extends AuthProtectedContro
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     TspBasicCredentialDto update(@Parameter(description = "TSP Profile UUID") @PathVariable UUID tspProfileUuid,
                                  @Parameter(description = "Basic credential UUID") @PathVariable UUID uuid,
-                                 @RequestBody @Valid TspBasicCredentialRequestDto request) throws AlreadyExistException, AttributeException, ConnectorCommunicationException, NotFoundException;
+                                 @RequestBody @Valid TspBasicCredentialUpdateRequestDto request) throws AlreadyExistException, AttributeException, ConnectorCommunicationException, NotFoundException;
 
     @Operation(operationId = "deleteTspProfileBasicCredential", summary = "Delete a Basic credential")
     @ApiResponses(value = {
