@@ -2,6 +2,7 @@ package com.otilm.api.model.core.authority;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,12 +28,23 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String status;
 
-    @Schema(description = "UUID of Authority provider",
+    @Schema(description = "Connector (Authority provider) this instance belongs to.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private NameAndUuidDto connector;
+
+    @Schema(description = "Connector Interface this Authority instance is bound to; null for legacy v1 connectors, "
+            + "which are identified by kind instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ConnectorInterfaceDto connectorInterface;
+
+    @Schema(description = "UUID of Authority provider. Deprecated — use connector.uuid instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, deprecated = true)
+    @Deprecated(forRemoval = true)
     private String connectorUuid;
 
-    @Schema(description = "Name of Authority provider",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Name of Authority provider. Deprecated — use connector.name instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, deprecated = true)
+    @Deprecated(forRemoval = true)
     private String connectorName;
 
     @Schema(description = "Authority Instance Kind",
@@ -48,8 +60,8 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
                 .append("attributes", attributes)
                 .append("customAttributes", customAttributes)
                 .append("status", status)
-                .append("connectorUuid", connectorUuid)
-                .append("connectorName", connectorName)
+                .append("connector", connector)
+                .append("connectorInterface", connectorInterface)
                 .append("kind", kind)
                 .toString();
     }
