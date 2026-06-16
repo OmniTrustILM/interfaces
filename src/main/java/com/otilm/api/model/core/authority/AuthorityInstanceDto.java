@@ -29,19 +29,25 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
     private String status;
 
     @Schema(description = "Connector (Authority provider) this instance belongs to.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private NameAndUuidDto connector;
 
     @Schema(description = "Connector Interface this Authority instance is bound to; null for legacy v1 connectors, "
             + "which are identified by kind instead.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private ConnectorInterfaceDto connectorInterface;
 
+    /**
+     * @deprecated use {@link #connector} instead.
+     */
     @Schema(description = "UUID of Authority provider. Deprecated — use connector.uuid instead.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, deprecated = true)
     @Deprecated(forRemoval = true)
     private String connectorUuid;
 
+    /**
+     * @deprecated use {@link #connector} instead.
+     */
     @Schema(description = "Name of Authority provider. Deprecated — use connector.name instead.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, deprecated = true)
     @Deprecated(forRemoval = true)
