@@ -10,20 +10,20 @@ import lombok.ToString;
 import java.util.UUID;
 
 @Data
-@Schema(name = "TspBasicCredentialRequestDto", description = "A single Basic (username/password) credential on a TSP Profile. "
-        + "The password is write-only: provide it to create or rotate the credential; leave it blank on update to keep the existing secret. "
-        + "Changing the username on update requires a new password.")
-public class TspBasicCredentialRequestDto {
+@Schema(name = "TspBasicCredentialUpdateRequestDto", description = "A Basic (username/password) credential to update on a TSP Profile. "
+        + "The password is write-only: leave it blank to keep the existing secret, or provide a value to rotate it. "
+        + "Changing the username requires a new password.")
+public class TspBasicCredentialUpdateRequestDto {
 
     @NotBlank
-    @Schema(description = "Basic username; unique within the TSP profile. Changing it on update requires a new password.",
+    @Schema(description = "Basic username; unique within the TSP profile. Changing it requires a new password.",
             requiredMode = Schema.RequiredMode.REQUIRED, example = "svc-account")
     private String username;
 
     @ToString.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Schema(description = "Basic password (write-only). On create a value is required — there is no existing secret to keep. "
-            + "On update, blank keeps the existing secret and a value rotates it; a value is also required when the username changes.",
+    @Schema(description = "Basic password (write-only). Blank keeps the existing secret and a value rotates it; "
+            + "a value is also required when the username changes.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, accessMode = Schema.AccessMode.WRITE_ONLY)
     private String password;
 
