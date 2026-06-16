@@ -2,6 +2,7 @@ package com.otilm.api.model.core.signing.signingrecord;
 
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.client.signing.profile.SigningProfileListDto;
+import com.otilm.api.model.core.signing.SigningProtocol;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +18,9 @@ public class SigningRecordListDto extends NameAndUuidDto {
 
     @Schema(description = "Signing Profile used to produce this Signing Record", requiredMode = Schema.RequiredMode.REQUIRED)
     private SigningProfileListDto signingProfile;
+
+    @Schema(description = "Signing protocol used to produce this record", requiredMode = Schema.RequiredMode.REQUIRED)
+    private SigningProtocol protocol;
 
     @Schema(
             description = "Claimed signing time embedded in the signature structure by the signing operation.",
