@@ -19,7 +19,7 @@ public class SigningRecordDto extends NameAndUuidDto {
     @Schema(description = "Signing Profile used to produce this Signing Record", requiredMode = Schema.RequiredMode.REQUIRED)
     private SigningProfileListDto signingProfile;
 
-    @Schema(description = "Signing protocol used to produce this record", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Signing protocol used to produce this Signing Record", requiredMode = Schema.RequiredMode.REQUIRED)
     private SigningProtocol protocol;
 
     @Schema(
