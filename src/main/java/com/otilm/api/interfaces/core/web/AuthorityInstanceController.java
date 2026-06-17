@@ -102,11 +102,13 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     List<BaseAttribute> listRAProfileAttributes(@Parameter(description = "Authority instance UUID") @PathVariable String uuid) throws ConnectorException, NotFoundException;
 
     @Operation(summary = "Validate RA Profile Attributes")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Attribute information validated")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Attribute information validated"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                    examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(path = "/{uuid}/attributes/raProfile/validate", consumes = {
             "application/json"}, produces = {"application/json"})
-    void validateRAProfileAttributes(@Parameter(description = "Authority instance UUID") @PathVariable String uuid, @RequestBody List<RequestAttribute>attributes)
-            throws ConnectorException, NotFoundException;
+    void validateRAProfileAttributes(@Parameter(description = "Authority instance UUID") @PathVariable String uuid, @RequestBody List<RequestAttribute> attributes)
+            throws ConnectorException, AttributeException, NotFoundException;
 
     @Operation(summary = "Delete multiple Authority instances")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Authority instances deleted"),
