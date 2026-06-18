@@ -2,8 +2,6 @@ package com.otilm.api.clients;
 
 import com.otilm.api.exception.*;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
-import com.otilm.api.model.common.attribute.common.AttributeContent;
-import com.otilm.api.model.common.attribute.v2.content.BaseAttributeContentV2;
 import com.otilm.api.model.common.attribute.v2.content.FileAttributeContentV2;
 import com.otilm.api.model.common.attribute.v2.content.SecretAttributeContentV2;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
@@ -105,15 +103,18 @@ public abstract class BaseApiClient {
                 request = webClient.mutate().clientConnector(new ReactorClientHttpConnector(httpClient)).build().method(method);
                 break;
             case API_KEY:
-                AttributeContent apiKeyHeader = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY_HEADER, authAttributes, false);
-                AttributeContent apiKey = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY, authAttributes, false);
+                List<StringAttributeContentV2> apiKeyHeaderContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY_HEADER, authAttributes, StringAttributeContentV2.class);
+                List<SecretAttributeContentV2> apiKeyContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY, authAttributes, SecretAttributeContentV2.class);
 
-                if (apiKeyHeader == null || apiKey == null)
+                if (apiKeyHeaderContent == null || apiKeyHeaderContent.isEmpty() || apiKeyContent == null || apiKeyContent.isEmpty())
                     throw new IllegalArgumentException("Missing API Key or API Key header in authentication");
+
+                String apiKeyHeaderValue = apiKeyHeaderContent.get(0).getData();
+                String apiKeyValue = apiKeyContent.get(0).getData().getSecret();
 
                 request = webClient
                         .method(method)
-                        .headers(h -> h.set(apiKeyHeader.getData(), apiKey.getData()));
+                        .headers(h -> h.set(apiKeyHeaderValue, apiKeyValue));
                 break;
             case JWT:
                 throw new UnsupportedOperationException("JWT is unimplemented");
