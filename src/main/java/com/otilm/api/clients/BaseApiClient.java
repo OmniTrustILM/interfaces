@@ -143,7 +143,7 @@ public abstract class BaseApiClient {
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
                 String keyStorePassword = getStorePassword(attributes, ATTRIBUTE_KEYSTORE_PASSWORD);
-                String keyStoreType = getStoreType(attributes);
+                String keyStoreType = getStoreType(attributes, ATTRIBUTE_KEYSTORE_TYPE);
                 byte[] keyStoreBytes = Base64.getDecoder().decode(keyStoreData.getData().getContent());
 
                 kmf.init(KeyStoreUtils.bytes2KeyStore(keyStoreBytes, keyStorePassword, keyStoreType), keyStorePassword != null ? keyStorePassword.toCharArray() : null);
@@ -159,7 +159,7 @@ public abstract class BaseApiClient {
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 
                 String trustStorePassword = getStorePassword(attributes, ATTRIBUTE_TRUSTSTORE_PASSWORD);
-                String trustStoreType = getStoreType(attributes);
+                String trustStoreType = getStoreType(attributes, ATTRIBUTE_TRUSTSTORE_TYPE);
                 byte[] trustStoreBytes = Base64.getDecoder().decode(trustStoreData.getData().getContent());
 
                 tmf.init(KeyStoreUtils.bytes2KeyStore(trustStoreBytes, trustStorePassword, trustStoreType));
@@ -177,8 +177,8 @@ public abstract class BaseApiClient {
         }
     }
 
-    private static String getStoreType(List<ResponseAttribute> attributes) {
-        List<StringAttributeContentV2> keyStoreTypeList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE_TYPE, attributes, StringAttributeContentV2.class);
+    private static String getStoreType(List<ResponseAttribute> attributes, String name) {
+        List<StringAttributeContentV2> keyStoreTypeList = AttributeDefinitionUtils.getAttributeContent(name, attributes, StringAttributeContentV2.class);
         return keyStoreTypeList != null && !keyStoreTypeList.isEmpty() ? keyStoreTypeList.get(0).getData() : null;
     }
 

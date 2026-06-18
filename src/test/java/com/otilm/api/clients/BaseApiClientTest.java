@@ -2,6 +2,7 @@ package com.otilm.api.clients;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.attribute.ResponseAttributeV2;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -38,16 +40,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class BaseApiClientTest {
 
-    private static final int PORT = 3670;
-
     private WireMockServer mockServer;
     private TestApiClient client;
 
     @BeforeEach
     void setUp() throws NoSuchAlgorithmException, KeyStoreException {
-        mockServer = new WireMockServer(PORT);
+        mockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         mockServer.start();
-        WireMock.configureFor("localhost", PORT);
+        WireMock.configureFor("localhost", mockServer.port());
         mockServer.stubFor(get(anyUrl()).willReturn(aResponse().withStatus(200)));
 
         javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory.getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
@@ -67,17 +67,17 @@ class BaseApiClientTest {
                 responseAttribute("password", AttributeContentType.SECRET, new SecretAttributeContentV2(null, new SecretAttributeContentData("secret123")))
         );
 
-        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + PORT, AuthType.BASIC, authAttributes);
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.BASIC, authAttributes);
 
         assertDoesNotThrow(() ->
                 client.prepareRequest(HttpMethod.GET, connector, false)
-                        .uri("http://localhost:" + PORT + "/test")
+                        .uri("http://localhost:" + mockServer.port() + "/test")
                         .retrieve()
                         .toBodilessEntity()
                         .block()
         );
 
-        String expectedHeader = "Basic " + Base64.getEncoder().encodeToString("admin:secret123".getBytes());
+        String expectedHeader = "Basic " + Base64.getEncoder().encodeToString("admin:secret123".getBytes(StandardCharsets.UTF_8));
         mockServer.verify(getRequestedFor(urlEqualTo("/test"))
                 .withHeader("Authorization", equalTo(expectedHeader)));
     }
@@ -89,11 +89,11 @@ class BaseApiClientTest {
                 responseAttribute("apiKey", AttributeContentType.SECRET, new SecretAttributeContentV2(null, new SecretAttributeContentData("my-api-key")))
         );
 
-        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + PORT, AuthType.API_KEY, authAttributes);
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.API_KEY, authAttributes);
 
         assertDoesNotThrow(() ->
                 client.prepareRequest(HttpMethod.GET, connector, false)
-                        .uri("http://localhost:" + PORT + "/test")
+                        .uri("http://localhost:" + mockServer.port() + "/test")
                         .retrieve()
                         .toBodilessEntity()
                         .block()
@@ -105,7 +105,7 @@ class BaseApiClientTest {
 
     @Test
     void prepareRequest_certificateAuth_buildsSslContextWithoutThrowing() throws Exception {
-        String keystoreBase64 = generatePkcs12Base64("testAlias", "keystorePass");
+        String keystoreBase64 = generatePkcs12Base64();
 
         FileAttributeContentData fileData = new FileAttributeContentData();
         fileData.setContent(keystoreBase64);
@@ -117,14 +117,14 @@ class BaseApiClientTest {
                 responseAttribute("keyStorePassword", AttributeContentType.SECRET, new SecretAttributeContentV2(null, new SecretAttributeContentData("keystorePass")))
         );
 
-        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + PORT, AuthType.CERTIFICATE, authAttributes);
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.CERTIFICATE, authAttributes);
 
         assertDoesNotThrow(() -> client.prepareRequest(HttpMethod.GET, connector, false));
     }
 
     @Test
     void prepareRequest_basicAuth_missingCredentials_throwsIllegalArgumentException() {
-        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + PORT, AuthType.BASIC, List.of());
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.BASIC, List.of());
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
                 client.prepareRequest(HttpMethod.GET, connector, false));
@@ -132,13 +132,13 @@ class BaseApiClientTest {
 
     @Test
     void prepareRequest_apiKeyAuth_missingCredentials_throwsIllegalArgumentException() {
-        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + PORT, AuthType.API_KEY, List.of());
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.API_KEY, List.of());
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
                 client.prepareRequest(HttpMethod.GET, connector, false));
     }
 
-    private String generatePkcs12Base64(String alias, String password) throws Exception {
+    private String generatePkcs12Base64() throws Exception {
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
         keyPairGen.initialize(2048);
         KeyPair keyPair = keyPairGen.generateKeyPair();
@@ -154,10 +154,10 @@ class BaseApiClientTest {
 
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
-        keyStore.setKeyEntry(alias, keyPair.getPrivate(), password.toCharArray(), new java.security.cert.Certificate[]{cert});
+        keyStore.setKeyEntry("testAlias", keyPair.getPrivate(), "keystorePass".toCharArray(), new java.security.cert.Certificate[]{cert});
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        keyStore.store(out, password.toCharArray());
+        keyStore.store(out, "keystorePass".toCharArray());
         return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 
