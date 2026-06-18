@@ -142,7 +142,7 @@ public abstract class BaseApiClient {
             if (keyStoreData != null && !keyStoreData.getData().getContent().isEmpty()) {
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
-                String keyStorePassword = getStorePassword(attributes);
+                String keyStorePassword = getStorePassword(attributes, ATTRIBUTE_KEYSTORE_PASSWORD);
                 String keyStoreType = getStoreType(attributes);
                 byte[] keyStoreBytes = Base64.getDecoder().decode(keyStoreData.getData().getContent());
 
@@ -158,7 +158,7 @@ public abstract class BaseApiClient {
             if (trustStoreData != null && !trustStoreData.getData().getContent().isEmpty()) {
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 
-                String trustStorePassword = getStorePassword(attributes);
+                String trustStorePassword = getStorePassword(attributes, ATTRIBUTE_TRUSTSTORE_PASSWORD);
                 String trustStoreType = getStoreType(attributes);
                 byte[] trustStoreBytes = Base64.getDecoder().decode(trustStoreData.getData().getContent());
 
@@ -182,9 +182,9 @@ public abstract class BaseApiClient {
         return keyStoreTypeList != null && !keyStoreTypeList.isEmpty() ? keyStoreTypeList.get(0).getData() : null;
     }
 
-    private static String getStorePassword(List<ResponseAttribute> attributes) {
-        List<SecretAttributeContentV2> trustStorePasswordList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE_PASSWORD, attributes, SecretAttributeContentV2.class);
-        return trustStorePasswordList != null && !trustStorePasswordList.isEmpty() ? trustStorePasswordList.get(0).getData().getSecret() : null;
+    private static String getStorePassword(List<ResponseAttribute> attributes, String attributeName) {
+        List<SecretAttributeContentV2> list = AttributeDefinitionUtils.getAttributeContent(attributeName, attributes, SecretAttributeContentV2.class);
+        return list != null && !list.isEmpty() ? list.get(0).getData().getSecret() : null;
     }
 
     private static final ParameterizedTypeReference<List<String>> ERROR_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
