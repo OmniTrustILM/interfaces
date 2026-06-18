@@ -102,9 +102,7 @@ public abstract class BaseApiClient {
             case CERTIFICATE:
                 SslContext sslContext = createSslContext(authAttributes);
                 HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
-                webClient.mutate().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
-
-                request = webClient.method(method);
+                request = webClient.mutate().clientConnector(new ReactorClientHttpConnector(httpClient)).build().method(method);
                 break;
             case API_KEY:
                 AttributeContent apiKeyHeader = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY_HEADER, authAttributes, false);
@@ -138,30 +136,32 @@ public abstract class BaseApiClient {
             SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
 
             KeyManager km = null;
-            FileAttributeContentV2 keyStoreData = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE, attributes, false);
+            List<FileAttributeContentV2> keyStoreDataList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE, attributes, FileAttributeContentV2.class);
+            FileAttributeContentV2 keyStoreData = keyStoreDataList != null && !keyStoreDataList.isEmpty() ? keyStoreDataList.get(0) : null;
             if (keyStoreData != null && !keyStoreData.getData().getContent().isEmpty()) {
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm()); //"SunX509"
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
-                AttributeContent keyStoreType = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE_TYPE, attributes, false);
-                AttributeContent keyStorePassword = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE_PASSWORD, attributes, false);
+                String keyStorePassword = getStorePassword(attributes);
+                String keyStoreType = getStoreType(attributes);
                 byte[] keyStoreBytes = Base64.getDecoder().decode(keyStoreData.getData().getContent());
 
-                kmf.init(KeyStoreUtils.bytes2KeyStore(keyStoreBytes, keyStorePassword.getData(), keyStoreType.getData()), ((String) keyStorePassword.getData()).toCharArray());
+                kmf.init(KeyStoreUtils.bytes2KeyStore(keyStoreBytes, keyStorePassword, keyStoreType), keyStorePassword != null ? keyStorePassword.toCharArray() : null);
                 km = kmf.getKeyManagers()[0];
             }
 
             sslContextBuilder.keyManager(km);
 
             TrustManager tm;
-            FileAttributeContentV2 trustStoreData = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE, attributes, false);
+            List<FileAttributeContentV2> trustStoreDataList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE, attributes, FileAttributeContentV2.class);
+            FileAttributeContentV2 trustStoreData = trustStoreDataList != null && !trustStoreDataList.isEmpty() ? trustStoreDataList.get(0) : null;
             if (trustStoreData != null && !trustStoreData.getData().getContent().isEmpty()) {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()); //"SunX509"
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 
-                AttributeContent trustStoreType = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE_TYPE, attributes, false);
-                AttributeContent trustStorePassword = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE_PASSWORD, attributes, false);
+                String trustStorePassword = getStorePassword(attributes);
+                String trustStoreType = getStoreType(attributes);
                 byte[] trustStoreBytes = Base64.getDecoder().decode(trustStoreData.getData().getContent());
 
-                tmf.init(KeyStoreUtils.bytes2KeyStore(trustStoreBytes, trustStorePassword.getData(), trustStoreType.getData()));
+                tmf.init(KeyStoreUtils.bytes2KeyStore(trustStoreBytes, trustStorePassword, trustStoreType));
                 tm = tmf.getTrustManagers()[0];
             } else {
                 // set default trustManager
@@ -174,6 +174,16 @@ public abstract class BaseApiClient {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to initialize SslContext.", e);
         }
+    }
+
+    private static String getStoreType(List<ResponseAttribute> attributes) {
+        List<StringAttributeContentV2> keyStoreTypeList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE_TYPE, attributes, StringAttributeContentV2.class);
+        return keyStoreTypeList != null && !keyStoreTypeList.isEmpty() ? keyStoreTypeList.get(0).getData() : null;
+    }
+
+    private static String getStorePassword(List<ResponseAttribute> attributes) {
+        List<SecretAttributeContentV2> trustStorePasswordList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE_PASSWORD, attributes, SecretAttributeContentV2.class);
+        return trustStorePasswordList != null && !trustStorePasswordList.isEmpty() ? trustStorePasswordList.get(0).getData().getSecret() : null;
     }
 
     private static final ParameterizedTypeReference<List<String>> ERROR_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
