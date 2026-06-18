@@ -54,7 +54,10 @@ public enum ResourceAction implements IPlatformEnum {
 
     // Secret
     GET_SECRET_CONTENT("getSecretContent", "Get secret content"),
-    UPDATE_SOURCE_VAULT_PROFILE("updateSourceVaultProfile", "Update source vault profile")
+    UPDATE_SOURCE_VAULT_PROFILE("updateSourceVaultProfile", "Update source vault profile"),
+
+    // Digital Signing
+    TIMESTAMP("timestamp", "Timestamp using RFC 3161 timestamping protocol"),
     ;
 
     @Schema(description = "Resource Action Name",
