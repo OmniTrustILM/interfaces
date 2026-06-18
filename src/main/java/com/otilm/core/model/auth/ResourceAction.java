@@ -57,7 +57,7 @@ public enum ResourceAction implements IPlatformEnum {
     UPDATE_SOURCE_VAULT_PROFILE("updateSourceVaultProfile", "Update source vault profile"),
 
     // Digital Signing
-    TIMESTAMP("timestamp", "Timestamp using RFC 3161 timestamping protocol"),
+    TIMESTAMP("timestamp", "Timestamp"), // RFC 3161 Timestamping
     ;
 
     @Schema(description = "Resource Action Name",
