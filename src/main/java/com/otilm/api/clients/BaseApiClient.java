@@ -3,7 +3,10 @@ package com.otilm.api.clients;
 import com.otilm.api.exception.*;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
+import com.otilm.api.model.common.attribute.v2.content.BaseAttributeContentV2;
 import com.otilm.api.model.common.attribute.v2.content.FileAttributeContentV2;
+import com.otilm.api.model.common.attribute.v2.content.SecretAttributeContentV2;
+import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import com.otilm.core.util.AttributeDefinitionUtils;
@@ -83,15 +86,18 @@ public abstract class BaseApiClient {
                 request = webClient.method(method);
                 break;
             case BASIC:
-                AttributeContent username = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_USERNAME, authAttributes, false);
-                AttributeContent password = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_PASSWORD, authAttributes, false);
+                List<StringAttributeContentV2> usernameContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_USERNAME, authAttributes, StringAttributeContentV2.class);
+                List<SecretAttributeContentV2> passwordContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_PASSWORD, authAttributes, SecretAttributeContentV2.class);
 
-                if (username == null || password == null)
+                if (usernameContent == null || usernameContent.isEmpty() || passwordContent == null || passwordContent.isEmpty())
                     throw new IllegalArgumentException("Missing username or password in authentication");
+
+                String usernameValue = usernameContent.get(0).getData();
+                String passwordValue = passwordContent.get(0).getData().getSecret();
 
                 request = webClient
                         .method(method)
-                        .headers(h -> h.setBasicAuth(username.getData(), password.getData()));
+                        .headers(h -> h.setBasicAuth(usernameValue, passwordValue));
                 break;
             case CERTIFICATE:
                 SslContext sslContext = createSslContext(authAttributes);
@@ -125,6 +131,7 @@ public abstract class BaseApiClient {
             throw new ValidationException(ValidationError.create("Connector has invalid status: " + connectorStatus.getLabel()));
         }
     }
+
 
     private SslContext createSslContext(List<ResponseAttribute> attributes) {
         try {
