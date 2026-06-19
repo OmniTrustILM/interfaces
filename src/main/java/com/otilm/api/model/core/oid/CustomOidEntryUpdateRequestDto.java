@@ -2,6 +2,9 @@ package com.otilm.api.model.core.oid;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.otilm.api.model.core.oid.properties.AdditionalOidPropertiesDto;
+import com.otilm.api.model.core.oid.properties.CertificateExtensionOidPropertiesDto;
+import com.otilm.api.model.core.oid.properties.RdnAttributeTypeOidPropertiesDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -28,7 +31,8 @@ public class CustomOidEntryUpdateRequestDto {
             property = "category"
     )
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = RdnAttributeTypeOidPropertiesDto.class, name = OidCategory.Codes.RDN_ATTRIBUTE_TYPE)
+            @JsonSubTypes.Type(value = RdnAttributeTypeOidPropertiesDto.class, name = OidCategory.Codes.RDN_ATTRIBUTE_TYPE),
+            @JsonSubTypes.Type(value = CertificateExtensionOidPropertiesDto.class, name = OidCategory.Codes.CERTIFICATE_EXTENSION)
     })
     @Schema(description = "Additional properties depending on OID category", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Valid
