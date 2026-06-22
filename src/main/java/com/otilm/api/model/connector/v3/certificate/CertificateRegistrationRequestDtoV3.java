@@ -46,15 +46,21 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> attributes;
 
+    @Schema(description = "Typed certificate identity content projected from request attributes. "
+                  + "When provided, satisfies the subject identification requirement in place of subjectDn/subjectAltName.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestContent requestContent;
+
     /**
      * RFC 5280 §4.1.2.6: subject identity may be carried in subjectDn, in subjectAltName, or both
-     * — but cannot be empty in both.
+     * — but cannot be empty in both. requestContent is an equivalent structured alternative.
      */
-    @AssertTrue(message = "At least one of subjectDn or subjectAltName must be non-empty (RFC 5280 §4.1.2.6)")
+    @AssertTrue(message = "At least one of subjectDn, subjectAltName, or requestContent must be provided (RFC 5280 §4.1.2.6)")
     @JsonIgnore
     @Schema(hidden = true)
     public boolean isSubjectIdentificationProvided() {
         return (subjectDn != null && !subjectDn.isBlank())
-                || (subjectAltName != null && !subjectAltName.isBlank());
+                || (subjectAltName != null && !subjectAltName.isBlank())
+                || requestContent != null;
     }
 }

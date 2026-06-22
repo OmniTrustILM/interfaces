@@ -42,4 +42,9 @@ public class CertificateSignRequestDtoV3 extends AuthorityV3ScopedRequestDto {
                   + "Null/empty = fresh issuance.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
+
+    @Schema(description = "Typed certificate identity content projected from request attributes. "
+                  + "The CSR remains authoritative for the public key and proof of possession.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestContent requestContent;
 }

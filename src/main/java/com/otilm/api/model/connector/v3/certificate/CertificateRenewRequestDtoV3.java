@@ -54,6 +54,11 @@ public class CertificateRenewRequestDtoV3 extends AuthorityV3ScopedRequestDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
 
+    @Schema(description = "Typed certificate identity content projected from request attributes. "
+                  + "The CSR remains authoritative for the public key and proof of possession.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestContent requestContent;
+
     /**
      * Renew requires a CSR unless {@code reuseKey=true} (in which case proof-of-possession is
      * delegated to the upstream CA's renewal policy).
