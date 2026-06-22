@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,7 +22,7 @@ import lombok.Setter;
         description = "Describes a single target field within an object; concrete type is determined by fieldType",
         subTypes = {RdnMappedField.class, SanMappedField.class, ExtensionMappedField.class}
 )
-public abstract class MappedField {
+public abstract class MappedField implements Serializable {
 
     @Schema(description = "Field type, determines the concrete subtype", requiredMode = Schema.RequiredMode.REQUIRED)
     private FieldType fieldType;

@@ -5,13 +5,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Declares how Core resolves the content of an attribute; orthogonal to fieldMapping")
-public class ValueSource {
+public class ValueSource implements Serializable {
 
     @Schema(description = "How the attribute value is resolved", requiredMode = Schema.RequiredMode.REQUIRED)
     private ValueSourceType kind;
