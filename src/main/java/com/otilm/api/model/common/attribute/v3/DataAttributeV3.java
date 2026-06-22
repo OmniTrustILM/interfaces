@@ -9,6 +9,8 @@ import com.otilm.api.model.common.attribute.common.constraint.BaseAttributeConst
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
+import com.otilm.api.model.common.attribute.v3.mapping.FieldMapping;
+import com.otilm.api.model.common.attribute.v3.mapping.ValueSource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -104,6 +106,19 @@ public class DataAttributeV3 extends DataAttribute {
     )
     private AttributeVersion schemaVersion = AttributeVersion.V3;
 
+    @Schema(
+            description = "Declares which certificate (or other object) fields this attribute's value projects into; " +
+                    "presence marks this attribute as a certificate request attribute",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private FieldMapping fieldMapping;
+
+    @Schema(
+            description = "Declares how Core resolves the content of this attribute; orthogonal to fieldMapping",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private ValueSource valueSource;
+
     public DataAttributeV3() {
         this.type = AttributeType.DATA;
     }
@@ -119,6 +134,8 @@ public class DataAttributeV3 extends DataAttribute {
         this.attributeCallback = original.attributeCallback;
         this.contentType = original.contentType;
         this.schemaVersion = original.schemaVersion;
+        this.fieldMapping = original.fieldMapping;
+        this.valueSource = original.valueSource;
         setDescription(original.getDescription());
         setType(original.getType());
         setContentType(original.contentType);
@@ -132,6 +149,8 @@ public class DataAttributeV3 extends DataAttribute {
                 .append("properties", properties)
                 .append("constraints", constraints)
                 .append("attributeCallback", attributeCallback)
+                .append("fieldMapping", fieldMapping)
+                .append("valueSource", valueSource)
                 .toString();
     }
 
@@ -144,7 +163,9 @@ public class DataAttributeV3 extends DataAttribute {
                 && contentType == that.contentType
                 && Objects.equals(properties, that.properties)
                 && Objects.equals(constraints, that.constraints)
-                && Objects.equals(attributeCallback, that.attributeCallback);
+                && Objects.equals(attributeCallback, that.attributeCallback)
+                && Objects.equals(fieldMapping, that.fieldMapping)
+                && Objects.equals(valueSource, that.valueSource);
     }
 
     @Override
@@ -155,7 +176,9 @@ public class DataAttributeV3 extends DataAttribute {
                 contentType,
                 properties,
                 constraints,
-                attributeCallback
+                attributeCallback,
+                fieldMapping,
+                valueSource
         );
     }
 
