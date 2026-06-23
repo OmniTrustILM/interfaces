@@ -5,16 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "A requested X.509 extension; SAN is never duplicated here — it is carried in subjectAltNames only")
 public class RequestedExtension {
 
