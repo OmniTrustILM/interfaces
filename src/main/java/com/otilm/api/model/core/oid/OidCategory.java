@@ -47,16 +47,12 @@ public enum OidCategory implements IPlatformEnum {
         return this.description;
     }
 
-    public static OidCategory findByCode(String code) {
+    @JsonCreator
+    public static OidCategory fromCode(String code) {
         for (OidCategory value : VALUES) {
             if (value.code.equals(code)) return value;
         }
-        return null;
-    }
-
-    @JsonCreator
-    public static OidCategory fromCode(String code) {
-        return findByCode(code);
+        throw new IllegalArgumentException("Unknown OidCategory code: " + code);
     }
 
     public static class Codes {

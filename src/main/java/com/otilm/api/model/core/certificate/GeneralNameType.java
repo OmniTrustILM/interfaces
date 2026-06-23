@@ -42,7 +42,7 @@ public enum GeneralNameType implements IPlatformEnum {
         return Arrays.stream(VALUES)
                 .filter(v -> v.code.equals(code))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Unknown GeneralNameType code: " + code));
     }
 
     @JsonCreator

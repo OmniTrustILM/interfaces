@@ -43,10 +43,9 @@ public enum FieldType implements IPlatformEnum {
     @Override
     public String getDescription() { return null; }
 
-    public static FieldType findByCode(String code) {
-        return Arrays.stream(VALUES).filter(v -> v.code.equals(code)).findFirst().orElse(null);
-    }
-
     @JsonCreator
-    public static FieldType fromCode(String code) { return findByCode(code); }
+    public static FieldType fromCode(String code) {
+        return Arrays.stream(VALUES).filter(v -> v.code.equals(code)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown FieldType code: " + code));
+    }
 }

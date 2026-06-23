@@ -35,10 +35,9 @@ public enum ObjectType implements IPlatformEnum {
     @Override
     public String getDescription() { return null; }
 
-    public static ObjectType findByCode(String code) {
-        return Arrays.stream(VALUES).filter(v -> v.code.equals(code)).findFirst().orElse(null);
-    }
-
     @JsonCreator
-    public static ObjectType fromCode(String code) { return findByCode(code); }
+    public static ObjectType fromCode(String code) {
+        return Arrays.stream(VALUES).filter(v -> v.code.equals(code)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown ObjectType code: " + code));
+    }
 }

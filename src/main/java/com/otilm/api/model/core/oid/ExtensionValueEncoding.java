@@ -37,10 +37,9 @@ public enum ExtensionValueEncoding implements IPlatformEnum {
     @Override
     public String getDescription() { return null; }
 
-    public static ExtensionValueEncoding findByCode(String code) {
-        return Arrays.stream(VALUES).filter(v -> v.code.equals(code)).findFirst().orElse(null);
-    }
-
     @JsonCreator
-    public static ExtensionValueEncoding fromCode(String code) { return findByCode(code); }
+    public static ExtensionValueEncoding fromCode(String code) {
+        return Arrays.stream(VALUES).filter(v -> v.code.equals(code)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown ExtensionValueEncoding code: " + code));
+    }
 }
