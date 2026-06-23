@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,7 @@ public abstract class MappedField implements Serializable {
     private FieldType fieldType;
 
     @Schema(description = "Ordering index for fields of the same type (e.g. RDN components); ascending")
+    @Min(value = 1, message = "Order must be a positive integer")
     private Integer order;
 
     @Schema(description = "Provenance of the value when reconciling CSR vs platform-projected values")
