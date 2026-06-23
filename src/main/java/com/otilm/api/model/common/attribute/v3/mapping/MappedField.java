@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,6 +26,7 @@ import java.io.Serializable;
 public abstract class MappedField implements Serializable {
 
     @Schema(description = "Field type, determines the concrete subtype", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Field type is required")
     private FieldType fieldType;
 
     @Schema(description = "Ordering index for fields of the same type (e.g. RDN components); ascending")

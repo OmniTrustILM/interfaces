@@ -10,7 +10,8 @@ public class CertificateExtensionOidPropertiesDto implements AdditionalOidProper
 
     @Schema(description = "Whether this extension should be marked critical by default when placed in a certificate",
             requiredMode = Schema.RequiredMode.REQUIRED)
-    private boolean defaultCritical;
+    @NotNull(message = "defaultCritical is required")
+    private Boolean defaultCritical;
 
     @Schema(description = "ASN.1 encoding used to encode the attribute string value into the extension DER value",
             requiredMode = Schema.RequiredMode.REQUIRED)

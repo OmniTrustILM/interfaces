@@ -4,6 +4,7 @@ import com.otilm.api.model.core.oid.ExtensionValueEncoding;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,10 +23,12 @@ public class RequestedExtension {
 
     @Schema(description = "Whether the extension is marked critical",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Extension criticality is required")
     private boolean critical;
 
     @Schema(description = "Encoding of the value string",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Extension encoding is required")
     private ExtensionValueEncoding encoding;
 
     @Schema(description = "Extension value; a string whose interpretation is declared by encoding",

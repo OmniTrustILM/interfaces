@@ -1,7 +1,9 @@
 package com.otilm.api.model.connector.v3.certificate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,4 +28,13 @@ public class X509RequestContent extends CertificateRequestContent {
     @Schema(description = "Requested X.509 extensions, excluding SAN",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestedExtension> extensions;
+
+    @AssertTrue(message = "At least one of subject, subjectAltName or extensions must be provided")
+    @JsonIgnore
+    @Schema(hidden = true)
+    public boolean isRequestContentProvided() {
+        return (subject != null && !subject.isEmpty())
+                || (subjectAltNames != null && !subjectAltNames.isEmpty())
+                || (extensions != null && !extensions.isEmpty());
+    }
 }

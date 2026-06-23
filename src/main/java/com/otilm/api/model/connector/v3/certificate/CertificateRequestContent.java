@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +24,6 @@ import lombok.Setter;
 public abstract class CertificateRequestContent {
 
     @Schema(description = "Certificate type, determines the concrete subtype", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Certificate type is required")
     private CertificateType certificateType;
 }
