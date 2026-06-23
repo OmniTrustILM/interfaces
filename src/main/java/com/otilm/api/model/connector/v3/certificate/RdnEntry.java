@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.v3.certificate;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,6 +13,7 @@ import lombok.ToString;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "A single RDN component in an ordered subject DN")
+@AllArgsConstructor
 public class RdnEntry {
 
     @Schema(description = "RDN attribute type: a short code (e.g. \"CN\") or a dotted-decimal OID; resolved via the OID registry",
