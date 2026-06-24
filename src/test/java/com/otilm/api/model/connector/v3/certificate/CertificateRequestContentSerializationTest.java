@@ -116,7 +116,7 @@ class CertificateRequestContentSerializationTest {
         X509RequestContent result = (X509RequestContent) deserialized;
         assertEquals(1, result.getExtensions().size());
         assertEquals("2.5.29.37", result.getExtensions().get(0).getOid());
-        assertFalse(result.getExtensions().get(0).isCritical());
+        assertFalse(result.getExtensions().get(0).getCritical());
         assertEquals(ExtensionValueEncoding.UTF8_STRING, result.getExtensions().get(0).getEncoding());
         assertEquals("clientAuth", result.getExtensions().get(0).getValue());
     }

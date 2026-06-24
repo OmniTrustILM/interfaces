@@ -92,7 +92,9 @@ class MappedFieldSerializationTest {
         String json = """
                 {
                   "fieldType": "san",
-                  "generalNameType": "dns"
+                  "generalNameType": "dns",
+                  "order": 0,
+                  "source": "csr"
                 }
                 """;
 
@@ -102,6 +104,8 @@ class MappedFieldSerializationTest {
         SanMappedField result = (SanMappedField) base;
         assertEquals(FieldType.SAN, result.getFieldType());
         assertEquals(GeneralNameType.DNS, result.getGeneralNameType());
+        assertEquals(0, result.getOrder());
+        assertEquals(FieldSource.CSR, result.getSource());
     }
 
     @Test
@@ -110,6 +114,7 @@ class MappedFieldSerializationTest {
         original.setFieldType(FieldType.SAN);
         original.setGeneralNameType(GeneralNameType.DNS);
         original.setOrder(0);
+        original.setSource(FieldSource.CSR);
 
         String json = mapper.writeValueAsString(original);
         MappedField deserialized = mapper.readValue(json, MappedField.class);
@@ -119,6 +124,7 @@ class MappedFieldSerializationTest {
         assertEquals(FieldType.SAN, result.getFieldType());
         assertEquals(GeneralNameType.DNS, result.getGeneralNameType());
         assertEquals(0, result.getOrder());
+        assertEquals(FieldSource.CSR, result.getSource());
     }
 
     @Test

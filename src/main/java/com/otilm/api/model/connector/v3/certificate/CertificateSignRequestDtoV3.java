@@ -42,5 +42,4 @@ public class CertificateSignRequestDtoV3 extends AuthorityV3ScopedRequestDto {
                   + "Null/empty = fresh issuance.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
-
 }

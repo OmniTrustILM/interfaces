@@ -24,7 +24,7 @@ public class RequestedExtension {
     @Schema(description = "Whether the extension is marked critical",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Extension criticality is required")
-    private boolean critical;
+    private Boolean critical;
 
     @Schema(description = "Encoding of the value string",
             requiredMode = Schema.RequiredMode.REQUIRED)

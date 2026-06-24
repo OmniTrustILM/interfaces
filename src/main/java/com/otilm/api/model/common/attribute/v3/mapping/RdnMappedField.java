@@ -2,11 +2,11 @@ package com.otilm.api.model.common.attribute.v3.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Maps an attribute value to an X.509 RDN component")
 public class RdnMappedField extends MappedField {
