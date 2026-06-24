@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.ToString.Exclude;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,7 @@ public class ScopedAttributes {
             description = "Credential-expanded attributes of the scope object.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @Exclude
     @NotNull
     @Valid
     private List<RequestAttribute> attributes;

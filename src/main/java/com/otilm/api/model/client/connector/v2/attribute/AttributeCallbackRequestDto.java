@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.ToString.Exclude;
 
 import java.util.List;
 import java.util.UUID;
@@ -63,6 +64,7 @@ public class AttributeCallbackRequestDto {
             description = "Route scope chain, credentials expanded inline by Core. Empty when the form has no parent scope.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @Exclude
     @NotNull
     @Valid
     private List<ScopedAttributes> contextAttributes;
@@ -71,6 +73,7 @@ public class AttributeCallbackRequestDto {
             description = "The dependsOn-named form values only, reference-typed values expanded inline by Core.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @Exclude
     @NotNull
     @Valid
     private List<RequestAttribute> currentAttributes;

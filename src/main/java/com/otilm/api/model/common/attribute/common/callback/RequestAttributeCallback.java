@@ -64,7 +64,6 @@ public class RequestAttributeCallback {
                 .append("pathVariable", pathVariable)
                 .append("requestParameter", requestParameter)
                 .append("body", body)
-                .append("attributes", attributes)
                 .toString();
     }
 }
