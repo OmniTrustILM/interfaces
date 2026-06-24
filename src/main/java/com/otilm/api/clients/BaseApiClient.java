@@ -131,7 +131,6 @@ public abstract class BaseApiClient {
         }
     }
 
-
     private SslContext createSslContext(List<ResponseAttribute> attributes) {
         try {
             SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
