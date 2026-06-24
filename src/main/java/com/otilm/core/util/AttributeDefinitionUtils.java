@@ -751,39 +751,42 @@ public class AttributeDefinitionUtils {
                     .filter(ResponseAttribute.class::isInstance)
                     .map(ResponseAttribute.class::cast)
                     .toList();
-            convertResponseToRequestAttribute(responseAttributes);
+            convertedDefinition = convertResponseToRequestAttribute(responseAttributes);
         } else {
             throw new IllegalArgumentException("Invalid argument provided to get Attributes");
         }
         return convertedDefinition;
     }
 
-    private static void convertResponseToRequestAttribute(List<ResponseAttribute> attributes) {
-        List<ResponseAttribute> itrAttributes = attributes;
-        for (ResponseAttribute clt : itrAttributes) {
+    private static List<RequestAttribute> convertResponseToRequestAttribute(List<ResponseAttribute> attributes) {
+        List<RequestAttribute> requestAttributes = new ArrayList<>();
+        for (ResponseAttribute clt : attributes) {
             if (clt.getVersion() == AttributeVersion.V2) {
-                convertResponseAttributeV2ToResponseAttribute(clt);
+                requestAttributes.add(convertResponseAttributeV2ToRequestAttribute(clt));
             }
             if (clt.getVersion() == AttributeVersion.V3) {
-                convertResponseAttributeV3ToResponseAttribute(clt);
+                requestAttributes.add(convertResponseAttributeV3ToRequestAttribute(clt));
             }
         }
+        return requestAttributes;
     }
 
-    private static void convertResponseAttributeV3ToResponseAttribute(ResponseAttribute clt) {
-        RequestAttributeV3 atr = new RequestAttributeV3();
-        atr.setName(clt.getName());
-        atr.setUuid(clt.getUuid());
-        atr.setContentType(clt.getContentType());
-        atr.setContent(clt.getContent());
+    private static RequestAttribute convertResponseAttributeV3ToRequestAttribute(ResponseAttribute responseAttribute) {
+        RequestAttributeV3 requestAttributeV3 = new RequestAttributeV3();
+        requestAttributeV3.setName(responseAttribute.getName());
+        requestAttributeV3.setUuid(responseAttribute.getUuid());
+        requestAttributeV3.setContentType(responseAttribute.getContentType());
+        requestAttributeV3.setContent(responseAttribute.getContent());
+        return requestAttributeV3;
     }
 
-    private static void convertResponseAttributeV2ToResponseAttribute(ResponseAttribute clt) {
+    private static RequestAttributeV2 convertResponseAttributeV2ToRequestAttribute(ResponseAttribute clt) {
         RequestAttributeV2 atr = new RequestAttributeV2();
         atr.setName(clt.getName());
         atr.setUuid(clt.getUuid());
         atr.setContentType(clt.getContentType());
         atr.setContent(clt.getContent());
+        return atr;
     }
 
     private static void convertBaseAttributesV3ToRequestAttributes(DataAttributeV3 dataAttribute, List<RequestAttribute> convertedDefinition) {

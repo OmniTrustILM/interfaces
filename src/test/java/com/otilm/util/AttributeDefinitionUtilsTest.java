@@ -21,6 +21,8 @@ import com.otilm.api.model.common.attribute.common.content.data.CredentialAttrib
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
 import com.otilm.api.model.common.attribute.common.constraint.AttributeConstraintType;
+import com.otilm.api.model.client.attribute.ResponseAttributeV2;
+import com.otilm.api.model.common.attribute.common.content.data.SecretAttributeContentData;
 import com.otilm.api.model.common.attribute.v2.content.*;
 import com.otilm.core.util.AttributeDefinitionUtils;
 import org.junit.jupiter.api.Assertions;
@@ -1147,5 +1149,52 @@ class AttributeDefinitionUtilsTest {
         Assertions.assertEquals(1, attrs.size());
         Assertions.assertEquals(1, attrs.get(0).getConstraints().size());
         Assertions.assertEquals(AttributeConstraintType.REGEXP, attrs.get(0).getConstraints().get(0).getType());
+    }
+
+    @Test
+    void testGetClientAttributes_responseAttributeV2_returnsConvertedRequestAttributes() {
+        UUID uuid = UUID.randomUUID();
+        ResponseAttributeV2 attr = new ResponseAttributeV2();
+        attr.setUuid(uuid);
+        attr.setName("username");
+        attr.setContentType(AttributeContentType.STRING);
+        attr.setContent(List.of(new StringAttributeContentV2("admin")));
+
+        List<RequestAttribute> result = AttributeDefinitionUtils.getClientAttributes(List.of(attr));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals("username", result.get(0).getName());
+        Assertions.assertEquals(uuid, result.get(0).getUuid());
+    }
+
+    @Test
+    void testGetClientAttributes_multipleResponseAttributes_allConverted() {
+        ResponseAttributeV2 attr1 = new ResponseAttributeV2();
+        attr1.setUuid(UUID.randomUUID());
+        attr1.setName("username");
+        attr1.setContentType(AttributeContentType.STRING);
+        attr1.setContent(List.of(new StringAttributeContentV2("admin")));
+
+        ResponseAttributeV2 attr2 = new ResponseAttributeV2();
+        attr2.setUuid(UUID.randomUUID());
+        attr2.setName("password");
+        attr2.setContentType(AttributeContentType.SECRET);
+        attr2.setContent(List.of(new SecretAttributeContentV2(null, new SecretAttributeContentData("secret"))));
+
+        List<RequestAttribute> result = AttributeDefinitionUtils.getClientAttributes(List.of(attr1, attr2));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertEquals("username", result.get(0).getName());
+        Assertions.assertEquals("password", result.get(1).getName());
+    }
+
+    @Test
+    void testGetClientAttributes_emptyList_returnsEmpty() {
+        List<RequestAttribute> result = AttributeDefinitionUtils.getClientAttributes(List.of());
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isEmpty());
     }
 }
