@@ -227,6 +227,30 @@ class AttributeV2DtoTest {
 
         assertEquals(1, back.getAttributes().size());
         assertEquals("raProfile", back.getAttributes().get(0).getName());
-        assertTrue(cb.toString().contains("attributes"), "toString must render attributes");
+        // Security: attribute values can carry inline-expanded SECRET content, so the attributes list
+        // must NOT appear in toString() (it would leak secrets to logs). Regression guard for that.
+        assertFalse(cb.toString().contains("attributes"),
+                "attributes must be excluded from toString to avoid leaking secret content");
+    }
+
+    @Test
+    void toString_doesNotLeakAttributeValues_butKeepsSafeContext() {
+        // currentV3() carries content "issuing" — stands in for inline-expanded secret content.
+        ScopedAttributes scope = new ScopedAttributes();
+        scope.setScope(Resource.AUTHORITY);
+        scope.setAttributes(List.of(currentV3()));
+        AttributeCallbackRequestDto req = new AttributeCallbackRequestDto();
+        req.setConnectorInterface(ConnectorInterface.AUTHORITY);
+        req.setInterfaceVersion("v3");
+        req.setContextAttributes(List.of(scope));
+        req.setCurrentAttributes(List.of(currentV3()));
+
+        assertFalse(scope.toString().contains("issuing"),
+                "ScopedAttributes.attributes must be @ToString.Exclude");
+        String reqStr = req.toString();
+        assertFalse(reqStr.contains("issuing"),
+                "request DTO must not render contextAttributes/currentAttributes values");
+        // safe, useful log context is retained
+        assertTrue(reqStr.contains("AUTHORITY"), "connectorInterface should remain in toString");
     }
 }
