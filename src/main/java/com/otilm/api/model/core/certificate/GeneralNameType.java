@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import org.bouncycastle.asn1.x509.GeneralName;
 
 import java.util.Arrays;
 
@@ -13,19 +14,19 @@ import java.util.Arrays;
 public enum GeneralNameType implements IPlatformEnum {
 
     /** RFC 5280: dNSName [2] IA5String */
-    DNS("dns", "DNS Name", ExtensionValueEncoding.IA5_STRING),
+    DNS("dns", "DNS Name", ExtensionValueEncoding.IA5_STRING, GeneralName.dNSName),
     /** RFC 5280: rfc822Name [1] IA5String */
-    EMAIL("email", "Email (RFC 822)", ExtensionValueEncoding.IA5_STRING),
+    EMAIL("email", "Email (RFC 822)", ExtensionValueEncoding.IA5_STRING, GeneralName.rfc822Name),
     /** RFC 5280: iPAddress [7] OCTET STRING */
-    IP("ip", "IP Address", ExtensionValueEncoding.OCTET_STRING),
+    IP("ip", "IP Address", ExtensionValueEncoding.OCTET_STRING, GeneralName.iPAddress),
     /** RFC 5280: uniformResourceIdentifier [6] IA5String */
-    URI("uri", "URI", ExtensionValueEncoding.IA5_STRING),
+    URI("uri", "URI", ExtensionValueEncoding.IA5_STRING, GeneralName.uniformResourceIdentifier),
     /** RFC 5280: otherName [0] OtherName; value string is UTF-8 encoded */
-    OTHER_NAME("otherName", "Other Name", ExtensionValueEncoding.UTF8_STRING),
+    OTHER_NAME("otherName", "Other Name", ExtensionValueEncoding.UTF8_STRING, GeneralName.otherName),
     /** RFC 5280: directoryName [4] Name; DER-encoded */
-    DIRECTORY_NAME("directoryName", "Directory Name", ExtensionValueEncoding.DER),
+    DIRECTORY_NAME("directoryName", "Directory Name", ExtensionValueEncoding.DER, GeneralName.directoryName),
     /** RFC 5280: registeredID [8] OBJECT IDENTIFIER; no value encoding applies */
-    REGISTERED_ID("registeredId", "Registered ID (OID)", null);
+    REGISTERED_ID("registeredId", "Registered ID (OID)", null, GeneralName.registeredID);
 
     private static final GeneralNameType[] VALUES = values();
 
@@ -33,11 +34,14 @@ public enum GeneralNameType implements IPlatformEnum {
     private final String label;
     @Getter
     private final ExtensionValueEncoding encoding;
+    @Getter
+    private final int bcTag;
 
-    GeneralNameType(String code, String label, ExtensionValueEncoding encoding) {
+    GeneralNameType(String code, String label, ExtensionValueEncoding encoding, int bcTag) {
         this.code = code;
         this.label = label;
         this.encoding = encoding;
+        this.bcTag = bcTag;
     }
 
     @Override
