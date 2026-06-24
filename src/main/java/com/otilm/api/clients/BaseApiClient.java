@@ -2,8 +2,9 @@ package com.otilm.api.clients;
 
 import com.otilm.api.exception.*;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
-import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.v2.content.FileAttributeContentV2;
+import com.otilm.api.model.common.attribute.v2.content.SecretAttributeContentV2;
+import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import com.otilm.core.util.AttributeDefinitionUtils;
@@ -83,33 +84,37 @@ public abstract class BaseApiClient {
                 request = webClient.method(method);
                 break;
             case BASIC:
-                AttributeContent username = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_USERNAME, authAttributes, false);
-                AttributeContent password = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_PASSWORD, authAttributes, false);
+                List<StringAttributeContentV2> usernameContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_USERNAME, authAttributes, StringAttributeContentV2.class);
+                List<SecretAttributeContentV2> passwordContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_PASSWORD, authAttributes, SecretAttributeContentV2.class);
 
-                if (username == null || password == null)
+                if (usernameContent == null || usernameContent.isEmpty() || passwordContent == null || passwordContent.isEmpty())
                     throw new IllegalArgumentException("Missing username or password in authentication");
+
+                String usernameValue = usernameContent.get(0).getData();
+                String passwordValue = passwordContent.get(0).getData().getSecret();
 
                 request = webClient
                         .method(method)
-                        .headers(h -> h.setBasicAuth(username.getData(), password.getData()));
+                        .headers(h -> h.setBasicAuth(usernameValue, passwordValue));
                 break;
             case CERTIFICATE:
                 SslContext sslContext = createSslContext(authAttributes);
                 HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
-                webClient.mutate().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
-
-                request = webClient.method(method);
+                request = webClient.mutate().clientConnector(new ReactorClientHttpConnector(httpClient)).build().method(method);
                 break;
             case API_KEY:
-                AttributeContent apiKeyHeader = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY_HEADER, authAttributes, false);
-                AttributeContent apiKey = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY, authAttributes, false);
+                List<StringAttributeContentV2> apiKeyHeaderContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY_HEADER, authAttributes, StringAttributeContentV2.class);
+                List<SecretAttributeContentV2> apiKeyContent = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_API_KEY, authAttributes, SecretAttributeContentV2.class);
 
-                if (apiKeyHeader == null || apiKey == null)
+                if (apiKeyHeaderContent == null || apiKeyHeaderContent.isEmpty() || apiKeyContent == null || apiKeyContent.isEmpty())
                     throw new IllegalArgumentException("Missing API Key or API Key header in authentication");
+
+                String apiKeyHeaderValue = apiKeyHeaderContent.get(0).getData();
+                String apiKeyValue = apiKeyContent.get(0).getData().getSecret();
 
                 request = webClient
                         .method(method)
-                        .headers(h -> h.set(apiKeyHeader.getData(), apiKey.getData()));
+                        .headers(h -> h.set(apiKeyHeaderValue, apiKeyValue));
                 break;
             case JWT:
                 throw new UnsupportedOperationException("JWT is unimplemented");
@@ -131,30 +136,32 @@ public abstract class BaseApiClient {
             SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
 
             KeyManager km = null;
-            FileAttributeContentV2 keyStoreData = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE, attributes, false);
+            List<FileAttributeContentV2> keyStoreDataList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE, attributes, FileAttributeContentV2.class);
+            FileAttributeContentV2 keyStoreData = keyStoreDataList != null && !keyStoreDataList.isEmpty() ? keyStoreDataList.get(0) : null;
             if (keyStoreData != null && !keyStoreData.getData().getContent().isEmpty()) {
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm()); //"SunX509"
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
-                AttributeContent keyStoreType = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE_TYPE, attributes, false);
-                AttributeContent keyStorePassword = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_KEYSTORE_PASSWORD, attributes, false);
+                String keyStorePassword = getStorePassword(attributes, ATTRIBUTE_KEYSTORE_PASSWORD);
+                String keyStoreType = getStoreType(attributes, ATTRIBUTE_KEYSTORE_TYPE);
                 byte[] keyStoreBytes = Base64.getDecoder().decode(keyStoreData.getData().getContent());
 
-                kmf.init(KeyStoreUtils.bytes2KeyStore(keyStoreBytes, keyStorePassword.getData(), keyStoreType.getData()), ((String) keyStorePassword.getData()).toCharArray());
+                kmf.init(KeyStoreUtils.bytes2KeyStore(keyStoreBytes, keyStorePassword, keyStoreType), keyStorePassword != null ? keyStorePassword.toCharArray() : null);
                 km = kmf.getKeyManagers()[0];
             }
 
             sslContextBuilder.keyManager(km);
 
             TrustManager tm;
-            FileAttributeContentV2 trustStoreData = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE, attributes, false);
+            List<FileAttributeContentV2> trustStoreDataList = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE, attributes, FileAttributeContentV2.class);
+            FileAttributeContentV2 trustStoreData = trustStoreDataList != null && !trustStoreDataList.isEmpty() ? trustStoreDataList.get(0) : null;
             if (trustStoreData != null && !trustStoreData.getData().getContent().isEmpty()) {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()); //"SunX509"
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 
-                AttributeContent trustStoreType = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE_TYPE, attributes, false);
-                AttributeContent trustStorePassword = AttributeDefinitionUtils.getAttributeContent(ATTRIBUTE_TRUSTSTORE_PASSWORD, attributes, false);
+                String trustStorePassword = getStorePassword(attributes, ATTRIBUTE_TRUSTSTORE_PASSWORD);
+                String trustStoreType = getStoreType(attributes, ATTRIBUTE_TRUSTSTORE_TYPE);
                 byte[] trustStoreBytes = Base64.getDecoder().decode(trustStoreData.getData().getContent());
 
-                tmf.init(KeyStoreUtils.bytes2KeyStore(trustStoreBytes, trustStorePassword.getData(), trustStoreType.getData()));
+                tmf.init(KeyStoreUtils.bytes2KeyStore(trustStoreBytes, trustStorePassword, trustStoreType));
                 tm = tmf.getTrustManagers()[0];
             } else {
                 // set default trustManager
@@ -167,6 +174,16 @@ public abstract class BaseApiClient {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to initialize SslContext.", e);
         }
+    }
+
+    private static String getStoreType(List<ResponseAttribute> attributes, String name) {
+        List<StringAttributeContentV2> keyStoreTypeList = AttributeDefinitionUtils.getAttributeContent(name, attributes, StringAttributeContentV2.class);
+        return keyStoreTypeList != null && !keyStoreTypeList.isEmpty() ? keyStoreTypeList.get(0).getData() : null;
+    }
+
+    private static String getStorePassword(List<ResponseAttribute> attributes, String attributeName) {
+        List<SecretAttributeContentV2> list = AttributeDefinitionUtils.getAttributeContent(attributeName, attributes, SecretAttributeContentV2.class);
+        return list != null && !list.isEmpty() ? list.get(0).getData().getSecret() : null;
     }
 
     private static final ParameterizedTypeReference<List<String>> ERROR_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
