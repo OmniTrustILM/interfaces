@@ -104,7 +104,7 @@ jobs:
         with:
           github-token: ${{ steps.interfaces-docs-app-token.outputs.token }}
           script: |
-            github.rest.actions.createWorkflowDispatch({
+            await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: 'interface-documentation',
               workflow_id: 'publish.yml',
