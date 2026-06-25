@@ -1,10 +1,12 @@
 package com.otilm.api.model.client.scep;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -57,7 +59,10 @@ public class BaseScepProfileRequestDto {
     )
     private boolean includeCaCertificateChain;
 
-    @Schema(description = "Challenge Password for the SCEP Request")
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(description = "Challenge Password for the SCEP Request (write-only).",
+            accessMode = Schema.AccessMode.WRITE_ONLY)
     private String challengePassword;
 
     /**
@@ -76,7 +81,7 @@ public class BaseScepProfileRequestDto {
      */
     @Schema(
             description = "Challenge password protection toggle. Omit to keep the stored password unchanged; "
-                    + "true to set/keep; false to remove it.",
+                    + "true to set a new password (or keep the existing one if left blank); false to remove it.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private Boolean enableChallengePassword;
@@ -90,7 +95,10 @@ public class BaseScepProfileRequestDto {
     @Schema(description = "Intune Application ID")
     private String intuneApplicationId;
 
-    @Schema(description = "Intune Application Key")
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(description = "Intune Application Key (write-only).",
+            accessMode = Schema.AccessMode.WRITE_ONLY)
     private String intuneApplicationKey;
 
     @Valid
