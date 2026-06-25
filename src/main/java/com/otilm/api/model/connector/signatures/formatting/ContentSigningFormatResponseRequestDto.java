@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.formatter;
+package com.otilm.api.model.connector.signatures.formatting;
 
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import io.swagger.v3.oas.annotations.media.Schema;

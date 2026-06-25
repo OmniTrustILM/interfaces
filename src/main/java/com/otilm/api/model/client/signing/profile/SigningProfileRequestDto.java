@@ -4,7 +4,7 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.signing.profile.record.SigningRecordPolicyRequestDto;
 import com.otilm.api.model.client.signing.profile.record.validation.ValidSigningRecordPolicy;
 import com.otilm.api.model.client.signing.profile.scheme.SigningSchemeRequestDto;
-import com.otilm.api.model.client.signing.profile.validation.ValidManagedSigningFormatterConnector;
+import com.otilm.api.model.client.signing.profile.validation.ValidManagedSignatureFormattingConnector;
 import com.otilm.api.model.client.signing.profile.workflow.WorkflowRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.otilm.api.model.common.validation.ValidName;
@@ -18,7 +18,7 @@ import java.util.List;
 
 @Data
 @Schema(name = "SigningProfileRequestDto", description = "Request to create or update a Signing Profile")
-@ValidManagedSigningFormatterConnector
+@ValidManagedSignatureFormattingConnector
 @ValidSigningRecordPolicy
 public class SigningProfileRequestDto {
     @NotBlank

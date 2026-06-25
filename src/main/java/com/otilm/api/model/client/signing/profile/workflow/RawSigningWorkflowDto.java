@@ -8,7 +8,7 @@ import lombok.ToString;
 /**
  * Raw signing workflow configuration embedded in a {@code SigningProfileDto}.
  *
- * <p>Raw signing requires no Signature Formatter Connector and currently has no workflow-specific validation properties.</p>
+ * <p>Raw signing requires no Signature Formatting Provider and currently has no workflow-specific validation properties.</p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

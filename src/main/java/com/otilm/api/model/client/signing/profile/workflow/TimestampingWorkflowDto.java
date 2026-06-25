@@ -32,17 +32,17 @@ public class TimestampingWorkflowDto extends WorkflowDto {
     // --------------------------------------------------------------------------------
 
     @Schema(
-            description = "Signature Formatter Connector that constructs the data-to-be-signed (DTBS) for Timestamping. " +
+            description = "Signature Formatting Provider that constructs the data-to-be-signed (DTBS) for Timestamping. " +
                     "Present only when ILM-managed signing is used; null for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private NameAndUuidDto signatureFormatterConnector;
+    private NameAndUuidDto signatureFormattingConnector;
 
     @Schema(
-            description = "Attributes configured on the Signature Formatter Connector that control DTBS construction " +
+            description = "Attributes configured on the Signature Formatting Provider that control DTBS construction " +
                     "(e.g. serial number generation strategy, whether to include signing time attribute). " +
                     "Applicable only when ILM-managed signing is used.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<ResponseAttribute> signatureFormatterConnectorAttributes = new ArrayList<>();
+    private List<ResponseAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
     @Schema(
             description = "ETSI qualified electronic timestamp. " +

@@ -164,18 +164,18 @@ public interface SigningProfileController extends AuthProtectedController {
             @Parameter(description = "Certificate UUID") @PathVariable UUID certificateUuid) throws NotFoundException;
 
     @Operation(
-            operationId = "listSignatureFormatterConnectorAttributes",
-            summary = "Get formatter attribute descriptors from a Signature Formatter Connector",
-            description = "Queries the Signature Formatter Connector for its available formatter attribute descriptors with connector default values. " +
+            operationId = "listSignatureFormattingConnectorAttributes",
+            summary = "Get formatting attribute descriptors from a Signature Formatting Provider",
+            description = "Queries the Signature Formatting Provider for its available formatting attribute descriptors with connector default values. " +
                     "The signingProfileUuid parameter is used for authorization only and does not affect the returned descriptors."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Formatter attribute descriptors retrieved"),
+            @ApiResponse(responseCode = "200", description = "Formatting attribute descriptors retrieved"),
             @ApiResponse(responseCode = "404", description = "Connector or Signing Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
-    @GetMapping(path = "/signatureFormatterConnectors/{connectorUuid}/formatterAttributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listSignatureFormatterConnectorAttributes(
-            @Parameter(description = "Signature Formatter Connector UUID") @PathVariable UUID connectorUuid,
+    @GetMapping(path = "/signatureFormattingConnectors/{connectorUuid}/formattingAttributes", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listSignatureFormattingConnectorAttributes(
+            @Parameter(description = "Signature Formatting Provider UUID") @PathVariable UUID connectorUuid,
             @Parameter(description = "Signing Profile UUID — used for authorization purposes only", in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid) throws AttributeException, ConnectorException, NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------

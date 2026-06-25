@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.formatter;
+package com.otilm.api.model.connector.signatures.formatting;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;

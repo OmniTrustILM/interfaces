@@ -10,15 +10,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Class-level constraint that ensures {@code workflow.signatureFormatterConnectorUuid} is non-null
+ * Class-level constraint that ensures {@code workflow.signatureFormattingConnectorUuid} is non-null
  * whenever the signing profile uses ILM-managed signing with a Timestamping or Content Signing workflow.
  */
-@Constraint(validatedBy = ManagedSigningFormatterConnectorValidator.class)
+@Constraint(validatedBy = ManagedSignatureFormattingConnectorValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ValidManagedSigningFormatterConnector {
-    String message() default "signatureFormatterConnectorUuid must be provided when using ILM-managed signing with a Timestamping or Content Signing workflow";
+public @interface ValidManagedSignatureFormattingConnector {
+    String message() default "signatureFormattingConnectorUuid must be provided when using ILM-managed signing with a Timestamping or Content Signing workflow";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.formatter;
+package com.otilm.api.model.connector.signatures.formatting;
 
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * <p>The concrete subtype is determined by the {@code type} discriminator
  * ({@link SigningWorkflowType}). {@code RAW_SIGNING} is excluded — raw signing
- * does not invoke a Signature Formatter Connector.</p>
+ * does not invoke a Signature Formatting Provider.</p>
  */
 @Schema(
         name = "FormatDtbsInterface",

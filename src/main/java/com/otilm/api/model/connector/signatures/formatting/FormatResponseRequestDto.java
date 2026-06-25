@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.formatter;
+package com.otilm.api.model.connector.signatures.formatting;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
@@ -50,7 +50,7 @@ public abstract class FormatResponseRequestDto implements FormatResponseInterfac
 
     @NotNull
     @Schema(
-            description = "Formatter-specific parameters, same attributes as passed to formatDtbs",
+            description = "Formatting-specific parameters, same attributes as passed to formatDtbs",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private List<RequestAttribute> formatAttributes;
