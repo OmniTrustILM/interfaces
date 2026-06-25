@@ -60,6 +60,27 @@ public class BaseScepProfileRequestDto {
     @Schema(description = "Challenge Password for the SCEP Request")
     private String challengePassword;
 
+    /**
+     * Tri-state toggle governing the write-only {@link #challengePassword}. The form does not prefill the
+     * secret, so a blank value must never be treated as "clear".
+     * <ul>
+     *   <li>{@code null} (field absent) — keep the stored password unchanged; on create this means no password
+     *       unless a value is supplied (legacy / opt-out behavior).</li>
+     *   <li>{@code true} + non-blank {@code challengePassword} — set the new password.</li>
+     *   <li>{@code true} + blank {@code challengePassword} — keep the stored password; rejected when none is stored.</li>
+     *   <li>{@code false} — clear / do not set a challenge password.</li>
+     * </ul>
+     * MUST stay nullable and MUST mean keep-when-null. Do NOT normalize it with {@code Boolean.TRUE.equals(...)}
+     * like {@code enableIntune}: that would turn an absent toggle into {@code false} and silently wipe stored
+     * passwords for clients that do not send the field.
+     */
+    @Schema(
+            description = "Challenge password protection toggle. Omit to keep the stored password unchanged; "
+                    + "true to set/keep; false to remove it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Boolean enableChallengePassword;
+
     @Schema(description = "Status of Intune")
     private Boolean enableIntune;
 
