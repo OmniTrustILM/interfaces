@@ -50,7 +50,7 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
      * RFC 5280 §4.1.2.6: subject identity may be carried in subjectDn, in subjectAltName, or both
      * — but cannot be empty in both.
      */
-    @AssertTrue(message = "At least one of subjectDn or subjectAltName must be non-empty (RFC 5280 §4.1.2.6)")
+    @AssertTrue(message = "At least one of subjectDn or subjectAltName must be provided (RFC 5280 §4.1.2.6)")
     @JsonIgnore
     @Schema(hidden = true)
     public boolean isSubjectIdentificationProvided() {

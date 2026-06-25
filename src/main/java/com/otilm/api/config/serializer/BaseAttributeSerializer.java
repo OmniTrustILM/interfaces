@@ -3,6 +3,7 @@ package com.otilm.api.config.serializer;
 import com.otilm.api.model.common.attribute.common.*;
 import com.otilm.api.model.common.attribute.v2.GroupAttributeV2;
 import com.otilm.api.model.common.attribute.v2.InfoAttributeV2;
+import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.GroupAttributeV3;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -47,6 +48,12 @@ public class BaseAttributeSerializer
                 serializers.defaultSerializeValue(attribute.getAttributeCallback(), gen);
                 gen.writeFieldName(CONSTRAINTS);
                 serializers.defaultSerializeValue(attribute.getConstraints(), gen);
+                if (attribute instanceof DataAttributeV3 v3) {
+                    gen.writeFieldName("fieldMapping");
+                    serializers.defaultSerializeValue(v3.getFieldMapping(), gen);
+                    gen.writeFieldName("valueSource");
+                    serializers.defaultSerializeValue(v3.getValueSource(), gen);
+                }
                 gen.writeEndObject();
             }
             case GROUP -> {

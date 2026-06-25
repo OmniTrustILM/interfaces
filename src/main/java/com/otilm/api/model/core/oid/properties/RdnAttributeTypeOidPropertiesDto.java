@@ -1,4 +1,4 @@
-package com.otilm.api.model.core.oid;
+package com.otilm.api.model.core.oid.properties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

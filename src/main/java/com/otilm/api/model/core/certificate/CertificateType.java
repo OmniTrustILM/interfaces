@@ -10,8 +10,15 @@ import java.util.Arrays;
 @Schema(enumAsRef = true)
 public enum CertificateType implements IPlatformEnum {
 	
-    X509("X.509", "X.509"),
-    SSH("SSH", "SSH");
+    X509(Codes.X509, Codes.X509),
+    SSH(Codes.SSH, Codes.SSH);
+
+    public static class Codes {
+        public static final String X509 = "X.509";
+        public static final String SSH = "SSH";
+
+        private Codes() {}
+    }
 
     private static final CertificateType[] VALUES;
 
