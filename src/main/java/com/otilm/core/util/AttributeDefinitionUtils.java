@@ -574,14 +574,6 @@ public class AttributeDefinitionUtils {
             return;
         }
 
-        if (targetClass == CredentialAttributeContentV2.class) {
-            CredentialAttributeContentData credentialData =
-                    ATTRIBUTES_OBJECT_MAPPER.convertValue(content.getData(), CredentialAttributeContentData.class);
-            if (credentialData == null) {
-                errors.add(wrongValueError);
-            }
-        }
-
         if (targetClass == FileAttributeContentV2.class || targetClass == FileAttributeContentV3.class) {
             try {
                 Base64.getDecoder().decode(((FileAttributeContentData) (content.getData())).getContent());
