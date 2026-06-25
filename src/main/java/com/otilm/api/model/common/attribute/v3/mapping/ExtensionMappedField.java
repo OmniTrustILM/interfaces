@@ -2,6 +2,7 @@ package com.otilm.api.model.common.attribute.v3.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,6 +13,7 @@ import lombok.EqualsAndHashCode;
 public class ExtensionMappedField extends MappedField {
 
     @Schema(description = "OID of the X.509 extension (dotted-decimal)", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
     private String extensionOid;
 
     @Schema(description = "Whether the requester may override the default criticality of the extension")

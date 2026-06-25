@@ -29,7 +29,7 @@ public class X509RequestContent extends CertificateRequestContent {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestedExtension> extensions;
 
-    @AssertTrue(message = "At least one of subject, subjectAltName or extensions must be provided")
+    @AssertTrue(message = "At least one of subject, subjectAltNames or extensions must be provided")
     @JsonIgnore
     @Schema(hidden = true)
     public boolean isRequestContentProvided() {

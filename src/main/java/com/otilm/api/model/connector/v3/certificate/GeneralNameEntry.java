@@ -34,7 +34,8 @@ public class GeneralNameEntry {
     @NullableNotBlank(message = "otherNameOid must not be blank when type is OTHER_NAME")
     private String otherNameOid;
 
-    @Schema(description = "Encoding of the otherName value; required when type is OTHER_NAME",
+    @Schema(description = "ASN.1 encoding used for the otherName value string; required when type is OTHER_NAME " +
+            "because different OtherName OIDs carry differently-typed values (e.g. UPN → UTF8String, others may differ)",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ExtensionValueEncoding valueEncoding;
 

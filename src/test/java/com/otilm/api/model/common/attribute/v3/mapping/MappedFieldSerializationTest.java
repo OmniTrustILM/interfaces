@@ -93,7 +93,7 @@ class MappedFieldSerializationTest {
                 {
                   "fieldType": "san",
                   "generalNameType": "dns",
-                  "order": 0,
+                  "order": 1,
                   "source": "csr"
                 }
                 """;
@@ -104,7 +104,7 @@ class MappedFieldSerializationTest {
         SanMappedField result = (SanMappedField) base;
         assertEquals(FieldType.SAN, result.getFieldType());
         assertEquals(GeneralNameType.DNS, result.getGeneralNameType());
-        assertEquals(0, result.getOrder());
+        assertEquals(1, result.getOrder());
         assertEquals(FieldSource.CSR, result.getSource());
     }
 
@@ -113,7 +113,7 @@ class MappedFieldSerializationTest {
         SanMappedField original = new SanMappedField();
         original.setFieldType(FieldType.SAN);
         original.setGeneralNameType(GeneralNameType.DNS);
-        original.setOrder(0);
+        original.setOrder(1);
         original.setSource(FieldSource.CSR);
 
         String json = mapper.writeValueAsString(original);
@@ -123,7 +123,7 @@ class MappedFieldSerializationTest {
         SanMappedField result = (SanMappedField) deserialized;
         assertEquals(FieldType.SAN, result.getFieldType());
         assertEquals(GeneralNameType.DNS, result.getGeneralNameType());
-        assertEquals(0, result.getOrder());
+        assertEquals(1, result.getOrder());
         assertEquals(FieldSource.CSR, result.getSource());
     }
 
@@ -184,7 +184,7 @@ class MappedFieldSerializationTest {
         original.setFieldType(FieldType.EXTENSION);
         original.setExtensionOid("2.5.29.37");
         original.setCriticalOverridable(true);
-        original.setOrder(0);
+        original.setOrder(1);
 
         String json = mapper.writeValueAsString(original);
         MappedField deserialized = mapper.readValue(json, MappedField.class);
@@ -194,7 +194,7 @@ class MappedFieldSerializationTest {
         assertEquals(FieldType.EXTENSION, result.getFieldType());
         assertEquals("2.5.29.37", result.getExtensionOid());
         assertTrue(result.isCriticalOverridable());
-        assertEquals(0, result.getOrder());
+        assertEquals(1, result.getOrder());
     }
 
     // -------------------------------------------------------------------------

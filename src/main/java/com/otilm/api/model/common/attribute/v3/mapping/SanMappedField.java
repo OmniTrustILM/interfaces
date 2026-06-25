@@ -2,6 +2,7 @@ package com.otilm.api.model.common.attribute.v3.mapping;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otilm.api.model.core.certificate.GeneralNameType;
+import com.otilm.api.model.core.oid.ExtensionValueEncoding;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
@@ -22,10 +23,15 @@ public class SanMappedField extends MappedField {
     @Schema(description = "OID of the otherName type; required when generalNameType is OTHER_NAME")
     private String otherNameOid;
 
-    @AssertTrue(message = "OtherName OID is required when SAN type is OTHER_NAME")
+    @Schema(description = "ASN.1 encoding for the otherName value; required when generalNameType is OTHER_NAME " +
+            "because different OtherName OIDs carry differently-typed values (e.g. UPN → UTF8String)")
+    private ExtensionValueEncoding otherNameValueEncoding;
+
+    @AssertTrue(message = "An otherNameOid and otherNameValueEncoding must be provided when generalNameType is OTHER_NAME")
     @JsonIgnore
     @Schema(hidden = true)
-    private boolean isOtherNameOidValid() {
-        return generalNameType != GeneralNameType.OTHER_NAME || (otherNameOid != null && !otherNameOid.isEmpty());
+    private boolean isOtherNameValid() {
+        return generalNameType != GeneralNameType.OTHER_NAME
+                || (otherNameOid != null && !otherNameOid.isEmpty() && otherNameValueEncoding != null);
     }
 }
