@@ -130,6 +130,20 @@ class AttributesApiClientTest {
     }
 
     @Test
+    void listDefinitions_successWithEmptyBody_failsClearly() {
+        mockServer.stubFor(WireMock.get("/v2/attributes")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+
+        IllegalStateException ex = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> client.listDefinitions(connector, null));
+
+        Assertions.assertTrue(ex.getMessage().contains("Attributes v2 list definitions"));
+    }
+
+    @Test
     void getDefinition_returnsBaseAttribute() throws ConnectorException {
         UUID uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
         String json = """
@@ -152,6 +166,21 @@ class AttributesApiClientTest {
         Assertions.assertInstanceOf(InfoAttributeV3.class, attr);
         Assertions.assertEquals(3, attr.getVersion());
         Assertions.assertEquals(AttributeType.INFO, attr.getType());
+    }
+
+    @Test
+    void getDefinition_successWithEmptyBody_failsClearly() {
+        UUID uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        mockServer.stubFor(WireMock.get("/v2/attributes/" + uuid)
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+
+        IllegalStateException ex = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> client.getDefinition(connector, uuid));
+
+        Assertions.assertTrue(ex.getMessage().contains("Attributes v2 get definition"));
     }
 
     /**
@@ -225,5 +254,27 @@ class AttributesApiClientTest {
 
         mockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/v2/attributes/callback"))
                 .withRequestBody(WireMock.matchingJsonPath("$.attributeName", WireMock.equalTo("someAttr"))));
+    }
+
+    @Test
+    void callback_successWithEmptyBody_failsClearly() {
+        mockServer.stubFor(WireMock.post("/v2/attributes/callback")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+
+        AttributeCallbackRequestDto request = new AttributeCallbackRequestDto();
+        request.setConnectorInterface(ConnectorInterface.AUTHORITY);
+        request.setInterfaceVersion("v3");
+        request.setAttributeUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+        request.setAttributeName("someAttr");
+        request.setContextAttributes(List.of());
+        request.setCurrentAttributes(List.of());
+
+        IllegalStateException ex = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> client.callback(connector, request));
+
+        Assertions.assertTrue(ex.getMessage().contains("Attributes v2 callback"));
     }
 }

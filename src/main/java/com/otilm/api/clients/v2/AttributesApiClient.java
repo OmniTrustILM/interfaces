@@ -53,10 +53,10 @@ public class AttributesApiClient extends BaseApiClient implements AttributesSync
         URI uri = uriBuilder.build();
 
         WebClient.RequestBodySpec request = prepareRequest(HttpMethod.GET, connector, true).uri(uri);
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .retrieve()
-                        .bodyToMono(AttributeDefinitionsDto.class)
-                        .block(),
+                        .toEntity(AttributeDefinitionsDto.class),
+                "Attributes v2 list definitions"),
                 request,
                 connector);
     }
@@ -64,11 +64,11 @@ public class AttributesApiClient extends BaseApiClient implements AttributesSync
     @Override
     public BaseAttribute getDefinition(ApiClientConnectorInfo connector, UUID uuid) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + ATTRIBUTE_CONTEXT, uuid)
                         .retrieve()
-                        .bodyToMono(BaseAttribute.class)
-                        .block(),
+                        .toEntity(BaseAttribute.class),
+                "Attributes v2 get definition"),
                 request,
                 connector);
     }
@@ -76,12 +76,12 @@ public class AttributesApiClient extends BaseApiClient implements AttributesSync
     @Override
     public AttributeCallbackResponseDto callback(ApiClientConnectorInfo connector, AttributeCallbackRequestDto requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        return processRequest(r -> r
+        return processRequest(r -> requireBody(r
                         .uri(connector.getUrl() + CALLBACK_CONTEXT)
                         .body(Mono.just(requestDto), AttributeCallbackRequestDto.class)
                         .retrieve()
-                        .bodyToMono(AttributeCallbackResponseDto.class)
-                        .block(),
+                        .toEntity(AttributeCallbackResponseDto.class),
+                "Attributes v2 callback"),
                 request,
                 connector);
     }
