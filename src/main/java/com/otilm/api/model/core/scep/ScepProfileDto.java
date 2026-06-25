@@ -27,4 +27,9 @@ public class ScepProfileDto extends NameAndUuidDto {
 
     @Schema(description = "Status of Intune")
     private boolean enableIntune;
+
+    @Schema(description = "Whether a challenge password is currently set for the SCEP Profile. The password value "
+            + "itself is write-only and never returned; this flag lets clients reflect the current state.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean enableChallengePassword;
 }

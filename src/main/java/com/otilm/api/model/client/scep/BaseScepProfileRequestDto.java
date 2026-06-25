@@ -1,10 +1,12 @@
 package com.otilm.api.model.client.scep;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -57,8 +59,32 @@ public class BaseScepProfileRequestDto {
     )
     private boolean includeCaCertificateChain;
 
-    @Schema(description = "Challenge Password for the SCEP Request")
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(description = "Challenge Password for the SCEP Request (write-only).",
+            accessMode = Schema.AccessMode.WRITE_ONLY)
     private String challengePassword;
+
+    /**
+     * Tri-state toggle governing the write-only {@link #challengePassword}. The form does not prefill the
+     * secret, so a blank value must never be treated as "clear".
+     * <ul>
+     *   <li>{@code null} (field absent) — keep the stored password unchanged; on create this means no password
+     *       unless a value is supplied (legacy / opt-out behavior).</li>
+     *   <li>{@code true} + non-blank {@code challengePassword} — set the new password.</li>
+     *   <li>{@code true} + blank {@code challengePassword} — keep the stored password; rejected when none is stored.</li>
+     *   <li>{@code false} — clear / do not set a challenge password.</li>
+     * </ul>
+     * MUST stay nullable and MUST mean keep-when-null. Do NOT normalize it with {@code Boolean.TRUE.equals(...)}
+     * like {@code enableIntune}: that would turn an absent toggle into {@code false} and silently wipe stored
+     * passwords for clients that do not send the field.
+     */
+    @Schema(
+            description = "Challenge password protection toggle. Omit to keep the stored password unchanged; "
+                    + "true to set a new password (or keep the existing one if left blank); false to remove it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Boolean enableChallengePassword;
 
     @Schema(description = "Status of Intune")
     private Boolean enableIntune;
@@ -69,7 +95,10 @@ public class BaseScepProfileRequestDto {
     @Schema(description = "Intune Application ID")
     private String intuneApplicationId;
 
-    @Schema(description = "Intune Application Key")
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(description = "Intune Application Key (write-only).",
+            accessMode = Schema.AccessMode.WRITE_ONLY)
     private String intuneApplicationKey;
 
     @Valid
