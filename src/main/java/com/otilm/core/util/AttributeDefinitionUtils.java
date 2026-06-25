@@ -23,7 +23,6 @@ import com.otilm.api.model.common.attribute.v2.content.*;
 import com.otilm.api.model.common.attribute.common.content.data.CredentialAttributeContentData;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.*;
-import com.otilm.api.model.core.credential.CredentialDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -573,13 +572,6 @@ public class AttributeDefinitionUtils {
         if (content.getData() == null) {
             errors.add(wrongValueError);
             return;
-        }
-
-        if (targetClass == CredentialAttributeContentV2.class) {
-            CredentialDto credentialDto = ATTRIBUTES_OBJECT_MAPPER.convertValue(content.getData(), CredentialDto.class);
-            if (credentialDto == null) {
-                errors.add(wrongValueError);
-            }
         }
 
         if (targetClass == FileAttributeContentV2.class || targetClass == FileAttributeContentV3.class) {
