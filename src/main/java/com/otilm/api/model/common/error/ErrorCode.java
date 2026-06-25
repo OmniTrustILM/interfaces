@@ -28,6 +28,10 @@ public enum ErrorCode {
     POLICY_VIOLATION(ProblemTypeCategory.CONNECTOR, null, "Policy violation at upstream system", HttpStatus.UNPROCESSABLE_ENTITY, false),
     OPERATION_PAST_POINT_OF_NO_RETURN(ProblemTypeCategory.CONNECTOR, null, "Cancel refused — operation past point of no return", HttpStatus.UNPROCESSABLE_ENTITY, false),
     OPERATION_NOT_TRACKED(ProblemTypeCategory.CONNECTOR, null, "Async operation no longer tracked by connector", HttpStatus.NOT_FOUND, false),
+    // Distinct from RESOURCE_NOT_FOUND: Core handles this internally — it refreshes its
+    // attribute-definition registry from the connector and retries the operation transparently,
+    // rather than surfacing the failure to the API caller. Not client-retryable (retryable=false).
+    ATTRIBUTE_DEFINITION_NOT_FOUND(ProblemTypeCategory.CONNECTOR, null, "Attribute definition not found", HttpStatus.NOT_FOUND, false),
 
     // CONNECTOR + AUTHORITY — interface-specific
     CSR_MALFORMED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "CSR malformed", HttpStatus.UNPROCESSABLE_ENTITY, false),

@@ -1,5 +1,6 @@
 package com.otilm.api.model.common.attribute.common.callback;
 
+import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.scheduler.PaginationRequestDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -45,6 +47,13 @@ public class RequestAttributeCallback {
 
     @Schema(description = "Pagination of the callback response", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PaginationRequestDto pagination;
+
+    @Schema(
+            description = "Attributes v2 callback values: the dependsOn-named attributes the callback consumes, "
+                    + "reference-typed values expanded inline by Core. Used by the NG (Attributes v2) callback path.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private List<RequestAttribute> attributes;
 
 
     @Override
