@@ -12,6 +12,7 @@ import com.otilm.api.model.client.connector.v2.attribute.AttributeDefinitionsDto
 import com.otilm.api.model.common.attribute.common.AttributeType;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
+import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.core.connector.ConnectorDto;
@@ -276,5 +277,42 @@ class AttributesApiClientTest {
                 () -> client.callback(connector, request));
 
         Assertions.assertTrue(ex.getMessage().contains("Attributes v2 callback"));
+    }
+
+    /**
+     * Callback GROUP arm: the connector returns runtime-injected GROUP children as the {@code attributes}
+     * arm (polymorphic {@code BaseAttribute} definitions), with the {@code content} arm absent. Exercises
+     * the second response arm's Jackson wiring, which the DATA-arm test does not.
+     */
+    @Test
+    void callback_attributesArm_returnsGroupChildren() throws ConnectorException {
+        String responseJson = """
+                {
+                  "attributes": [
+                    { "type": "data", "version": 3, "name": "childAttr", "contentType": "string", "content": [] }
+                  ]
+                }
+                """;
+        mockServer.stubFor(WireMock.post("/v2/attributes/callback")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(responseJson)));
+
+        AttributeCallbackRequestDto request = new AttributeCallbackRequestDto();
+        request.setConnectorInterface(ConnectorInterface.AUTHORITY);
+        request.setInterfaceVersion("v3");
+        request.setAttributeUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+        request.setAttributeName("groupAttr");
+        request.setContextAttributes(List.of());
+        request.setCurrentAttributes(List.of());
+
+        AttributeCallbackResponseDto response = client.callback(connector, request);
+
+        Assertions.assertNull(response.getContent());
+        Assertions.assertNotNull(response.getAttributes());
+        Assertions.assertEquals(1, response.getAttributes().size());
+        Assertions.assertInstanceOf(DataAttributeV3.class, response.getAttributes().get(0));
+        Assertions.assertEquals("childAttr", ((DataAttributeV3) response.getAttributes().get(0)).getName());
     }
 }

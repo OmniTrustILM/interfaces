@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * {@link ProxyClient} implementation maps connector errors by raw HTTP status code and does not
  * reconstruct a {@code ConnectorProblemException} from the connector's {@code errorCode}. So a connector
  * 404 ({@code ATTRIBUTE_DEFINITION_NOT_FOUND}) over MQ surfaces without its error code. Restoring that
- * parity is tracked as a Core gate (#1622); #726 ships the transport only.</p>
+ * parity is tracked as a Core gate (core #1622/#1621); #726 ships the transport only.</p>
  *
  * <p>{@code ProxyClient} also has no notion of a query string, so the exploded {@code uuids} filter rides
  * inside the request path string (e.g. {@code /v2/attributes?uuids=a&uuids=b}); whether that survives the

@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
  * implementation maps connector errors by raw HTTP status code and never reconstructs a
  * {@code ConnectorProblemException} from the connector's {@code errorCode}, so a connector 404
  * ({@code ATTRIBUTE_DEFINITION_NOT_FOUND}) over MQ loses its error code. That parity fix is tracked as a
- * Core gate (#1622), not #726, so this suite does NOT assert error mapping over MQ. Note too that
+ * Core gate (core #1622/#1621), not #726, so this suite does NOT assert error mapping over MQ. Note too that
  * {@code ProxyClient} has no query-string notion — the exploded {@code uuids} string rides in the path
  * (verified below); whether it survives the bus is a separate Core/MQ gate.</p>
  */
@@ -133,6 +133,46 @@ class AttributesApiClientMqTest {
         Assertions.assertEquals("GET", proxyClient.method);
         Assertions.assertNull(proxyClient.body);
         Assertions.assertEquals(BaseAttribute.class, proxyClient.responseType);
+    }
+
+    @Test
+    void listDefinitionsAsync_withUuids_delegatesExplodedPath() {
+        UUID a = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID b = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        AttributeDefinitionsDto expected = new AttributeDefinitionsDto();
+        proxyClient.asyncResponse = CompletableFuture.completedFuture(expected);
+
+        CompletableFuture<AttributeDefinitionsDto> result =
+                client.listDefinitionsAsync(connector, List.of(a, b));
+
+        Assertions.assertSame(expected, result.join());
+        // The exploded-uuids path build is the only async logic that differs from the sync path.
+        Assertions.assertEquals(ATTRIBUTES_PATH + "?uuids=" + a + "&uuids=" + b, proxyClient.path);
+        Assertions.assertEquals("GET", proxyClient.method);
+        Assertions.assertNull(proxyClient.body);
+        Assertions.assertEquals(AttributeDefinitionsDto.class, proxyClient.responseType);
+    }
+
+    @Test
+    void callbackAsync_delegatesPostWithBody() {
+        AttributeCallbackRequestDto request = new AttributeCallbackRequestDto();
+        request.setConnectorInterface(ConnectorInterface.AUTHORITY);
+        request.setInterfaceVersion("v3");
+        request.setAttributeUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+        request.setAttributeName("someAttr");
+        request.setContextAttributes(List.of());
+        request.setCurrentAttributes(List.of());
+
+        AttributeCallbackResponseDto expected = new AttributeCallbackResponseDto();
+        proxyClient.asyncResponse = CompletableFuture.completedFuture(expected);
+
+        CompletableFuture<AttributeCallbackResponseDto> result = client.callbackAsync(connector, request);
+
+        Assertions.assertSame(expected, result.join());
+        Assertions.assertEquals(ATTRIBUTES_PATH + "/callback", proxyClient.path);
+        Assertions.assertEquals("POST", proxyClient.method);
+        Assertions.assertSame(request, proxyClient.body);
+        Assertions.assertEquals(AttributeCallbackResponseDto.class, proxyClient.responseType);
     }
 
     /**
