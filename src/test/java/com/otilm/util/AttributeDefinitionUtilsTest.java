@@ -699,6 +699,44 @@ class AttributeDefinitionUtilsTest {
     }
 
     @Test
+    void testValidateAttributes_credentialWithNestedProviderAttributes() {
+        // Mirrors what core injects before forwarding to a connector: the credential content
+        // carries the full credential, including its provider attributes as nested DataAttributeV2.
+        String attributeName = "credential";
+
+        DataAttributeV2 definition = new DataAttributeV2();
+        definition.setName(attributeName);
+        definition.setType(AttributeType.DATA);
+        definition.setContentType(AttributeContentType.CREDENTIAL);
+
+        DataAttributeV2 keyStoreType = new DataAttributeV2();
+        keyStoreType.setName("keyStoreType");
+        keyStoreType.setType(AttributeType.DATA);
+        keyStoreType.setContentType(AttributeContentType.STRING);
+        keyStoreType.setContent(List.of(new StringAttributeContentV2("PKCS12")));
+
+        DataAttributeV2 keyStorePassword = new DataAttributeV2();
+        keyStorePassword.setName("keyStorePassword");
+        keyStorePassword.setType(AttributeType.DATA);
+        keyStorePassword.setContentType(AttributeContentType.SECRET);
+        SecretAttributeContentData secret = new SecretAttributeContentData();
+        secret.setSecret("s3cr3t");
+        keyStorePassword.setContent(List.of(new SecretAttributeContentV2("pwd", secret)));
+
+        CredentialAttributeContentData credential = new CredentialAttributeContentData();
+        credential.setUuid("3ca21efc-75cc-42f0-b250-47fc722ec3f7");
+        credential.setName("ewgwefe");
+        credential.setKind("SoftKeyStore");
+        credential.setAttributes(List.of(keyStoreType, keyStorePassword));
+
+        RequestAttributeV2 attribute = new RequestAttributeV2();
+        attribute.setName(attributeName);
+        attribute.setContent(List.of(new CredentialAttributeContentV2("ewgwefe", credential)));
+
+        validateAttributes(List.of(definition), List.of(attribute));
+    }
+
+    @Test
     void testValidateAttributes_credentialFail() {
         String attributeName = "testAttribute1";
 
