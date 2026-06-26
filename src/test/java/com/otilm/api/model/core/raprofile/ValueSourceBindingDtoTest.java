@@ -16,38 +16,47 @@ class ValueSourceBindingDtoTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void bindingByUuidRoundTrips() throws Exception {
-        SourceParam p = new SourceParam();
-        p.setAttributeName("dc_select");
-
-        ValueSourceBindingDto dto = new ValueSourceBindingDto();
-        dto.setAttributeUuid("u1");
+    void roundTripsBindingByUuid() throws Exception {
+        // given — a binding identified by attributeUuid, with no attributeName
+        var boundUuid = "u1";
+        var collectionRef = "cmdb.servers";
+        var paramName = "dc_select";
+        var param = new SourceParam();
+        param.setAttributeName(paramName);
+        var dto = new ValueSourceBindingDto();
+        dto.setAttributeUuid(boundUuid);
         dto.setValueSourceType(ValueSourceType.STATIC_LIST);
-        dto.setCollectionRef("cmdb.servers");
-        dto.setParams(List.of(p));
+        dto.setCollectionRef(collectionRef);
+        dto.setParams(List.of(param));
 
-        String json = mapper.writeValueAsString(dto);
+        // when
+        var json = mapper.writeValueAsString(dto);
         ValueSourceBindingDto back = mapper.readValue(json, ValueSourceBindingDto.class);
 
-        assertEquals("u1", back.getAttributeUuid());
+        // then
+        assertEquals(boundUuid, back.getAttributeUuid());
         assertNull(back.getAttributeName());
         assertEquals(ValueSourceType.STATIC_LIST, back.getValueSourceType());
-        assertEquals("cmdb.servers", back.getCollectionRef());
-        assertEquals("dc_select", back.getParams().get(0).getAttributeName());
+        assertEquals(collectionRef, back.getCollectionRef());
+        assertEquals(paramName, back.getParams().get(0).getAttributeName());
     }
 
     @Test
-    void bindingByNameFallbackOmitsNullUuidAndCollectionRef() throws Exception {
-        ValueSourceBindingDto dto = new ValueSourceBindingDto();
-        dto.setAttributeName("server");
+    void omitsNullUuidAndCollectionRef_whenBindingByName() throws Exception {
+        // given — a binding identified by attributeName, with no uuid or collectionRef
+        var boundName = "server";
+        var dto = new ValueSourceBindingDto();
+        dto.setAttributeName(boundName);
         dto.setValueSourceType(ValueSourceType.CONNECTOR_CALLBACK);
 
-        String json = mapper.writeValueAsString(dto);
+        // when
+        var json = mapper.writeValueAsString(dto);
+        ValueSourceBindingDto back = mapper.readValue(json, ValueSourceBindingDto.class);
+
+        // then
         assertFalse(json.contains("attributeUuid"));
         assertFalse(json.contains("collectionRef"));
-
-        ValueSourceBindingDto back = mapper.readValue(json, ValueSourceBindingDto.class);
-        assertEquals("server", back.getAttributeName());
+        assertEquals(boundName, back.getAttributeName());
         assertEquals(ValueSourceType.CONNECTOR_CALLBACK, back.getValueSourceType());
     }
 }

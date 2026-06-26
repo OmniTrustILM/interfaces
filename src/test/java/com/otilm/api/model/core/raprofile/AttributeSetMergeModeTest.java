@@ -12,27 +12,34 @@ class AttributeSetMergeModeTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void serializesAsCode() throws Exception {
+    void serializesEachModeAsItsCode() throws Exception {
+        // given / when / then
         assertEquals("\"staticOnly\"", mapper.writeValueAsString(AttributeSetMergeMode.STATIC_ONLY));
         assertEquals("\"connectorOnly\"", mapper.writeValueAsString(AttributeSetMergeMode.CONNECTOR_ONLY));
         assertEquals("\"merge\"", mapper.writeValueAsString(AttributeSetMergeMode.MERGE));
     }
 
     @Test
-    void deserializesFromCode() throws Exception {
+    void deserializesEachModeFromItsCode() throws Exception {
+        // given / when / then
         assertEquals(AttributeSetMergeMode.STATIC_ONLY, mapper.readValue("\"staticOnly\"", AttributeSetMergeMode.class));
         assertEquals(AttributeSetMergeMode.CONNECTOR_ONLY, mapper.readValue("\"connectorOnly\"", AttributeSetMergeMode.class));
         assertEquals(AttributeSetMergeMode.MERGE, mapper.readValue("\"merge\"", AttributeSetMergeMode.class));
     }
 
     @Test
-    void unknownCodeThrows() {
-        assertThrows(Exception.class, () -> mapper.readValue("\"bogus\"", AttributeSetMergeMode.class));
-        assertThrows(IllegalArgumentException.class, () -> AttributeSetMergeMode.fromCode("bogus"));
+    void throwsOnUnknownCode() {
+        // given — a code that maps to no mode
+        var unknownCode = "bogus";
+
+        // when / then
+        assertThrows(Exception.class, () -> mapper.readValue("\"" + unknownCode + "\"", AttributeSetMergeMode.class));
+        assertThrows(IllegalArgumentException.class, () -> AttributeSetMergeMode.fromCode(unknownCode));
     }
 
     @Test
-    void labelsAndDescriptionsArePopulated() {
+    void populatesLabelAndDescriptionForEveryMode() {
+        // given / when / then
         for (AttributeSetMergeMode mode : AttributeSetMergeMode.values()) {
             assertFalse(mode.getLabel().isBlank(), "label missing for " + mode.name());
             assertFalse(mode.getDescription().isBlank(), "description missing for " + mode.name());

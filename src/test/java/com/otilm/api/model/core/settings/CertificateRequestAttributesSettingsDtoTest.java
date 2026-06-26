@@ -1,13 +1,12 @@
 package com.otilm.api.model.core.settings;
 
-import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
-import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.otilm.util.builders.DataAttributeV3Builder.aDataAttribute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -15,54 +14,56 @@ class CertificateRequestAttributesSettingsDtoTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private static DataAttributeV3 def(String uuid, String name) {
-        DataAttributeV3 a = new DataAttributeV3();
-        a.setUuid(uuid);
-        a.setName(name);
-        a.setContentType(AttributeContentType.STRING);
-        DataAttributeProperties p = new DataAttributeProperties();
-        p.setLabel(name);
-        a.setProperties(p);
-        return a;
-    }
-
     @Test
-    void readViewRoundTrips() throws Exception {
-        CertificateRequestAttributesSettingsDto dto = new CertificateRequestAttributesSettingsDto();
-        dto.setRequestAttributes(List.of(def("u1", "common_name")));
+    void roundTripsReadView() throws Exception {
+        // given
+        var attributeName = "common_name";
+        var dto = new CertificateRequestAttributesSettingsDto();
+        dto.setRequestAttributes(List.of(aDataAttribute().withUuid("u1").withName(attributeName).build()));
 
-        String json = mapper.writeValueAsString(dto);
+        // when
+        var json = mapper.writeValueAsString(dto);
         CertificateRequestAttributesSettingsDto back =
                 mapper.readValue(json, CertificateRequestAttributesSettingsDto.class);
 
+        // then
         assertEquals(1, back.getRequestAttributes().size());
         assertInstanceOf(DataAttributeV3.class, back.getRequestAttributes().get(0));
-        assertEquals("common_name", back.getRequestAttributes().get(0).getName());
+        assertEquals(attributeName, back.getRequestAttributes().get(0).getName());
     }
 
     @Test
-    void updateViewRoundTrips() throws Exception {
-        CertificateRequestAttributesSettingsUpdateDto dto = new CertificateRequestAttributesSettingsUpdateDto();
-        dto.setRequestAttributes(List.of(def("u1", "common_name"), def("u2", "country")));
+    void roundTripsUpdateView() throws Exception {
+        // given
+        var secondAttributeName = "country";
+        var dto = new CertificateRequestAttributesSettingsUpdateDto();
+        dto.setRequestAttributes(List.of(
+                aDataAttribute().withUuid("u1").withName("common_name").build(),
+                aDataAttribute().withUuid("u2").withName(secondAttributeName).build()));
 
-        String json = mapper.writeValueAsString(dto);
+        // when
+        var json = mapper.writeValueAsString(dto);
         CertificateRequestAttributesSettingsUpdateDto back =
                 mapper.readValue(json, CertificateRequestAttributesSettingsUpdateDto.class);
 
+        // then
         assertEquals(2, back.getRequestAttributes().size());
-        assertEquals("country", back.getRequestAttributes().get(1).getName());
+        assertEquals(secondAttributeName, back.getRequestAttributes().get(1).getName());
     }
 
     @Test
     void foldsIntoCertificateSettings() throws Exception {
-        CertificateRequestAttributesSettingsDto ra = new CertificateRequestAttributesSettingsDto();
-        ra.setRequestAttributes(List.of(def("u1", "common_name")));
-        CertificateSettingsDto settings = new CertificateSettingsDto();
-        settings.setRequestAttributes(ra);
+        // given
+        var requestAttributes = new CertificateRequestAttributesSettingsDto();
+        requestAttributes.setRequestAttributes(List.of(aDataAttribute().withUuid("u1").withName("common_name").build()));
+        var settings = new CertificateSettingsDto();
+        settings.setRequestAttributes(requestAttributes);
 
-        String json = mapper.writeValueAsString(settings);
+        // when
+        var json = mapper.writeValueAsString(settings);
         CertificateSettingsDto back = mapper.readValue(json, CertificateSettingsDto.class);
 
+        // then
         assertEquals(1, back.getRequestAttributes().getRequestAttributes().size());
     }
 }

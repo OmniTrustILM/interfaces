@@ -11,16 +11,18 @@ class RaProfileDtoRequestAttributesTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void carriesCertificateRequestAttributes() throws Exception {
-        RaProfileCertificateRequestAttributesDto ra = new RaProfileCertificateRequestAttributesDto();
-        ra.setMergeMode(AttributeSetMergeMode.MERGE);
+    void roundTripsCertificateRequestAttributes() throws Exception {
+        // given
+        var requestAttributes = new RaProfileCertificateRequestAttributesDto();
+        requestAttributes.setMergeMode(AttributeSetMergeMode.MERGE);
+        var dto = new RaProfileDto();
+        dto.setCertificateRequestAttributes(requestAttributes);
 
-        RaProfileDto dto = new RaProfileDto();
-        dto.setCertificateRequestAttributes(ra);
-
-        String json = mapper.writeValueAsString(dto);
+        // when
+        var json = mapper.writeValueAsString(dto);
         RaProfileDto back = mapper.readValue(json, RaProfileDto.class);
 
+        // then
         assertNotNull(back.getCertificateRequestAttributes());
         assertEquals(AttributeSetMergeMode.MERGE, back.getCertificateRequestAttributes().getMergeMode());
     }
