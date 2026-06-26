@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Read view of an RA Profile's static request-attribute set (spec §4.5): the ordered platform-owned definitions and the
- * merge mode that governs combination with a connector-supplied set (spec §4.3).
+ * View of an RA Profile's static request-attribute set: the ordered platform-owned definitions and the
+ * merge mode that governs a combination with a connector-supplied set.
  */
 @Getter
 @Setter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "RA-Profile static request-attribute definitions and the merge mode.")
+@Schema(description = "RA Profile static request-attribute definitions and the merge mode.")
 public class RaProfileCertificateRequestAttributesDto {
 
     @ArraySchema(arraySchema = @Schema(

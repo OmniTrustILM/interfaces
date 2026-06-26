@@ -13,9 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Read view of the editable platform default request-attribute set (spec §4.3 step 3 / Decision-16): the terminal
- * fallback set applied when neither the RA-Profile static set nor a connector-supplied set yields definitions. No merge
- * mode — it is not combined with another set.
+ * View of the editable platform default request-attribute set: the terminal fallback set applied when neither
+ * the RA-Profile static set nor a connector-supplied set yields definitions. No merge mode — it is not combined with another set.
  */
 @Getter
 @Setter

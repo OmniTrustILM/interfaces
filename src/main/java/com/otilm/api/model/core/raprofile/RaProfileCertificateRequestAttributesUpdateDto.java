@@ -13,15 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Request body to author an RA Profile's static request-attribute set (spec §4.5). The definitions are platform-owned
- * (connectorUuid = null); request <em>values</em> are never authored here, only definitions. The set is an
- * <em>ordered</em> {@link BaseAttribute} list (rendering order is preserved).
+ * Request body to author an RA Profile's static request-attribute set. The set is an <em>ordered</em>
+ * {@link BaseAttribute} list (rendering order is preserved).
  */
 @Getter
 @Setter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Request to set the RA-Profile static request-attribute definitions and the merge mode.")
+@Schema(description = "Request to set the RA Profile static request-attribute definitions and the merge mode.")
 public class RaProfileCertificateRequestAttributesUpdateDto {
 
     @ArraySchema(arraySchema = @Schema(

@@ -14,10 +14,8 @@ import lombok.ToString;
 import java.util.List;
 
 /**
- * A Core-side value-source binding attached to a (connector-supplied or static) request-attribute definition on
- * an RA Profile (spec §4.6). The binding binds to a definition by {@code attributeUuid}, falling back to
- * {@code attributeName} (spec §4.3, name fallback) — at least one of the two must be set. It carries the value-source
- * kind and an optional reference plus optional cascading dependency parameters.
+ * A Core-side value-source binding attached to a request-attribute definition on an RA Profile.
+ * It binds to a definition by {@code attributeUuid}, falling back to {@code attributeName} — at least one of the two must be set.
  */
 @Getter
 @Setter
@@ -42,7 +40,7 @@ public class ValueSourceBindingDto {
     private String collectionRef;
 
     @ArraySchema(arraySchema = @Schema(
-            description = "Optional cascading dependency parameters (from other attributes); resolved in a later phase",
+            description = "Optional cascading dependency parameters (from other attributes)",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED))
     @Valid
     private List<SourceParam> params;
