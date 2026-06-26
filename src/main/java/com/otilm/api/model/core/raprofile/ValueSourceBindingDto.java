@@ -2,10 +2,12 @@ package com.otilm.api.model.core.raprofile;
 
 import com.otilm.api.model.common.attribute.v3.mapping.SourceParam;
 import com.otilm.api.model.common.attribute.v3.mapping.ValueSourceType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,4 +46,11 @@ public class ValueSourceBindingDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED))
     @Valid
     private List<SourceParam> params;
+
+    @AssertTrue(message = "Value-source binding requires attributeUuid or attributeName to be set.")
+    @JsonIgnore
+    public boolean isValid() {
+        return (attributeUuid != null && !attributeUuid.isBlank())
+                || (attributeName != null && !attributeName.isBlank());
+    }
 }

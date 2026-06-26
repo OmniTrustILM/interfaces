@@ -56,7 +56,6 @@ public class RaProfileDto extends NameAndUuidDto {
     @Schema(description = "Static certificate-request-attribute set configured for the RA Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private RaProfileCertificateRequestAttributesDto certificateRequestAttributes;
 
-
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)

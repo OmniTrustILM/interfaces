@@ -1,10 +1,12 @@
 package com.otilm.api.model.core.raprofile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AttributeSetMergeModeTest {
@@ -32,8 +34,10 @@ class AttributeSetMergeModeTest {
         // given — a code that maps to no mode
         var unknownCode = "bogus";
 
-        // when / then
-        assertThrows(Exception.class, () -> mapper.readValue("\"" + unknownCode + "\"", AttributeSetMergeMode.class));
+        // when / then — Jackson wraps the @JsonCreator rejection; assert both the wrapper type and the originating cause
+        ValueInstantiationException thrown = assertThrows(ValueInstantiationException.class,
+                () -> mapper.readValue("\"" + unknownCode + "\"", AttributeSetMergeMode.class));
+        assertInstanceOf(IllegalArgumentException.class, thrown.getCause());
         assertThrows(IllegalArgumentException.class, () -> AttributeSetMergeMode.fromCode(unknownCode));
     }
 

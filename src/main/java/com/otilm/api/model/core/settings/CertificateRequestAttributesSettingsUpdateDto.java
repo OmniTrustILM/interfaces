@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,9 +15,7 @@ import java.util.List;
  * Request to edit the platform default request-attribute set. Definitions are platform-owned (connectorUuid = null);
  * only definitions are stored, never request values.
  */
-@Getter
-@Setter
-@ToString
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Request to set the editable platform default request-attribute definitions.")
 public class CertificateRequestAttributesSettingsUpdateDto implements Serializable {

@@ -1,6 +1,7 @@
 package com.otilm.api.model.core.raprofile;
 
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
+import com.otilm.api.model.common.attribute.v3.mapping.ValueSourceType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ import static com.otilm.util.builders.DataAttributeV3Builder.aDataAttribute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RaProfileCertificateRequestAttributesUpdateDtoTest {
 
@@ -37,6 +39,29 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
         assertInstanceOf(DataAttributeV3.class, back.getRequestAttributes().get(0));
         assertEquals(firstAttributeName, back.getRequestAttributes().get(0).getName());
         assertEquals(secondAttributeName, back.getRequestAttributes().get(1).getName());
+    }
+
+    @Test
+    void roundTripsValueSourceBindingsAndStrictnessFlag() throws Exception {
+        // given — a binding and the strictness flag, the two fields the merge-mode test leaves untouched
+        var boundName = "server";
+        var binding = new ValueSourceBindingDto();
+        binding.setAttributeName(boundName);
+        binding.setValueSourceType(ValueSourceType.CONNECTOR_CALLBACK);
+        var dto = new RaProfileCertificateRequestAttributesUpdateDto();
+        dto.setValueSourceBindings(List.of(binding));
+        dto.setExternalCsrValidationStrict(true);
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+        RaProfileCertificateRequestAttributesUpdateDto back =
+                mapper.readValue(json, RaProfileCertificateRequestAttributesUpdateDto.class);
+
+        // then
+        assertEquals(1, back.getValueSourceBindings().size());
+        assertEquals(boundName, back.getValueSourceBindings().get(0).getAttributeName());
+        assertEquals(ValueSourceType.CONNECTOR_CALLBACK, back.getValueSourceBindings().get(0).getValueSourceType());
+        assertTrue(back.getExternalCsrValidationStrict());
     }
 
     @Test
