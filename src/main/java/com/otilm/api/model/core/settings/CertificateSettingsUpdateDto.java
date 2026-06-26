@@ -12,4 +12,8 @@ public class CertificateSettingsUpdateDto implements Serializable {
     @Valid
     @Schema(description = "Settings of validation of certificates")
     private CertificateValidationSettingsUpdateDto validation;
+
+    @Valid
+    @Schema(description = "Platform default request-attribute set")
+    private CertificateRequestAttributesSettingsUpdateDto requestAttributes;
 }
