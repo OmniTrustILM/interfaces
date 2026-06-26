@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.formatter;
+package com.otilm.api.model.connector.signatures.formatting;
 
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FormatterPolymorphicSerializationTest {
+class FormattingPolymorphicSerializationTest {
 
     private ObjectMapper mapper;
 

@@ -3,10 +3,10 @@ package com.otilm.api.interfaces.connector.signing;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.connector.signatures.formatter.FormatDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.formatter.FormatDtbsResponseDto;
-import com.otilm.api.model.connector.signatures.formatter.FormatResponseRequestDto;
-import com.otilm.api.model.connector.signatures.formatter.FormattedResponseDto;
+import com.otilm.api.model.connector.signatures.formatting.FormatDtbsRequestDto;
+import com.otilm.api.model.connector.signatures.formatting.FormatDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.formatting.FormatResponseRequestDto;
+import com.otilm.api.model.connector.signatures.formatting.FormattedResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -22,16 +22,16 @@ import java.util.List;
 
 @RequestMapping("/v1/signatureProvider/formatting")
 @Tag(
-        name = "Signature Formatter",
-        description = "Signature Formatter API defines operations for protocol-specific formatting of digital signing requests. " +
-                "The formatter is stateless and handles the conversion between raw signing material and " +
+        name = "Signature Formatting Provider",
+        description = "Signature Formatting Provider API defines operations for protocol-specific formatting of digital signing requests. " +
+                "The provider is stateless and handles the conversion between raw signing material and " +
                 "protocol-specific formats (e.g. TSA TimeStampToken, AdES signature containers)."
 )
-public interface SignatureFormatterController extends AuthProtectedConnectorController {
+public interface SignatureFormattingController extends AuthProtectedConnectorController {
 
     @Operation(
-            summary = "List Formatter Attributes",
-            operationId = "listFormatterAttributes"
+            summary = "List Formatting Attributes",
+            operationId = "listFormattingAttributes"
     )
     @ApiResponses(
             value = {
@@ -45,7 +45,7 @@ public interface SignatureFormatterController extends AuthProtectedConnectorCont
             path = "/attributes",
             produces = {"application/json"}
     )
-    List<BaseAttribute> listFormatterAttributes();
+    List<BaseAttribute> listFormattingAttributes();
 
     @Operation(
             summary = "Compute data-to-be-signed bytes",

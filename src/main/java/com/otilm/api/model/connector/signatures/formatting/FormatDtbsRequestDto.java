@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.formatter;
+package com.otilm.api.model.connector.signatures.formatting;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
@@ -43,7 +43,7 @@ public abstract class FormatDtbsRequestDto implements FormatDtbsInterface {
 
     @NotNull
     @Schema(
-            description = "Formatter-specific parameters (e.g. message imprint hash and algorithm, nonce, policy OID for TSA)",
+            description = "Formatting-specific parameters (e.g. message imprint hash and algorithm, nonce, policy OID for TSA)",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private List<RequestAttribute> formatAttributes;

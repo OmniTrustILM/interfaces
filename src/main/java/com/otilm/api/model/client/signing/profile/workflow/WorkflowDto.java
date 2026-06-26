@@ -13,7 +13,7 @@ import lombok.Data;
  * <p>Workflow configuration is split into two logical categories (expressed as flat fields
  * on each concrete subtype):</p>
  * <ul>
- *   <li><b>Signature Formatter Connector properties</b> — the connector UUID and its
+ *   <li><b>Signature Formatting Provider properties</b> — the connector UUID and its
  *       dynamically fetched attributes that control construction of the data-to-be-signed (DTBS).
  *       Present only for ILM-managed signing; absent (null) for delegated signing and for
  *       {@code RAW_SIGNING} (which requires no DTBS formatting).</li>

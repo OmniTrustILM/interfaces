@@ -60,47 +60,47 @@ class SigningProfileConstraintValidatorsTest {
         return dto;
     }
 
-    // --- ManagedSigningFormatterConnectorValidator ---
+    // --- ManagedSignatureFormattingConnectorValidator ---
 
     @Test
-    void managedTimestampingNullFormatterUuid_producesViolation() {
+    void managedTimestampingNullFormattingUuid_producesViolation() {
         TimestampingWorkflowRequestDto workflow = new TimestampingWorkflowRequestDto();
         assertTrue(hasViolationOn(validator.validate(profileRequest(managedScheme(), workflow)),
-                "workflow.signatureFormatterConnectorUuid"));
+                "workflow.signatureFormattingConnectorUuid"));
     }
 
     @Test
-    void managedTimestampingWithFormatterUuid_noFormatterViolation() {
+    void managedTimestampingWithFormattingUuid_noFormattingViolation() {
         TimestampingWorkflowRequestDto workflow = new TimestampingWorkflowRequestDto();
-        workflow.setSignatureFormatterConnectorUuid(UUID.randomUUID());
+        workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
         assertFalse(hasViolationOn(validator.validate(profileRequest(managedScheme(), workflow)),
-                "workflow.signatureFormatterConnectorUuid"));
+                "workflow.signatureFormattingConnectorUuid"));
     }
 
     @Test
-    void delegatedTimestampingNullFormatterUuid_noFormatterViolation() {
+    void delegatedTimestampingNullFormattingUuid_noFormattingViolation() {
         assertFalse(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), new TimestampingWorkflowRequestDto())),
-                "workflow.signatureFormatterConnectorUuid"));
+                "workflow.signatureFormattingConnectorUuid"));
     }
 
     @Test
-    void managedContentSigningNullFormatterUuid_producesViolation() {
+    void managedContentSigningNullFormattingUuid_producesViolation() {
         assertTrue(hasViolationOn(validator.validate(profileRequest(managedScheme(), new ContentSigningWorkflowRequestDto())),
-                "workflow.signatureFormatterConnectorUuid"));
+                "workflow.signatureFormattingConnectorUuid"));
     }
 
     @Test
-    void managedContentSigningWithFormatterUuid_noFormatterViolation() {
+    void managedContentSigningWithFormattingUuid_noFormattingViolation() {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setSignatureFormatterConnectorUuid(UUID.randomUUID());
+        workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
         assertFalse(hasViolationOn(validator.validate(profileRequest(managedScheme(), workflow)),
-                "workflow.signatureFormatterConnectorUuid"));
+                "workflow.signatureFormattingConnectorUuid"));
     }
 
     @Test
-    void managedRawSigningNullFormatterUuid_noFormatterViolation() {
+    void managedRawSigningNullFormattingUuid_noFormattingViolation() {
         assertFalse(hasViolationOn(validator.validate(profileRequest(managedScheme(), new RawSigningWorkflowRequestDto())),
-                "workflow.signatureFormatterConnectorUuid"));
+                "workflow.signatureFormattingConnectorUuid"));
     }
 
     @Test
@@ -114,7 +114,7 @@ class SigningProfileConstraintValidatorsTest {
     @Test
     void managedTimestampingQualifiedTimestampTrueWithTqcUuid_noQualificationViolation() {
         TimestampingWorkflowRequestDto workflow = new TimestampingWorkflowRequestDto();
-        workflow.setSignatureFormatterConnectorUuid(UUID.randomUUID());
+        workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
         workflow.setQualifiedTimestamp(true);
         workflow.setTimeQualityConfigurationUuid(UUID.randomUUID());
         assertFalse(hasViolationOn(validator.validate(profileRequest(managedScheme(), workflow)),
@@ -267,7 +267,7 @@ class SigningProfileConstraintValidatorsTest {
     @Test
     void defaultPolicyNotInAllowedPolicies_violationSurfacesThroughProfileRequest() {
         TimestampingWorkflowRequestDto workflow = new TimestampingWorkflowRequestDto();
-        workflow.setSignatureFormatterConnectorUuid(UUID.randomUUID());
+        workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
         workflow.setDefaultPolicyId("1.2.3.4.7");
         workflow.setAllowedPolicyIds(java.util.List.of("1.2.3.4.5"));
         assertTrue(hasViolationOn(validator.validate(profileRequest(managedScheme(), workflow)),

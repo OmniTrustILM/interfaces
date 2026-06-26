@@ -142,16 +142,16 @@ class PolymorphicSerializationTest {
     }
 
     @Test
-    void timestampingWorkflowConfigRequestDto_withFormatterConnector_roundTrip() throws Exception {
+    void timestampingWorkflowConfigRequestDto_withFormattingConnector_roundTrip() throws Exception {
         TimestampingWorkflowRequestDto original = new TimestampingWorkflowRequestDto();
-        original.setSignatureFormatterConnectorUuid(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"));
+        original.setSignatureFormattingConnectorUuid(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"));
 
         String json = mapper.writeValueAsString(original);
         WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
 
         assertInstanceOf(TimestampingWorkflowRequestDto.class, deserialized);
         TimestampingWorkflowRequestDto result = (TimestampingWorkflowRequestDto) deserialized;
-        assertEquals(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"), result.getSignatureFormatterConnectorUuid());
+        assertEquals(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"), result.getSignatureFormattingConnectorUuid());
     }
 
     // -------------------------------------------------------------------------
@@ -184,7 +184,7 @@ class PolymorphicSerializationTest {
     @Test
     void contentSigningWorkflowConfigRequestDto_serializesDiscriminator() throws Exception {
         ContentSigningWorkflowRequestDto dto = new ContentSigningWorkflowRequestDto();
-        dto.setSignatureFormatterConnectorUuid(UUID.fromString("11111111-2222-3333-4444-555555555555"));
+        dto.setSignatureFormattingConnectorUuid(UUID.fromString("11111111-2222-3333-4444-555555555555"));
 
         JsonNode json = mapper.valueToTree(dto);
 
@@ -194,7 +194,7 @@ class PolymorphicSerializationTest {
     @Test
     void contentSigningWorkflowConfigRequestDto_roundTrip() throws Exception {
         ContentSigningWorkflowRequestDto original = new ContentSigningWorkflowRequestDto();
-        original.setSignatureFormatterConnectorUuid(UUID.fromString("11111111-2222-3333-4444-555555555555"));
+        original.setSignatureFormattingConnectorUuid(UUID.fromString("11111111-2222-3333-4444-555555555555"));
 
         String json = mapper.writeValueAsString(original);
         WorkflowRequestDto deserialized = mapper.readValue(json, WorkflowRequestDto.class);
@@ -208,7 +208,7 @@ class PolymorphicSerializationTest {
         String json = """
                 {
                   "type": "content_signing",
-                  "signatureFormatterConnectorUuid": "11111111-2222-3333-4444-555555555555"
+                  "signatureFormattingConnectorUuid": "11111111-2222-3333-4444-555555555555"
                 }
                 """;
 
@@ -217,7 +217,7 @@ class PolymorphicSerializationTest {
         assertInstanceOf(ContentSigningWorkflowRequestDto.class, base);
         ContentSigningWorkflowRequestDto result = (ContentSigningWorkflowRequestDto) base;
         assertEquals(SigningWorkflowType.CONTENT_SIGNING, result.getType());
-        assertEquals(UUID.fromString("11111111-2222-3333-4444-555555555555"), result.getSignatureFormatterConnectorUuid());
+        assertEquals(UUID.fromString("11111111-2222-3333-4444-555555555555"), result.getSignatureFormattingConnectorUuid());
     }
 
     // -------------------------------------------------------------------------

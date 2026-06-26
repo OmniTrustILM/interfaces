@@ -9,7 +9,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.UUID;
 
-public class ManagedSigningFormatterConnectorValidator implements ConstraintValidator<ValidManagedSigningFormatterConnector, SigningProfileRequestDto> {
+public class ManagedSignatureFormattingConnectorValidator implements ConstraintValidator<ValidManagedSignatureFormattingConnector, SigningProfileRequestDto> {
 
     @Override
     public boolean isValid(SigningProfileRequestDto dto, ConstraintValidatorContext context) {
@@ -22,10 +22,10 @@ public class ManagedSigningFormatterConnectorValidator implements ConstraintVali
 
         boolean valid = true;
 
-        UUID formatterConnectorUuid = null;
+        UUID formattingConnectorUuid = null;
 
         if (dto.getWorkflow() instanceof TimestampingWorkflowRequestDto tsw) {
-            formatterConnectorUuid = tsw.getSignatureFormatterConnectorUuid();
+            formattingConnectorUuid = tsw.getSignatureFormattingConnectorUuid();
             if (Boolean.TRUE.equals(tsw.getQualifiedTimestamp()) && tsw.getTimeQualityConfigurationUuid() == null) {
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate("timeQualityConfigurationUuid must be provided when qualifiedTimestamp is true")
@@ -34,15 +34,15 @@ public class ManagedSigningFormatterConnectorValidator implements ConstraintVali
                 valid = false;
             }
         } else if (dto.getWorkflow() instanceof ContentSigningWorkflowRequestDto csw) {
-            formatterConnectorUuid = csw.getSignatureFormatterConnectorUuid();
+            formattingConnectorUuid = csw.getSignatureFormattingConnectorUuid();
         } else {
             return true;
         }
 
-        if (formatterConnectorUuid == null) {
+        if (formattingConnectorUuid == null) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-                    .addPropertyNode("workflow").addPropertyNode("signatureFormatterConnectorUuid")
+                    .addPropertyNode("workflow").addPropertyNode("signatureFormattingConnectorUuid")
                     .addConstraintViolation();
             valid = false;
         }
