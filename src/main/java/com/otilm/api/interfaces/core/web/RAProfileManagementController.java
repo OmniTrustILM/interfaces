@@ -97,7 +97,8 @@ public interface RAProfileManagementController extends AuthProtectedController {
 
     @Operation(summary = "Update request-attribute configuration of RA Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Configuration of request attributes of RA Profile updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
+            @ApiResponse(responseCode = "404", description = "RA Profile not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PatchMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/requestAttributes", consumes = {"application/json"}, produces = {"application/json"})
     RaProfileDto updateRaProfileRequestAttributesConfiguration(@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid, @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid, @RequestBody @Valid RaProfileCertificateRequestAttributesUpdateDto request) throws NotFoundException;
 

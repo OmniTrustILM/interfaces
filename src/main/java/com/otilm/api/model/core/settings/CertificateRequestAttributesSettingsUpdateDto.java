@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Request to edit the platform default request-attribute set. Definitions are platform-owned (connectorUuid = null);
- * only definitions are stored, never request values.
+ * Request to edit the platform default request-attribute set. Definitions are platform-owned
+ * (not supplied by a connector); only definitions are stored, never request values.
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
