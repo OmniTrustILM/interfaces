@@ -10,4 +10,6 @@ public class CertificateSettingsDto implements Serializable {
 
     private CertificateValidationSettingsDto validation;
 
+    private CertificateRequestAttributesSettingsDto requestAttributes;
+
 }

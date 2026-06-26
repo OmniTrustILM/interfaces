@@ -12,6 +12,7 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.core.certificate.CertificateDetailDto;
 import com.otilm.api.model.core.raprofile.RaProfileDto;
 import com.otilm.api.model.core.raprofile.RaProfileCertificateValidationSettingsUpdateDto;
+import com.otilm.api.model.core.raprofile.RaProfileCertificateRequestAttributesUpdateDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -93,6 +94,12 @@ public interface RAProfileManagementController extends AuthProtectedController {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
     @PatchMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/validation", consumes = {"application/json"}, produces = {"application/json"})
     RaProfileDto updateRaProfileValidationConfiguration(@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid, @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid, @RequestBody @Valid RaProfileCertificateValidationSettingsUpdateDto request) throws NotFoundException;
+
+    @Operation(summary = "Update request-attribute configuration of RA profile")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Configuration of request attributes of RA Profile updated"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
+    @PatchMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/requestAttributes", consumes = {"application/json"}, produces = {"application/json"})
+    RaProfileDto updateRaProfileRequestAttributesConfiguration(@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid, @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid, @RequestBody @Valid RaProfileCertificateRequestAttributesUpdateDto request) throws NotFoundException;
 
     @Operation(summary = "Delete RA Profile")
     @ApiResponses(value = {
