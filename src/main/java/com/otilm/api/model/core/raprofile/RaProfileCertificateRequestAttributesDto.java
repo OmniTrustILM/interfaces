@@ -27,8 +27,8 @@ public class RaProfileCertificateRequestAttributesDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED))
     private List<BaseAttribute> requestAttributes = new ArrayList<>();
 
-    @Schema(description = "How the static set combines with a connector-supplied set",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "How the static set combines with a connector-supplied set; always the effective mode",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private AttributeSetMergeMode mergeMode;
 
     @ArraySchema(arraySchema = @Schema(

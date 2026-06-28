@@ -4,7 +4,9 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,7 +16,9 @@ import java.util.List;
  * View of the editable platform default request-attribute set: the terminal fallback set applied when neither
  * the RA-Profile static set nor a connector-supplied set yields definitions. No merge mode — it is not combined with another set.
  */
-@Data
+@Getter
+@Setter
+@ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Editable platform default request-attribute definitions (terminal fallback set).")
 public class CertificateRequestAttributesSettingsDto implements Serializable {
