@@ -30,7 +30,8 @@ public enum FeatureFlag implements IPlatformEnum {
     SECRET_ROTATION("secretRotation", "Secret Rotation", "Supports triggering rotation of secrets", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SECRET)),
     CONTENT_SIGNING("contentSigning", "Content Signing", "Supports content signing workflows", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
     TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
-    CERTIFICATE_REGISTRATION("certificateRegistration", "Certificate Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY));
+    CERTIFICATE_REGISTRATION("certificateRegistration", "Certificate Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
+    CERTIFICATE_STATUS_POLLING("certificateStatusPolling", "Certificate Status Polling", "Supports being polled for asynchronous operation completion; the platform polls the status endpoint rather than relying on out-of-band/manual completion", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY));
 
     public enum FeatureFlagBehavior {
         ENFORCED,
