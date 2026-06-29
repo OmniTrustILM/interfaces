@@ -17,6 +17,13 @@ class FeatureFlagTest {
     }
 
     @Test
+    void certificateStatusPollingFlagExists() {
+        FeatureFlag flag = FeatureFlag.CERTIFICATE_STATUS_POLLING;
+        assertEquals("certificateStatusPolling", flag.getCode());
+        assertEquals(List.of(ConnectorInterface.AUTHORITY), flag.getApplicableInterfaces());
+    }
+
+    @Test
     void findByCodeRoundTripsAllEntries() {
         for (FeatureFlag f : FeatureFlag.values()) {
             assertEquals(f, FeatureFlag.findByCode(f.getCode()));
