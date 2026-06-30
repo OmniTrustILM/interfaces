@@ -1,16 +1,20 @@
 package com.otilm.api.model.core.raprofile;
 
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Request body to author an RA Profile's static request-attribute set. The set is an <em>ordered</em>
@@ -42,4 +46,32 @@ public class RaProfileCertificateRequestAttributesUpdateDto {
     @Schema(description = "Whether an external CSR violating the resolved set is rejected (true) or accepted with warnings (false); null inherits the platform default",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean externalCsrValidationStrict;
+
+    /**
+     * Each attribute may carry at most one value-source binding. Two bindings targeting the same attribute are ambiguous.
+     */
+    @AssertTrue(message = "Value-source bindings must not target the same attribute more than once.")
+    @JsonIgnore
+    @Schema(hidden = true)
+    public boolean isValueSourceBindingsUnique() {
+        if (valueSourceBindings == null) {
+            return true;
+        }
+        Set<String> uuids = new HashSet<>();
+        Set<String> names = new HashSet<>();
+        for (ValueSourceBindingDto binding : valueSourceBindings) {
+            if (binding == null) {
+                continue;
+            }
+            String uuid = binding.getAttributeUuid();
+            if (uuid != null && !uuid.isBlank() && !uuids.add(uuid)) {
+                return false;
+            }
+            String name = binding.getAttributeName();
+            if (name != null && !name.isBlank() && !names.add(name)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

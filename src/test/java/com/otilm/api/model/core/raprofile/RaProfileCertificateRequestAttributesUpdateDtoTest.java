@@ -76,4 +76,54 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
         // then
         assertFalse(json.contains("mergeMode"));
     }
+
+    @Test
+    void acceptsDistinctBindingTargets() {
+        // given — two bindings targeting different attributes
+        var dto = new RaProfileCertificateRequestAttributesUpdateDto();
+        dto.setValueSourceBindings(List.of(
+                bindingByUuid("u1"),
+                bindingByName("organization")));
+
+        // when / then
+        assertTrue(dto.isValueSourceBindingsUnique());
+    }
+
+    @Test
+    void rejectsDuplicateBindingTargetByUuid() {
+        // given — two bindings targeting the same attribute UUID
+        var dto = new RaProfileCertificateRequestAttributesUpdateDto();
+        dto.setValueSourceBindings(List.of(
+                bindingByUuid("u1"),
+                bindingByUuid("u1")));
+
+        // when / then
+        assertFalse(dto.isValueSourceBindingsUnique());
+    }
+
+    @Test
+    void rejectsDuplicateBindingTargetByName() {
+        // given — two bindings targeting the same attribute name
+        var dto = new RaProfileCertificateRequestAttributesUpdateDto();
+        dto.setValueSourceBindings(List.of(
+                bindingByName("server"),
+                bindingByName("server")));
+
+        // when / then
+        assertFalse(dto.isValueSourceBindingsUnique());
+    }
+
+    private static ValueSourceBindingDto bindingByUuid(String uuid) {
+        var binding = new ValueSourceBindingDto();
+        binding.setAttributeUuid(uuid);
+        binding.setValueSourceType(ValueSourceType.STATIC_LIST);
+        return binding;
+    }
+
+    private static ValueSourceBindingDto bindingByName(String name) {
+        var binding = new ValueSourceBindingDto();
+        binding.setAttributeName(name);
+        binding.setValueSourceType(ValueSourceType.CONNECTOR_CALLBACK);
+        return binding;
+    }
 }
