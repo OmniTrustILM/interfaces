@@ -9,9 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.util.List;
 
@@ -19,9 +17,7 @@ import java.util.List;
  * A Core-side value-source binding attached to a request-attribute definition on an RA Profile.
  * It binds to a definition by {@code attributeUuid}, falling back to {@code attributeName} — at least one of the two must be set.
  */
-@Getter
-@Setter
-@ToString
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Core-side value-source binding onto a request-attribute definition; binds by attribute UUID (name fallback).")
 public class ValueSourceBindingDto {
@@ -49,6 +45,7 @@ public class ValueSourceBindingDto {
 
     @AssertTrue(message = "Value-source binding requires attributeUuid or attributeName to be set.")
     @JsonIgnore
+    @Schema(hidden = true)
     public boolean isValid() {
         return (attributeUuid != null && !attributeUuid.isBlank())
                 || (attributeName != null && !attributeName.isBlank());

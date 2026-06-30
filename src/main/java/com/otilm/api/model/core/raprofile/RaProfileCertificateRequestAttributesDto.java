@@ -29,7 +29,7 @@ public class RaProfileCertificateRequestAttributesDto {
 
     @Schema(description = "How the static set combines with a connector-supplied set; always the effective mode",
             requiredMode = Schema.RequiredMode.REQUIRED)
-    private AttributeSetMergeMode mergeMode;
+    private AttributeSetMergeMode mergeMode = AttributeSetMergeMode.MERGE;
 
     @ArraySchema(arraySchema = @Schema(
             description = "Core-side value-source bindings attached onto connector-supplied (or static) definitions by reference",

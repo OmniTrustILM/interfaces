@@ -30,7 +30,7 @@ public class RaProfileCertificateRequestAttributesUpdateDto {
     private List<BaseAttribute> requestAttributes = new ArrayList<>();
 
     @Schema(description = "How the static set combines with a connector-supplied set; defaults to MERGE when omitted",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "merge")
     private AttributeSetMergeMode mergeMode;
 
     @ArraySchema(arraySchema = @Schema(
