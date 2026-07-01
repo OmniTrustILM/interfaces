@@ -4,7 +4,9 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CertificateSignRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Certificate signing request, Base64-encoded",
@@ -42,4 +45,12 @@ public class CertificateSignRequestDtoV3 extends AuthorityV3ScopedRequestDto {
                   + "Null/empty = fresh issuance.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
+
+    @Schema(description = "Optional structured request content (typed RDNs, SANs, extensions). "
+                  + "Present ONLY when the connector advertises the CERTIFICATE_REQUEST_STRUCTURED feature flag. "
+                  + "When present it is the authoritative source of subject identity and extensions for this issuance; "
+                  + "otherwise identity is taken from the submitted CSR (request).",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Valid
+    private CertificateRequestContent requestContent;
 }

@@ -31,7 +31,9 @@ public enum FeatureFlag implements IPlatformEnum {
     CONTENT_SIGNING("contentSigning", "Content Signing", "Supports content signing workflows", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
     TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SIGNING, ConnectorInterface.SIGNATURE_FORMATTING)),
     CERTIFICATE_REGISTRATION("certificateRegistration", "Certificate Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
-    CERTIFICATE_STATUS_POLLING("certificateStatusPolling", "Certificate Status Polling", "Supports being polled for asynchronous operation completion; the platform polls the status endpoint rather than relying on out-of-band/manual completion", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY));
+    CERTIFICATE_STATUS_POLLING("certificateStatusPolling", "Certificate Status Polling", "Supports being polled for asynchronous operation completion; the platform polls the status endpoint rather than relying on out-of-band/manual completion", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
+    CERTIFICATE_REQUEST_STRUCTURED("certificateRequestStructured", "Structured Certificate Request", "Accepts the structured requestContent model (typed RDNs, SANs, extensions) on register/issue/renew instead of only the flat subjectDn/subjectAltName/extensions fields", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
+    CERTIFICATE_IDENTITY_OVERRIDE("certificateIdentityOverride", "Certificate Identity Override", "Applies an authoritative platform-supplied identity to a forwarded CSR per the CA technology (EJBCA End Entity override; CRMF raVerified), without the platform stripping or re-signing the CSR", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY));
 
     public enum FeatureFlagBehavior {
         ENFORCED,

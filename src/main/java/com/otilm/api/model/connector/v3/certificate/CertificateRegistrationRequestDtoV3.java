@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.v3.certificate;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -19,6 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Subject DN. Optional per RFC 5280 §4.1.2.6: an empty subject is permitted "
@@ -42,6 +44,14 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
     @Valid
     private List<CertificateExtension> extensions;
 
+    @Schema(description = "Optional structured request content (typed RDNs, SANs, extensions). "
+                  + "Present ONLY when the connector advertises the CERTIFICATE_REQUEST_STRUCTURED feature flag; "
+                  + "otherwise Core renders the flat subjectDn/subjectAltName/extensions fields from the same content. "
+                  + "The structured form is authoritative when both are present.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Valid
+    private CertificateRequestContent requestContent;
+
     @Schema(description = "Register-specific dynamic attributes",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> attributes;
@@ -49,6 +59,9 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
     /**
      * RFC 5280 §4.1.2.6: subject identity may be carried in subjectDn, in subjectAltName, or both
      * — but cannot be empty in both.
+     *
+     * <p>{@code requestContent} is intentionally not consulted here: it is supplementary. Core always renders the flat
+     * {@code subjectDn} from the structured content. The flat fields therefore remain the single validation anchor.
      */
     @AssertTrue(message = "At least one of subjectDn or subjectAltName must be provided (RFC 5280 §4.1.2.6)")
     @JsonIgnore

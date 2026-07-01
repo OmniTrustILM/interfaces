@@ -5,7 +5,9 @@ import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.connector.v3.AuthorityV3ScopedRequestDto;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -22,6 +24,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CertificateRenewRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
     @Schema(description = "Certificate signing request, Base64-encoded. Optional when reuseKey=true.",
@@ -53,6 +56,14 @@ public class CertificateRenewRequestDtoV3 extends AuthorityV3ScopedRequestDto {
                   + "Replayed here so a stateless connector can resolve the upstream end-entity without an extra lookup.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
+
+    @Schema(description = "Optional structured request content (typed RDNs, SANs, extensions). "
+                  + "Present ONLY when the connector advertises the CERTIFICATE_REQUEST_STRUCTURED feature flag. "
+                  + "When present it is the authoritative source of subject identity and extensions for this renewal; "
+                  + "otherwise identity is derived from existingCertificate (serial + issuer DN) as documented above.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Valid
+    private CertificateRequestContent requestContent;
 
     /**
      * Renew requires a CSR unless {@code reuseKey=true} (in which case proof-of-possession is
