@@ -25,7 +25,6 @@ import lombok.Setter;
         discriminatorMapping = {
                 @DiscriminatorMapping(value = CertificateType.Codes.X509, schema = X509RequestContent.class)
         },
-        oneOf = {X509RequestContent.class},
         subTypes = {X509RequestContent.class}
 )
 public abstract class CertificateRequestContent {
