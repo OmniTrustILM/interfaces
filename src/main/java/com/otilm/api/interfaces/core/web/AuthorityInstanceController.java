@@ -96,9 +96,9 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     List<NameAndIdDto> listCAsInProfile(@Parameter(description = "Authority instance UUID") @PathVariable String uuid, @PathVariable Integer endEntityProfileId)
             throws ConnectorException, NotFoundException;
 
-    @Operation(summary = "List Authority Instance Attributes",
-            description = "Authority attribute schema for a stateless v3 (NG) authority connector, keyed by connector UUID.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Authority instance attributes retrieved"),
+    @Operation(summary = "List authority attributes for a connector",
+            description = "Connector-scoped authority attribute schema for a stateless authority connector, keyed by connector UUID.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Authority attributes retrieved"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                     examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/{connectorUuid}/attributes", produces = {"application/json"})
