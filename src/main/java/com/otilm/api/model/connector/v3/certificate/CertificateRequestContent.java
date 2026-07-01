@@ -4,6 +4,7 @@ import com.otilm.api.model.core.certificate.CertificateType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -19,6 +20,12 @@ import lombok.Setter;
 @Schema(
         description = "Typed certificate request content carrying the decoded identity intent; " +
                 "coexists with the raw CSR which remains authoritative for the public key and proof of possession",
+        type = "object",
+        discriminatorProperty = "certificateType",
+        discriminatorMapping = {
+                @DiscriminatorMapping(value = CertificateType.Codes.X509, schema = X509RequestContent.class)
+        },
+        oneOf = {X509RequestContent.class},
         subTypes = {X509RequestContent.class}
 )
 public abstract class CertificateRequestContent {
