@@ -70,9 +70,33 @@ class RequestContentDualWireTest {
         CertificateRenewRequestDtoV3 back =
                 mapper.readValue(mapper.writeValueAsString(renew), CertificateRenewRequestDtoV3.class);
 
-        // then
+        // then — the structured content survives with its subject and SAN intact
         assertInstanceOf(X509RequestContent.class, back.getRequestContent());
-        assertEquals(CertificateType.X509, back.getRequestContent().getCertificateType());
+        X509RequestContent x509 = (X509RequestContent) back.getRequestContent();
+        assertEquals(CertificateType.X509, x509.getCertificateType());
+        assertEquals("device-7", x509.getSubject().get(0).getValue());
+        assertEquals("device-7.acme.test", x509.getSubjectAltNames().get(0).getValue());
+    }
+
+    @Test
+    void roundTripsStructuredContent_onSign() throws Exception {
+        // given — an issue body carrying structured content
+        CertificateSignRequestDtoV3 sign = new CertificateSignRequestDtoV3();
+        sign.setAuthorityAttributes(List.of());
+        sign.setRaProfileAttributes(List.of());
+        sign.setRequest("Zm9v");
+        sign.setRequestContent(x509Content());
+
+        // when
+        CertificateSignRequestDtoV3 back =
+                mapper.readValue(mapper.writeValueAsString(sign), CertificateSignRequestDtoV3.class);
+
+        // then — the structured content resolves to its concrete subtype with subject and SAN intact
+        assertInstanceOf(X509RequestContent.class, back.getRequestContent());
+        X509RequestContent x509 = (X509RequestContent) back.getRequestContent();
+        assertEquals(CertificateType.X509, x509.getCertificateType());
+        assertEquals("device-7", x509.getSubject().get(0).getValue());
+        assertEquals("device-7.acme.test", x509.getSubjectAltNames().get(0).getValue());
     }
 
     @Test

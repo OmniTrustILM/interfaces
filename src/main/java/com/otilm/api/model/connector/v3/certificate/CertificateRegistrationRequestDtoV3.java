@@ -59,6 +59,9 @@ public class CertificateRegistrationRequestDtoV3 extends AuthorityV3ScopedReques
     /**
      * RFC 5280 §4.1.2.6: subject identity may be carried in subjectDn, in subjectAltName, or both
      * — but cannot be empty in both.
+     *
+     * <p>{@code requestContent} is intentionally not consulted here: it is supplementary. Core always renders the flat
+     * {@code subjectDn} from the structured content. The flat fields therefore remain the single validation anchor.
      */
     @AssertTrue(message = "At least one of subjectDn or subjectAltName must be provided (RFC 5280 §4.1.2.6)")
     @JsonIgnore
