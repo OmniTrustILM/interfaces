@@ -98,7 +98,9 @@ public interface AuthorityInstanceController extends AuthProtectedController {
 
     @Operation(summary = "List Authority Instance Attributes",
             description = "Authority attribute schema for a stateless v3 (NG) authority connector, keyed by connector UUID.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Authority instance attributes retrieved")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Authority instance attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                    examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/{connectorUuid}/attributes", produces = {"application/json"})
     List<BaseAttribute> listAuthorityInstanceAttributes(
             @Parameter(description = "Connector UUID") @PathVariable String connectorUuid,
