@@ -51,7 +51,7 @@ class RequestContentDualWireTest {
         String json = mapper.writeValueAsString(sign);
 
         // then — the null field is absent from the wire and the body still round-trips
-        assertFalse(json.contains("requestContent"), "null requestContent must be omitted from the wire");
+        assertFalse(mapper.readTree(json).has("requestContent"), "null requestContent must be omitted from the wire");
         CertificateSignRequestDtoV3 back = mapper.readValue(json, CertificateSignRequestDtoV3.class);
         assertNull(back.getRequestContent());
     }
