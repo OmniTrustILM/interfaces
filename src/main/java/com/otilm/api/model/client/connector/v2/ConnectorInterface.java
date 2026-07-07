@@ -13,7 +13,7 @@ import java.util.Arrays;
 @Schema(enumAsRef = true)
 public enum ConnectorInterface implements IPlatformEnum {
 
-    // Common interfaces — every NG connector implements these (INFO/HEALTH/METRICS mandatory; ATTRIBUTES optional).
+    // Common interfaces — the shared baseline (info/health/metrics/attributes), as opposed to the functional providers below.
     INFO("info", "Info", InterfaceCategory.COMMON),
     HEALTH("health", "Health", InterfaceCategory.COMMON),
     METRICS("metrics", "Metrics", InterfaceCategory.COMMON),
@@ -30,9 +30,10 @@ public enum ConnectorInterface implements IPlatformEnum {
     SIGNING("signing", "Signing", InterfaceCategory.FUNCTIONAL);
 
     /**
-     * Whether an interface is a common baseline interface (implemented by every NG connector) or a
-     * functional/operational one (the capabilities a connector actually provides). A connector must
-     * implement the mandatory common interfaces plus at least one functional interface.
+     * Groups a connector interface as a common baseline interface (info/health/metrics/attributes) or a
+     * functional/operational provider (the capabilities a connector supplies). This is a grouping only —
+     * which specific interfaces are required for a connector to register is enforced by Core, independently
+     * of this category.
      */
     public enum InterfaceCategory {
         COMMON,
@@ -49,8 +50,8 @@ public enum ConnectorInterface implements IPlatformEnum {
             examples = {"credentialProvider"}, requiredMode = Schema.RequiredMode.REQUIRED)
     private final String code;
     private final String label;
-    private final String description;
     private final InterfaceCategory category;
+    private final String description;
 
     ConnectorInterface(String code, String label, InterfaceCategory category) {
         this(code, label, category, null);
