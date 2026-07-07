@@ -6,7 +6,6 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ConnectorInterfaceCategoryTest {
 
@@ -15,14 +14,6 @@ class ConnectorInterfaceCategoryTest {
         ConnectorInterface.HEALTH,
         ConnectorInterface.METRICS,
         ConnectorInterface.ATTRIBUTES);
-
-    @Test
-    void everyInterfaceDeclaresCategory() {
-        for (ConnectorInterface iface : ConnectorInterface.values()) {
-            assertNotNull(iface.getCategory(),
-                "ConnectorInterface " + iface + " must declare an InterfaceCategory");
-        }
-    }
 
     @Test
     void everyInterfaceIsCategorizedCorrectly() {

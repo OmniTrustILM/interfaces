@@ -13,12 +13,12 @@ import java.util.Arrays;
 @Schema(enumAsRef = true)
 public enum ConnectorInterface implements IPlatformEnum {
 
-    // Common interfaces — the shared baseline (info/health/metrics/attributes), as opposed to the functional providers below.
+    // Common interfaces
     INFO("info", "Info", InterfaceCategory.COMMON),
     HEALTH("health", "Health", InterfaceCategory.COMMON),
     METRICS("metrics", "Metrics", InterfaceCategory.COMMON),
     ATTRIBUTES("attributes", "Attributes", InterfaceCategory.COMMON),
-    // Functional interfaces — a connector implements one or more to provide actual capabilities.
+    // Functional interfaces
     AUTHORITY("authority", "Authority", InterfaceCategory.FUNCTIONAL),
     DISCOVERY("discovery", "Discovery", InterfaceCategory.FUNCTIONAL),
     ENTITY("entity", "Entity", InterfaceCategory.FUNCTIONAL),
