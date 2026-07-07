@@ -24,7 +24,8 @@ public enum ConnectorInterface implements IPlatformEnum {
     NOTIFICATION("notification", "Notification"),
     SECRET("secret", "Secret"),
     SIGNATURE_FORMATTING("signatureFormatting", "Signature Formatting"),
-    SIGNING("signing", "Signing");
+    SIGNING("signing", "Signing"),
+    ATTRIBUTES("attributes", "Attributes");
 
     private static final ConnectorInterface[] VALUES;
 
