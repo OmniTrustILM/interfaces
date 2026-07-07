@@ -13,19 +13,31 @@ import java.util.Arrays;
 @Schema(enumAsRef = true)
 public enum ConnectorInterface implements IPlatformEnum {
 
-    INFO("info", "Info"),
-    HEALTH("health", "Health"),
-    METRICS("metrics", "Metrics"),
-    ATTRIBUTES("attributes", "Attributes"),
-    AUTHORITY("authority", "Authority"),
-    DISCOVERY("discovery", "Discovery"),
-    ENTITY("entity", "Entity"),
-    COMPLIANCE("compliance", "Compliance"),
-    CRYPTOGRAPHY("cryptography", "Cryptography"),
-    NOTIFICATION("notification", "Notification"),
-    SECRET("secret", "Secret"),
-    SIGNATURE_FORMATTING("signatureFormatting", "Signature Formatting"),
-    SIGNING("signing", "Signing");
+    // Common interfaces — every NG connector implements these (INFO/HEALTH/METRICS mandatory; ATTRIBUTES optional).
+    INFO("info", "Info", InterfaceCategory.COMMON),
+    HEALTH("health", "Health", InterfaceCategory.COMMON),
+    METRICS("metrics", "Metrics", InterfaceCategory.COMMON),
+    ATTRIBUTES("attributes", "Attributes", InterfaceCategory.COMMON),
+    // Functional interfaces — a connector implements one or more to provide actual capabilities.
+    AUTHORITY("authority", "Authority", InterfaceCategory.FUNCTIONAL),
+    DISCOVERY("discovery", "Discovery", InterfaceCategory.FUNCTIONAL),
+    ENTITY("entity", "Entity", InterfaceCategory.FUNCTIONAL),
+    COMPLIANCE("compliance", "Compliance", InterfaceCategory.FUNCTIONAL),
+    CRYPTOGRAPHY("cryptography", "Cryptography", InterfaceCategory.FUNCTIONAL),
+    NOTIFICATION("notification", "Notification", InterfaceCategory.FUNCTIONAL),
+    SECRET("secret", "Secret", InterfaceCategory.FUNCTIONAL),
+    SIGNATURE_FORMATTING("signatureFormatting", "Signature Formatting", InterfaceCategory.FUNCTIONAL),
+    SIGNING("signing", "Signing", InterfaceCategory.FUNCTIONAL);
+
+    /**
+     * Whether an interface is a common baseline interface (implemented by every NG connector) or a
+     * functional/operational one (the capabilities a connector actually provides). A connector must
+     * implement the mandatory common interfaces plus at least one functional interface.
+     */
+    public enum InterfaceCategory {
+        COMMON,
+        FUNCTIONAL
+    }
 
     private static final ConnectorInterface[] VALUES;
 
@@ -38,14 +50,16 @@ public enum ConnectorInterface implements IPlatformEnum {
     private final String code;
     private final String label;
     private final String description;
+    private final InterfaceCategory category;
 
-    ConnectorInterface(String code, String label) {
-        this(code, label, null);
+    ConnectorInterface(String code, String label, InterfaceCategory category) {
+        this(code, label, category, null);
     }
 
-    ConnectorInterface(String code, String label, String description) {
+    ConnectorInterface(String code, String label, InterfaceCategory category, String description) {
         this.code = code;
         this.label = label;
+        this.category = category;
         this.description = description;
     }
 
@@ -63,6 +77,10 @@ public enum ConnectorInterface implements IPlatformEnum {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    public InterfaceCategory getCategory() {
+        return this.category;
     }
 
     @JsonCreator
