@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClientCertificateIssueRequestDtoTest {
 
@@ -21,6 +22,7 @@ class ClientCertificateIssueRequestDtoTest {
         assertFalse(json.contains("authorizationSecret"),
                 "write-only authorizationSecret must never be serialized back to a client");
         assertFalse(json.contains("s3cret"));
+        assertTrue(json.contains("request"), "non-write-only fields must still serialize (exclusion is field-targeted)");
     }
 
     @Test

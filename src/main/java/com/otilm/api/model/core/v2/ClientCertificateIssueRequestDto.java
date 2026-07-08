@@ -88,7 +88,6 @@ public class ClientCertificateIssueRequestDto {
     )
     private List<RequestAttribute> customAttributes;
 
-    @ToString.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(
             description = "One-time authorization secret proving the caller may complete a pre-registered "
@@ -97,6 +96,7 @@ public class ClientCertificateIssueRequestDto {
     )
     private String authorizationSecret;
 
+    // Deliberate allowlist — only non-sensitive fields. Never append request (the CSR) or authorizationSecret.
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
