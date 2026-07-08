@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.v2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,10 +12,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Class representing a request to sign CSR from external clients
+ * Request to issue a certificate for an external client — by uploading a CSR or having the platform generate the
+ * key — including completing a pre-registered certificate, which additionally carries the authorization secret.
  */
 @Data
-public class ClientCertificateSignRequestDto {
+public class ClientCertificateIssueRequestDto {
 
     @Schema(
             description = "List of attributes to create CSR. Required if CSR is not provided"
@@ -85,6 +87,15 @@ public class ClientCertificateSignRequestDto {
             description = "List of Custom Attributes"
     )
     private List<RequestAttribute> customAttributes;
+
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(
+            description = "One-time authorization secret proving the caller may complete a pre-registered "
+                    + "certificate. Write-only; ignored for certificates without an active registration.",
+            accessMode = Schema.AccessMode.WRITE_ONLY
+    )
+    private String authorizationSecret;
 
     @Override
     public String toString() {
