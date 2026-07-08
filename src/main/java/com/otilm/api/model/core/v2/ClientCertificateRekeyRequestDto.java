@@ -75,12 +75,12 @@ public class ClientCertificateRekeyRequestDto {
     @Schema(
             description = "Signature Attributes. If not provided, existing attributes will be used to generate the new CSR"
     )
-    private List<RequestAttribute>signatureAttributes;
+    private List<RequestAttribute> signatureAttributes;
 
     @Schema(
             description = "Alternative Signature Attributes. If not provided, existing alternative attributes will be used to generate the new CSR"
     )
-    private List<RequestAttribute>altSignatureAttributes;
+    private List<RequestAttribute> altSignatureAttributes;
 
     @ToString.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

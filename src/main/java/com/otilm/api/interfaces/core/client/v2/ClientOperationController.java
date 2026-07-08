@@ -178,7 +178,7 @@ public interface ClientOperationController extends AuthProtectedController {
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
 			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
-					description = "Sign request body. Required when cert state is REGISTERED (carries the operator's CSR + sign attributes); must be omitted when cert state is REQUESTED.",
+					description = "Issue request body. Required when cert state is REGISTERED (carries the operator's CSR or key-generation parameters plus the authorization secret); must be omitted when cert state is REQUESTED.",
 					required = false)
 			@RequestBody(required = false) @Valid ClientCertificateIssueRequestDto request) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException, AttributeException;
 
