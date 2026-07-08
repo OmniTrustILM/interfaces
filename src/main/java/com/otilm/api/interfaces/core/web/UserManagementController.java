@@ -51,7 +51,7 @@ public interface UserManagementController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "Group, Certificate or Attribute definition not found", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))
     })
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
-    ResponseEntity<UserDetailDto> createUser(@RequestBody AddUserRequestDto request) throws NotFoundException, CertificateException, AttributeException;
+    ResponseEntity<UserDetailDto> createUser(@RequestBody @Valid AddUserRequestDto request) throws NotFoundException, CertificateException, AttributeException;
 
     @Operation(summary = "Update User")
     @ApiResponses(value = {
