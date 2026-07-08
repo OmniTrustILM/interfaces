@@ -2,6 +2,7 @@ package com.otilm.api.model.client.auth;
 
 import com.otilm.api.model.common.Named;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class AddUserRequestDto extends UpdateUserRequestDto implements Named {
 
     @Schema(description = "Username of the user", requiredMode = Schema.RequiredMode.REQUIRED, examples = {"user1"})
+    @NotBlank
     private String username;
 
     @Schema(description = "Status of the user. True = Enabled, False = Disabled")
