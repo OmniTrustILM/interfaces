@@ -35,6 +35,7 @@ public class AddUserRequestDto extends UpdateUserRequestDto implements Named {
                 .append("enabled", enabled)
                 .append("certificateData", getCertificateData())
                 .append("customAttributes", getCustomAttributes())
+                .append("certificateCustomAttributes", getCertificateCustomAttributes())
                 .toString();
     }
 }

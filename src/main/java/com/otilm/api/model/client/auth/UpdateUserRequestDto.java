@@ -27,7 +27,8 @@ public class UpdateUserRequestDto {
     @NullableNotBlank(message = "Email cannot be blank if provided")
     private String email;
 
-    @Schema(description = "Groups UUIDs of the user. When updating, set to an empty list to remove the user from all groups; omit to leave the current group membership unchanged.")
+    @Schema(description = "Groups UUIDs of the user. For creation, omit or provide an empty list for no group membership. " +
+            "For updates, omit to leave the current membership unchanged; set to an empty list to remove the user from all groups.")
     private List<String> groupUuids;
 
     @Schema(
@@ -37,7 +38,7 @@ public class UpdateUserRequestDto {
     private String certificateData;
 
     @Schema(
-            description = "UUID of the existing certificate in the Inventory. Mandatory if certificate data is not provided",
+            description = "UUID of the existing certificate in the inventory. Mandatory if certificate data is not provided",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private String certificateUuid;
@@ -45,7 +46,8 @@ public class UpdateUserRequestDto {
     @Schema(description = "List of Custom Attributes")
     private List<RequestAttribute> customAttributes;
 
-    @Schema(description = "List of custom Attributes set for user certificate, if a new certificate is uploaded. Ignored if the certificate already exists in the inventory (matched by UUID or fingerprint).", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "List of Custom Attributes set for the user certificate, if a new certificate is uploaded. Ignored if the certificate already exists in the inventory (matched by UUID or fingerprint).",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> certificateCustomAttributes;
 
     @Override
@@ -59,6 +61,7 @@ public class UpdateUserRequestDto {
                 .append("certificateUuid", certificateUuid)
                 .append("certificateData", certificateData)
                 .append("customAttributes", customAttributes)
+                .append("certificateCustomAttributes", certificateCustomAttributes)
                 .toString();
     }
 }
