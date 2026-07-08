@@ -163,8 +163,8 @@ public interface ClientOperationController extends AuthProtectedController {
 					  a protocol layer such as ACME, SCEP, or CMP, or after an approval/compliance cycle).
 					  Issuance is triggered with the existing CSR.
 					- `REGISTERED` (body required): the certificate was pre-registered (v3 authorities with
-					  `CERTIFICATE_REGISTRATION` capability) and is now being finalized with an operator-
-					  supplied CSR. The CSR + sign attributes from the body are attached to the existing
+					  `CERTIFICATE_REGISTRATION` capability) and is now being finalized. The body carries the authorization secret plus either an operator-
+					  supplied CSR or platform key-generation parameters, which are attached to the existing
 					  certificate row, then issuance is triggered. The cert's identity (subject DN, SAN,
 					  extensions) and connector-supplied metadata from the registration are preserved.
 					"""
