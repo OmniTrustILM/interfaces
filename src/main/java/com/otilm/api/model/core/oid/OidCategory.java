@@ -10,7 +10,6 @@ public enum OidCategory implements IPlatformEnum {
 
     RDN_ATTRIBUTE_TYPE(Codes.RDN_ATTRIBUTE_TYPE, "RDN Attribute Type", "OID for a type of attribute that can appear in DN"),
     EXTENDED_KEY_USAGE(Codes.EXTENDED_KEY_USAGE, "Extended Key Usage", "OID specifying key purpose in Extended Key Usage extension"),
-    QC_STATEMENT(Codes.QC_STATEMENT, "QC Statement", "OID identifying a qualified certificate statement (ETSI EN 319 412)"),
     CERTIFICATE_EXTENSION(Codes.CERTIFICATE_EXTENSION, "Certificate Extension", "OID for a custom X.509 certificate extension with typed value encoding"),
     GENERIC(Codes.GENERIC, "Generic", "Generic OID for general use")
     ;
@@ -58,7 +57,6 @@ public enum OidCategory implements IPlatformEnum {
     public static class Codes {
         public static final String RDN_ATTRIBUTE_TYPE = "rdnAttributeType";
         public static final String EXTENDED_KEY_USAGE = "extendedKeyUsage";
-        public static final String QC_STATEMENT = "qcStatement";
         public static final String CERTIFICATE_EXTENSION = "certificateExtension";
         public static final String GENERIC = "generic";
 
