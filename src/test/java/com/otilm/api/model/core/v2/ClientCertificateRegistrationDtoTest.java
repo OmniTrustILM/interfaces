@@ -1,11 +1,18 @@
 package com.otilm.api.model.core.v2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClientCertificateRegistrationDtoTest {
+
+    private final ObjectMapper mapper = JsonMapper.builder().findAndAddModules().build();
 
     @Test
     void bothEmpty_failsRfc5280Constraint() {
@@ -44,5 +51,35 @@ class ClientCertificateRegistrationDtoTest {
         dto.setSubjectAltName("\t\n  ");
         assertFalse(dto.isSubjectIdentificationProvided(),
                 "Whitespace-only strings must not satisfy the subject-identification constraint");
+    }
+
+    @Test
+    void authorizationSecretIsAcceptedOnInputButNeverSerialized() throws Exception {
+        ClientCertificateRegistrationDto dto = mapper.readValue(
+                "{\"subjectDn\":\"CN=x\",\"authorizationSecret\":\"s3cret-value-1234\"}",
+                ClientCertificateRegistrationDto.class);
+        assertEquals("s3cret-value-1234", dto.getAuthorizationSecret());
+
+        String json = mapper.writeValueAsString(dto);
+        assertFalse(json.contains("authorizationSecret"), "write-only secret must never serialize back");
+        assertFalse(json.contains("s3cret-value-1234"));
+        assertTrue(json.contains("subjectDn"), "non-write-only fields must still serialize");
+    }
+
+    @Test
+    void toStringOmitsAuthorizationSecret() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setAuthorizationSecret("s3cret-value-1234");
+        assertFalse(dto.toString().contains("s3cret-value-1234"), "authorizationSecret must not appear in toString");
+    }
+
+    @Test
+    void expiresAtRoundTrips() throws Exception {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setSubjectDn("CN=x");
+        dto.setExpiresAt(OffsetDateTime.parse("2026-08-01T00:00:00Z"));
+        ClientCertificateRegistrationDto back =
+                mapper.readValue(mapper.writeValueAsString(dto), ClientCertificateRegistrationDto.class);
+        assertEquals(dto.getExpiresAt(), back.getExpiresAt());
     }
 }
