@@ -38,7 +38,6 @@ public enum SystemOid {
     IPSEC_TUNNEL("1.3.6.1.5.5.7.3.6", "IPSec Tunnel", OidCategory.EXTENDED_KEY_USAGE),
     AUTHENTIC_DOCUMENTS_TRUST("1.2.840.113583.1.1.5", "Authentic Documents Trust", OidCategory.EXTENDED_KEY_USAGE),
 
-    // Generic
     QTST_STATEMENT_1("0.4.0.19422.1.1", "Qualified Electronic Time-Stamp", OidCategory.GENERIC)
     ;
 
