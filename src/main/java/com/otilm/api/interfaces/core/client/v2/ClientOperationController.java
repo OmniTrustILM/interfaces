@@ -164,7 +164,7 @@ public interface ClientOperationController extends AuthProtectedController {
 					  Issuance is triggered with the existing CSR.
 					- `REGISTERED` (body required): the certificate was pre-registered (v3 authorities with
 					  `CERTIFICATE_REGISTRATION` capability) and is now being finalized with an operator-
-					  supplied CSR. The CSR + sign attributes from the body are attached to the existing
+					  supplied CSR. The CSR + sign attributes and the authorization secret from the body are attached to the existing
 					  certificate row, then issuance is triggered. The cert's identity (subject DN, SAN,
 					  extensions) and connector-supplied metadata from the registration are preserved.
 					"""
@@ -178,9 +178,9 @@ public interface ClientOperationController extends AuthProtectedController {
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
 			@Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
-					description = "Sign request body. Required when cert state is REGISTERED (carries the operator's CSR + sign attributes); must be omitted when cert state is REQUESTED.",
+					description = "Issue request body. Required when cert state is REGISTERED (carries the operator's CSR + sign attributes plus the authorization secret); must be omitted when cert state is REQUESTED.",
 					required = false)
-			@RequestBody(required = false) @Valid ClientCertificateSignRequestDto request) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException, AttributeException;
+			@RequestBody(required = false) @Valid ClientCertificateIssueRequestDto request) throws ConnectorException, CertificateException, NoSuchAlgorithmException, AlreadyExistException, CertificateRequestException, NotFoundException, AttributeException;
 
 	@Operation(
 			summary = "Issue certificate",
@@ -193,7 +193,7 @@ public interface ClientOperationController extends AuthProtectedController {
 	ClientCertificateDataResponseDto issueCertificate(
 			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
 			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
-			@RequestBody ClientCertificateSignRequestDto request) throws NotFoundException, CertificateException, IOException, NoSuchAlgorithmException, InvalidKeyException, CertificateOperationException, CertificateRequestException;
+			@RequestBody ClientCertificateIssueRequestDto request) throws NotFoundException, CertificateException, IOException, NoSuchAlgorithmException, InvalidKeyException, CertificateOperationException, CertificateRequestException;
 
 	@Operation(
 			summary = "Renew certificate",
