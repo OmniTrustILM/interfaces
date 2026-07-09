@@ -9,8 +9,8 @@ import java.time.OffsetDateTime;
 @Data
 public class CertificateRegistrationDetailDto implements Serializable {
 
-    @Schema(description = "Registration authorization state", allowableValues = {"ACTIVE", "EXPIRED", "LOCKED", "CLOSED"}, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private String state;
+    @Schema(description = "Registration authorization state", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRegistrationState state;
 
     @Schema(description = "Issuance deadline for completing the pre-registered certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private OffsetDateTime expiresAt;

@@ -7,9 +7,11 @@ import com.otilm.api.model.connector.v3.certificate.CertificateExtension;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.OffsetDateTime;
@@ -78,16 +80,20 @@ public class ClientCertificateRegistrationDto {
     private List<RequestAttribute> customAttributes;
 
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(min = 12, max = 255)
-    @Pattern(regexp = "\\p{Print}+", message = "authorizationSecret must be printable ASCII")
+    @Pattern(regexp = "[\\x20-\\x7E]+", message = "authorizationSecret must be printable ASCII")
     @Schema(
             description = "Authorization secret (challenge) that gates later issue/rekey of this "
-                    + "pre-registered certificate. Write-only; the operator supplies it (the platform never generates one).",
-            accessMode = Schema.AccessMode.WRITE_ONLY
+                    + "pre-registered certificate. Write-only and optional — the operator supplies it to opt the "
+                    + "registration into challenge-gated completion; the platform never generates one.",
+            accessMode = Schema.AccessMode.WRITE_ONLY,
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private String authorizationSecret;
 
+    @Future
     @Schema(
             description = "Optional absolute deadline by which the pre-registered certificate must be issued. "
                     + "When omitted, the platform applies the default registration issuance window.",

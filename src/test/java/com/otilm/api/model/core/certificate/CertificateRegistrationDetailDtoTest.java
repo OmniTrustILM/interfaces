@@ -16,13 +16,13 @@ class CertificateRegistrationDetailDtoTest {
     @Test
     void registrationBlockRoundTrips() throws Exception {
         CertificateRegistrationDetailDto reg = new CertificateRegistrationDetailDto();
-        reg.setState("ACTIVE");
+        reg.setState(CertificateRegistrationState.ACTIVE);
         reg.setExpiresAt(OffsetDateTime.parse("2026-08-01T00:00:00Z"));
         reg.setFailedAttempts(2);
 
         CertificateRegistrationDetailDto back =
                 mapper.readValue(mapper.writeValueAsString(reg), CertificateRegistrationDetailDto.class);
-        assertEquals("ACTIVE", back.getState());
+        assertEquals(CertificateRegistrationState.ACTIVE, back.getState());
         assertEquals(reg.getExpiresAt(), back.getExpiresAt());
         assertEquals(2, back.getFailedAttempts());
     }

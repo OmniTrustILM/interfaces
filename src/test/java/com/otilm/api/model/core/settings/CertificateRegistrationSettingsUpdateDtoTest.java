@@ -4,6 +4,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,7 +22,7 @@ class CertificateRegistrationSettingsUpdateDtoTest {
         CertificateRegistrationSettingsUpdateDto dto = new CertificateRegistrationSettingsUpdateDto();
         dto.setDefaultIssuanceWindowDays(-1);
         dto.setMaxFailedAttempts(0);
-        assertFalse(VALIDATOR.validate(dto).isEmpty(), "@Positive must reject <= 0");
+        assertEquals(2, VALIDATOR.validate(dto).size(), "each @Positive field must be rejected independently");
     }
 
     @Test

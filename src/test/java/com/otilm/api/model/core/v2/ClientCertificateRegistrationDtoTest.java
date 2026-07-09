@@ -2,9 +2,14 @@ package com.otilm.api.model.core.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ClientCertificateRegistrationDtoTest {
 
     private final ObjectMapper mapper = JsonMapper.builder().findAndAddModules().build();
+    private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     void bothEmpty_failsRfc5280Constraint() {
@@ -64,6 +70,8 @@ class ClientCertificateRegistrationDtoTest {
         assertFalse(json.contains("authorizationSecret"), "write-only secret must never serialize back");
         assertFalse(json.contains("s3cret-value-1234"));
         assertTrue(json.contains("subjectDn"), "non-write-only fields must still serialize");
+        assertFalse(json.contains("subjectIdentificationProvided"),
+                "the @JsonIgnore'd @AssertTrue getter must not serialize");
     }
 
     @Test
@@ -81,5 +89,22 @@ class ClientCertificateRegistrationDtoTest {
         ClientCertificateRegistrationDto back =
                 mapper.readValue(mapper.writeValueAsString(dto), ClientCertificateRegistrationDto.class);
         assertEquals(dto.getExpiresAt(), back.getExpiresAt());
+    }
+
+    @Test
+    void authorizationSecretFormatIsEnforced() {
+        assertTrue(secretViolations("abcdefghijkl").isEmpty(), "a 12-char printable secret is valid");
+        assertFalse(secretViolations("abcdefghijk").isEmpty(), "an 11-char secret is too short");
+        assertFalse(secretViolations("a".repeat(256)).isEmpty(), "a 256-char secret is too long");
+        assertFalse(secretViolations("abcdefghijklé").isEmpty(), "a character outside printable ASCII is rejected");
+    }
+
+    private static Set<ConstraintViolation<ClientCertificateRegistrationDto>> secretViolations(String secret) {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setSubjectDn("CN=x");
+        dto.setAuthorizationSecret(secret);
+        return VALIDATOR.validate(dto).stream()
+                .filter(v -> v.getPropertyPath().toString().equals("authorizationSecret"))
+                .collect(Collectors.toSet());
     }
 }
