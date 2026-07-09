@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Request to issue a certificate for an external client — by uploading a CSR or having the platform generate the
- * key — including completing a pre-registered certificate, which additionally carries the authorization secret.
+ * Request to issue a certificate for an external client from a CSR, including completing a pre-registered
+ * certificate, which additionally carries the authorization secret.
  */
 @Data
 public class ClientCertificateIssueRequestDto {
