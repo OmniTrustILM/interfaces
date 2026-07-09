@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -156,7 +157,7 @@ public interface CertificateController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Compliance check initiated")})
     @PostMapping(path = "/compliance", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void checkCompliance(@RequestBody CertificateComplianceCheckDto request) throws NotFoundException;
+    void checkCompliance(@Valid @RequestBody CertificateComplianceCheckDto request) throws NotFoundException;
 
     @Operation(summary = "Get Certificate Validation Result")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate validation detail retrieved")})
