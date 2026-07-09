@@ -39,7 +39,7 @@ public enum SystemOid {
     AUTHENTIC_DOCUMENTS_TRUST("1.2.840.113583.1.1.5", "Authentic Documents Trust", OidCategory.EXTENDED_KEY_USAGE),
 
     // QC Statements for time-stamp tokens (ETSI EN 319 422 Annex B)
-    QTST_STATEMENT_1("0.4.0.19422.1.1", "Qualified Electronic Time-Stamp", OidCategory.QC_STATEMENT)
+    QTST_STATEMENT_1("0.4.0.19422.1.1", "Qualified Electronic Time-Stamp", OidCategory.GENERIC)
     ;
 
     private static final SystemOid[] VALUES;
