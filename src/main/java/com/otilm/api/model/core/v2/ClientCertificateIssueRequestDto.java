@@ -88,6 +88,7 @@ public class ClientCertificateIssueRequestDto {
     )
     private List<RequestAttribute> customAttributes;
 
+    @EqualsAndHashCode.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(
             description = "One-time authorization secret proving the caller may complete a pre-registered "
