@@ -83,6 +83,8 @@ public class ClientCertificateRekeyRequestDto {
     )
     private List<RequestAttribute> altSignatureAttributes;
 
+    // Format (@Size/@Pattern) is enforced at registration, not here: on the verify path a malformed secret
+    // must fail the challenge identically to a wrong one, so no format constraint is applied (no format oracle).
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
