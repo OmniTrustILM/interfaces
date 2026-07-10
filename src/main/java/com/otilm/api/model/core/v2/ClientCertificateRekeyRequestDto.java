@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -82,7 +83,10 @@ public class ClientCertificateRekeyRequestDto {
     )
     private List<RequestAttribute> altSignatureAttributes;
 
+    // Format (@Size/@Pattern) is enforced at registration, not here: on the verify path a malformed secret
+    // must fail the challenge identically to a wrong one, so no format constraint is applied (no format oracle).
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(
             description = "One-time authorization secret for rekeying a certificate that has an active "

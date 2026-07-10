@@ -61,6 +61,12 @@ public class CertificateDetailDto extends CertificateDto {
     )
     private Set<LocationDto> locations;
 
+    @Schema(
+            description = "Pre-registration authorization status; present only for certificates that were pre-registered",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private CertificateRegistrationDetailDto registration;
+
     /**
      * @deprecated As of release 2.16.0. Replaced by {@link com.otilm.api.interfaces.core.web.v2.ComplianceController#getComplianceCheckResult(Resource, UUID)} endpoint instead that is part of compliance v2 implementation.
      */

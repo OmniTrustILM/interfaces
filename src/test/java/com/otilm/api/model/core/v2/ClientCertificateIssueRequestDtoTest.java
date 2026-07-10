@@ -31,4 +31,14 @@ class ClientCertificateIssueRequestDtoTest {
         dto.setAuthorizationSecret("s3cret");
         assertFalse(dto.toString().contains("s3cret"), "authorizationSecret must not appear in toString");
     }
+
+    @Test
+    void authorizationSecretIsExcludedFromEqualsAndHashCode() {
+        ClientCertificateIssueRequestDto a = new ClientCertificateIssueRequestDto();
+        a.setAuthorizationSecret("secret-a");
+        ClientCertificateIssueRequestDto b = new ClientCertificateIssueRequestDto();
+        b.setAuthorizationSecret("secret-b");
+        assertEquals(a, b, "authorizationSecret must not affect equals()");
+        assertEquals(a.hashCode(), b.hashCode(), "authorizationSecret must not affect hashCode()");
+    }
 }

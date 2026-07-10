@@ -1,12 +1,20 @@
 package com.otilm.api.model.core.v2;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.connector.v3.certificate.CertificateExtension;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -71,12 +79,35 @@ public class ClientCertificateRegistrationDto {
     )
     private List<RequestAttribute> customAttributes;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Size(min = 12, max = 255)
+    @Pattern(regexp = "[\\x20-\\x7E]+", message = "authorizationSecret must be printable ASCII")
+    @Schema(
+            description = "Authorization secret (challenge) that gates later issue/rekey of this "
+                    + "pre-registered certificate. Write-only and optional — the operator supplies it to opt the "
+                    + "registration into challenge-gated completion; the platform never generates one.",
+            accessMode = Schema.AccessMode.WRITE_ONLY,
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private String authorizationSecret;
+
+    @Future
+    @Schema(
+            description = "Optional absolute deadline by which the pre-registered certificate must be issued. "
+                    + "When omitted, the platform applies the default registration issuance window.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private OffsetDateTime expiresAt;
+
     /**
      * RFC 5280 §4.1.2.6: a certificate's subject identity may be carried in subjectDn, in the
      * subjectAltName extension, or both — but it cannot be empty in both. Connector-side issuance
      * will require subjectAltName to be marked critical when subjectDn is empty; the operator
      * input is checked here only for the basic "at least one is set" invariant.
      */
+    @JsonIgnore
     @AssertTrue(message = "At least one of subjectDn or subjectAltName must be non-empty (RFC 5280 §4.1.2.6)")
     @Schema(hidden = true)
     public boolean isSubjectIdentificationProvided() {
