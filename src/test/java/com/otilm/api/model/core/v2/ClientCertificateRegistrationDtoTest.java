@@ -9,6 +9,7 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,6 +59,22 @@ class ClientCertificateRegistrationDtoTest {
         dto.setCsrAttributes(List.of(new RequestAttributeV2()));
         assertTrue(dto.isSubjectIdentificationProvided(),
                 "structured csrAttributes is an accepted identity source alongside flat subjectDn/subjectAltName");
+    }
+
+    @Test
+    void csrAttributesEmptyList_doesNotProvideIdentity() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setCsrAttributes(List.of());
+        assertFalse(dto.isSubjectIdentificationProvided(),
+                "an empty csrAttributes list is not an identity source");
+    }
+
+    @Test
+    void csrAttributesOnlyNullElements_doesNotProvideIdentity() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setCsrAttributes(Collections.singletonList(null));
+        assertFalse(dto.isSubjectIdentificationProvided(),
+                "a csrAttributes list of only null elements carries no identity");
     }
 
     @Test

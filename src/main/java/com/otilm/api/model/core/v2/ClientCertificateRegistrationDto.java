@@ -16,6 +16,7 @@ import lombok.ToString;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Request body for the {@code POST /certificates/register} operator endpoint.
@@ -39,8 +40,8 @@ public class ClientCertificateRegistrationDto {
             description = "Subject DN. Optional per RFC 5280 §4.1.2.6: an empty subject is permitted "
                     + "when subject naming information is carried entirely in the Subject Alternative "
                     + "Name extension (in which case the subjectAltName extension MUST be marked "
-                    + "critical at issuance). At least one of subjectDn or subjectAltName must be "
-                    + "non-empty — enforced by the cross-field {@code subjectIdentificationProvided} "
+                    + "critical at issuance). At least one of subjectDn, subjectAltName, or csrAttributes "
+                    + "must provide subject identity — enforced by the cross-field {@code subjectIdentificationProvided} "
                     + "constraint.",
             example = "CN=device-7,O=Acme",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
@@ -51,7 +52,8 @@ public class ClientCertificateRegistrationDto {
             description = "Subject Alternative Name in RFC 5280 textual form (e.g. DNS:foo,IP:1.2.3.4,email:x@y). "
                     + "SAN MUST be carried here ONLY — do not also include it as OID 2.5.29.17 in extensions[]. "
                     + "Connectors reject duplicate-source requests with VALIDATION_FAILED. "
-                    + "Required when subjectDn is empty (see RFC 5280 §4.1.2.6).",
+                    + "Provides subject identity when subjectDn is empty (see RFC 5280 §4.1.2.6); "
+                    + "csrAttributes is a further alternative.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private String subjectAltName;
@@ -68,7 +70,8 @@ public class ClientCertificateRegistrationDto {
             description = "Structured request-attribute identity content (subject RDNs, SANs, extensions) — the "
                     + "typed alternative to the flat subjectDn/subjectAltName/extensions above, mirroring the issue "
                     + "path. When provided, the platform projects it into the registration identity; the flat fields "
-                    + "remain the simple/compatibility shape.",
+                    + "remain the simple/compatibility shape. When both are supplied, the register handling defines "
+                    + "the precedence.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private List<RequestAttribute> csrAttributes;
@@ -123,6 +126,6 @@ public class ClientCertificateRegistrationDto {
     public boolean isSubjectIdentificationProvided() {
         return (subjectDn != null && !subjectDn.isBlank())
                 || (subjectAltName != null && !subjectAltName.isBlank())
-                || (csrAttributes != null && !csrAttributes.isEmpty());
+                || (csrAttributes != null && csrAttributes.stream().anyMatch(Objects::nonNull));
     }
 }
