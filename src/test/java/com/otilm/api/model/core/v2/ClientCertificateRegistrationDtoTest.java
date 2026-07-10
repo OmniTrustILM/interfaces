@@ -2,12 +2,14 @@ package com.otilm.api.model.core.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.otilm.api.model.client.attribute.RequestAttributeV2;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,14 @@ class ClientCertificateRegistrationDtoTest {
         dto.setSubjectDn("CN=device-7");
         dto.setSubjectAltName("DNS:device-7.example.com");
         assertTrue(dto.isSubjectIdentificationProvided());
+    }
+
+    @Test
+    void csrAttributesOnly_providesIdentity() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setCsrAttributes(List.of(new RequestAttributeV2()));
+        assertTrue(dto.isSubjectIdentificationProvided(),
+                "structured csrAttributes is an accepted identity source alongside flat subjectDn/subjectAltName");
     }
 
     @Test

@@ -65,6 +65,15 @@ public class ClientCertificateRegistrationDto {
     private List<CertificateExtension> extensions;
 
     @Schema(
+            description = "Structured request-attribute identity content (subject RDNs, SANs, extensions) — the "
+                    + "typed alternative to the flat subjectDn/subjectAltName/extensions above, mirroring the issue "
+                    + "path. When provided, the platform projects it into the registration identity; the flat fields "
+                    + "remain the simple/compatibility shape.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private List<RequestAttribute> csrAttributes;
+
+    @Schema(
             description = "Authority-defined registration attributes (e.g., subject DN template, validity hints)."
     )
     private List<RequestAttribute> attributes;
@@ -103,15 +112,17 @@ public class ClientCertificateRegistrationDto {
 
     /**
      * RFC 5280 §4.1.2.6: a certificate's subject identity may be carried in subjectDn, in the
-     * subjectAltName extension, or both — but it cannot be empty in both. Connector-side issuance
-     * will require subjectAltName to be marked critical when subjectDn is empty; the operator
-     * input is checked here only for the basic "at least one is set" invariant.
+     * subjectAltName extension, or both — but it cannot be empty in both. Structured identity may
+     * instead arrive via csrAttributes (projected connector-side into a subject/SAN). Connector-side
+     * issuance will require subjectAltName to be marked critical when subjectDn is empty; the operator
+     * input is checked here only for the basic "at least one identity source is set" invariant.
      */
     @JsonIgnore
-    @AssertTrue(message = "At least one of subjectDn or subjectAltName must be non-empty (RFC 5280 §4.1.2.6)")
+    @AssertTrue(message = "At least one of subjectDn, subjectAltName, or csrAttributes must provide subject identity (RFC 5280 §4.1.2.6)")
     @Schema(hidden = true)
     public boolean isSubjectIdentificationProvided() {
         return (subjectDn != null && !subjectDn.isBlank())
-                || (subjectAltName != null && !subjectAltName.isBlank());
+                || (subjectAltName != null && !subjectAltName.isBlank())
+                || (csrAttributes != null && !csrAttributes.isEmpty());
     }
 }
