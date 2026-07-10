@@ -57,7 +57,9 @@ public class BaseCmpProfileRequestDto {
     private ProtectionMethod responseProtectionMethod;
 
     @Schema(
-            description = "Shared secret for the CMP Request. Required when requestProtectionMethod is sharedSecret"
+            description = "Shared secret for the CMP Request, used when requestProtectionMethod is sharedSecret. " +
+                    "Required when creating a CMP Profile. When editing, a blank or omitted value keeps the " +
+                    "existing shared secret; a value is required if no shared secret is stored yet."
     )
     private String sharedSecret;
 
