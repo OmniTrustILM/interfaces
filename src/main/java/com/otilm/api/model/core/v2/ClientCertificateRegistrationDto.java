@@ -69,9 +69,9 @@ public class ClientCertificateRegistrationDto {
     @Schema(
             description = "Structured request-attribute identity content (subject RDNs, SANs, extensions) — the "
                     + "typed alternative to the flat subjectDn/subjectAltName/extensions above, mirroring the issue "
-                    + "path. When provided, the platform projects it into the registration identity; the flat fields "
-                    + "remain the simple/compatibility shape. When both are supplied, the register handling defines "
-                    + "the precedence.",
+                    + "path. When provided, the platform projects it into the registration identity; the flat "
+                    + "subjectDn/subjectAltName/extensions are the simple alternative. Provide the identity via "
+                    + "csrAttributes OR the flat fields, not both.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private List<RequestAttribute> csrAttributes;
