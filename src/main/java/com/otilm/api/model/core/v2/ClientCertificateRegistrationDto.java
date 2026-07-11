@@ -128,4 +128,21 @@ public class ClientCertificateRegistrationDto {
                 || (subjectAltName != null && !subjectAltName.isBlank())
                 || (csrAttributes != null && csrAttributes.stream().anyMatch(Objects::nonNull));
     }
+
+    /**
+     * The pre-registration identity comes either from structured csrAttributes or from the flat
+     * subjectDn/subjectAltName/extensions fields — never both. Mixing the two forms is ambiguous
+     * (which one defines the placeholder subject?), so it is rejected at the contract boundary
+     * rather than surfacing as a less specific error from register handling.
+     */
+    @JsonIgnore
+    @AssertTrue(message = "Provide the pre-registration identity via csrAttributes or the flat subjectDn/subjectAltName/extensions fields, not both")
+    @Schema(hidden = true)
+    public boolean isSingleIdentitySource() {
+        boolean structured = csrAttributes != null && csrAttributes.stream().anyMatch(Objects::nonNull);
+        boolean flat = (subjectDn != null && !subjectDn.isBlank())
+                || (subjectAltName != null && !subjectAltName.isBlank())
+                || (extensions != null && !extensions.isEmpty());
+        return !(structured && flat);
+    }
 }
