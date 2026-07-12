@@ -3,6 +3,7 @@ package com.otilm.api.model.core.v2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.otilm.api.model.client.attribute.RequestAttributeV2;
+import com.otilm.api.model.connector.v3.certificate.CertificateExtension;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -75,6 +76,59 @@ class ClientCertificateRegistrationDtoTest {
         dto.setCsrAttributes(Collections.singletonList(null));
         assertFalse(dto.isSubjectIdentificationProvided(),
                 "a csrAttributes list of only null elements carries no identity");
+    }
+
+    @Test
+    void csrAttributesWithFlatFields_violatesMutualExclusion() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setSubjectDn("CN=device-7");
+        dto.setCsrAttributes(List.of(new RequestAttributeV2()));
+        assertFalse(dto.isSingleIdentitySource(),
+                "supplying both csrAttributes and a flat identity field is ambiguous and must be rejected");
+        assertFalse(mutualExclusionViolations(dto).isEmpty(),
+                "the @AssertTrue constraint must surface as a bean-validation violation");
+    }
+
+    @Test
+    void csrAttributesWithFlatExtensionsOnly_violatesMutualExclusion() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setExtensions(List.of(new CertificateExtension()));
+        dto.setCsrAttributes(List.of(new RequestAttributeV2()));
+        assertFalse(dto.isSingleIdentitySource(),
+                "flat extensions alongside csrAttributes is still the mixed form");
+    }
+
+    @Test
+    void csrAttributesAlone_satisfiesMutualExclusion() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setCsrAttributes(List.of(new RequestAttributeV2()));
+        assertTrue(dto.isSingleIdentitySource());
+        assertTrue(mutualExclusionViolations(dto).isEmpty());
+    }
+
+    @Test
+    void flatFieldsAlone_satisfyMutualExclusion() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setSubjectDn("CN=device-7");
+        dto.setSubjectAltName("DNS:device-7.example.com");
+        assertTrue(dto.isSingleIdentitySource());
+        assertTrue(mutualExclusionViolations(dto).isEmpty());
+    }
+
+    @Test
+    void nullElementCsrAttributesWithFlat_notMixed() {
+        ClientCertificateRegistrationDto dto = new ClientCertificateRegistrationDto();
+        dto.setSubjectDn("CN=device-7");
+        dto.setCsrAttributes(Collections.singletonList(null));
+        assertTrue(dto.isSingleIdentitySource(),
+                "a csrAttributes list carrying no real element is not the structured form, so no conflict with flat");
+    }
+
+    private static Set<ConstraintViolation<ClientCertificateRegistrationDto>> mutualExclusionViolations(
+            ClientCertificateRegistrationDto dto) {
+        return VALIDATOR.validate(dto).stream()
+                .filter(v -> v.getPropertyPath().toString().equals("singleIdentitySource"))
+                .collect(Collectors.toSet());
     }
 
     @Test

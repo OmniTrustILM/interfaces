@@ -69,9 +69,9 @@ public class ClientCertificateRegistrationDto {
     @Schema(
             description = "Structured request-attribute identity content (subject RDNs, SANs, extensions) — the "
                     + "typed alternative to the flat subjectDn/subjectAltName/extensions above, mirroring the issue "
-                    + "path. When provided, the platform projects it into the registration identity; the flat fields "
-                    + "remain the simple/compatibility shape. When both are supplied, the register handling defines "
-                    + "the precedence.",
+                    + "path. When provided, the platform projects it into the registration identity; the flat "
+                    + "subjectDn/subjectAltName/extensions are the simple alternative. Provide the identity via "
+                    + "csrAttributes OR the flat fields, not both.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private List<RequestAttribute> csrAttributes;
@@ -127,5 +127,22 @@ public class ClientCertificateRegistrationDto {
         return (subjectDn != null && !subjectDn.isBlank())
                 || (subjectAltName != null && !subjectAltName.isBlank())
                 || (csrAttributes != null && csrAttributes.stream().anyMatch(Objects::nonNull));
+    }
+
+    /**
+     * The pre-registration identity comes either from structured csrAttributes or from the flat
+     * subjectDn/subjectAltName/extensions fields — never both. Mixing the two forms is ambiguous
+     * (which one defines the placeholder subject?), so it is rejected at the contract boundary
+     * rather than surfacing as a less specific error from register handling.
+     */
+    @JsonIgnore
+    @AssertTrue(message = "Provide the pre-registration identity via csrAttributes or the flat subjectDn/subjectAltName/extensions fields, not both")
+    @Schema(hidden = true)
+    public boolean isSingleIdentitySource() {
+        boolean structured = csrAttributes != null && csrAttributes.stream().anyMatch(Objects::nonNull);
+        boolean flat = (subjectDn != null && !subjectDn.isBlank())
+                || (subjectAltName != null && !subjectAltName.isBlank())
+                || (extensions != null && !extensions.isEmpty());
+        return !(structured && flat);
     }
 }
