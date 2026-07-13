@@ -24,7 +24,7 @@ public enum ResourceEvent implements IPlatformEnum {
     CERTIFICATE_EXPIRING(Codes.CERTIFICATE_EXPIRING, "Certificate expiring", "Event to trigger actions associated with expiring certificates without renewal", Resource.CERTIFICATE, List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateExpiringEventData.class, true),
     CERTIFICATE_NOT_COMPLIANT(Codes.CERTIFICATE_NOT_COMPLIANT, "Certificate not compliant", "Event when the certificate is evaluated as not compliant", Resource.CERTIFICATE, List.of(Resource.RA_PROFILE), CertificateNotCompliantEventData.class, false),
     CERTIFICATE_UPLOADED(Codes.CERTIFICATE_UPLOADED, "Certificate uploaded", "Event when the certificate has been uploaded", Resource.CERTIFICATE, CertificateEventData.class, false),
-    CERTIFICATE_REGISTERED(Codes.CERTIFICATE_REGISTERED, "Certificate registered", "Event when a certificate has been successfully pre-registered, carrying the credential and issuance deadline to complete issuance", Resource.CERTIFICATE, CertificateRegisteredEventData.class, false),
+    CERTIFICATE_REGISTERED(Codes.CERTIFICATE_REGISTERED, "Certificate registered", "Event when a certificate has been successfully pre-registered, carrying the credential and completion deadline to complete issuance", Resource.CERTIFICATE, List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateRegisteredEventData.class, false),
 
     // Discoveries
     DISCOVERY_FINISHED(Codes.DISCOVERY_FINISHED, "Discovery Finished", "Event when discovery has been finished.", Resource.DISCOVERY, DiscoveryFinishedEventData.class, false),

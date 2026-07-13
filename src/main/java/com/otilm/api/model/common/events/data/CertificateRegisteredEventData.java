@@ -16,15 +16,19 @@ import java.time.ZonedDateTime;
 @Data
 public class CertificateRegisteredEventData extends CertificateEventAuthorityData {
 
-    @Schema(description = "Deadline by which the pre-registered certificate must be issued, in \"yyyy-MM-dd'T'HH:mm:ssXXX\" format")
+    @Schema(description = "Deadline by which the completion request must be presented — a valid challenge must be "
+            + "supplied before this instant. It gates the completion request, not final issuance: an approved or "
+            + "otherwise asynchronous completion may finalize shortly after. Format \"yyyy-MM-dd'T'HH:mm:ssXXX\".")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     @JsonDeserialize(using = ZonedDateTimeDeserializer.class)
     @JsonSerialize(using = ZonedDateTimeSerializer.class)
-    private ZonedDateTime issuanceDeadline;
+    private ZonedDateTime completionDeadline;
 
-    // The one-time credential (pre-registration challenge) the recipient presents to complete issuance. It is
-    // serialized to external notification providers, but excluded from toString and equals/hashCode so it cannot
-    // leak into logs or tracing spans (both event envelopes carry this object in their toString).
+    // The one-time credential (the pre-registration challenge the operator supplied as authorizationSecret) that the
+    // recipient presents to complete issuance. Serialized to external notification providers, but excluded from
+    // toString and equals/hashCode so it cannot leak into logs or tracing spans (both event envelopes carry this
+    // object in their toString). That exclusion covers the toString path only — downstream must not JSON-log or
+    // persist the event payload; core keeps the credential out of internal notifications and event-history.
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Schema(description = "One-time credential the recipient presents to complete issuance on the public portal")
