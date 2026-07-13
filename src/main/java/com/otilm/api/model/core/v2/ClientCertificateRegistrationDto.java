@@ -99,9 +99,10 @@ public class ClientCertificateRegistrationDto {
     @Schema(
             description = "Authorization secret (challenge) that gates completion of this pre-registered "
                     + "certificate. Write-only and optional — the operator supplies it to opt the registration "
-                    + "into challenge-gated issuance; the platform never generates one. Issue is currently the "
-                    + "challenge-verified completion path; renew and rekey of a certificate with an active "
-                    + "registration are refused (fail-closed) until challenge-gated successor handling is added.",
+                    + "into challenge-gated issuance; the platform never generates one. Issuing a pre-registered "
+                    + "certificate is currently the only challenge-verified completion path; renewal and rekey "
+                    + "requests for a certificate with an active registration are rejected (fail-closed) until "
+                    + "challenge-gated successor handling is added.",
             accessMode = Schema.AccessMode.WRITE_ONLY,
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
