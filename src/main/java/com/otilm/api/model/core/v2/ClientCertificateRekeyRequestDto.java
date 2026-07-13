@@ -1,15 +1,12 @@
 package com.otilm.api.model.core.v2;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 import java.util.UUID;
@@ -82,18 +79,4 @@ public class ClientCertificateRekeyRequestDto {
             description = "Alternative Signature Attributes. If not provided, existing alternative attributes will be used to generate the new CSR"
     )
     private List<RequestAttribute> altSignatureAttributes;
-
-    // Format (@Size/@Pattern) is enforced at registration, not here: on the verify path a malformed secret
-    // must fail the challenge identically to a wrong one, so no format constraint is applied (no format oracle).
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Schema(
-            description = "One-time authorization secret, reserved for challenge-gated rekey of a certificate "
-                    + "with an active registration. Not yet honored — rekey of a certificate with an active "
-                    + "registration is currently refused (fail-closed) until challenge-gated successor handling "
-                    + "is added. Write-only; ignored for certificates without a registration.",
-            accessMode = Schema.AccessMode.WRITE_ONLY
-    )
-    private String authorizationSecret;
 }
