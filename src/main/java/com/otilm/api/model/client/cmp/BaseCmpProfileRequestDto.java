@@ -1,5 +1,6 @@
 package com.otilm.api.model.client.cmp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.cmp.validation.ValidUuid;
 import com.otilm.api.model.core.cmp.ProtectionMethod;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -28,12 +30,12 @@ public class BaseCmpProfileRequestDto {
     private String raProfileUuid;
 
     @Schema(
-            description = "List of Attributes to issue Certificate for the associated RA Profile. Required when raProfileUuid is provided"
+            description = "List of Attributes to issue Certificate for the associated RA Profile. Required when RA Profile UUID is provided"
     )
     private List<RequestAttribute> issueCertificateAttributes;
 
     @Schema(
-            description = "List of Attributes to revoke Certificate for the associated RA Profile. Required when raProfileUuid is provided"
+            description = "List of Attributes to revoke Certificate for the associated RA Profile. Required when RA Profile UUID is provided"
     )
     private List<RequestAttribute> revokeCertificateAttributes;
 
@@ -56,14 +58,18 @@ public class BaseCmpProfileRequestDto {
     )
     private ProtectionMethod responseProtectionMethod;
 
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(
-            description = "Shared secret for the CMP Request. Required when requestProtectionMethod is sharedSecret"
+            description = "Shared secret for the CMP Request, used when Protection Method is Shared Secret. " +
+                    "Required when creating a CMP Profile. When editing, a blank or omitted value keeps the " +
+                    "existing shared secret; a value is required if no shared secret is stored yet."
     )
     private String sharedSecret;
 
     @ValidUuid
     @Schema(
-            description = "UUID of the Certificate to be used as signing certificate for CMP responses. Required when responseProtectionMethod is signature"
+            description = "UUID of the Certificate to be used as signing certificate for CMP responses. Required when Protection Method is Signature"
     )
     private String signingCertificateUuid;
 
