@@ -97,9 +97,11 @@ public class ClientCertificateRegistrationDto {
     @Size(min = 12, max = 255)
     @Pattern(regexp = "[\\x20-\\x7E]+", message = "authorizationSecret must be printable ASCII")
     @Schema(
-            description = "Authorization secret (challenge) that gates later issue/rekey of this "
-                    + "pre-registered certificate. Write-only and optional — the operator supplies it to opt the "
-                    + "registration into challenge-gated completion; the platform never generates one.",
+            description = "Authorization secret (challenge) that gates completion of this pre-registered "
+                    + "certificate. Write-only and optional — the operator supplies it to opt the registration "
+                    + "into challenge-gated issuance; the platform never generates one. Issue is currently the "
+                    + "challenge-verified completion path; renew and rekey of a certificate with an active "
+                    + "registration are refused (fail-closed) until challenge-gated successor handling is added.",
             accessMode = Schema.AccessMode.WRITE_ONLY,
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
