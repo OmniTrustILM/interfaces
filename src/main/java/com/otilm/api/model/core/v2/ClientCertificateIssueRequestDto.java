@@ -88,6 +88,9 @@ public class ClientCertificateIssueRequestDto {
     )
     private List<RequestAttribute> customAttributes;
 
+    // Format (@Size/@Pattern) is enforced at registration, not here: on the verify path a malformed secret
+    // must fail the challenge identically to a wrong one, so no format constraint is applied (no format oracle).
+    @EqualsAndHashCode.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(
             description = "One-time authorization secret proving the caller may complete a pre-registered "

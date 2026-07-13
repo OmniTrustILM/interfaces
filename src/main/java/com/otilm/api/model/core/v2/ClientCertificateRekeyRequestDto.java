@@ -1,6 +1,5 @@
 package com.otilm.api.model.core.v2;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 import java.util.UUID;
@@ -81,13 +79,4 @@ public class ClientCertificateRekeyRequestDto {
             description = "Alternative Signature Attributes. If not provided, existing alternative attributes will be used to generate the new CSR"
     )
     private List<RequestAttribute> altSignatureAttributes;
-
-    @ToString.Exclude
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Schema(
-            description = "One-time authorization secret for rekeying a certificate that has an active "
-                    + "registration. Write-only; ignored for certificates without one.",
-            accessMode = Schema.AccessMode.WRITE_ONLY
-    )
-    private String authorizationSecret;
 }
