@@ -113,7 +113,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "List RA Profile Attributes")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Attribute information retrieved")})
     @GetMapping(path = "/{uuid}/attributes/raProfile", produces = {"application/json"})
-    List<BaseAttribute> listRAProfileAttributes(@Parameter(description = "Authority instance UUID") @PathVariable String uuid) throws ConnectorException, NotFoundException;
+    List<BaseAttribute> listRAProfileAttributes(@Parameter(description = "Authority instance UUID") @PathVariable String uuid) throws ConnectorException, NotFoundException, AttributeException;
 
     @Operation(summary = "Validate RA Profile Attributes")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Attribute information validated"),
