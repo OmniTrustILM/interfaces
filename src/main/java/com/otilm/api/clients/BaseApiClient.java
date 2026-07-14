@@ -242,6 +242,11 @@ public abstract class BaseApiClient {
             } else if (unwrapped instanceof ConnectorException ce) {
                 ce.setConnector(connector);
                 throw ce;
+            } else if (unwrapped instanceof IllegalStateException) {
+                // A v2-only connector 404s the v1 discovery probe (empty/no body); surface it as a
+                // communication error so connect() falls through to the next adapter version (/v2/info)
+                // instead of aborting with a 500.
+                throw new ConnectorCommunicationException("Error in connector %s communication. URL: %s".formatted(connector.getName(), connector.getUrl()), unwrapped, connector);
             } else {
                 logger.error(unwrapped.getMessage(), unwrapped);
                 throw e;
