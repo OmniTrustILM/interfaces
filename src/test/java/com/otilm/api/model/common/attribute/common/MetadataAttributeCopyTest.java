@@ -23,7 +23,8 @@ class MetadataAttributeCopyTest {
         MetadataAttributeProperties properties = new MetadataAttributeProperties();
         properties.setLabel("Label");
         original.setProperties(properties);
-        original.setContent(List.of(new StringAttributeContentV2("value")));
+        StringAttributeContentV2 contentElement = new StringAttributeContentV2("value");
+        original.setContent(List.of(contentElement));
 
         MetadataAttributeV2 copy = original.copy();
 
@@ -33,6 +34,12 @@ class MetadataAttributeCopyTest {
         assertEquals(original.getContentType(), copy.getContentType());
         assertEquals(original.getProperties(), copy.getProperties());
         assertEquals(original.getContent(), copy.getContent());
+
+        // documented reference-sharing contract: properties and content elements are shared,
+        // only the list container is a distinct instance
+        assertSame(original.getProperties(), copy.getProperties());
+        assertNotSame(original.getContent(), copy.getContent());
+        assertSame(contentElement, copy.getContent().getFirst());
     }
 
     @Test
@@ -41,10 +48,12 @@ class MetadataAttributeCopyTest {
         original.setUuid("uuid-2");
         original.setName("attr");
         original.setContentType(AttributeContentType.STRING);
+        original.setSchemaVersion(AttributeVersion.V3);
         MetadataAttributeProperties properties = new MetadataAttributeProperties();
         properties.setLabel("Label");
         original.setProperties(properties);
-        original.setContent(List.of(new StringAttributeContentV3("value")));
+        StringAttributeContentV3 contentElement = new StringAttributeContentV3("value");
+        original.setContent(List.of(contentElement));
 
         MetadataAttributeV3 copy = original.copy();
 
@@ -52,8 +61,26 @@ class MetadataAttributeCopyTest {
         assertEquals(original.getUuid(), copy.getUuid());
         assertEquals(original.getName(), copy.getName());
         assertEquals(original.getContentType(), copy.getContentType());
+        assertEquals(original.getSchemaVersion(), copy.getSchemaVersion());
         assertEquals(original.getProperties(), copy.getProperties());
         assertEquals(original.getContent(), copy.getContent());
+
+        // documented reference-sharing contract: properties and content elements are shared,
+        // only the list container is a distinct instance
+        assertSame(original.getProperties(), copy.getProperties());
+        assertNotSame(original.getContent(), copy.getContent());
+        assertSame(contentElement, copy.getContent().getFirst());
+    }
+
+    @Test
+    void copy_withNullContent_doesNotThrowAndCopiesNull() {
+        MetadataAttributeV2 original = new MetadataAttributeV2();
+        original.setContentType(AttributeContentType.STRING);
+        original.setContent(null);
+
+        MetadataAttributeV2 copy = original.copy();
+
+        assertNull(copy.getContent());
     }
 
     @Test
