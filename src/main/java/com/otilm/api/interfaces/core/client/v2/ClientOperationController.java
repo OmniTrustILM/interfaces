@@ -347,14 +347,14 @@ public interface ClientOperationController extends AuthProtectedController {
 	@Operation(
 			summary = "Pre-register a certificate",
 			description = """
-					Pre-registers a certificate that will be issued later, returning its UUID; completion runs
-					through the standard issue flow.
+					Pre-registers a certificate that will be issued later; the response carries the pre-registered
+					certificate's UUID, and completion runs through the standard issue flow.
 
 					When the authority's connector supports registration (a v3 connector advertising the
-					`CERTIFICATE_REGISTRATION` feature flag), the registration is made with the upstream CA and may
-					complete synchronously (200) or asynchronously (202 with status polling), returning a tracking
-					handle in metadata. Otherwise the certificate is pre-registered at the platform level with no
-					connector call — a platform-level pre-registration does not imply a CA-side end-entity exists.
+					`CERTIFICATE_REGISTRATION` feature flag), the registration is made with the upstream CA; otherwise
+					the certificate is pre-registered at the platform level with no connector call — a platform-level
+					pre-registration does not imply a CA-side end-entity exists. Connector-side completion may be
+					asynchronous; it is tracked server-side and finished through the issue flow.
 					"""
 	)
 	@ApiResponses(value = {
