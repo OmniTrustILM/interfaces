@@ -57,7 +57,7 @@ class MetadataAttributeCopyTest {
     }
 
     @Test
-    void mutatingCopyContent_doesNotAffectOriginal() {
+    void replacingCopyContentReference_doesNotAffectOriginal() {
         MetadataAttributeV2 original = new MetadataAttributeV2();
         original.setContentType(AttributeContentType.STRING);
         original.setContent(List.of(new StringAttributeContentV2("value")));
@@ -71,6 +71,22 @@ class MetadataAttributeCopyTest {
         assertTrue(copyContent.isEmpty());
         assertEquals(1, originalContent.size());
         assertEquals("value", ((StringAttributeContentV2) originalContent.get(0)).getData());
+    }
+
+    @Test
+    void mutatingCopyContentListInPlace_doesNotAffectOriginal() {
+        // The content list itself is copied, not shared, so in-place mutation of the copy's
+        // list (as opposed to replacing the reference via setContent) must not leak back.
+        MetadataAttributeV2 original = new MetadataAttributeV2();
+        original.setContentType(AttributeContentType.STRING);
+        original.setContent(List.of(new StringAttributeContentV2("value")));
+
+        MetadataAttributeV2 copy = original.copy();
+        copy.getContent().clear();
+
+        assertTrue(copy.getContent().isEmpty());
+        assertEquals(1, original.getContent().size());
+        assertEquals("value", ((StringAttributeContentV2) original.getContent().get(0)).getData());
     }
 
     @Test

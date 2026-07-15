@@ -21,8 +21,10 @@ public abstract class MetadataAttribute extends BaseAttribute implements Metadat
     public abstract MetadataAttributeProperties getProperties();
 
     /**
-     * Shallow copy: a distinct instance sharing all field references with this one.
-     * Lets callers strip or replace {@code content} on the copy without mutating the original.
+     * A distinct instance with the same field values. The {@code content} list is copied, so
+     * mutating it (via {@link #setContent} or in place, e.g. {@code copy.getContent().clear()})
+     * never affects the original. Other fields (e.g. {@code properties}) are shared by reference,
+     * since callers treat them as immutable after construction.
      */
     public abstract MetadataAttribute copy();
 }

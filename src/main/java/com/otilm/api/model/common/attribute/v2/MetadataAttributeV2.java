@@ -15,6 +15,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -76,7 +77,7 @@ public class MetadataAttributeV2 extends MetadataAttribute {
         this.description = other.description;
         this.version = other.version;
         this.type = other.type;
-        this.content = other.content;
+        this.content = other.content == null ? null : new ArrayList<>(other.content);
         this.contentType = other.contentType;
         this.properties = other.properties;
     }
