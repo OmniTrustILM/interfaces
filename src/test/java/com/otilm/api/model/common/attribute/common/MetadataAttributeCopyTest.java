@@ -39,7 +39,7 @@ class MetadataAttributeCopyTest {
         // only the list container is a distinct instance
         assertSame(original.getProperties(), copy.getProperties());
         assertNotSame(original.getContent(), copy.getContent());
-        assertSame(contentElement, copy.getContent().getFirst());
+        assertSame(contentElement, copy.getContent().get(0));
     }
 
     @Test
@@ -69,7 +69,7 @@ class MetadataAttributeCopyTest {
         // only the list container is a distinct instance
         assertSame(original.getProperties(), copy.getProperties());
         assertNotSame(original.getContent(), copy.getContent());
-        assertSame(contentElement, copy.getContent().getFirst());
+        assertSame(contentElement, copy.getContent().get(0));
     }
 
     @Test
