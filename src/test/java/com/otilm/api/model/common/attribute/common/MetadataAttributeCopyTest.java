@@ -12,10 +12,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MetadataAttributeCloneTest {
+class MetadataAttributeCopyTest {
 
     @Test
-    void cloneV2_isDistinctInstance_withEqualFieldValues() {
+    void copyV2_isDistinctInstance_withEqualFieldValues() {
         MetadataAttributeV2 original = new MetadataAttributeV2();
         original.setUuid("uuid-1");
         original.setName("attr");
@@ -25,18 +25,18 @@ class MetadataAttributeCloneTest {
         original.setProperties(properties);
         original.setContent(List.of(new StringAttributeContentV2("value")));
 
-        MetadataAttributeV2 clone = (MetadataAttributeV2) original.clone();
+        MetadataAttributeV2 copy = original.copy();
 
-        assertNotSame(original, clone);
-        assertEquals(original.getUuid(), clone.getUuid());
-        assertEquals(original.getName(), clone.getName());
-        assertEquals(original.getContentType(), clone.getContentType());
-        assertEquals(original.getProperties(), clone.getProperties());
-        assertEquals(original.getContent(), clone.getContent());
+        assertNotSame(original, copy);
+        assertEquals(original.getUuid(), copy.getUuid());
+        assertEquals(original.getName(), copy.getName());
+        assertEquals(original.getContentType(), copy.getContentType());
+        assertEquals(original.getProperties(), copy.getProperties());
+        assertEquals(original.getContent(), copy.getContent());
     }
 
     @Test
-    void cloneV3_isDistinctInstance_withEqualFieldValues() {
+    void copyV3_isDistinctInstance_withEqualFieldValues() {
         MetadataAttributeV3 original = new MetadataAttributeV3();
         original.setUuid("uuid-2");
         original.setName("attr");
@@ -46,40 +46,40 @@ class MetadataAttributeCloneTest {
         original.setProperties(properties);
         original.setContent(List.of(new StringAttributeContentV3("value")));
 
-        MetadataAttributeV3 clone = (MetadataAttributeV3) original.clone();
+        MetadataAttributeV3 copy = original.copy();
 
-        assertNotSame(original, clone);
-        assertEquals(original.getUuid(), clone.getUuid());
-        assertEquals(original.getName(), clone.getName());
-        assertEquals(original.getContentType(), clone.getContentType());
-        assertEquals(original.getProperties(), clone.getProperties());
-        assertEquals(original.getContent(), clone.getContent());
+        assertNotSame(original, copy);
+        assertEquals(original.getUuid(), copy.getUuid());
+        assertEquals(original.getName(), copy.getName());
+        assertEquals(original.getContentType(), copy.getContentType());
+        assertEquals(original.getProperties(), copy.getProperties());
+        assertEquals(original.getContent(), copy.getContent());
     }
 
     @Test
-    void mutatingCloneContent_doesNotAffectOriginal() {
+    void mutatingCopyContent_doesNotAffectOriginal() {
         MetadataAttributeV2 original = new MetadataAttributeV2();
         original.setContentType(AttributeContentType.STRING);
         original.setContent(List.of(new StringAttributeContentV2("value")));
 
-        MetadataAttribute clone = original.clone();
-        clone.setContent(List.of());
+        MetadataAttribute copy = original.copy();
+        copy.setContent(List.of());
 
-        List<?> cloneContent = clone.getContent();
+        List<?> copyContent = copy.getContent();
         List<?> originalContent = original.getContent();
 
-        assertTrue(cloneContent.isEmpty());
+        assertTrue(copyContent.isEmpty());
         assertEquals(1, originalContent.size());
         assertEquals("value", ((StringAttributeContentV2) originalContent.get(0)).getData());
     }
 
     @Test
-    void clone_preservesRuntimeType() {
+    void copy_preservesRuntimeType() {
         MetadataAttributeV3 original = new MetadataAttributeV3();
         original.setContentType(AttributeContentType.STRING);
 
-        MetadataAttribute clone = original.clone();
+        MetadataAttribute copy = original.copy();
 
-        assertInstanceOf(MetadataAttributeV3.class, clone);
+        assertInstanceOf(MetadataAttributeV3.class, copy);
     }
 }

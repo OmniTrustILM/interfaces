@@ -77,6 +77,23 @@ public class MetadataAttributeV3 extends MetadataAttribute {
         type = AttributeType.META;
     }
 
+    public MetadataAttributeV3(MetadataAttributeV3 other) {
+        this.uuid = other.uuid;
+        this.name = other.name;
+        this.description = other.description;
+        this.version = other.version;
+        this.type = other.type;
+        this.content = other.content;
+        this.contentType = other.contentType;
+        this.properties = other.properties;
+        this.schemaVersion = other.schemaVersion;
+    }
+
+    @Override
+    public MetadataAttributeV3 copy() {
+        return new MetadataAttributeV3(this);
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
