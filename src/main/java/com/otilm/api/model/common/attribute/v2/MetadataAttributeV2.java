@@ -6,7 +6,6 @@ import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.content.*;
 import com.otilm.api.model.common.attribute.common.properties.MetadataAttributeProperties;
-import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -16,6 +15,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,6 +69,22 @@ public class MetadataAttributeV2 extends MetadataAttribute {
 
     public MetadataAttributeV2() {
         type = AttributeType.META;
+    }
+
+    public MetadataAttributeV2(MetadataAttributeV2 other) {
+        this.uuid = other.uuid;
+        this.name = other.name;
+        this.description = other.description;
+        this.version = other.version;
+        this.type = other.type;
+        this.content = other.content == null ? null : new ArrayList<>(other.content);
+        this.contentType = other.contentType;
+        this.properties = other.properties;
+    }
+
+    @Override
+    public MetadataAttributeV2 copy() {
+        return new MetadataAttributeV2(this);
     }
 
     @Override

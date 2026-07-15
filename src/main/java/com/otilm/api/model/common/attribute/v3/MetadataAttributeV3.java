@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -75,6 +76,23 @@ public class MetadataAttributeV3 extends MetadataAttribute {
 
     public MetadataAttributeV3() {
         type = AttributeType.META;
+    }
+
+    public MetadataAttributeV3(MetadataAttributeV3 other) {
+        this.uuid = other.uuid;
+        this.name = other.name;
+        this.description = other.description;
+        this.version = other.version;
+        this.type = other.type;
+        this.content = other.content == null ? null : new ArrayList<>(other.content);
+        this.contentType = other.contentType;
+        this.properties = other.properties;
+        this.schemaVersion = other.schemaVersion;
+    }
+
+    @Override
+    public MetadataAttributeV3 copy() {
+        return new MetadataAttributeV3(this);
     }
 
     @Override
