@@ -55,6 +55,12 @@ public interface CustomOidEntryController extends AuthProtectedController {
     @PostMapping(path = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     CustomOidEntryListResponseDto listCustomOidEntries(@RequestBody SearchRequestDto searchRequestDto);
 
+    @Operation(summary = "List built-in system OID entries, optionally filtered by category")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "System OID entries retrieved")})
+    @GetMapping(path = "/system", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<CustomOidEntryDetailResponseDto> listSystemOidEntries(
+            @Parameter(description = "Optional OID category filter") @RequestParam(required = false) OidCategory category);
+
     @Operation(operationId = "getCustomOidEntrySearchableFields", summary = "Get searchable filter fields for custom OID entries")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Searchable fields retrieved")})
     @GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
