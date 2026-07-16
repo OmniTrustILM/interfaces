@@ -177,9 +177,8 @@ public interface CertificateController extends AuthProtectedController {
             @ApiResponse(responseCode = "503", description = "Connector Communication Error", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/csr/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<BaseAttribute> getCsrGenerationAttributes(
-            @Parameter(description = "RA Profile UUID — when provided, the response is the resolved request-attribute set for this RA profile",
-                    schema = @Schema(type = "string", format = "uuid"))
-            @RequestParam(required = false) String raProfileUuid) throws NotFoundException, ConnectorException;
+            @Parameter(description = "RA Profile UUID — when provided, the response is the resolved request-attribute set for this RA profile")
+            @RequestParam(required = false) UUID raProfileUuid) throws NotFoundException, ConnectorException;
 
     @Operation(summary = "Get Certificate Content")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate content retrieved"),
