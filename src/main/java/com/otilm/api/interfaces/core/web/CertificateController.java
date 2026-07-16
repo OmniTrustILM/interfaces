@@ -164,10 +164,21 @@ public interface CertificateController extends AuthProtectedController {
     @GetMapping(path = "/{uuid}/validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     CertificateValidationResultDto getCertificateValidationResult(@Parameter(description = "Certificate UUID") @PathVariable UUID uuid) throws NotFoundException, CertificateException;
 
-    @Operation(summary = "Get CSR Generation Attributes")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "CSR Generation attributes retrieved")})
+    @Operation(
+            summary = "Get CSR Generation Attributes",
+            description = """
+                    Returns the request-attribute definitions available for building a certificate request.
+                    Without `raProfileUuid`: the editable platform default request-attribute set.
+                    With `raProfileUuid`: the resolved request-attribute set for that RA profile.""")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "CSR Generation attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                    examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
+            @ApiResponse(responseCode = "502", description = "Connector Error", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error", content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/csr/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BaseAttribute> getCsrGenerationAttributes();
+    List<BaseAttribute> getCsrGenerationAttributes(
+            @Parameter(description = "RA Profile UUID — when provided, the response is the resolved request-attribute set for this RA profile")
+            @RequestParam(required = false) UUID raProfileUuid) throws NotFoundException, ConnectorException;
 
     @Operation(summary = "Get Certificate Content")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate content retrieved"),
