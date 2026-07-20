@@ -17,6 +17,8 @@ import lombok.ToString;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Request body for the {@code POST /certificates/register} operator endpoint.
@@ -90,6 +92,22 @@ public class ClientCertificateRegistrationDto {
             description = "List of Custom Attributes"
     )
     private List<RequestAttribute> customAttributes;
+
+    @Schema(
+            description = "Optional UUID of the user to set as the certificate owner at registration. When "
+                    + "omitted, the registering user becomes the owner. The value set here is preserved when the "
+                    + "pre-registered certificate is later issued.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private String ownerUuid;
+
+    @Schema(
+            description = "Optional set of group UUIDs to associate with the certificate at registration. When "
+                    + "provided, it replaces any existing group set. The groups set here are preserved when the "
+                    + "pre-registered certificate is later issued.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Set<UUID> groupUuids;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
