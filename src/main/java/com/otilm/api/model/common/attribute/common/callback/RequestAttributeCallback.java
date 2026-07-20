@@ -69,6 +69,7 @@ public class RequestAttributeCallback {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("name", name)
                 .append("uuid", uuid)
+                .append("interfaceUuid", interfaceUuid)
                 .append("pathVariable", pathVariable)
                 .append("requestParameter", requestParameter)
                 .append("body", body)
