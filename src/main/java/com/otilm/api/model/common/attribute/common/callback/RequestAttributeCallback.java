@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -20,6 +21,13 @@ public class RequestAttributeCallback {
 
     @Schema(description = "UUID of the Attribute")
     private String uuid;
+
+    @Schema(
+            description = "Connector-interface row UUID the form was listed under. Identifies the interface version "
+                    + "the callback belongs to for parent-less (Attributes v2) forms.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private UUID interfaceUuid;
 
     @Schema(description = "Name of the Attribute",
             requiredMode = Schema.RequiredMode.REQUIRED)
@@ -61,6 +69,7 @@ public class RequestAttributeCallback {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("name", name)
                 .append("uuid", uuid)
+                .append("interfaceUuid", interfaceUuid)
                 .append("pathVariable", pathVariable)
                 .append("requestParameter", requestParameter)
                 .append("body", body)
