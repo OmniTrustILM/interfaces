@@ -118,6 +118,12 @@ public class CertificateDetailDto extends CertificateDto {
     @Schema(description = "List of revoke attributes")
     private List<ResponseAttribute> revokeAttributes = new ArrayList<>();
 
+    @Schema(description = "List of register attributes: the connector's register-operation attributes submitted when the certificate was pre-registered")
+    private List<ResponseAttribute> registerAttributes = new ArrayList<>();
+
+    @Schema(description = "List of request attributes submitted at registration: the operator-supplied request-attribute values that shaped the pre-registered identity")
+    private List<ResponseAttribute> registrationRequestAttributes = new ArrayList<>();
+
     @Schema(description = "List of related certificates")
     @Deprecated(since = "2.16.0", forRemoval = true)
     /**
