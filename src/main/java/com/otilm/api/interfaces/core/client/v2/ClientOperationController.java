@@ -251,6 +251,16 @@ public interface ClientOperationController extends AuthProtectedController {
 			@RequestBody List<RequestAttribute>attributes) throws ConnectorException, ValidationException, NotFoundException;
 
 	@Operation(
+			summary = "Get registration attributes",
+			description = "Return the list of attributes the client must populate when pre-registering a certificate through this RA profile. The list reflects the certificate authority's register-operation attribute schema."
+	)
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Attributes obtained") })
+	@GetMapping(path = "/attributes/register", produces = {"application/json"})
+	List<BaseAttribute> listRegisterCertificateAttributes(
+			@Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+			@Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid) throws ConnectorException, NotFoundException;
+
+	@Operation(
 			summary = "Revoke certificate",
 			description = "Revoke a certificate currently in state `ISSUED`. If the revocation is asynchronous, the certificate moves to state `PENDING_REVOKE` and must be confirmed once the revocation has been performed."
 	)
