@@ -12,7 +12,6 @@ import com.otilm.core.util.KeyStoreUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -40,7 +39,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
@@ -66,21 +64,22 @@ public abstract class BaseApiClient {
     private static final int CODEC_MAX_IN_MEMORY = 16 * 1024 * 1024;
 
     // Pool hygiene, fixed here because it is not deployment-specific. Connector servers typically
-    // drop keep-alive connections around 60s; idle connections are evicted (30s) before they go
-    // stale to avoid PrematureCloseException on reuse. maxIdleTime < the read-idle guard below so
-    // idle pooled connections are reclaimed by eviction rather than by that guard firing on them.
+    // drop keep-alive connections around 60s, so idle connections are evicted and capped in age to
+    // avoid reusing a server-closed connection (PrematureCloseException).
     private static final Duration POOL_MAX_IDLE = Duration.ofSeconds(30);
     private static final Duration POOL_MAX_LIFE = Duration.ofMinutes(5);
     private static final Duration POOL_EVICT_INTERVAL = Duration.ofSeconds(30);
     private static final Duration POOL_DISPOSE_INTERVAL = Duration.ofSeconds(120);
     private static final Duration POOL_DISPOSE_AFTER = Duration.ofSeconds(300);
 
-    // The tuned HttpClient is the single source the CERTIFICATE path derives from (via secure()),
-    // so per-connector TLS clients inherit the same pool and timeouts. Tuning is write-once: the
-    // first prepareWebClient(ClientTuning) wins, because rebuilding would orphan the live
-    // ConnectionProvider (Reactor-Netty pools are never disposed here).
+    // Tuning is applied once (first prepareWebClient wins); the tuned HttpClient is the single source
+    // the CERTIFICATE path derives from (via secure()), so per-connector TLS clients inherit the same
+    // pool and timeouts. baseHttpClient is built lazily on first use so a deployment that always
+    // supplies tuning never builds a throwaway default ConnectionProvider — an orphaned provider is
+    // never GC'd (its background eviction task keeps a strong reference to it forever).
     private static volatile ClientTuning appliedTuning;
-    private static volatile HttpClient baseHttpClient = buildHttpClient(ClientTuning.defaults());
+    private static volatile ConnectionProvider connectionProvider;
+    private static volatile HttpClient baseHttpClient;
 
     // Per-connector CERTIFICATE WebClients, keyed by connector UUID. The stored authMaterialHash
     // invalidates the entry when credentials rotate. Caching the built WebClient (not just the
@@ -176,19 +175,27 @@ public abstract class BaseApiClient {
      */
     WebClient certificateWebClient(ApiClientConnectorInfo connector) {
         String authHash = authMaterialHash(connector.getAuthAttributes());
-        CachedCertClient cached = certClientCache.get(connector.getUuid());
-        if (cached != null && cached.authHash().equals(authHash)) {
-            return cached.webClient();
+        String uuid = connector.getUuid();
+        if (uuid == null) {
+            // Not cacheable without a stable key (a ConcurrentHashMap rejects null keys anyway); build per request.
+            return buildCertificateWebClient(connector);
         }
+        // compute() builds at most once per (uuid, authHash): concurrent first-callers for the same
+        // connector serialize on the map bin instead of each building a distinct SslContext, which
+        // would briefly give one host two Reactor pool keys.
+        return certClientCache.compute(uuid, (key, existing) ->
+                existing != null && existing.authHash().equals(authHash)
+                        ? existing
+                        : new CachedCertClient(authHash, buildCertificateWebClient(connector))
+        ).webClient();
+    }
 
+    private WebClient buildCertificateWebClient(ApiClientConnectorInfo connector) {
         SslContext sslContext = createSslContext(connector.getAuthAttributes());
-        HttpClient certHttpClient = baseHttpClient.secure(spec -> spec.sslContext(sslContext));
-        WebClient certWebClient = webClient.mutate()
+        HttpClient certHttpClient = baseHttpClient().secure(spec -> spec.sslContext(sslContext));
+        return webClient.mutate()
                 .clientConnector(new ReactorClientHttpConnector(certHttpClient))
                 .build();
-
-        certClientCache.put(connector.getUuid(), new CachedCertClient(authHash, certWebClient));
-        return certWebClient;
     }
 
     private SslContext createSslContext(List<ResponseAttribute> attributes) {
@@ -280,7 +287,7 @@ public abstract class BaseApiClient {
      * (tests, and any consumer without deployment config) get {@link ClientTuning#defaults()}.
      */
     public static WebClient prepareWebClient() {
-        return buildWebClient(baseHttpClient);
+        return prepareWebClient(ClientTuning.defaults());
     }
 
     /**
@@ -292,15 +299,24 @@ public abstract class BaseApiClient {
     public static synchronized WebClient prepareWebClient(ClientTuning tuning) {
         if (appliedTuning == null) {
             appliedTuning = tuning;
-            baseHttpClient = buildHttpClient(tuning);
+            connectionProvider = buildConnectionProvider(tuning);
+            baseHttpClient = buildHttpClient(connectionProvider, tuning);
         } else if (!appliedTuning.equals(tuning)) {
             logger.warn("Connector WebClient already tuned; ignoring differing tuning request");
         }
         return buildWebClient(baseHttpClient);
     }
 
-    private static HttpClient buildHttpClient(ClientTuning tuning) {
-        ConnectionProvider provider = ConnectionProvider.builder("connector")
+    /** Lazily initialize with defaults if a client is used before any prepareWebClient call. */
+    private static synchronized HttpClient baseHttpClient() {
+        if (baseHttpClient == null) {
+            prepareWebClient();
+        }
+        return baseHttpClient;
+    }
+
+    private static ConnectionProvider buildConnectionProvider(ClientTuning tuning) {
+        return ConnectionProvider.builder("connector")
                 .maxConnections(tuning.maxConnections())
                 .pendingAcquireMaxCount(tuning.maxConnections() * 2)
                 .pendingAcquireTimeout(tuning.pendingAcquireTimeout())
@@ -310,14 +326,16 @@ public abstract class BaseApiClient {
                 .disposeInactivePoolsInBackground(POOL_DISPOSE_INTERVAL, POOL_DISPOSE_AFTER)
                 .lifo()
                 .build();
+    }
+
+    private static HttpClient buildHttpClient(ConnectionProvider provider, ClientTuning tuning) {
+        // responseTimeout is reactor-netty's own per-request read guard (added when the request is
+        // sent, removed when the response is received), so it fails fast on a connector that never
+        // responds without ever firing on an idle pooled connection. A mid-body stall after headers
+        // is bounded by the caller's transaction timeout rather than a persistent channel handler.
         return HttpClient.create(provider)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) tuning.connectTimeout().toMillis())
-                .responseTimeout(tuning.responseTimeout())
-                // responseTimeout stops applying once response headers arrive; this read-idle guard
-                // bounds a connector that returns headers then stalls mid-body, which would otherwise
-                // block() forever. It surfaces as ReadTimeoutException (mapped in processRequest).
-                .doOnConnected(conn -> conn.addHandlerLast(
-                        new ReadTimeoutHandler(tuning.responseTimeout().toMillis(), TimeUnit.MILLISECONDS)));
+                .responseTimeout(tuning.responseTimeout());
     }
 
     private static WebClient buildWebClient(HttpClient httpClient) {
@@ -335,9 +353,13 @@ public abstract class BaseApiClient {
      * Reset the static tuning and CERTIFICATE-client cache to defaults. Test-only seam so cases that
      * apply custom tuning do not leak into subsequent cases in the same JVM.
      */
-    static void resetConnectorClientForTest() {
+    static synchronized void resetConnectorClientForTest() {
+        if (connectionProvider != null) {
+            connectionProvider.dispose();
+        }
+        connectionProvider = null;
+        baseHttpClient = null;
         appliedTuning = null;
-        baseHttpClient = buildHttpClient(ClientTuning.defaults());
         certClientCache.clear();
     }
 
@@ -380,10 +402,11 @@ public abstract class BaseApiClient {
             } else if (unwrapped instanceof IOException
                     || unwrapped instanceof WebClientRequestException
                     || unwrapped instanceof io.netty.handler.timeout.TimeoutException
-                    || unwrapped instanceof TimeoutException) {
-                // Connect / response / read-idle / pool-acquire timeouts land here. Netty's timeout
-                // exceptions are not IOExceptions, and a read-idle timeout during the body phase is
-                // not wrapped in WebClientRequestException, so they are matched explicitly.
+                    || unwrapped instanceof TimeoutException
+                    || isPoolAcquireExhausted(unwrapped)) {
+                // Connect, response, and pool-acquire failures land here. Netty's timeout exceptions
+                // are not IOExceptions, and the pool "pending acquire limit" exception is a plain
+                // RuntimeException, so they are matched explicitly rather than rethrown raw.
                 logger.error(String.valueOf(unwrapped.getMessage()));
                 throw new ConnectorCommunicationException("Error in connector %s communication. URL: %s".formatted(connector.getName(), connector.getUrl()), unwrapped, connector);
             } else if (unwrapped instanceof ConnectorException ce) {
@@ -394,6 +417,16 @@ public abstract class BaseApiClient {
                 throw e;
             }
         }
+    }
+
+    /**
+     * Reactor-Netty's {@code PoolAcquireTimeoutException} extends {@link TimeoutException} (already
+     * matched), but {@code PoolAcquirePendingLimitException} — thrown when the pending-acquire queue
+     * is saturated — is a plain {@code RuntimeException}. Match it by simple name to avoid a
+     * compile-time dependency on Reactor-Netty's shaded internal pool package.
+     */
+    private static boolean isPoolAcquireExhausted(Throwable t) {
+        return "PoolAcquirePendingLimitException".equals(t.getClass().getSimpleName());
     }
 
     private static Mono<ClientResponse> handleHttpExceptions(ClientResponse clientResponse) {

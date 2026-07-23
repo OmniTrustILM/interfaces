@@ -67,9 +67,13 @@ class BaseApiClientTest {
 
     @AfterEach
     void tearDown() {
-        mockServer.stop();
-        // Custom tuning and the CERTIFICATE-client cache are static; reset so cases don't leak into each other.
-        BaseApiClient.resetConnectorClientForTest();
+        // Reset the static tuning/cache regardless of mockServer.stop() outcome, so state never leaks
+        // into the next test (which would make the tuned-timeout cases order-dependent).
+        try {
+            mockServer.stop();
+        } finally {
+            BaseApiClient.resetConnectorClientForTest();
+        }
     }
 
     @Test
@@ -287,6 +291,7 @@ class BaseApiClientTest {
 
     @Test
     void prepareRequest_slowResponse_failsFastWithinResponseTimeout() {
+        BaseApiClient.resetConnectorClientForTest(); // claim write-once tuning for this test
         WebClient tuned = BaseApiClient.prepareWebClient(
                 new ClientTuning(Duration.ofSeconds(1), Duration.ofMillis(500), 5, Duration.ofSeconds(1)));
         TestApiClient tunedClient = new TestApiClient(tuned);
@@ -307,6 +312,7 @@ class BaseApiClientTest {
 
     @Test
     void processRequest_responseTimeout_mappedToConnectorCommunicationException() {
+        BaseApiClient.resetConnectorClientForTest(); // claim write-once tuning for this test
         WebClient tuned = BaseApiClient.prepareWebClient(
                 new ClientTuning(Duration.ofSeconds(1), Duration.ofMillis(500), 5, Duration.ofSeconds(1)));
         TestApiClient tunedClient = new TestApiClient(tuned);
@@ -322,6 +328,23 @@ class BaseApiClientTest {
                                 .block(),
                         null,
                         connector));
+    }
+
+    @Test
+    void processRequest_poolAcquirePendingLimit_mappedToConnectorCommunicationException() {
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE, List.of());
+        // Reactor-Netty throws this (a plain RuntimeException) when the pending-acquire queue is
+        // saturated; a local stand-in with the same simple name exercises the name-based mapping.
+        Assertions.assertThrows(ConnectorCommunicationException.class, () ->
+                BaseApiClient.processRequest(req -> {
+                    throw new PoolAcquirePendingLimitException("pending acquire limit reached");
+                }, null, connector));
+    }
+
+    private static class PoolAcquirePendingLimitException extends RuntimeException {
+        PoolAcquirePendingLimitException(String message) {
+            super(message);
+        }
     }
 
     private List<ResponseAttribute> certAuthAttributes(String keyStorePassword, String trustStorePassword) throws Exception {
