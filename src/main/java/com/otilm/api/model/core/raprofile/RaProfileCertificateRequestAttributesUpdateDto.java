@@ -33,20 +33,24 @@ public class RaProfileCertificateRequestAttributesUpdateDto {
     @Valid
     private List<BaseAttribute> requestAttributes = new ArrayList<>();
 
-    @Schema(description = "How the static set combines with a connector-supplied set; defaults to MERGE when omitted",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "merge")
-    private AttributeSetMergeMode mergeMode;
+    @Schema(description = "How the static set combines with a connector-supplied set; currently only 'staticOnly' is supported",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "staticOnly")
+    private AttributeSetMergeMode mergeMode = AttributeSetMergeMode.STATIC_ONLY;
 
+    // Hidden until properly supported in following version
     @ArraySchema(arraySchema = @Schema(
             description = "Core-side value-source bindings to attach onto connector-supplied (or static) definitions by reference",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED))
     @Valid
+    @JsonIgnore
+    @Schema(hidden = true)
     private List<ValueSourceBindingDto> valueSourceBindings = new ArrayList<>();
 
     @Schema(description = "Whether an external CSR violating the resolved set is rejected (true) or accepted with warnings (false); null inherits the platform default",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean externalCsrValidationStrict;
 
+    // This check is dormant until valueSourceBindings is re-exposed
     /**
      * Each attribute may carry at most one value-source binding. Two bindings targeting the same attribute are ambiguous.
      */

@@ -57,15 +57,15 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
         RaProfileCertificateRequestAttributesUpdateDto back =
                 mapper.readValue(json, RaProfileCertificateRequestAttributesUpdateDto.class);
 
-        // then
-        assertEquals(1, back.getValueSourceBindings().size());
-        assertEquals(boundName, back.getValueSourceBindings().get(0).getAttributeName());
-        assertEquals(ValueSourceType.CONNECTOR_CALLBACK, back.getValueSourceBindings().get(0).getValueSourceType());
-        assertTrue(back.getExternalCsrValidationStrict());
+        // since it is hidden, it should not return it
+        // then — valueSourceBindings is hidden from JSON and strictness still round-trips
+        assertFalse(json.contains("valueSourceBindings"));
+        assertEquals(0, back.getValueSourceBindings().size());
+        assertEquals(Boolean.TRUE, back.getExternalCsrValidationStrict());
     }
 
     @Test
-    void omitsMergeMode_whenNull() throws Exception {
+    void omitsMergeModeIsStaticOnly_whenNull() throws Exception {
         // given — a DTO whose mergeMode was never set
         var dto = new RaProfileCertificateRequestAttributesUpdateDto();
         dto.setRequestAttributes(List.of());
@@ -74,7 +74,8 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
         var json = mapper.writeValueAsString(dto);
 
         // then
-        assertFalse(json.contains("mergeMode"));
+        assertTrue(json.contains("mergeMode"));
+        assertTrue(json.contains(AttributeSetMergeMode.STATIC_ONLY.getCode()));
     }
 
     @Test
