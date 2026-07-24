@@ -87,6 +87,10 @@ public abstract class BaseApiClient {
     // SslContext) keeps the Reactor-Netty pool key stable across requests — the pool key hashes the
     // SslProvider, so a fresh SslContext per request would give CERTIFICATE connectors no connection
     // reuse and an ever-growing pool map.
+    // The cache is process-wide, so it assumes every BaseApiClient shares one base WebClient (its
+    // filters/codecs) and one defaultTrustManagers set — which holds in core, where both are single
+    // beans injected into all clients. If per-client base configuration ever diverged, that config
+    // would need to be part of the cache key.
     private static final Map<String, CachedCertClient> certClientCache = new ConcurrentHashMap<>();
 
     private record CachedCertClient(String authHash, WebClient webClient) {
