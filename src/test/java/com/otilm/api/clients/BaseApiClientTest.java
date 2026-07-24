@@ -299,7 +299,7 @@ class BaseApiClientTest {
         TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE, List.of());
 
         long startMs = System.currentTimeMillis();
-        Assertions.assertThrows(Exception.class, () ->
+        Throwable thrown = Assertions.assertThrows(Exception.class, () ->
                 tunedClient.prepareRequest(HttpMethod.GET, connector, false)
                         .uri("http://localhost:" + mockServer.port() + "/slow")
                         .retrieve()
@@ -308,6 +308,22 @@ class BaseApiClientTest {
         long elapsedMs = System.currentTimeMillis() - startMs;
 
         Assertions.assertTrue(elapsedMs < 3000, "expected fail-fast under the 500ms response timeout, took " + elapsedMs + "ms");
+        // Ensure it failed for the intended reason (a timeout), not a URI/connect error that merely happened fast.
+        Assertions.assertTrue(hasTimeoutCause(thrown), "expected a response/read timeout, got: " + thrown);
+    }
+
+    private static boolean hasTimeoutCause(Throwable thrown) {
+        for (Throwable t = thrown; t != null; t = t.getCause()) {
+            if (t instanceof java.util.concurrent.TimeoutException
+                    || t instanceof io.netty.handler.timeout.TimeoutException
+                    || t.getClass().getSimpleName().toLowerCase().contains("timeout")) {
+                return true;
+            }
+            if (t == t.getCause()) {
+                break;
+            }
+        }
+        return false;
     }
 
     @Test

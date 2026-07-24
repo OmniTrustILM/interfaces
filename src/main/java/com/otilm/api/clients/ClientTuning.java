@@ -20,6 +20,21 @@ public record ClientTuning(
         int maxConnections,
         Duration pendingAcquireTimeout) {
 
+    public ClientTuning {
+        requirePositive(connectTimeout, "connectTimeout");
+        requirePositive(responseTimeout, "responseTimeout");
+        requirePositive(pendingAcquireTimeout, "pendingAcquireTimeout");
+        if (maxConnections <= 0) {
+            throw new IllegalArgumentException("maxConnections must be positive, was " + maxConnections);
+        }
+    }
+
+    private static void requirePositive(Duration value, String name) {
+        if (value == null || value.isNegative() || value.isZero()) {
+            throw new IllegalArgumentException(name + " must be a positive duration, was " + value);
+        }
+    }
+
     public static ClientTuning defaults() {
         // 35s response ~ authority connector per-call budget (30s) + margin; 3s connect fails fast on unreachable hosts.
         return new ClientTuning(Duration.ofSeconds(3), Duration.ofSeconds(35), 20, Duration.ofSeconds(10));

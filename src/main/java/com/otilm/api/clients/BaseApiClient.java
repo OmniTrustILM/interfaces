@@ -249,19 +249,34 @@ public abstract class BaseApiClient {
      * client. Hashing (rather than keying on the raw material) keeps secrets out of the cache map.
      */
     private static String authMaterialHash(List<ResponseAttribute> attributes) {
-        String material = String.join("\n",
-                String.valueOf(getStoreType(attributes, ATTRIBUTE_KEYSTORE_TYPE)),
-                String.valueOf(storeContent(attributes, ATTRIBUTE_KEYSTORE)),
-                String.valueOf(getStorePassword(attributes, ATTRIBUTE_KEYSTORE_PASSWORD)),
-                String.valueOf(getStoreType(attributes, ATTRIBUTE_TRUSTSTORE_TYPE)),
-                String.valueOf(storeContent(attributes, ATTRIBUTE_TRUSTSTORE)),
-                String.valueOf(getStorePassword(attributes, ATTRIBUTE_TRUSTSTORE_PASSWORD)));
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(material.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(digest);
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            // Feed each field to the digest directly (no concatenated copy of the keystore blobs) and
+            // length-prefix it, so absent/empty/adjacent values cannot alias one another.
+            updateField(digest, getStoreType(attributes, ATTRIBUTE_KEYSTORE_TYPE));
+            updateField(digest, storeContent(attributes, ATTRIBUTE_KEYSTORE));
+            updateField(digest, getStorePassword(attributes, ATTRIBUTE_KEYSTORE_PASSWORD));
+            updateField(digest, getStoreType(attributes, ATTRIBUTE_TRUSTSTORE_TYPE));
+            updateField(digest, storeContent(attributes, ATTRIBUTE_TRUSTSTORE));
+            updateField(digest, getStorePassword(attributes, ATTRIBUTE_TRUSTSTORE_PASSWORD));
+            return Base64.getEncoder().encodeToString(digest.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 not available", e);
         }
+    }
+
+    private static void updateField(MessageDigest digest, String value) {
+        if (value == null) {
+            digest.update((byte) 0);
+            return;
+        }
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        digest.update((byte) 1);
+        digest.update((byte) (bytes.length >>> 24));
+        digest.update((byte) (bytes.length >>> 16));
+        digest.update((byte) (bytes.length >>> 8));
+        digest.update((byte) bytes.length);
+        digest.update(bytes);
     }
 
     private static String storeContent(List<ResponseAttribute> attributes, String name) {
@@ -406,8 +421,10 @@ public abstract class BaseApiClient {
                     || isPoolAcquireExhausted(unwrapped)) {
                 // Connect, response, and pool-acquire failures land here. Netty's timeout exceptions
                 // are not IOExceptions, and the pool "pending acquire limit" exception is a plain
-                // RuntimeException, so they are matched explicitly rather than rethrown raw.
-                logger.error(String.valueOf(unwrapped.getMessage()));
+                // RuntimeException, so they are matched explicitly rather than rethrown raw. Log the
+                // type + message (the full cause rides on the ConnectorCommunicationException below);
+                // toString keeps message-less timeouts identifiable without spamming netty stacks.
+                logger.error("Connector {} communication failure: {}", connector.getName(), unwrapped.toString());
                 throw new ConnectorCommunicationException("Error in connector %s communication. URL: %s".formatted(connector.getName(), connector.getUrl()), unwrapped, connector);
             } else if (unwrapped instanceof ConnectorException ce) {
                 ce.setConnector(connector);
