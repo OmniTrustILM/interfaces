@@ -65,7 +65,7 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
     }
 
     @Test
-    void omitsMergeMode_whenNull() throws Exception {
+    void omitsMergeModeIsStaticOnly_whenNull() throws Exception {
         // given — a DTO whose mergeMode was never set
         var dto = new RaProfileCertificateRequestAttributesUpdateDto();
         dto.setRequestAttributes(List.of());
@@ -74,7 +74,8 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
         var json = mapper.writeValueAsString(dto);
 
         // then
-        assertFalse(json.contains("mergeMode"));
+        assertTrue(json.contains("mergeMode"));
+        assertTrue(json.contains(AttributeSetMergeMode.STATIC_ONLY.getCode()));
     }
 
     @Test
