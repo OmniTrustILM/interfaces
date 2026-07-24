@@ -38,6 +38,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
@@ -174,12 +175,13 @@ public abstract class BaseApiClient {
      * so the per-connector TLS client inherits the connection pool and timeouts.
      */
     WebClient certificateWebClient(ApiClientConnectorInfo connector) {
-        String authHash = authMaterialHash(connector.getAuthAttributes());
         String uuid = connector.getUuid();
         if (uuid == null) {
-            // Not cacheable without a stable key (a ConcurrentHashMap rejects null keys anyway); build per request.
+            // Not cacheable without a stable key (a ConcurrentHashMap rejects null keys anyway); build
+            // per request without hashing the auth material.
             return buildCertificateWebClient(connector);
         }
+        String authHash = authMaterialHash(connector.getAuthAttributes());
         // compute() builds at most once per (uuid, authHash): concurrent first-callers for the same
         // connector serialize on the map bin instead of each building a distinct SslContext, which
         // would briefly give one host two Reactor pool keys.
@@ -281,7 +283,11 @@ public abstract class BaseApiClient {
 
     private static String storeContent(List<ResponseAttribute> attributes, String name) {
         List<FileAttributeContentV2> list = AttributeDefinitionUtils.getAttributeContent(name, attributes, FileAttributeContentV2.class);
-        return list != null && !list.isEmpty() ? list.get(0).getData().getContent() : null;
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        var data = list.get(0).getData();
+        return data != null ? data.getContent() : null;
     }
 
     private static String getStoreType(List<ResponseAttribute> attributes, String name) {
@@ -312,6 +318,7 @@ public abstract class BaseApiClient {
      * than once per JVM.
      */
     public static synchronized WebClient prepareWebClient(ClientTuning tuning) {
+        Objects.requireNonNull(tuning, "tuning must not be null");
         if (appliedTuning == null) {
             appliedTuning = tuning;
             connectionProvider = buildConnectionProvider(tuning);
@@ -333,7 +340,7 @@ public abstract class BaseApiClient {
     private static ConnectionProvider buildConnectionProvider(ClientTuning tuning) {
         return ConnectionProvider.builder("connector")
                 .maxConnections(tuning.maxConnections())
-                .pendingAcquireMaxCount(tuning.maxConnections() * 2)
+                .pendingAcquireMaxCount(Math.multiplyExact(tuning.maxConnections(), 2))
                 .pendingAcquireTimeout(tuning.pendingAcquireTimeout())
                 .maxIdleTime(POOL_MAX_IDLE)
                 .maxLifeTime(POOL_MAX_LIFE)
@@ -349,7 +356,7 @@ public abstract class BaseApiClient {
         // responds without ever firing on an idle pooled connection. A mid-body stall after headers
         // is bounded by the caller's transaction timeout rather than a persistent channel handler.
         return HttpClient.create(provider)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) tuning.connectTimeout().toMillis())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(tuning.connectTimeout().toMillis()))
                 .responseTimeout(tuning.responseTimeout());
     }
 

@@ -33,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -316,7 +317,7 @@ class BaseApiClientTest {
         for (Throwable t = thrown; t != null; t = t.getCause()) {
             if (t instanceof java.util.concurrent.TimeoutException
                     || t instanceof io.netty.handler.timeout.TimeoutException
-                    || t.getClass().getSimpleName().toLowerCase().contains("timeout")) {
+                    || t.getClass().getSimpleName().toLowerCase(Locale.ROOT).contains("timeout")) {
                 return true;
             }
             if (t == t.getCause()) {
