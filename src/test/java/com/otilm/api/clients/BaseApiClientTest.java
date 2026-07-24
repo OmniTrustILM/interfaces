@@ -11,6 +11,7 @@ import com.otilm.api.model.common.attribute.common.content.data.SecretAttributeC
 import com.otilm.api.model.common.attribute.v2.content.FileAttributeContentV2;
 import com.otilm.api.model.common.attribute.v2.content.SecretAttributeContentV2;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
+import com.otilm.api.exception.ConnectorCommunicationException;
 import com.otilm.api.model.core.connector.AuthType;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import com.otilm.api.model.core.proxy.ProxyDto;
@@ -25,12 +26,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,7 +68,13 @@ class BaseApiClientTest {
 
     @AfterEach
     void tearDown() {
-        mockServer.stop();
+        // Reset the static tuning/cache regardless of mockServer.stop() outcome, so state never leaks
+        // into the next test (which would make the tuned-timeout cases order-dependent).
+        try {
+            mockServer.stop();
+        } finally {
+            BaseApiClient.resetConnectorClientForTest();
+        }
     }
 
     @Test
@@ -253,6 +262,130 @@ class BaseApiClientTest {
 
         Assertions.assertThrows(IllegalArgumentException.class, () ->
                 client.prepareRequest(HttpMethod.GET, connector, false));
+    }
+
+    @Test
+    void certificateWebClient_sameConnector_reusesCachedClientWithoutRebuildingSslContext() throws Exception {
+        List<ResponseAttribute> authAttributes = certAuthAttributes("clientPass", "clientTrustPass");
+        TestConnectorInfo connector = new TestConnectorInfo("https://localhost:9999", AuthType.CERTIFICATE, authAttributes);
+
+        WebClient first = client.certificateWebClient(connector);
+        WebClient second = client.certificateWebClient(connector);
+
+        // Same instance proves the SslContext (and its WebClient) was cached, not rebuilt per request.
+        Assertions.assertSame(first, second);
+    }
+
+    @Test
+    void certificateWebClient_rotatedCredentials_rebuildsClient() throws Exception {
+        List<ResponseAttribute> original = certAuthAttributes("clientPass", "clientTrustPass");
+        TestConnectorInfo connector = new TestConnectorInfo("https://localhost:9999", AuthType.CERTIFICATE, original);
+        WebClient first = client.certificateWebClient(connector);
+
+        // Same connector UUID, different keystore/truststore material -> cache entry must be invalidated.
+        List<ResponseAttribute> rotated = certAuthAttributes("clientPass", "clientTrustPass");
+        TestConnectorInfo rotatedConnector = new TestConnectorInfo("https://localhost:9999", AuthType.CERTIFICATE, rotated);
+        WebClient second = client.certificateWebClient(rotatedConnector);
+
+        Assertions.assertNotSame(first, second);
+    }
+
+    @Test
+    void prepareRequest_slowResponse_failsFastWithinResponseTimeout() {
+        BaseApiClient.resetConnectorClientForTest(); // claim write-once tuning for this test
+        WebClient tuned = BaseApiClient.prepareWebClient(
+                new ClientTuning(Duration.ofSeconds(1), Duration.ofMillis(500), 5, Duration.ofSeconds(1)));
+        TestApiClient tunedClient = new TestApiClient(tuned);
+        mockServer.stubFor(get(urlEqualTo("/slow")).willReturn(aResponse().withStatus(200).withFixedDelay(5000)));
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE, List.of());
+
+        long startMs = System.currentTimeMillis();
+        Throwable thrown = Assertions.assertThrows(Exception.class, () ->
+                tunedClient.prepareRequest(HttpMethod.GET, connector, false)
+                        .uri("http://localhost:" + mockServer.port() + "/slow")
+                        .retrieve()
+                        .toBodilessEntity()
+                        .block());
+        long elapsedMs = System.currentTimeMillis() - startMs;
+
+        Assertions.assertTrue(elapsedMs < 3000, "expected fail-fast under the 500ms response timeout, took " + elapsedMs + "ms");
+        // Ensure it failed for the intended reason (a timeout), not a URI/connect error that merely happened fast.
+        Assertions.assertTrue(hasTimeoutCause(thrown), "expected a response/read timeout, got: " + thrown);
+    }
+
+    private static boolean hasTimeoutCause(Throwable thrown) {
+        for (Throwable t = thrown; t != null; t = t.getCause()) {
+            if (t instanceof java.util.concurrent.TimeoutException
+                    || t instanceof io.netty.handler.timeout.TimeoutException
+                    || t.getClass().getSimpleName().toLowerCase(Locale.ROOT).contains("timeout")) {
+                return true;
+            }
+            if (t == t.getCause()) {
+                break;
+            }
+        }
+        return false;
+    }
+
+    @Test
+    void processRequest_responseTimeout_mappedToConnectorCommunicationException() {
+        BaseApiClient.resetConnectorClientForTest(); // claim write-once tuning for this test
+        WebClient tuned = BaseApiClient.prepareWebClient(
+                new ClientTuning(Duration.ofSeconds(1), Duration.ofMillis(500), 5, Duration.ofSeconds(1)));
+        TestApiClient tunedClient = new TestApiClient(tuned);
+        mockServer.stubFor(get(urlEqualTo("/slow")).willReturn(aResponse().withStatus(200).withFixedDelay(5000)));
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE, List.of());
+
+        Assertions.assertThrows(ConnectorCommunicationException.class, () ->
+                BaseApiClient.processRequest(
+                        req -> tunedClient.prepareRequest(HttpMethod.GET, connector, false)
+                                .uri("http://localhost:" + mockServer.port() + "/slow")
+                                .retrieve()
+                                .toBodilessEntity()
+                                .block(),
+                        null,
+                        connector));
+    }
+
+    @Test
+    void processRequest_poolAcquirePendingLimit_mappedToConnectorCommunicationException() {
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE, List.of());
+        // Reactor-Netty throws this (a plain RuntimeException) when the pending-acquire queue is
+        // saturated; a local stand-in with the same simple name exercises the name-based mapping.
+        Assertions.assertThrows(ConnectorCommunicationException.class, () ->
+                BaseApiClient.processRequest(req -> {
+                    throw new PoolAcquirePendingLimitException("pending acquire limit reached");
+                }, null, connector));
+    }
+
+    private static class PoolAcquirePendingLimitException extends RuntimeException {
+        PoolAcquirePendingLimitException(String message) {
+            super(message);
+        }
+    }
+
+    private List<ResponseAttribute> certAuthAttributes(String keyStorePassword, String trustStorePassword) throws Exception {
+        KeyPair clientKeyPair = generateKeyPair();
+        X509Certificate clientCert = generateCert(clientKeyPair, "client");
+        KeyPair serverKeyPair = generateKeyPair();
+        X509Certificate serverCert = generateCert(serverKeyPair, "localhost");
+
+        FileAttributeContentData ksData = new FileAttributeContentData();
+        ksData.setContent(Base64.getEncoder().encodeToString(buildPkcs12(clientKeyPair, clientCert, "client", keyStorePassword)));
+        ksData.setFileName("client.p12");
+
+        FileAttributeContentData tsData = new FileAttributeContentData();
+        tsData.setContent(Base64.getEncoder().encodeToString(buildTrustStore(serverCert, "server", trustStorePassword)));
+        tsData.setFileName("trust.p12");
+
+        return List.of(
+                responseAttribute("keyStoreType", AttributeContentType.STRING, new StringAttributeContentV2("PKCS12")),
+                responseAttribute("keyStore", AttributeContentType.FILE, new FileAttributeContentV2(null, ksData)),
+                responseAttribute("keyStorePassword", AttributeContentType.SECRET, new SecretAttributeContentV2(null, new SecretAttributeContentData(keyStorePassword))),
+                responseAttribute("trustStoreType", AttributeContentType.STRING, new StringAttributeContentV2("PKCS12")),
+                responseAttribute("trustStore", AttributeContentType.FILE, new FileAttributeContentV2(null, tsData)),
+                responseAttribute("trustStorePassword", AttributeContentType.SECRET, new SecretAttributeContentV2(null, new SecretAttributeContentData(trustStorePassword)))
+        );
     }
 
     private static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
