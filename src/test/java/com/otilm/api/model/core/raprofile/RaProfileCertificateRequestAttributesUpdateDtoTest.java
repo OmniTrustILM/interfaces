@@ -58,7 +58,10 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
                 mapper.readValue(json, RaProfileCertificateRequestAttributesUpdateDto.class);
 
         // since it is hidden, it should not return it
+        // then — valueSourceBindings is hidden from JSON and strictness still round-trips
+        assertFalse(json.contains("valueSourceBindings"));
         assertEquals(0, back.getValueSourceBindings().size());
+        assertEquals(Boolean.TRUE, back.getExternalCsrValidationStrict());
     }
 
     @Test

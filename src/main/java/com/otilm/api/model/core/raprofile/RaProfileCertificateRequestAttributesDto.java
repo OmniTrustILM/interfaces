@@ -28,7 +28,7 @@ public class RaProfileCertificateRequestAttributesDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED))
     private List<BaseAttribute> requestAttributes = new ArrayList<>();
 
-    @Schema(description = "How the static set combines with a connector-supplied set; always the effective mode. Currently only STATIC ONLY is supported.",
+    @Schema(description = "How the static set combines with a connector-supplied set; always the effective mode. Currently only `staticOnly` is supported.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private AttributeSetMergeMode mergeMode = AttributeSetMergeMode.STATIC_ONLY;
 

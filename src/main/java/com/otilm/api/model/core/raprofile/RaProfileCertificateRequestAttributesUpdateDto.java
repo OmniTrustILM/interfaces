@@ -33,7 +33,7 @@ public class RaProfileCertificateRequestAttributesUpdateDto {
     @Valid
     private List<BaseAttribute> requestAttributes = new ArrayList<>();
 
-    @Schema(description = "How the static set combines with a connector-supplied set; currently only 'STATIC ONLY' is supported",
+    @Schema(description = "How the static set combines with a connector-supplied set; currently only 'staticOnly' is supported",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "staticOnly")
     private AttributeSetMergeMode mergeMode;
 
@@ -50,6 +50,7 @@ public class RaProfileCertificateRequestAttributesUpdateDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean externalCsrValidationStrict;
 
+    // This check is dormant until valueSourceBindings is re-exposed
     /**
      * Each attribute may carry at most one value-source binding. Two bindings targeting the same attribute are ambiguous.
      */
