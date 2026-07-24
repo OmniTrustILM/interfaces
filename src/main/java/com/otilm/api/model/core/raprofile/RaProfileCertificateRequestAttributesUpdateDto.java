@@ -35,7 +35,7 @@ public class RaProfileCertificateRequestAttributesUpdateDto {
 
     @Schema(description = "How the static set combines with a connector-supplied set; currently only 'staticOnly' is supported",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "staticOnly")
-    private AttributeSetMergeMode mergeMode;
+    private AttributeSetMergeMode mergeMode = AttributeSetMergeMode.STATIC_ONLY;
 
     // Hidden until properly supported in following version
     @ArraySchema(arraySchema = @Schema(
