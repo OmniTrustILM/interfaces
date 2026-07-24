@@ -1,10 +1,10 @@
 package com.otilm.api.model.client.connector.v2;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Arrays;
@@ -33,7 +33,8 @@ public enum FeatureFlag implements IPlatformEnum {
     CERTIFICATE_REGISTRATION("certificateRegistration", "Certificate Registration", "Supports pre-registering a certificate's identity (Subject DN, SAN, extensions) at the upstream CA before a CSR exists", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
     CERTIFICATE_STATUS_POLLING("certificateStatusPolling", "Certificate Status Polling", "Supports being polled for asynchronous operation completion; the platform polls the status endpoint rather than relying on out-of-band/manual completion", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
     CERTIFICATE_REQUEST_STRUCTURED("certificateRequestStructured", "Structured Certificate Request", "Accepts the structured requestContent model (typed RDNs, SANs, extensions) on register/issue/renew instead of only the flat subjectDn/subjectAltName/extensions fields", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
-    CERTIFICATE_IDENTITY_OVERRIDE("certificateIdentityOverride", "Certificate Identity Override", "Applies an authoritative platform-supplied identity to a forwarded CSR per the CA technology (EJBCA End Entity override; CRMF raVerified), without the platform stripping or re-signing the CSR", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY));
+    CERTIFICATE_IDENTITY_OVERRIDE("certificateIdentityOverride", "Certificate Identity Override", "Applies an authoritative platform-supplied identity to a forwarded CSR per the CA technology (EJBCA End Entity override; CRMF raVerified), without the platform stripping or re-signing the CSR", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
+    KEY_OPERATION_POLLING("keyOperationPolling", "Key Operation Polling", "Supports being polled for asynchronous completion of key creation, key destruction and signing; the platform polls the status endpoint rather than relying on the operation completing inline", FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY));
 
     public enum FeatureFlagBehavior {
         ENFORCED,

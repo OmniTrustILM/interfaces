@@ -5,6 +5,8 @@ import com.otilm.api.model.core.auth.AttributeResource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -26,6 +28,16 @@ public class ResourceSecretContentData extends ResourceObjectContentData {
         this.uuid = uuid;
         this.name = name;
         this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("uuid", uuid)
+                .append("name", name)
+                .append("resource", getResource())
+                .append("content", "***")
+                .toString();
     }
 
 }

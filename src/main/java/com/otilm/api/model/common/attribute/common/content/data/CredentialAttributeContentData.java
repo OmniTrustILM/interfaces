@@ -31,7 +31,7 @@ public class CredentialAttributeContentData extends NameAndUuidDto {
                 .append("uuid", uuid)
                 .append("name", name)
                 .append("kind", kind)
-                .append("attributes", attributes)
+                .append("attributes", "***")
                 .toString();
     }
 }

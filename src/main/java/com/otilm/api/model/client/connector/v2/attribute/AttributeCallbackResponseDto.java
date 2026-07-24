@@ -15,6 +15,7 @@ import java.util.List;
 /**
  * Connector response to a callback. Exactly one arm is set: {@code content} (resolved dropdown options
  * for a DATA attribute) or {@code attributes} (runtime-injected GROUP children definitions).
+ * Neither arm may expose resolved credentials or secret values from the callback request context.
  *
  * <p><b>Why {@code content} is {@code BaseAttributeContentV3} (schema v3), not v2:</b> the version axes
  * are independent — this DTO belongs to the Attributes <i>v2</i> API (the common NG <i>interface</i>

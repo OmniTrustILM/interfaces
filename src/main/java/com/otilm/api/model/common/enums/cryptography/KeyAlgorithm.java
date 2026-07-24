@@ -1,10 +1,10 @@
 package com.otilm.api.model.common.enums.cryptography;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import java.util.Arrays;
 @Schema(enumAsRef = true)
 public enum KeyAlgorithm implements IPlatformEnum {
 
+    AES("AES", "AES", "Advanced Encryption Standard"),
     RSA("RSA", "RSA", "Rivest–Shamir–Adleman"),
     ECDSA("ECDSA", "ECDSA", "Elliptic Curve Digital Signature Algorithm"),
     FALCON("FALCON", "FALCON", "Fast Fourier lattice-based compact signatures over NTRU"),

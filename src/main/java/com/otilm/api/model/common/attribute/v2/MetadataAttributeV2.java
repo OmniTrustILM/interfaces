@@ -1,15 +1,19 @@
 package com.otilm.api.model.common.attribute.v2;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.AttributeType;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
-import com.otilm.api.model.common.attribute.v2.content.*;
 import com.otilm.api.model.common.attribute.common.properties.MetadataAttributeProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.otilm.api.model.common.attribute.v2.content.BaseAttributeContentV2;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -32,6 +36,7 @@ public class MetadataAttributeV2 extends MetadataAttribute {
 
     private String uuid;
 
+    @NotBlank(message = "metadata attribute name is required")
     private String name;
 
     private String description;
@@ -47,7 +52,8 @@ public class MetadataAttributeV2 extends MetadataAttribute {
     @Schema(
             description = "Content of the Attribute"
     )
-    private List<BaseAttributeContentV2<?>> content;
+    @NotEmpty(message = "metadata attribute content is required")
+    private List<@NotNull @Valid BaseAttributeContentV2<?>> content;
 
     /**
      * Type of the Attribute content
@@ -56,6 +62,7 @@ public class MetadataAttributeV2 extends MetadataAttribute {
             description = "Type of the Content",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @NotNull(message = "metadata attribute contentType is required")
     private AttributeContentType contentType;
 
     /**
@@ -65,6 +72,7 @@ public class MetadataAttributeV2 extends MetadataAttribute {
             description = "Properties of the Attributes",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @NotNull(message = "metadata attribute properties are required")
     private MetadataAttributeProperties properties;
 
     public MetadataAttributeV2() {
@@ -98,7 +106,8 @@ public class MetadataAttributeV2 extends MetadataAttribute {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof MetadataAttributeV2 that)) return false;
+        if (!(object instanceof MetadataAttributeV2 that))
+            return false;
         return Objects.equals(content, that.content) && contentType == that.contentType && Objects.equals(properties, that.properties);
     }
 

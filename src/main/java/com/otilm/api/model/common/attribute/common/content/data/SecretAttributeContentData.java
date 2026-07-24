@@ -35,9 +35,10 @@ public class SecretAttributeContentData implements AttributeContentData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SecretAttributeContentData)) return false;
-        SecretAttributeContentData that = (SecretAttributeContentData) o;
+        if (this == o)
+            return true;
+        if (!(o instanceof SecretAttributeContentData that))
+            return false;
         return Objects.equals(this.secret, that.secret);
     }
 
@@ -49,13 +50,14 @@ public class SecretAttributeContentData implements AttributeContentData {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("secret", secret)
+                .append("secret", "***")
                 .append("protectionLevel", protectionLevel)
                 .toString();
     }
 
     @Override
     public void validate() throws ValidationException {
-        if (secret == null) throw new ValidationException("Secret is not present in secret attribute content data");
+        if (secret == null)
+            throw new ValidationException("Secret is not present in secret attribute content data");
     }
 }
