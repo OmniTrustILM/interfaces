@@ -419,11 +419,12 @@ public abstract class BaseApiClient {
                     || unwrapped instanceof io.netty.handler.timeout.TimeoutException
                     || unwrapped instanceof TimeoutException
                     || isPoolAcquireExhausted(unwrapped)) {
-                // Connect, response, and pool-acquire failures land here. Netty's timeout exceptions
-                // are not IOExceptions, and the pool "pending acquire limit" exception is a plain
-                // RuntimeException, so they are matched explicitly rather than rethrown raw. Log the
-                // type + message (the full cause rides on the ConnectorCommunicationException below);
-                // toString keeps message-less timeouts identifiable without spamming netty stacks.
+                // Connect, response, and pool-acquire failures land here. Netty timeout exceptions
+                // are not IOExceptions, and the pool pending-acquire-limit exception is a plain
+                // RuntimeException, so they are matched explicitly rather than rethrown raw. We log
+                // the failure type and message. The full cause is preserved on the
+                // ConnectorCommunicationException thrown just below, and toString keeps a
+                // message-less timeout identifiable without spamming netty stacks.
                 logger.error("Connector {} communication failure: {}", connector.getName(), unwrapped.toString());
                 throw new ConnectorCommunicationException("Error in connector %s communication. URL: %s".formatted(connector.getName(), connector.getUrl()), unwrapped, connector);
             } else if (unwrapped instanceof ConnectorException ce) {
@@ -442,6 +443,7 @@ public abstract class BaseApiClient {
      * is saturated — is a plain {@code RuntimeException}. Match it by simple name to avoid a
      * compile-time dependency on Reactor-Netty's shaded internal pool package.
      */
+    @SuppressWarnings("java:S1872") // name match is intentional — see Javadoc; instanceof would couple to the shaded type
     private static boolean isPoolAcquireExhausted(Throwable t) {
         return "PoolAcquirePendingLimitException".equals(t.getClass().getSimpleName());
     }
