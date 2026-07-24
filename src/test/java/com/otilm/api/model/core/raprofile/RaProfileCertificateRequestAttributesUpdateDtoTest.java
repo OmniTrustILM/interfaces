@@ -57,11 +57,8 @@ class RaProfileCertificateRequestAttributesUpdateDtoTest {
         RaProfileCertificateRequestAttributesUpdateDto back =
                 mapper.readValue(json, RaProfileCertificateRequestAttributesUpdateDto.class);
 
-        // then
-        assertEquals(1, back.getValueSourceBindings().size());
-        assertEquals(boundName, back.getValueSourceBindings().get(0).getAttributeName());
-        assertEquals(ValueSourceType.CONNECTOR_CALLBACK, back.getValueSourceBindings().get(0).getValueSourceType());
-        assertTrue(back.getExternalCsrValidationStrict());
+        // since it is hidden, it should not return it
+        assertEquals(0, back.getValueSourceBindings().size());
     }
 
     @Test

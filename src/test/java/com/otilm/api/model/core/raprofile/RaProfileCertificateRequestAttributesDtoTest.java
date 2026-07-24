@@ -8,7 +8,6 @@ import java.util.List;
 
 import static com.otilm.util.builders.DataAttributeV3Builder.aDataAttribute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RaProfileCertificateRequestAttributesDtoTest {
 
@@ -49,10 +48,7 @@ class RaProfileCertificateRequestAttributesDtoTest {
         RaProfileCertificateRequestAttributesDto back =
                 mapper.readValue(json, RaProfileCertificateRequestAttributesDto.class);
 
-        // then
-        assertEquals(1, back.getValueSourceBindings().size());
-        assertEquals(boundUuid, back.getValueSourceBindings().get(0).getAttributeUuid());
-        assertEquals(ValueSourceType.STATIC_LIST, back.getValueSourceBindings().get(0).getValueSourceType());
-        assertTrue(back.getExternalCsrValidationStrict());
+        // value source binding is supposed to be hidden
+        assertEquals(0, back.getValueSourceBindings().size());
     }
 }
