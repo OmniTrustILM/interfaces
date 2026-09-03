@@ -17,7 +17,9 @@ import lombok.EqualsAndHashCode;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CryptographicAssetDetailDto extends CryptographicAssetDto {
 
-    @Schema(description = "Provenance of the asset's PQC verdict", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Provenance of the asset's PQC verdict. Absent until the first rule-set evaluation of "
+            + "this asset; the row-level pqcVerdict serves unknown until then",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CryptographicAssetVerdictDto verdict;
 
     @Schema(description = "Normalized filterable properties derived for the asset; absent when nothing is derivable",
