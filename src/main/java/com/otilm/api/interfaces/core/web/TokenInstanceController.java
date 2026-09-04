@@ -51,22 +51,27 @@ public interface TokenInstanceController extends AuthProtectedController {
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "200", description = "Attribute information retrieved"),
+            @ApiResponse(responseCode = "404", description = "Connector not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @Operation(summary = "List available token attributes for the specified connector")
     @GetMapping(path = "/{connectorUuid}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listTokenAttributes(@Parameter(description = "Connector UUID") @PathVariable UUID connectorUuid,
-            @Nullable @RequestParam String kind) throws ConnectorException, NotFoundException;
+            @Parameter(description = "Connector kind. Required for connectors based on version 1 of the connector "
+                    + "framework; omit for connectors based on version 2 (NG) of the connector framework.") @Nullable @RequestParam(
+                            required = false) String kind)
+            throws ConnectorException, NotFoundException;
 
     @Operation(summary = "Get Token Instance Detail")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token Instance Detail retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token Instance not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-
-            @ApiResponse(responseCode = "200", description = "Token Instance Detail retrieved"),
-            @ApiResponse(responseCode = "404", description = "Token Instance not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
     @GetMapping(path = "/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
     TokenInstanceDetailDto getTokenInstance(
             @Parameter(description = "UUID of the Token Instance") @PathVariable String uuid)
@@ -80,7 +85,7 @@ public interface TokenInstanceController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
 
             @ApiResponse(responseCode = "201", description = "Token Instance Created Successfully"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Token Instance, Connector or Credential not found",
@@ -98,7 +103,7 @@ public interface TokenInstanceController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
 
             @ApiResponse(responseCode = "200", description = "Token Instance Updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Token Instance not found",
@@ -180,21 +185,6 @@ public interface TokenInstanceController extends AuthProtectedController {
             throws ConnectorException, NotFoundException;
 
     // Token Instance related Attribute APIs
-
-    @Operation(summary = "List Token Profile Attributes")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "502", description = "Connector Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-
-            @ApiResponse(responseCode = "200", description = "Token Profile Attributes retrieved"),
-            @ApiResponse(responseCode = "404", description = "Token Instance not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
-    @GetMapping(path = "/{uuid}/tokenProfiles/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listTokenProfileAttributes(
-            @Parameter(description = "Token instance UUID") @PathVariable String uuid)
-            throws ConnectorException, NotFoundException;
 
     @Operation(summary = "List Token activation Attributes")
     @ApiResponses(value = {

@@ -11,6 +11,8 @@ import com.otilm.api.model.client.cryptography.tokenprofile.BulkTokenProfileKeyU
 import com.otilm.api.model.client.cryptography.tokenprofile.EditTokenProfileRequestDto;
 import com.otilm.api.model.client.cryptography.tokenprofile.TokenProfileKeyUsageRequestDto;
 import com.otilm.api.model.common.ErrorMessageDto;
+import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import com.otilm.api.model.core.cryptography.tokenprofile.TokenProfileDetailDto;
 import com.otilm.api.model.core.cryptography.tokenprofile.TokenProfileDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,17 +41,27 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping("/v1")
 @Tag(name = "Token Profile Management", description = "Token Profile Management API")
-@ApiResponses(value = {
-        @ApiResponse(responseCode = "502", description = "Connector Error",
-                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-        @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
 
 public interface TokenProfileController extends AuthProtectedController {
     @Operation(summary = "List of available Token Profiles")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Token Profiles retrieved")})
     @GetMapping(path = "/tokenProfiles", produces = MediaType.APPLICATION_JSON_VALUE)
     List<TokenProfileDto> listTokenProfiles(Optional<Boolean> enabled);
+
+    @Operation(summary = "List Token Profile Attributes")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token Profile Attributes retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token Instance not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
+    @GetMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/attributes",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listTokenProfileAttributes(
+            @Parameter(description = "Token instance UUID") @PathVariable String tokenInstanceUuid)
+            throws ConnectorException, NotFoundException;
 
     @Operation(summary = "Details of Token Profile")
     @ApiResponses(value = {
@@ -64,11 +76,15 @@ public interface TokenProfileController extends AuthProtectedController {
     @Operation(summary = "Create Token Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Token Profile added"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Token Instance not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
     @PostMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<TokenProfileDetailDto> createTokenProfile(
@@ -78,12 +94,16 @@ public interface TokenProfileController extends AuthProtectedController {
 
     @Operation(summary = "Edit Token Profile")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Token Profile updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "200", description = "Token Profile updated"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Token Profile or Token instance not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
     @PutMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     TokenProfileDetailDto editTokenProfile(
@@ -138,7 +158,7 @@ public interface TokenProfileController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Token Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Token Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/tokenProfiles", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -173,6 +193,22 @@ public interface TokenProfileController extends AuthProtectedController {
     // Usages
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
+
+    @Operation(summary = "List supported token profile key usages",
+            description = "Returns the key usages supported for the specified token instance")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Supported key usages retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token Instance not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
+    @PostMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfile/keyUsages",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<KeyUsage> listSupportedTokenProfileKeyUsages(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid)
+            throws NotFoundException, ConnectorException;
 
     @Operation(summary = "Update Key Usage")
     @ApiResponses(value = {

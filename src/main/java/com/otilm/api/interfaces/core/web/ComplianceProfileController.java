@@ -161,7 +161,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Compliance Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})
@@ -175,7 +175,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Force delete Compliance Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance Profiles forced to delete"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/force", produces = {"application/json"})

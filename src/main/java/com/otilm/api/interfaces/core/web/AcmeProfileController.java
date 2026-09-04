@@ -135,7 +135,7 @@ public interface AcmeProfileController extends AuthProtectedController {
     @Operation(summary = "Force delete multiple ACME Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "ACME Profiles forced to delete"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/delete/force", produces = {"application/json"})

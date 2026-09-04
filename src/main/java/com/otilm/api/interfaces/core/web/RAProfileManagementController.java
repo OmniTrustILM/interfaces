@@ -184,7 +184,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Delete multiple RA Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "RA Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -305,7 +305,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Deactivate SCEP for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "SCEP deactivated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",

@@ -148,7 +148,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Authority instances")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authority instances deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})
@@ -162,7 +162,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "Force delete multiple Authority instances")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authority instances forced to delete"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/force", produces = {"application/json"})

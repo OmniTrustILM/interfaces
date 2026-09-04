@@ -195,7 +195,7 @@ public interface ConnectorController extends AuthProtectedController {
     @Operation(summary = "Force Delete multiple Connectors")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Connectors deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/force", produces = {"application/json"})

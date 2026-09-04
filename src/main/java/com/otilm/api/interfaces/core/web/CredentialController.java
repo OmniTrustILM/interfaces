@@ -106,7 +106,7 @@ public interface CredentialController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Credentials")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Credentials deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})

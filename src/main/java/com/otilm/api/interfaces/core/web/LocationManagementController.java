@@ -94,7 +94,7 @@ public interface LocationManagementController extends AuthProtectedController {
     @Operation(summary = "Edit Location")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Location updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessible Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Location not found",
