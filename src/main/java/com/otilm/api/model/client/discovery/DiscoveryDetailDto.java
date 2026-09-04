@@ -6,6 +6,7 @@ import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryProgressDto;
 import com.otilm.api.model.core.auth.Resource;
+import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.workflows.TriggerDto;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -50,6 +51,13 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(description = "Name of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorName;
 
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "The connector interface this run is driven through, and so which generation drives it. "
+            + "Absent for a run against a legacy v1 connector, which declares no connector interface.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ConnectorInterfaceDto connectorInterface;
+
     @Schema(description = "List of Discovery Attributes", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> attributes = new ArrayList<>();
 
@@ -77,16 +85,11 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Resource> resources;
 
-    /**
-     * Progress counters reported by the connector, with an optional per-resource breakdown. Omitted when the run is
-     * against a v1 connector, or when the connector reports no progress at all. Individual counters inside it are
-     * independently optional — a connector that cannot estimate a total still reports what it has processed.
-     *
-     * <p>
-     * The prose lives here and not in {@code @Schema} for the hoisting reason in the comment above
-     * ({@code progressComponentsAreIdenticalFromEveryEntryPoint} pins it).
-     */
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "Progress counters reported by the connector, with an optional per-resource breakdown. "
+            + "Omitted for a v1 run and when the connector reports no progress. The counters inside are "
+            + "independently optional.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryProgressDto progress;
 
@@ -108,6 +111,15 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
             + "A non-zero count does not imply the run failed. Always 0 for runs against a v1 Discovery Provider.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
+
+    @Schema(description = "How many items this run has produced across every resource. Item sequences are dense, so "
+            + "this is an exact count rather than an estimate, and it counts what is available to read: the items "
+            + "listing returns exactly these. A connector that has produced more than has been collected reports "
+            + "the difference through progress, not here. Absent for a run against a v1 Discovery Provider, which "
+            + "numbers nothing — totalCertificatesDiscovered is that generation's count.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long itemsDiscovered;
 
     /**
      * <b>Provenance:</b> declared by the connector at initiate and refreshed on resume; derived by Core from the

@@ -44,8 +44,8 @@ class DiscoveryDetailDtoTest {
         DiscoveryResourceProgressDto keyProgress = new DiscoveryResourceProgressDto();
         keyProgress.setProcessed(3L);
         DiscoveryProgressDto progress = new DiscoveryProgressDto();
-        progress.setProcessed(11L);
-        progress.setTotalEstimate(40L);
+        progress.setTargetsProcessed(11L);
+        progress.setTargetsTotal(40L);
         progress.setPhase("scanning");
         progress.setByResource(Map.of(Resource.CRYPTOGRAPHIC_KEY, keyProgress));
 
@@ -66,8 +66,8 @@ class DiscoveryDetailDtoTest {
         assertTrue(json.contains("\"stoppable\":"), json);
 
         assertEquals(List.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY), back.getResources());
-        assertEquals(11L, back.getProgress().getProcessed());
-        assertEquals(40L, back.getProgress().getTotalEstimate());
+        assertEquals(11L, back.getProgress().getTargetsProcessed());
+        assertEquals(40L, back.getProgress().getTargetsTotal());
         assertEquals("scanning", back.getProgress().getPhase());
         assertEquals(3L, back.getProgress().getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProcessed());
         assertEquals(2L, back.getRunMessageCount());
@@ -119,9 +119,12 @@ class DiscoveryDetailDtoTest {
         assertTrue(json.contains("\"runMessageCount\":0"), json);
         assertEquals(0L, back.getRunMessageCount());
 
-        // progress is the one genuinely optional field, and it promises absence rather than null
+        // progress and connectorInterface are the genuinely optional fields, and both promise absence rather
+        // than null: a v1 run declares no connector interface, which is how a client tells the generations apart.
         assertFalse(json.contains("progress"), json);
         assertNull(back.getProgress());
+        assertFalse(json.contains("connectorInterface"), json);
+        assertNull(back.getConnectorInterface());
     }
 
     @Test

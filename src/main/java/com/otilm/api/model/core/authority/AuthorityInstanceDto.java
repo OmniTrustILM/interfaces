@@ -28,8 +28,13 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private NameAndUuidDto connector;
 
-    @Schema(description = "Connector Interface this Authority instance is bound to; null for legacy v1 connectors, "
-            + "which are identified by kind instead", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto. nullable rides along
+    // but OpenAPI 3.0 only honours it where a type sits in the same schema object, so the field states its own
+    // nullability in prose. The key is serialized as an explicit null rather than omitted.
+    @Schema(description = "The connector interface this authority instance is bound to. Sent as an explicit null "
+            + "for a legacy v1 connector, which is identified by kind instead; the key is always present.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     private ConnectorInterfaceDto connectorInterface;
 
     /**

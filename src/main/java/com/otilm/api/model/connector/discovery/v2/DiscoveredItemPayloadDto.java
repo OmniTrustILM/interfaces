@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.core.auth.Resource;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Resource-specific payload carried by a {@link DiscoveredItemDto}. {@code resource} is this interface's own
@@ -27,6 +30,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
                 @DiscriminatorMapping(value = Resource.Codes.CRYPTOGRAPHIC_KEY, schema = DiscoveredKeyDto.class)},
         oneOf = {DiscoveredCertificateDto.class, DiscoveredKeyDto.class})
 public interface DiscoveredItemPayloadDto {
+
+    /**
+     * The resources discovery can report — exactly those with a payload subtype registered above. A run may target a
+     * resource precisely when this contract can carry an item for it, so Core and the connector client read this set
+     * rather than keeping copies of it.
+     */
+    Set<Resource> DISCOVERABLE = Collections
+            .unmodifiableSet(EnumSet.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY));
 
     Resource getResource();
 }

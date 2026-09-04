@@ -28,11 +28,20 @@ import reactor.core.publisher.Flux;
 
 @RequestMapping("/v2/discoveryProvider/discoveries")
 @Tag(name = "Discovery Operations v2",
-        description = "Stateless discovery v2 run lifecycle: initiate a run, poll or stream its results, "
-                + "and control it (stop/resume/cancel). Every call carries the full runId + meta + "
-                + "attributes context; the connector is not required to hold any state between calls. A "
-                + "connector MUST answer 404 for any runId it does not recognize, including after a restart.")
+        description = "Stateless discovery v2 run lifecycle: initiate a run, poll or stream its results, and "
+                + "control it (stop/resume/cancel).\n\n"
+                + "Every call replays the run's identity, resources, handle and attributes, so you need keep "
+                + "no state between calls: rebuild the run from the request, including after a restart. "
+                + "Answer 404 only for a runId you cannot rebuild — it ends the run at once, and a stopped "
+                + "run may be waiting days for its resume.\n\n"
+                + "If you can rebuild the run but no longer hold the items a drain asks for, answer 404 "
+                + "rather than a later page: Core takes the highest sequence you return as its new cursor, so "
+                + "a page served across a gap loses everything in it.")
 public interface DiscoveryOperationController extends AuthProtectedConnectorController {
+
+    /** Shared by every body-taking operation: the scoped base makes runId and resources mandatory on all of them. */
+    String VALIDATION_FAILED = "The request body is invalid — a missing runId, an empty or unsupported "
+            + "resources set, or an invalid attribute (errorCode VALIDATION_FAILED)";
 
     @Operation(summary = "Initiate a discovery run",
             description = "Starts a new discovery run for the given resource types and attributes. runId is "
@@ -60,6 +69,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/status", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,12 +86,21 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "reached a terminal state, is the full ack. Until the full ack arrives, the connector "
                     + "MUST retain terminal-run state for at least 24 hours after the run reached a terminal "
                     + "state. Once the full ack arrives, the connector MAY discard all state it holds for the "
-                    + "run.")
+                    + "run.\n\n"
+                    + "A connector that bounds its result buffer should size it against the polling interval "
+                    + "rather than assume prompt collection. While items are flowing Core drains again "
+                    + "immediately, but a drain that returns nothing leaves the next one already scheduled, so "
+                    + "production resuming just after that drain waits out the interval before anything is "
+                    + "collected. It is tens of seconds by default and is Core-side configuration an operator "
+                    + "may widen, so treat it as a bound to cover rather than a fixed number.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Items retrieved; more indicates whether additional items remain beyond this page"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/results", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -104,6 +125,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                             schema = @Schema(implementation = DiscoveryEvent.class))),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/stream", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -144,6 +168,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "410",
                     description = "The checkpoint needed to resume this run is no longer available (errorCode CHECKPOINT_LOST); distinct from 404, which means the run was never known",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/resume", consumes = MediaType.APPLICATION_JSON_VALUE,

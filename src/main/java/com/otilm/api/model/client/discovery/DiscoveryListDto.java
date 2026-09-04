@@ -3,6 +3,7 @@ package com.otilm.api.model.client.discovery;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
+import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.search.AttributeProjectable;
 import com.otilm.api.model.core.search.FilterFieldSource;
@@ -37,6 +38,13 @@ public class DiscoveryListDto extends NameAndUuidDto implements AttributeProject
 
     @Schema(description = "Name of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorName;
+
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "The connector interface this run is driven through, and so which generation drives it. "
+            + "Absent for a run against a legacy v1 connector, which declares no connector interface.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ConnectorInterfaceDto connectorInterface;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = AttributeProjectable.ATTRIBUTE_VALUES_DESCRIPTION,

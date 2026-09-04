@@ -96,6 +96,7 @@ public enum Operation implements IPlatformEnum {
     UPDATE_OBJECT_PERMISSIONS("updateObjectPermissions", "Update object permissions"),
     SCHEDULE("schedule", "Schedule"),
     LIST_ATTRIBUTES("listAttributes", "List attributes"),
+    LIST_RESOURCES("listResources", "List resources"),
     VALIDATE_ATTRIBUTES("validateAttributes", "Validate attributes"),
     ATTRIBUTE_CALLBACK("attributeCallback", "Attribute callback"),
     UPDATE_ATTRIBUTE_RESOURCES("updateAttributeResources", "Update attribute resources"),
