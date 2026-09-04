@@ -5,6 +5,7 @@ import com.otilm.api.exception.AttributeException;
 import com.otilm.api.exception.NotFoundException;
 import com.otilm.api.interfaces.AuthProtectedController;
 import com.otilm.api.model.common.ErrorMessageDto;
+import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.UuidDto;
 import com.otilm.api.model.core.certificate.group.GroupDto;
 import com.otilm.api.model.core.certificate.group.GroupRequestDto;
@@ -82,4 +83,12 @@ public interface GroupController extends AuthProtectedController {
                     @ExampleObject(
                             value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> groupUuids);
 
+    @Operation(summary = "Get Group Users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Group users retrieved"),
+            @ApiResponse(responseCode = "404", description = "Group not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/{uuid}/users", produces = {"application/json"})
+    List<NameAndUuidDto> getGroupUsers(@Parameter(description = "Group UUID") @PathVariable String uuid)
+            throws NotFoundException;
 }
