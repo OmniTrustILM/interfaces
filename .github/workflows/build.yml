@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 # packages: read is required: pom.xml resolves the com.otilm parent from
-# maven.pkg.github.com. publish-pr escalates to packages: write.
+# maven.pkg.github.com.
 permissions:
   contents: read
   packages: read
@@ -39,35 +39,6 @@ jobs:
 
       # Staged here so the privileged job never runs Maven against PR-controlled
       # build configuration. Only the jar and a version-rewritten pom cross over.
-      - name: Stage the PR snapshot
-        if: github.event_name == 'pull_request'
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-          mkdir -p stage
-          # Read with ElementTree, not `mvn help:evaluate`: no parent resolution,
-          # so a registry hiccup cannot surface as a bad version.
-          BASE=$(python3 -c 'import xml.etree.ElementTree as ET; ns="http://maven.apache.org/POM/4.0.0"; print(ET.parse("pom.xml").getroot().find("{%s}version" % ns).text.strip())')
-          PRV="${BASE%-SNAPSHOT}-alpha-PR${PR_NUMBER}-SNAPSHOT"
-          cp "target/interfaces-${BASE}.jar" stage/interfaces.jar
-          # The staged pom carries the PR coordinate; deploy-file takes the GAV from it.
-          PRV="$PRV" python3 -c 'import os, xml.etree.ElementTree as ET; ns="http://maven.apache.org/POM/4.0.0"; ET.register_namespace("", ns); t=ET.parse("pom.xml"); t.getroot().find("{%s}version" % ns).text=os.environ["PRV"]; t.write("stage/pom.xml", xml_declaration=True, encoding="UTF-8")'
-          echo "$PRV" > stage/coordinate.txt
-          echo "staged $PRV"
-
-      - name: Upload the PR snapshot
-        # continue-on-error: `Check` is a required status check, and an artifact
-        # hiccup must not block a merge. publish-pr then fails with a clear
-        # "artifact not found" instead.
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: pr-snapshot
-          path: stage/
-          retention-days: 1
-          if-no-files-found: error
   build:
     if: github.event_name != 'pull_request'
     name: Build
@@ -97,107 +68,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         run: mvn -B verify -f pom.xml
-
-  publish-pr:
-    name: Publish PR snapshot
-    needs: check
-    # Both clauses are about read-only tokens, not bot heuristics: fork PRs get one
-    # regardless, and GitHub forces one on Dependabot runs whatever this workflow
-    # requests, so the deploy would 401 on every security update.
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.user.login != 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      # Trust model, because this reads like a hole and is not one. Write access to
-      # this repository already implies registry write: the package is
-      # repository-scoped, so a PAT publishes any version from a laptop, and a
-      # push-triggered workflow on any branch can grant itself this token. On a
-      # `pull_request` event the runner also executes the workflow file from the PR
-      # head, so nothing written here is an authorization boundary.
-      #
-      # What this job adds is narrower: PR-controlled Maven executing while the
-      # token is in scope. The steps below remove that - no checkout, and only
-      # deploy-file, which reads the pom as data. `publish-package.yml` still runs
-      # the same class of code against GPG and Central credentials after merge.
-      packages: write
-      pull-requests: read # the freshness step re-reads the PR
-    concurrency:
-      # No cancel-in-progress: aborting mid-deploy leaves the package version
-      # metadata on a half-uploaded build. The stale-head check below is the guard.
-      group: publish-pr-${{ github.event.pull_request.number }}
-      cancel-in-progress: false
-    steps:
-      # No checkout, and deliberately no ~/.m2 cache: `check` runs PR-controlled
-      # Maven and caches that directory, so a restored local repository could carry
-      # a planted resolver or plugin jar, which Maven trusts without re-verifying.
-      - name: Set up JDK 21
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
-        with:
-          java-version: 21
-          distribution: 'temurin'
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
-
-      # The coordinate is mutable, and job concurrency does not order runs by commit
-      # freshness - an older run finishing later would overwrite newer bytes.
-      - id: freshness
-        name: Stand down if the PR head has moved
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RUN_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          LIVE=$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.head.sha')
-          if [ "$LIVE" != "$RUN_HEAD_SHA" ]; then
-            echo "::notice::PR #$PR_NUMBER has moved from $RUN_HEAD_SHA to $LIVE; a newer run will publish it."
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Download the staged snapshot
-        if: steps.freshness.outputs.publish == 'true'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: pr-snapshot
-          path: ${{ runner.temp }}/stage
-
-      - name: Publish PR snapshot to GitHub Packages
-        if: steps.freshness.outputs.publish == 'true'
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          STAGE: ${{ runner.temp }}/stage
-        run: |
-          set -euo pipefail
-          cd "$RUNNER_TEMP"   # no project here, and .mvn/ discovery walks upwards
-          PRV=$(cat "$STAGE/coordinate.txt")
-
-          # Fully-qualified and version-pinned: the `deploy:` prefix resolves to
-          # whatever Central calls latest, currently a 4.0.0 beta. deploy-file reads
-          # the pom as data - no parent resolution, no plugins, no lifecycle.
-          # Files named explicitly so nothing in the archive can redirect them.
-          mvn -B -ntp org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy-file               -Durl=https://maven.pkg.github.com/omnitrustilm/interfaces               -DrepositoryId=github               -DpomFile="$STAGE/pom.xml"               -Dfile="$STAGE/interfaces.jar"               -DgeneratePom=false               -DretryFailedDeploymentCount=3
-          {
-            echo "### PR snapshot published"
-            echo ""
-            echo "Add this line to the body of the coupled \`core\` PR:"
-            echo ""
-            echo '```'
-            echo "Depends-On: $REPO#${PR_NUMBER}"
-            echo '```'
-            echo ""
-            echo "Coordinate: \`com.otilm:interfaces:$PRV\`"
-            echo ""
-            echo "Built from the PR **merged into main**, not the branch head."
-            echo ""
-            echo "> The \`Depends-On:\` marker is not read yet - tracking in OmniTrustILM/core#2191."
-          } >> "$GITHUB_STEP_SUMMARY"

@@ -8,20 +8,19 @@ on:
       - '*'
   workflow_dispatch:
       
-# Keyed by commit, not ref: the -M<n> step below is check-then-act, so two runs
-# over the same commit must serialize. Keying by ref would group every main push,
-# and only one run may be pending - a third push cancels the pending one, whose
-# commit then gets no -M coordinate. Never cancelled: aborts a run mid-deploy.
+# Keyed by commit: the -M<n> job below is check-then-act, so two runs over one
+# commit must serialize. A ref key would group every main push, and only one run
+# may be pending - a third would cancel the pending one, costing it its
+# coordinate. Never cancelled: that would abort a run mid-deploy.
 concurrency:
   group: publish-package-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   publish:
-    # workflow_dispatch carries no ref restriction; without this, any branch could
-    # deploy over the mainline SNAPSHOT to both Maven Central and GitHub Packages
-    # and rebuild the published docs from it. Tags stay allowed - check-version
-    # hard-fails a tag carrying a SNAPSHOT.
+    # workflow_dispatch carries no ref restriction, so without this any branch could
+    # deploy over the mainline SNAPSHOT to Central and GitHub Packages. Tags stay
+    # allowed - check-version hard-fails a tag carrying a SNAPSHOT.
     #
     # Not an authorization boundary: a dispatch runs the workflow file from the ref
     # it targets. Enforcement needs an Environment restricted to main.
@@ -135,9 +134,8 @@ jobs:
   # Immutable pin for a developer whose unrelated core PR is broken by a mainline
   # snapshot change.
   #
-  # Its own job so that it and the SNAPSHOT publish fail independently, and so a
-  # failed pin can be re-run alone - re-running `publish` would redeploy the
-  # SNAPSHOT from this run's commit over whatever has since been published.
+  # Its own job so a failed pin can be re-run alone: re-running `publish` would
+  # redeploy the SNAPSHOT from this run's commit over whatever came after it.
   #
   # Guarded on the ref, not ref_type: every branch holds a SNAPSHOT and would mint
   # an -M from its own commit count, claiming a number main will later compute.
@@ -195,19 +193,19 @@ jobs:
           esac
 
           # Ordinal orders, SHA addresses. ComparableVersion compares the ordinal
-          # before the suffix, so ordering holds and every form stays below the
-          # SNAPSHOT and the GA release. A mistyped SHA 404s; a mistyped ordinal
-          # would resolve a different real build.
+          # before the suffix, so every form stays below the SNAPSHOT and the GA
+          # release. A mistyped SHA 404s; a mistyped ordinal resolves a real build.
           MV="${BASE%-SNAPSHOT}-M$(git rev-list --count HEAD)-${GITHUB_SHA:0:8}"
 
           # A release coordinate the registry will not replace, so a re-run must
           # skip. 2xx/3xx skips, 404 publishes, anything else warns and falls
-          # through - the registry's own conflict response is the authority. Asset
-          # GETs redirect to a pre-signed blob host, so 3xx means the version
-          # exists. No -L: curl drops Authorization across hosts.
+          # through to let the registry's conflict response decide. Asset GETs
+          # redirect to a blob host, so 3xx means it exists. No -L: curl drops
+          # Authorization across hosts.
           POM_URL="https://maven.pkg.github.com/omnitrustilm/interfaces/com/otilm/interfaces/$MV/interfaces-$MV.pom"
           # curl writes 000 itself on a connection failure; `|| true` is only for set -e.
-          CODE=$(curl -sS --retry 3 --retry-connrefused -o /dev/null -w '%{http_code}'                    -u "$GITHUB_ACTOR:$GITHUB_TOKEN" "$POM_URL" || true)
+          CODE=$(curl -sS --retry 3 --retry-connrefused -o /dev/null -w '%{http_code}' \
+                   -u "$GITHUB_ACTOR:$GITHUB_TOKEN" "$POM_URL" || true)
           case "$CODE" in
             20[0-9]|30[0-9]) echo "$MV is already published (HTTP $CODE) - re-run, nothing to do"; exit 0 ;;
             404)             echo "$MV is not present; publishing" ;;
@@ -225,16 +223,18 @@ jobs:
           {
             echo "### Immutable build version"
             echo ""
-            echo "\`com.otilm:interfaces:$MV\` - pin this to escape a broken mainline snapshot:"
+            echo "\`com.otilm:interfaces:$MV\`"
+            echo ""
+            echo "Add to the body of a \`core\` PR that someone else's merge has reddened,"
+            echo "picking the newest pin below that merge:"
             echo ""
             echo '```'
             echo "Interfaces-Version: $MV"
             echo '```'
             echo ""
-            echo "Built from [\`${GITHUB_SHA:0:8}\`]($SERVER_URL/$REPO/commit/$GITHUB_SHA)."
+            echo "To drop it: delete the line and re-run all jobs."
             echo ""
-            echo "> Not read by \`core\` yet - the resolver is not live, so adding the line has"
-            echo "> no effect. Override in \`core/pom.xml\` by hand until it lands."
+            echo "<sub>Built from [\`${GITHUB_SHA:0:8}\`]($SERVER_URL/$REPO/commit/$GITHUB_SHA).</sub>"
             echo ""
             echo "The pin stays resolvable for at least 90 days. The ordinal orders these"
             echo "coordinates; it does not measure distance between them, and a release cut"

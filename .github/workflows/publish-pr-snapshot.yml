@@ -1,0 +1,180 @@
+name: Publish PR snapshot
+
+# Publishes <base>-alpha-PR<n>-SNAPSHOT so a coupled `core` PR can compile against
+# an unmerged interfaces change during review.
+#
+# Separate from `Build interfaces` because that workflow owns the required `Check`
+# context, and a label event there would emit a skipped `Check` - which counts as
+# passing. No job here may be named after a required context.
+#
+# `opened` is omitted: a PR created with the label also fires `labeled`.
+on:
+  pull_request:
+    branches: [main]
+    types: [labeled, synchronize, reopened]
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  stage:
+    name: Stage PR snapshot
+    # Either the label was just applied, or an already-labelled PR got a commit.
+    #
+    # Not an authorization boundary: labelling needs triage permission, and anyone
+    # with it can edit this file in their own PR. Fork PRs get a read-only token
+    # regardless, which is what the repository check is for.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (
+        (github.event.action == 'labeled' && github.event.label.name == 'publish-snapshot') ||
+        (github.event.action != 'labeled' &&
+         contains(github.event.pull_request.labels.*.name, 'publish-snapshot'))
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      # `needs:` does not span workflows, so this is what stops a snapshot being
+      # published from a PR whose tests fail.
+      - name: Verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B verify javadoc:jar -f pom.xml
+
+      # Staged here so the privileged job never runs Maven against PR-controlled
+      # build configuration. Only the jar and a version-rewritten pom cross over.
+      - name: Stage the snapshot
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          mkdir -p stage
+          # Read with ElementTree, not `mvn help:evaluate`: no parent resolution,
+          # so a registry hiccup cannot surface as a bad version.
+          BASE=$(python3 -c 'import xml.etree.ElementTree as ET; ns="http://maven.apache.org/POM/4.0.0"; print(ET.parse("pom.xml").getroot().find("{%s}version" % ns).text.strip())')
+          PRV="${BASE%-SNAPSHOT}-alpha-PR${PR_NUMBER}-SNAPSHOT"
+          cp "target/interfaces-${BASE}.jar" stage/interfaces.jar
+          # The staged pom carries the PR coordinate; deploy-file takes the GAV from it.
+          PRV="$PRV" python3 -c 'import os, xml.etree.ElementTree as ET; ns="http://maven.apache.org/POM/4.0.0"; ET.register_namespace("", ns); t=ET.parse("pom.xml"); t.getroot().find("{%s}version" % ns).text=os.environ["PRV"]; t.write("stage/pom.xml", xml_declaration=True, encoding="UTF-8")'
+          echo "$PRV" > stage/coordinate.txt
+          echo "staged $PRV"
+
+      - name: Upload the staged snapshot
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-snapshot
+          path: stage/
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: Publish PR snapshot
+    needs: stage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Adds no authorization: the package is repository-scoped, so write access
+      # already implies registry write. What it avoids is running PR-controlled
+      # Maven beside the token - no checkout, only deploy-file.
+      packages: write
+      pull-requests: read
+    concurrency:
+      # No cancel-in-progress: aborting mid-deploy leaves the package version
+      # metadata on a half-uploaded build. The stand-down below is the guard.
+      group: publish-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      # No checkout and no ~/.m2 cache: the stage job runs PR-controlled Maven, and
+      # a restored local repository could carry a planted resolver or plugin jar,
+      # which Maven trusts without re-verifying.
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      # Live, not from the payload: the payload is frozen at event time, so it still
+      # says "labelled" after the label is removed, and a re-run replays it. The
+      # coordinate is mutable, so a run that lost the race must not overwrite it.
+      - id: gate
+        name: Stand down if the PR moved, closed, or lost the label
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          read -r STATE LIVE LABELS < <(gh api "repos/$REPO/pulls/$PR_NUMBER" \
+            --jq '[.state, .head.sha, ([.labels[].name] | join(","))] | @tsv')
+
+          stand_down() { echo "::notice::$1"; echo "publish=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          [ "$STATE" = open ] || stand_down "PR #$PR_NUMBER is $STATE; not publishing."
+          case ",$LABELS," in
+            *,publish-snapshot,*) ;;
+            *) stand_down "PR #$PR_NUMBER no longer carries publish-snapshot; not publishing." ;;
+          esac
+          [ "$LIVE" = "$RUN_HEAD_SHA" ] || stand_down "PR #$PR_NUMBER moved from $RUN_HEAD_SHA to $LIVE; a newer run will publish it."
+
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Download the staged snapshot
+        if: steps.gate.outputs.publish == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pr-snapshot
+          path: ${{ runner.temp }}/stage
+
+      - name: Publish to GitHub Packages
+        if: steps.gate.outputs.publish == 'true'
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          STAGE: ${{ runner.temp }}/stage
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"   # no project here, and .mvn/ discovery walks upwards
+          PRV=$(cat "$STAGE/coordinate.txt")
+
+          # Version-pinned: the `deploy:` prefix resolves to whatever Central calls
+          # latest. deploy-file reads the pom as data - no parent resolution, no
+          # plugins, no lifecycle. Files named explicitly so nothing in the archive
+          # can redirect them.
+          mvn -B -ntp org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy-file \
+              -Durl=https://maven.pkg.github.com/omnitrustilm/interfaces \
+              -DrepositoryId=github \
+              -DpomFile="$STAGE/pom.xml" \
+              -Dfile="$STAGE/interfaces.jar" \
+              -DgeneratePom=false \
+              -DretryFailedDeploymentCount=3
+          {
+            echo "### PR snapshot published"
+            echo ""
+            echo "\`com.otilm:interfaces:$PRV\`"
+            echo ""
+            echo "Add to the \`core\` PR body:"
+            echo ""
+            echo '```'
+            echo "Depends-On: $REPO#${PR_NUMBER}"
+            echo '```'
+            echo ""
+            echo "To drop it: merge this PR, then re-run all jobs on the \`core\` PR - the marker"
+            echo "clears itself. No body edit, no push."
+            echo ""
+            echo "<sub>Built from the PR merged into main, not the branch head. Removing the"
+            echo "label stops refreshing this coordinate but does not delete it.</sub>"
+          } >> "$GITHUB_STEP_SUMMARY"
