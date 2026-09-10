@@ -46,7 +46,7 @@ public class TimeQualityConfigurationDto extends NameAndUuidDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT500MS", defaultValue = "PT500MS")
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "PT0.5S", defaultValue = "PT0.5S")
     private Duration maxClockDrift = Duration.ofMillis(500);
 
     @Schema(description = "Whether to guard against leap second anomalies",
