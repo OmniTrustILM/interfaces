@@ -70,7 +70,7 @@ Adding a field grows the generated all-args constructor, so any caller in anothe
 
 interface-documentation lints the generated OpenAPI with Redocly `recommended-strict`, which rejects a numeric schema carrying both `minimum` and `exclusiveMinimum` (or both `maximum` and `exclusiveMaximum`). swagger-core emits `@Min`/`@Max` and `@Schema(minimum/maximum)` as inclusive `minimum`/`maximum`, but `@Positive`/`@Negative` as `exclusiveMinimum`/`exclusiveMaximum`. A field carrying an inclusive bound *and* `@Positive`/`@Negative` emits both keywords and fails that lint — silently from here, since this repo's build stays green and the break only appears when the docs are regenerated.
 
-Use `@Min(n)`/`@Max(n)` on bounded numeric fields; keep `@Positive`/`@Negative` for fields with no other bound. (`@PositiveOrZero`/`@NegativeOrZero` are inclusive `0`, safe beside a matching `@Schema`.)
+Use `@Min(n)`/`@Max(n)` on integral fields; keep `@Positive`/`@Negative` for fields with no other bound. On `float`/`double`, where `@Min`/`@Max` don't fit, use `@DecimalMin`/`@DecimalMax` (inclusive) or `@Positive`/`@Negative` — the same one-bound-keyword-per-field rule applies. (`@PositiveOrZero`/`@NegativeOrZero` emit inclusive `0`, safe beside a matching `@Schema`.)
 
 ```java
 @Schema(description = "...", minimum = "1")
