@@ -3,30 +3,17 @@ package com.otilm.api.model.connector.discovery.v2;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.core.auth.Resource;
-import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Resource-specific payload carried by a {@link DiscoveredItemDto}. {@code resource} is this interface's own
- * discriminator, declared on each subtype ({@link DiscoveredCertificateDto}, {@link DiscoveredKeyDto}) rather than on
- * the enclosing item, since OpenAPI's discriminator requires the property to be present in every {@code oneOf}
- * subschema.
+ * Resource-specific payload carried by a {@link DiscoveredItemDto}, bound by Jackson on the {@code resource}
+ * discriminator. The schema it publishes is {@link DiscoveredItemPayloadInterface}.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "resource",
         visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DiscoveredCertificateDto.class, name = Resource.Codes.CERTIFICATE),
         @JsonSubTypes.Type(value = DiscoveredKeyDto.class, name = Resource.Codes.CRYPTOGRAPHIC_KEY)})
-@Schema(name = "DiscoveredItemPayload",
-        description = "Resource-specific payload of a discovered item. The required resource property is "
-                + "the discriminator: it carries the resource's wire code and selects which concrete "
-                + "payload shape this object is. Each concrete shape fixes it to its own value.",
-        type = "object", discriminatorProperty = "resource",
-        discriminatorMapping = {
-                @DiscriminatorMapping(value = Resource.Codes.CERTIFICATE, schema = DiscoveredCertificateDto.class),
-                @DiscriminatorMapping(value = Resource.Codes.CRYPTOGRAPHIC_KEY, schema = DiscoveredKeyDto.class)},
-        oneOf = {DiscoveredCertificateDto.class, DiscoveredKeyDto.class})
-public interface DiscoveredItemPayloadDto {
-
-    Resource getResource();
+@Schema(implementation = DiscoveredItemPayloadInterface.class)
+public interface DiscoveredItemPayloadDto extends DiscoveredItemPayloadInterface {
 }

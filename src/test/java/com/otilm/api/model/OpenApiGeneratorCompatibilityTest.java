@@ -1,5 +1,6 @@
 package com.otilm.api.model;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.otilm.api.model.client.certificate.CertificateImportRequestDto;
 import com.otilm.api.model.client.certificate.CertificateImportResponseDto;
 import com.otilm.api.model.client.certificate.CertificateKeystoreRequestDto;
@@ -15,12 +16,16 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyResultRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMaterialV2Dto;
+import com.otilm.api.model.connector.discovery.v2.DiscoveredItemPayloadInterface;
 import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceDetailDto;
 import com.otilm.api.model.core.cryptography.tokenprofile.TokenProfileDetailDto;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Schema;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -35,6 +40,10 @@ import org.junit.jupiter.api.Test;
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertLanguageNeutral;
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertNoJargon;
 import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schemas;
+import static com.otilm.api.testsupport.PublishedUnions.arms;
+import static com.otilm.api.testsupport.PublishedUnions.declaringClasses;
+import static com.otilm.api.testsupport.PublishedUnions.publishedName;
+import static com.otilm.api.testsupport.PublishedUnions.publishedSchemaName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,6 +53,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Holds the key-transfer schemas to what an OpenAPI generator can consume without hand edits: an untyped property, a
  * dangling reference or a name two schemas claim becomes broken generated code rather than a build failure here.
  * Running the generators themselves needs the assembled document; {@code scripts/openapi-generator-check.sh} does that.
+ *
+ * <p>
+ * {@link #noChildOfAPublishedUnionComposesTheUnionItBelongsTo()} is the one invariant here not scoped to those roots:
+ * it reaches every union the model package declares.
+ * </p>
  */
 class OpenApiGeneratorCompatibilityTest {
 
@@ -55,6 +69,14 @@ class OpenApiGeneratorCompatibilityTest {
                     CertificateImportRequestDto.class, CertificateImportResponseDto.class,
                     CertificateKeystoreRequestDto.class, KeyItemDetailDto.class, TokenInstanceDetailDto.class,
                     TokenProfileDetailDto.class);
+
+    /**
+     * {@code ResponseMetadata} binds its version subtypes under "2" and "3" while both the published mapping and the
+     * wire value its discriminator carries are "v2" and "v3", so no value it publishes resolves to a subtype at all.
+     * Correcting that changes what the metadata contract binds, so it is pinned as the one divergence rather than
+     * exempted: repairing the registry fails this too, and takes the entry with it.
+     */
+    private static final Set<String> KNOWN_DIVERGENT_MAPPINGS = Set.of("ResponseMetadataDto");
 
     /** Schemas these contracts introduce. Anything else a root pulls in belongs to a contract of its own. */
     private static final Set<String> CONTRIBUTED_SCHEMAS = Set
@@ -256,6 +278,124 @@ class OpenApiGeneratorCompatibilityTest {
         });
     }
 
+    /**
+     * Every child has to be a shape a client can build — its own fields, and the discriminator among them wherever the
+     * union declares one — rather than a composition of the union it belongs to, which is the cycle
+     * {@link DiscoveredItemPayloadInterface} describes.
+     */
+    @Test
+    void noChildOfAPublishedUnionComposesTheUnionItBelongsTo() {
+        Set<String> broken = new TreeSet<>();
+        Set<String> checked = new TreeSet<>();
+
+        for (Class<?> declaring : declaringClasses()) {
+            Map<String, Schema> schemas = openApi31Schemas(declaring);
+            schemas.forEach((union, schema) -> {
+                if (schema.getOneOf() == null) {
+                    return;
+                }
+                checked.add(union);
+                namedChildren(schema)
+                        .forEach(child -> auditChild(schemas, union, child, schema.getDiscriminator(), broken));
+            });
+        }
+
+        assertTrue(broken.isEmpty(), () -> "children that a client generator cannot resolve: " + broken);
+        assertReachedEveryDeclaredUnion(checked);
+    }
+
+    /**
+     * A union registers its arms twice — {@code @JsonSubTypes} for Jackson, {@code discriminatorMapping} for the schema
+     * — and once the schema is published from an interface of its own the two sit in different files. Editing one and
+     * forgetting the other publishes a union that does not match what binds, so the expected mapping is derived from
+     * the registry rather than restated.
+     */
+    @Test
+    void noPublishedMappingDiffersFromTheSubtypesJacksonBinds() {
+        Map<String, String> drifted = new TreeMap<>();
+        Set<String> checked = new TreeSet<>();
+
+        for (Class<?> declaring : declaringClasses()) {
+            String union = publishedName(declaring);
+            Map<String, String> registered = jacksonMapping(declaring);
+            Schema<?> published = openApi31Schemas(declaring).get(union);
+            if (registered.isEmpty() || published == null || published.getDiscriminator() == null) {
+                continue;
+            }
+            checked.add(union);
+            if (!registered.equals(published.getDiscriminator().getMapping())) {
+                drifted
+                        .put(union, "Jackson binds " + registered + ", the document publishes "
+                                + published.getDiscriminator().getMapping());
+            }
+        }
+
+        assertEquals(KNOWN_DIVERGENT_MAPPINGS, drifted.keySet(),
+                () -> "unions whose published mapping is not what Jackson binds: " + drifted);
+        assertFalse(checked.isEmpty(), "no union with a Jackson registry was reached at all");
+    }
+
+    /**
+     * The registry the arms are actually bound by, keyed by wire code. Empty when the arms are resolved some other way:
+     * the nearest registry above them then binds types that are not these arms, as it does for a union nested inside
+     * another one, whose second level is a custom deserializer.
+     */
+    private static Map<String, String> jacksonMapping(Class<?> declaring) {
+        List<Class<?>> arms = arms(declaring);
+        JsonSubTypes registry = arms.isEmpty() ? null : nearestRegistryAbove(arms.get(0));
+        if (registry == null) {
+            return Map.of();
+        }
+        Map<String, String> registered = new LinkedHashMap<>();
+        for (JsonSubTypes.Type type : registry.value()) {
+            registered.put(type.name(), "#/components/schemas/" + publishedSchemaName(type.value()));
+        }
+        if (!new TreeSet<>(registered.values()).equals(armReferences(arms))) {
+            return Map.of();
+        }
+        return registered;
+    }
+
+    private static Set<String> armReferences(List<Class<?>> arms) {
+        Set<String> references = new TreeSet<>();
+        arms.forEach(arm -> references.add("#/components/schemas/" + publishedSchemaName(arm)));
+        return references;
+    }
+
+    /** Breadth first, so a union nested inside another one finds its own level before the outer one. */
+    private static JsonSubTypes nearestRegistryAbove(Class<?> arm) {
+        Deque<Class<?>> pending = new ArrayDeque<>(supertypesOf(arm));
+        while (!pending.isEmpty()) {
+            Class<?> supertype = pending.removeFirst();
+            JsonSubTypes registry = supertype.getDeclaredAnnotation(JsonSubTypes.class);
+            if (registry != null) {
+                return registry;
+            }
+            pending.addAll(supertypesOf(supertype));
+        }
+        return null;
+    }
+
+    private static List<Class<?>> supertypesOf(Class<?> type) {
+        List<Class<?>> supertypes = new ArrayList<>(List.of(type.getInterfaces()));
+        if (type.getSuperclass() != null) {
+            supertypes.add(type.getSuperclass());
+        }
+        return supertypes;
+    }
+
+    /**
+     * A union that stops being reachable covers nothing while the guard above still passes, which is the failure mode
+     * the per-family tests kept hitting.
+     */
+    private static void assertReachedEveryDeclaredUnion(Set<String> checked) {
+        Set<String> unreached = new TreeSet<>();
+        declaringClasses().forEach(declaring -> unreached.add(publishedName(declaring)));
+        unreached.removeAll(checked);
+
+        assertTrue(unreached.isEmpty(), () -> "unions this module declares that the scan never reached: " + unreached);
+    }
+
     private static boolean isBlank(String text) {
         return text == null || text.isBlank();
     }
@@ -280,6 +420,48 @@ class OpenApiGeneratorCompatibilityTest {
             return schema.getType();
         }
         return schema.getTypes() == null || schema.getTypes().isEmpty() ? null : schema.getTypes().iterator().next();
+    }
+
+    private static void auditChild(Map<String, Schema> schemas, String union, String child, Discriminator discriminator,
+            Set<String> broken) {
+        Schema<?> arm = schemas.get(child);
+        String where = union + " -> " + child;
+        if (arm == null) {
+            broken.add(where + ": the union maps a child the document does not carry");
+            return;
+        }
+        if (arm.getAllOf() != null) {
+            broken.add(where + ": the child composes its own union with allOf");
+            return;
+        }
+        // A child that is itself a union carries no properties; it is audited under its own name instead.
+        if (arm.getOneOf() != null) {
+            return;
+        }
+        if (arm.getProperties() == null) {
+            broken.add(where + ": the child declares no properties of its own");
+        } else if (discriminator != null && !arm.getProperties().containsKey(discriminator.getPropertyName())) {
+            broken.add(where + ": the child does not declare " + discriminator.getPropertyName() + " itself");
+        }
+    }
+
+    /** Every child the union names, whether the {@code mapping} or the {@code oneOf} list names it. */
+    private static Set<String> namedChildren(Schema<?> union) {
+        Set<String> children = new TreeSet<>();
+        if (union.getDiscriminator() != null && union.getDiscriminator().getMapping() != null) {
+            union.getDiscriminator().getMapping().values().forEach(reference -> children.add(schemaName(reference)));
+        }
+        union
+                .getOneOf()
+                .stream()
+                .map(Schema::get$ref)
+                .filter(Objects::nonNull)
+                .forEach(reference -> children.add(schemaName(reference)));
+        return children;
+    }
+
+    private static String schemaName(String reference) {
+        return reference.substring(reference.lastIndexOf('/') + 1);
     }
 
     private static void collectReferences(Schema<?> schema, Set<String> into) {

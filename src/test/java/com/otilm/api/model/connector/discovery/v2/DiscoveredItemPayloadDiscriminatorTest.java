@@ -108,9 +108,9 @@ class DiscoveredItemPayloadDiscriminatorTest {
 
     /**
      * A property with a getter and no setter is the shape swagger-core publishes as {@code readOnly}, which would tell
-     * every generator the discriminator must not be sent in a request body. It resolves through the base interface's
-     * own accessor here, so it does not - but that is a fact about the generator, not about this contract, so it is
-     * pinned rather than trusted.
+     * every generator the discriminator must not be sent in a request body. It does not here - but that is a fact about
+     * the generator, not about this contract, so it is pinned rather than trusted. Each subtype publishes the
+     * discriminator itself, so it is checked there rather than on the union.
      */
     @Test
     void theDiscriminatorStaysRequiredAndWritableInTheGeneratedSchema() {
@@ -121,12 +121,9 @@ class DiscoveredItemPayloadDiscriminatorTest {
             assertNotNull(sub, "expected a generated schema named " + subtype + "; found " + schemas.keySet());
             assertTrue(sub.getRequired().contains("resource"),
                     subtype + " must still publish resource as required; was " + sub.getRequired());
+            assertNotEquals(Boolean.TRUE, sub.getProperties().get("resource").getReadOnly(),
+                    "the discriminator must not become readOnly: connectors send it in request bodies");
         }
-
-        Schema<?> base = schemas.get("DiscoveredItemPayload");
-        Schema<?> resource = base.getProperties().get("resource");
-        assertNotEquals(Boolean.TRUE, resource.getReadOnly(),
-                "the discriminator must not become readOnly: connectors send it in request bodies");
     }
 
     /**

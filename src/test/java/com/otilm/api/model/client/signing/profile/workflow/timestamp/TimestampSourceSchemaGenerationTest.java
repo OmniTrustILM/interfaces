@@ -1,14 +1,17 @@
 package com.otilm.api.model.client.signing.profile.workflow.timestamp;
 
-import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
+import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schemas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -21,6 +24,16 @@ class TimestampSourceSchemaGenerationTest {
     private static final String RESPONSE_ARM = "InternalTimestampSourceDto";
     private static final String REQUEST_BASE = "TimestampSourceRequestDto";
     private static final String REQUEST_ARM = "InternalTimestampSourceRequestDto";
+
+    /** The union is a {@code oneOf} over its arms, so an arm that composes it is a cycle no generator can express. */
+    private static final String COMPOSITION_IS_A_CYCLE = "an arm must not compose the union it belongs to";
+
+    /**
+     * The arm declares {@code type} with a getter and no mutator, the shape swagger-core publishes as {@code readOnly}
+     * — which would tell a generated client not to send the discriminator the union requires.
+     */
+    private static final String DISCRIMINATOR_STAYS_WRITABLE = "the discriminator must stay writable: it is sent in a "
+            + "request body";
 
     @Test
     void theResponseUnionCarriesADiscriminatorWithMapping() {
@@ -63,21 +76,25 @@ class TimestampSourceSchemaGenerationTest {
     }
 
     @Test
-    void theResponseArmInheritsTheUnionAndRequiresTheDiscriminator() {
+    void theResponseArmIsSelfContainedAndCarriesTheDiscriminator() {
         Schema<?> arm = readAll(TimestampSourceDto.class).get(RESPONSE_ARM);
         assertNotNull(arm, "expected a generated schema named " + RESPONSE_ARM);
 
-        assertTrue(inheritsFrom(arm, RESPONSE_BASE), RESPONSE_ARM + " must allOf-inherit " + RESPONSE_BASE);
+        assertNull(arm.getAllOf(), COMPOSITION_IS_A_CYCLE);
+        assertEquals(Set.of("type", "signingProfile"), arm.getProperties().keySet());
         assertTrue(arm.getRequired().contains("type"), RESPONSE_ARM + " must require the type discriminator");
+        assertNotEquals(Boolean.TRUE, arm.getProperties().get("type").getReadOnly(), DISCRIMINATOR_STAYS_WRITABLE);
     }
 
     @Test
-    void theRequestArmInheritsTheUnionAndRequiresTheDiscriminator() {
+    void theRequestArmIsSelfContainedAndCarriesTheDiscriminator() {
         Schema<?> arm = readAll(TimestampSourceRequestDto.class).get(REQUEST_ARM);
         assertNotNull(arm, "expected a generated schema named " + REQUEST_ARM);
 
-        assertTrue(inheritsFrom(arm, REQUEST_BASE), REQUEST_ARM + " must allOf-inherit " + REQUEST_BASE);
+        assertNull(arm.getAllOf(), COMPOSITION_IS_A_CYCLE);
+        assertEquals(Set.of("type", "signingProfileUuid"), arm.getProperties().keySet());
         assertTrue(arm.getRequired().contains("type"), REQUEST_ARM + " must require the type discriminator");
+        assertNotEquals(Boolean.TRUE, arm.getProperties().get("type").getReadOnly(), DISCRIMINATOR_STAYS_WRITABLE);
     }
 
     /** Renaming a published schema breaks every generated client, so the four names are pinned here. */
@@ -89,14 +106,9 @@ class TimestampSourceSchemaGenerationTest {
                 "request union publishes " + readAll(TimestampSourceRequestDto.class).keySet());
     }
 
-    /** {@code ModelConverters.readAll} is declared with a raw {@code Schema}; the cast is contained here. */
+    /** {@code readAll} is declared with a raw {@code Schema}; the cast is contained here. */
     @SuppressWarnings("unchecked")
     private static Map<String, Schema<?>> readAll(Class<?> type) {
-        return (Map<String, Schema<?>>) (Map<String, ?>) ModelConverters.getInstance().readAll(type);
-    }
-
-    private static boolean inheritsFrom(Schema<?> arm, String baseName) {
-        return arm.getAllOf() != null
-                && arm.getAllOf().stream().anyMatch(m -> ("#/components/schemas/" + baseName).equals(m.get$ref()));
+        return (Map<String, Schema<?>>) (Map<String, ?>) openApi31Schemas(type);
     }
 }

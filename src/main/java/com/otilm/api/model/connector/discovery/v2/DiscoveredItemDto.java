@@ -6,9 +6,9 @@ import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.core.auth.Resource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -32,7 +32,7 @@ public class DiscoveredItemDto {
     @Schema(description = "Dense per-run item sequence (1, 2, 3, ... with no holes); the drain/stream cursor "
             + "value after which the next batch starts", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
     @NotNull(message = "sequence is required")
-    @Positive(message = "sequence must be positive")
+    @Min(value = 1, message = "sequence must be positive")
     private Long sequence;
 
     @Schema(description = "Connector-side natural key that Core uses to dedupe this item across drains and retries",

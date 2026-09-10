@@ -5,8 +5,8 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +26,7 @@ public class RandomDataRequestV2Dto extends TokenProfileScopedRequestV2Dto {
 
     @Schema(description = "Number of random bytes to generate, capped at 1 MiB", minimum = "1",
             maximum = "" + MAX_LENGTH, requiredMode = Schema.RequiredMode.REQUIRED)
-    @Positive(message = "length must be greater than zero")
+    @Min(value = 1, message = "length must be greater than zero")
     @Max(value = MAX_LENGTH, message = "length must not exceed 1 MiB")
     private int length;
 
