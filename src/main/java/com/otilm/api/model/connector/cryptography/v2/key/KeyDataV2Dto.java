@@ -9,8 +9,8 @@ import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import com.otilm.api.model.connector.cryptography.v2.validation.ValidMetadataAttribute;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -49,7 +49,7 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
 
     @Schema(description = "Bit length of the key", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
     @NotNull(message = "key length is required")
-    @Positive(message = "key length must be positive")
+    @Min(value = 1, message = "key length must be positive")
     private Integer length;
 
     @Schema(description = "Non-sensitive, provider-specific descriptive metadata",

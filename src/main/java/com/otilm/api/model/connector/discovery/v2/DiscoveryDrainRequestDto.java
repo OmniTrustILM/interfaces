@@ -2,7 +2,7 @@ package com.otilm.api.model.connector.discovery.v2;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +32,7 @@ public class DiscoveryDrainRequestDto extends DiscoveryV2ScopedRequestDto {
     @Schema(description = "Maximum number of items to return in this batch. The platform's tunneled "
             + "transport caps a single response at 10 MiB; a connector MUST apply its own bound on "
             + "the returned page when this is omitted.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
-    @Positive
+    @Min(1)
     private Integer maxItems;
 
     @Schema(description = "Maximum serialized size, in bytes, of the items returned in this batch. The "
@@ -40,7 +40,7 @@ public class DiscoveryDrainRequestDto extends DiscoveryV2ScopedRequestDto {
             + " bytes); exceeding it is an unrecoverable run failure. A connector MUST apply its own "
             + "bound when this is omitted.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1",
             maximum = "" + MAX_BYTES_CAP)
-    @Positive
+    @Min(1)
     @Max(value = MAX_BYTES_CAP, message = "maxBytes must not exceed the 10 MiB transport cap")
     private Long maxBytes;
 }
