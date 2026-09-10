@@ -34,6 +34,8 @@ import com.otilm.api.model.connector.cryptography.enums.TokenInstanceStatus;
 import com.otilm.api.model.connector.secrets.SecretType;
 import com.otilm.api.model.connector.secrets.content.KeyStoreType;
 import com.otilm.api.model.core.acme.AccountStatus;
+import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
+import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.authority.CertificateRevocationReason;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
@@ -154,6 +156,8 @@ public enum PlatformEnum implements IPlatformEnum {
 
     // Protocols
     PROTOCOL_CHALLENGE_SOURCE(ProtocolChallengeSource.class, "Protocol challenge source"),
+    ACME_IDENTIFIER_MATCH_TYPE(AcmeIdentifierMatchType.class, "ACME identifier match type"),
+    ACME_IDENTIFIER_AUTHORIZATION_MODE(AcmeIdentifierAuthorizationMode.class, "ACME identifier authorization mode"),
 
     // Attributes
     ATTRIBUTE_TYPE(AttributeType.class, "Attribute Type"),

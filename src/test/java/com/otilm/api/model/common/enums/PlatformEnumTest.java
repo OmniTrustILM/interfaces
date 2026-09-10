@@ -1,5 +1,7 @@
 package com.otilm.api.model.common.enums;
 
+import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
+import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
@@ -31,6 +33,16 @@ class PlatformEnumTest {
         assertEquals(PlatformEnum.PROTOCOL_CHALLENGE_SOURCE, entry);
         assertEquals(ProtocolChallengeSource.class, entry.getEnumClass());
         assertEquals("ProtocolChallengeSource", entry.getCode());
+    }
+
+    @Test
+    void acmeIdentifierEnumsAreRegistered() {
+        assertEquals(PlatformEnum.ACME_IDENTIFIER_MATCH_TYPE, PlatformEnum.findByClass(AcmeIdentifierMatchType.class));
+        assertEquals("AcmeIdentifierMatchType", PlatformEnum.findByClass(AcmeIdentifierMatchType.class).getCode());
+        assertEquals(PlatformEnum.ACME_IDENTIFIER_AUTHORIZATION_MODE,
+                PlatformEnum.findByClass(AcmeIdentifierAuthorizationMode.class));
+        assertEquals("AcmeIdentifierAuthorizationMode",
+                PlatformEnum.findByClass(AcmeIdentifierAuthorizationMode.class).getCode());
     }
 
     @Test

@@ -1,0 +1,32 @@
+package com.otilm.api.model.core.acme;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+@Data
+@Schema(description = "An identifier an ACME account may obtain from this profile without proving control of it. "
+        + "An order whose identifiers are all covered gets its authorizations created valid, so no http-01 or "
+        + "dns-01 challenge is issued for them.")
+public class AcmePreauthorizedIdentifierDto {
+
+    @NotBlank
+    @Schema(description = "The identifier value: a DNS name, or an IP address for an RFC 8738 ip identifier.",
+            example = "apps.example.com", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String value;
+
+    @NotNull
+    @Schema(description = "How the value is compared with an ordered identifier. 'exact' covers that identifier "
+            + "only. 'subdomain' covers descendants of the name at any depth but not the name itself, so covering "
+            + "both takes two entries; it applies to DNS names, an IP address always being matched exactly. DNS "
+            + "comparison is case-insensitive, IP comparison is by octets.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private AcmeIdentifierMatchType matchType;
+
+    @Schema(description = "Whether the wildcard identifier of this entry may also be pre-authorized. It sits on the "
+            + "entry rather than the profile, so allowing '*.apps.example.com' is a decision about that pattern "
+            + "rather than a switch over every listed name. A wildcard is covered only when everything it stands "
+            + "for is already inside this entry's scope.", defaultValue = "false", example = "false")
+    private boolean allowWildcard;
+}
