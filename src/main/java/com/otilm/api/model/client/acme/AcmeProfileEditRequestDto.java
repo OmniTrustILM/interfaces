@@ -6,7 +6,7 @@ import com.otilm.api.model.core.acme.AcmePreauthorizedIdentifierDto;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -56,15 +56,16 @@ public class AcmeProfileEditRequestDto {
 
     @Valid
     @Schema(description = "Identifiers an account may obtain from this profile without proving control of them. "
-            + "An order whose identifiers are all covered is ready at creation and carries no challenges.",
+            + "An order whose identifiers are all covered is ready at creation and carries no challenges. "
+            + "Omitting the property keeps the profile's current entries; send an empty array to clear them.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
+    private List<@NotNull AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers;
 
     @Schema(description = "What happens to an ordered identifier the pre-authorization policy does not cover. "
             + "'preauthorizedOrChallenge', the default, sends it through the usual http-01 and dns-01 flow. "
             + "'preauthorizedOnly' refuses the order, and needs at least one pre-authorized identifier - to stop "
-            + "a profile accepting orders at all, disable new orders instead.",
-            defaultValue = "preauthorizedOrChallenge", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "a profile accepting orders at all, disable new orders instead. Omitting the property keeps the "
+            + "profile's current mode.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
 
     public Boolean isRequireTermsOfService() {

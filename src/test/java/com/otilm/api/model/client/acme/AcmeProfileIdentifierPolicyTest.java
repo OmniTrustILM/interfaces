@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcmeProfileIdentifierPolicyTest {
@@ -55,11 +56,40 @@ class AcmeProfileIdentifierPolicyTest {
     }
 
     @Test
-    void theWildcardFlagDefaultsToFalseAndThePolicyToEmpty() {
+    void theWildcardFlagDefaultsToFalseAndTheCreatePolicyToEmpty() {
         assertFalse(new AcmePreauthorizedIdentifierDto().isAllowWildcard());
         assertEquals(List.of(), new AcmeProfileRequestDto().getPreauthorizedIdentifiers());
-        assertEquals(List.of(), new AcmeProfileEditRequestDto().getPreauthorizedIdentifiers());
         assertEquals(List.of(), new AcmeProfileDto().getPreauthorizedIdentifiers());
+    }
+
+    @Test
+    void anOmittedEditPolicyStaysDistinguishableFromAClearedOne() throws Exception {
+        // On a partial edit, defaulting to empty would make a mode-only change silently erase the entries.
+        assertNull(new AcmeProfileEditRequestDto().getPreauthorizedIdentifiers());
+        assertNull(mapper
+                .readValue("{\"description\":\"unrelated\"}", AcmeProfileEditRequestDto.class)
+                .getPreauthorizedIdentifiers());
+        assertEquals(List.of(),
+                mapper
+                        .readValue("{\"preauthorizedIdentifiers\":[]}", AcmeProfileEditRequestDto.class)
+                        .getPreauthorizedIdentifiers(),
+                "an explicit empty array is how the policy is cleared");
+    }
+
+    @Test
+    void aNullEntryIsNotAUsablePolicy() throws Exception {
+        AcmeProfileRequestDto request = mapper
+                .readValue("{\"name\":\"policy\",\"identifierAuthorizationMode\":\"preauthorizedOnly\","
+                        + "\"preauthorizedIdentifiers\":[null]}", AcmeProfileRequestDto.class);
+
+        assertFalse(request.isPreauthorizedOnlyBackedByEntries(),
+                "a list holding only nulls carries no entry the policy could match against");
+        assertFalse(
+                VALIDATOR
+                        .validate(request)
+                        .stream()
+                        .noneMatch(v -> v.getPropertyPath().toString().startsWith("preauthorizedIdentifiers")),
+                "the null element must itself be a violation");
     }
 
     @Test

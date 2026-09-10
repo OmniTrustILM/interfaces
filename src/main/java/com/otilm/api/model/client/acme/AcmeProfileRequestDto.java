@@ -8,8 +8,10 @@ import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestD
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -57,7 +59,7 @@ public class AcmeProfileRequestDto {
     @Schema(description = "Identifiers an account may obtain from this profile without proving control of them. "
             + "An order whose identifiers are all covered is ready at creation and carries no challenges.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
+    private List<@NotNull AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
 
     @Schema(description = "What happens to an ordered identifier the pre-authorization policy does not cover. "
             + "'preauthorizedOrChallenge', the default, sends it through the usual http-01 and dns-01 flow. "
@@ -102,6 +104,6 @@ public class AcmeProfileRequestDto {
     @Schema(hidden = true)
     public boolean isPreauthorizedOnlyBackedByEntries() {
         return identifierAuthorizationMode != AcmeIdentifierAuthorizationMode.PREAUTHORIZED_ONLY
-                || (preauthorizedIdentifiers != null && !preauthorizedIdentifiers.isEmpty());
+                || (preauthorizedIdentifiers != null && preauthorizedIdentifiers.stream().anyMatch(Objects::nonNull));
     }
 }
