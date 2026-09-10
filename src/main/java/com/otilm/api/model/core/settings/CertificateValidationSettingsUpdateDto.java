@@ -3,7 +3,7 @@ package com.otilm.api.model.core.settings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Min;
 import java.io.Serializable;
 import lombok.Data;
 
@@ -16,12 +16,12 @@ public class CertificateValidationSettingsUpdateDto implements Serializable {
 
     @Schema(description = "Frequency of validation of certificates in days",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "1", minimum = "1")
-    @Positive
+    @Min(1)
     private Integer frequency = 1;
 
     @Schema(description = "How many days before expiration should certificate validation status change to Expiring",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "30", minimum = "1")
-    @Positive
+    @Min(1)
     private Integer expiringThreshold = 30;
 
     @AssertTrue(message = "Frequency and expiring threshold values must not be null for enabled validation.")
