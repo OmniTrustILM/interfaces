@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcmeProfileEabSecretsTest {
@@ -19,8 +20,19 @@ class AcmeProfileEabSecretsTest {
     @Test
     void secretUuidsDefaultToAnEmptyListRatherThanNull() {
         assertEquals(List.of(), new AcmeProfileRequestDto().getEabSecretUuids());
-        assertEquals(List.of(), new AcmeProfileEditRequestDto().getEabSecretUuids());
         assertEquals(List.of(), new AcmeProfileDto().getEabSecretUuids());
+    }
+
+    @Test
+    void anOmittedEditListStaysDistinguishableFromAClearedOne() throws Exception {
+        // Defaulting to empty on a partial edit would let an unrelated change switch the requirement off.
+        assertNull(new AcmeProfileEditRequestDto().getEabSecretUuids());
+        assertNull(mapper
+                .readValue("{\"description\":\"unrelated\"}", AcmeProfileEditRequestDto.class)
+                .getEabSecretUuids());
+        assertEquals(List.of(),
+                mapper.readValue("{\"eabSecretUuids\":[]}", AcmeProfileEditRequestDto.class).getEabSecretUuids(),
+                "an explicit empty array is how the requirement is turned off");
     }
 
     @Test
