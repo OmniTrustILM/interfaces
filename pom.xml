@@ -31,8 +31,8 @@
 
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>https://github.com/OmniTrustILM/dependencies/blob/main/LICENSE.md</url>
+            <name>Apache License, Version 2.0</name>
+            <url>https://github.com/OmniTrustILM/interfaces/blob/main/LICENSE.md</url>
         </license>
     </licenses>
 
