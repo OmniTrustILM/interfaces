@@ -36,6 +36,12 @@ public class NewAccountRequest {
     @Schema(description = "Return existing Account only flag", defaultValue = "false", example = "false")
     private boolean onlyReturnExisting;
 
+    @Schema(description = "External Account Binding JWS (RFC 8555 section 7.3.4). Required when the directory meta "
+            + "advertises externalAccountRequired; binds the new Account to the external key named by its kid. "
+            + "Honoured on newAccount only - an Account update ignores it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ExternalAccountBinding externalAccountBinding;
+
     public List<String> getContact() {
         return contact;
     }
@@ -60,12 +66,21 @@ public class NewAccountRequest {
         this.onlyReturnExisting = onlyReturnExisting;
     }
 
+    public ExternalAccountBinding getExternalAccountBinding() {
+        return externalAccountBinding;
+    }
+
+    public void setExternalAccountBinding(ExternalAccountBinding externalAccountBinding) {
+        this.externalAccountBinding = externalAccountBinding;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("contact", contact)
                 .append("termsOfServiceAgreed", termsOfServiceAgreed)
                 .append("onlyReturnExisting", onlyReturnExisting)
+                .append("externalAccountBinding", externalAccountBinding)
                 .toString();
     }
 }
