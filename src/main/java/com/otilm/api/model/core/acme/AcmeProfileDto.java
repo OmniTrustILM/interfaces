@@ -5,6 +5,7 @@ import com.otilm.api.model.client.raprofile.SimplifiedRaProfileDto;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsDto;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -57,6 +58,14 @@ public class AcmeProfileDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ProtocolCertificateAssociationsDto certificateAssociations;
 
+    @Schema(description = "Identifiers an account may obtain from this profile without proving control of them.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
+
+    @Schema(description = "What happens to an ordered identifier the pre-authorization policy does not cover.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -77,6 +86,8 @@ public class AcmeProfileDto extends NameAndUuidDto {
                 .append("issueCertificateAttributes", issueCertificateAttributes)
                 .append("revokeCertificateAttributes", revokeCertificateAttributes)
                 .append("customAttributes", customAttributes)
+                .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
+                .append("identifierAuthorizationMode", identifierAuthorizationMode)
                 .toString();
     }
 }
