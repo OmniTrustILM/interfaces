@@ -3,13 +3,14 @@ package com.otilm.api.model.core.acme;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
 import lombok.Data;
 
 @Data
 @Schema(description = "An identifier an ACME account may obtain from this profile without proving control of it. "
         + "An order whose identifiers are all covered gets its authorizations created valid, so no http-01 or "
         + "dns-01 challenge is issued for them.")
-public class AcmePreauthorizedIdentifierDto {
+public class AcmePreauthorizedIdentifierDto implements Serializable {
 
     @NotBlank
     @Schema(description = "The identifier value: a DNS name, or an IP address for an RFC 8738 ip identifier.",
