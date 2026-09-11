@@ -84,7 +84,7 @@ public class TimeQualityConfigurationRequestDto
     @PositiveDuration
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Maximum allowed clock drift from NTP reference time, in ISO 8601 duration format",
-            requiredMode = Schema.RequiredMode.REQUIRED, example = "PT500MS")
+            requiredMode = Schema.RequiredMode.REQUIRED, example = "PT0.5S")
     private Duration maxClockDrift;
 
     @Schema(description = "Whether to guard against leap second anomalies",
