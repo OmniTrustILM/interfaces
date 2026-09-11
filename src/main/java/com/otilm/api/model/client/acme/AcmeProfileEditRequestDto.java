@@ -4,7 +4,9 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -51,6 +53,14 @@ public class AcmeProfileEditRequestDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ProtocolCertificateAssociationsRequestDto certificateAssociations;
 
+    @Schema(description = "UUIDs of the secrets holding the External Account Binding HMAC keys accepted by this "
+            + "ACME Profile. Each secret's UUID is the kid an ACME client binds a new Account with, and its "
+            + "content is the base64url-encoded key. A non-empty list makes External Account Binding mandatory - "
+            + "the directory meta then advertises externalAccountRequired. Omitting the property keeps the "
+            + "profile's current secrets; send an empty array to clear them and leave Account registration open.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<@NotNull UUID> eabSecretUuids;
+
     public Boolean isRequireTermsOfService() {
         return requireTermsOfService;
     }
@@ -81,6 +91,7 @@ public class AcmeProfileEditRequestDto {
                 .append("requireContact", requireContact)
                 .append("requireTermsOfService", requireTermsOfService)
                 .append("customAttributes", customAttributes)
+                .append("eabSecretUuids", eabSecretUuids)
                 .toString();
     }
 }
