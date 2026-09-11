@@ -294,11 +294,11 @@ class DiscoveryV2ResponseDtoTest {
     @Test
     void byResourceProgressMapRoundTripsWithWireCodes() throws Exception {
         DiscoveryResourceProgressDto certProgress = new DiscoveryResourceProgressDto();
-        certProgress.setProcessed(60L);
+        certProgress.setProduced(60L);
         certProgress.setTotalEstimate(200L);
 
         DiscoveryResourceProgressDto keyProgress = new DiscoveryResourceProgressDto();
-        keyProgress.setProcessed(40L);
+        keyProgress.setProduced(40L);
         keyProgress.setTotalEstimate(300L);
 
         DiscoveryProgressDto dto = new DiscoveryProgressDto();
@@ -319,9 +319,9 @@ class DiscoveryV2ResponseDtoTest {
         assertEquals("scanning", back.getPhase());
         assertTrue(back.getByResource().containsKey(Resource.CERTIFICATE));
         assertTrue(back.getByResource().containsKey(Resource.CRYPTOGRAPHIC_KEY));
-        assertEquals(60L, back.getByResource().get(Resource.CERTIFICATE).getProcessed());
+        assertEquals(60L, back.getByResource().get(Resource.CERTIFICATE).getProduced());
         assertEquals(200L, back.getByResource().get(Resource.CERTIFICATE).getTotalEstimate());
-        assertEquals(40L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProcessed());
+        assertEquals(40L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProduced());
         assertEquals(300L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getTotalEstimate());
     }
 
@@ -329,7 +329,7 @@ class DiscoveryV2ResponseDtoTest {
     @Test
     void progressCountsWorkRunWideAndYieldPerResource() throws Exception {
         DiscoveryResourceProgressDto certYield = new DiscoveryResourceProgressDto();
-        certYield.setProcessed(12L);
+        certYield.setProduced(12L);
 
         DiscoveryProgressDto dto = new DiscoveryProgressDto();
         dto.setTargetsProcessed(4_200L);
@@ -346,7 +346,7 @@ class DiscoveryV2ResponseDtoTest {
         assertEquals(4_200L, back.getTargetsProcessed());
         assertEquals(16_645_890L, back.getTargetsTotal());
         assertEquals(4_188L, back.getTargetsFailed());
-        assertEquals(12L, back.getByResource().get(Resource.CERTIFICATE).getProcessed(),
+        assertEquals(12L, back.getByResource().get(Resource.CERTIFICATE).getProduced(),
                 "yield is counted in items, per resource, and never mixed with the run's work counters");
     }
 
@@ -359,10 +359,10 @@ class DiscoveryV2ResponseDtoTest {
         DiscoveryProgressDto run = new DiscoveryProgressDto();
         run.setTargetsProcessed(7L);
         String runJson = mapper.writeValueAsString(run);
-        assertFalse(runJson.contains("\"processed\""), "the run level counts work, not items: " + runJson);
+        assertFalse(runJson.contains("\"produced\""), "the run level counts work, not items: " + runJson);
 
         DiscoveryResourceProgressDto leaf = new DiscoveryResourceProgressDto();
-        leaf.setProcessed(7L);
+        leaf.setProduced(7L);
         String leafJson = mapper.writeValueAsString(leaf);
         assertFalse(leafJson.contains("targets"), "a resource counts items, not the work that found them: " + leafJson);
     }

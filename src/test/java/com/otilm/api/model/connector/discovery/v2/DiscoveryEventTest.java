@@ -44,7 +44,7 @@ class DiscoveryEventTest {
         // A progress event as a connector emits it on the NDJSON stream. The irregular whitespace
         // is deliberate: parsing must not depend on this module's own serializer formatting.
         String json = "{\"type\": \"progress\",     \"targetsProcessed\": 1200, \"targetsTotal\": 5000, "
-                + "\"phase\": \"scan\", \"byResource\": {\"certificates\": {\"processed\": 900}}}";
+                + "\"phase\": \"scan\", \"byResource\": {\"certificates\": {\"produced\": 900}}}";
 
         DiscoveryEvent event = mapper.readValue(json, DiscoveryEvent.class);
 
@@ -53,7 +53,7 @@ class DiscoveryEventTest {
         assertEquals(1200L, progress.getTargetsProcessed());
         assertEquals(5000L, progress.getTargetsTotal());
         assertEquals("scan", progress.getPhase());
-        assertEquals(900L, progress.getByResource().get(Resource.CERTIFICATE).getProcessed());
+        assertEquals(900L, progress.getByResource().get(Resource.CERTIFICATE).getProduced());
 
         String reSerialized = mapper.writeValueAsString(event);
         assertFalse(reSerialized.contains("\n"), "an NDJSON line must not contain an embedded newline");

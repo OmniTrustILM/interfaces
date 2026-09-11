@@ -42,7 +42,7 @@ class DiscoveryDetailDtoTest {
     @Test
     void roundTripsAllFourV2Fields() throws Exception {
         DiscoveryResourceProgressDto keyProgress = new DiscoveryResourceProgressDto();
-        keyProgress.setProcessed(3L);
+        keyProgress.setProduced(3L);
         DiscoveryProgressDto progress = new DiscoveryProgressDto();
         progress.setTargetsProcessed(11L);
         progress.setTargetsTotal(40L);
@@ -69,7 +69,7 @@ class DiscoveryDetailDtoTest {
         assertEquals(11L, back.getProgress().getTargetsProcessed());
         assertEquals(40L, back.getProgress().getTargetsTotal());
         assertEquals("scanning", back.getProgress().getPhase());
-        assertEquals(3L, back.getProgress().getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProcessed());
+        assertEquals(3L, back.getProgress().getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProduced());
         assertEquals(2L, back.getRunMessageCount());
         assertEquals(Boolean.TRUE, back.getStoppable());
         assertEquals(DiscoveryStatus.STOPPED, back.getStatus());
@@ -88,7 +88,7 @@ class DiscoveryDetailDtoTest {
     @Test
     void resourceValuesUseWireCodes() throws Exception {
         DiscoveryResourceProgressDto certProgress = new DiscoveryResourceProgressDto();
-        certProgress.setProcessed(1L);
+        certProgress.setProduced(1L);
         DiscoveryProgressDto progress = new DiscoveryProgressDto();
         progress.setByResource(Map.of(Resource.CERTIFICATE, certProgress));
 

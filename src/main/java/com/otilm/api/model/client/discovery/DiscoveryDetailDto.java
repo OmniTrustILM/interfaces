@@ -39,10 +39,11 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(description = "Date and time when Discovery finished", nullable = true)
     private OffsetDateTime endTime;
 
-    @Schema(description = "Number of certificates that are discovered", defaultValue = "0")
+    @Schema(description = "How many certificates this discovery found and saved.", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
 
-    @Schema(description = "Number of certificates that were discovered by connector", defaultValue = "0")
+    @Schema(description = "How many certificates the Discovery Provider reported finding. Can be higher than "
+            + "totalCertificatesDiscovered if the discovery ended before everything was collected.", defaultValue = "0")
     private Integer connectorTotalCertificatesDiscovered;
 
     @Schema(description = "UUID of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -112,14 +113,16 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
 
-    @Schema(description = "How many items this run has produced across every resource. Item sequences are dense, so "
-            + "this is an exact count rather than an estimate, and it counts what is available to read: the items "
-            + "listing returns exactly these. A connector that has produced more than has been collected reports "
-            + "the difference through progress, not here. Absent for a run against a v1 Discovery Provider, which "
-            + "numbers nothing — totalCertificatesDiscovered is that generation's count.",
+    @Schema(description = "How many items this discovery has collected, across all resource types — exactly "
+            + "what the items listing returns. If the provider produced more than was collected, the difference "
+            + "shows in progress, not here. Not set for a discovery run against a v1 Discovery Provider.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long itemsDiscovered;
+
+    @Schema(description = "How many of the items found were not already in the inventory — what this discovery "
+            + "added, rather than found again.", requiredMode = Schema.RequiredMode.REQUIRED)
+    private long itemsNewlyDiscovered;
 
     /**
      * <b>Provenance:</b> declared by the connector at initiate and refreshed on resume; derived by Core from the
