@@ -1,7 +1,7 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
-import com.otilm.api.model.connector.common.v2.validation.ValidMetadataAttribute;
+import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

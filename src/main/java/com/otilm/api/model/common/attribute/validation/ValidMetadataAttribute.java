@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.common.v2.validation;
+package com.otilm.api.model.common.attribute.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
