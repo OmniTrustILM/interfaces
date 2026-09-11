@@ -2,12 +2,16 @@ package com.otilm.api.model.core.acme;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Set of properties to represent the new Account object from ACME.
  */
+@Setter
+@Getter
 public class NewAccountRequest {
 
     /**
@@ -36,29 +40,11 @@ public class NewAccountRequest {
     @Schema(description = "Return existing Account only flag", defaultValue = "false", example = "false")
     private boolean onlyReturnExisting;
 
-    public List<String> getContact() {
-        return contact;
-    }
-
-    public void setContact(List<String> contact) {
-        this.contact = contact;
-    }
-
-    public boolean isTermsOfServiceAgreed() {
-        return termsOfServiceAgreed;
-    }
-
-    public void setTermsOfServiceAgreed(boolean termsOfServiceAgreed) {
-        this.termsOfServiceAgreed = termsOfServiceAgreed;
-    }
-
-    public boolean isOnlyReturnExisting() {
-        return onlyReturnExisting;
-    }
-
-    public void setOnlyReturnExisting(boolean onlyReturnExisting) {
-        this.onlyReturnExisting = onlyReturnExisting;
-    }
+    @Schema(description = "External Account Binding JWS (RFC 8555 section 7.3.4). Required when the directory meta "
+            + "advertises externalAccountRequired; binds the new Account to the external key named by its kid. "
+            + "Honoured on newAccount only - an Account update ignores it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ExternalAccountBinding externalAccountBinding;
 
     @Override
     public String toString() {
@@ -66,6 +52,7 @@ public class NewAccountRequest {
                 .append("contact", contact)
                 .append("termsOfServiceAgreed", termsOfServiceAgreed)
                 .append("onlyReturnExisting", onlyReturnExisting)
+                .append("externalAccountBinding", externalAccountBinding)
                 .toString();
     }
 }

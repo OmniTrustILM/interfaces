@@ -11,6 +11,7 @@ import com.otilm.api.model.client.acme.AcmeProfileRequestDto;
 import com.otilm.api.model.common.BulkActionMessageDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
+import com.otilm.api.model.core.acme.AcmeEabKeyDto;
 import com.otilm.api.model.core.acme.AcmeProfileDto;
 import com.otilm.api.model.core.acme.AcmeProfileListDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -145,6 +146,15 @@ public interface AcmeProfileController extends AuthProtectedController {
                     @ExampleObject(
                             value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> uuids)
             throws NotFoundException, ValidationException;
+
+    @Operation(summary = "Generate an External Account Binding key",
+            description = "Generate a random HMAC key suitable for External Account Binding and return it once. "
+                    + "The platform neither stores nor associates the key here - store it in a secret and add "
+                    + "that secret's UUID to an ACME Profile's eabSecretUuids to put it into use. The same value "
+                    + "is what the ACME client MACs its binding with.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Key generated")})
+    @PostMapping(path = "/eabKeys", produces = {"application/json"})
+    AcmeEabKeyDto generateEabKey();
 
     @Operation(summary = "Update RA Profile for ACME Profile")
     @ApiResponses(value = {
