@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.cryptography.v2.validation;
+package com.otilm.api.model.connector.common.v2.validation;
 
 import jakarta.validation.groups.Default;
 

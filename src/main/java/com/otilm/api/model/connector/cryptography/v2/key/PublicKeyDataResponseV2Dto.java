@@ -3,7 +3,7 @@ package com.otilm.api.model.connector.cryptography.v2.key;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
-import com.otilm.api.model.connector.cryptography.v2.validation.ValidMetadataAttribute;
+import com.otilm.api.model.connector.common.v2.validation.ValidMetadataAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

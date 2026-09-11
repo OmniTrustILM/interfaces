@@ -2,9 +2,9 @@ package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
+import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
+import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.validation.AsynchronousResponse;
-import com.otilm.api.model.connector.cryptography.v2.validation.SynchronousResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.groups.Default;

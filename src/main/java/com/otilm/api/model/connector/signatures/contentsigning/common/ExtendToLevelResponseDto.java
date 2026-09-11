@@ -2,9 +2,9 @@ package com.otilm.api.model.connector.signatures.contentsigning.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
-import com.otilm.api.model.connector.cryptography.v2.validation.AsynchronousResponse;
-import com.otilm.api.model.connector.cryptography.v2.validation.SynchronousResponse;
-import com.otilm.api.model.connector.cryptography.v2.validation.ValidMetadataAttribute;
+import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
+import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
+import com.otilm.api.model.connector.common.v2.validation.ValidMetadataAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

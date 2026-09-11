@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
-import com.otilm.api.model.connector.cryptography.v2.validation.ValidMetadataAttribute;
+import com.otilm.api.model.connector.common.v2.validation.ValidMetadataAttribute;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;

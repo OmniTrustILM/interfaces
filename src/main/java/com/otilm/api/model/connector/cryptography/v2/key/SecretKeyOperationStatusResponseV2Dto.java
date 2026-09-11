@@ -2,7 +2,7 @@ package com.otilm.api.model.connector.cryptography.v2.key;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
-import com.otilm.api.model.connector.cryptography.v2.validation.SynchronousResponse;
+import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
