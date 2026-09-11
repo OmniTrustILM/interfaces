@@ -6,6 +6,7 @@ import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryProgressDto;
 import com.otilm.api.model.core.auth.Resource;
+import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.workflows.TriggerDto;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -38,10 +39,11 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(description = "Date and time when Discovery finished", nullable = true)
     private OffsetDateTime endTime;
 
-    @Schema(description = "Number of certificates that are discovered", defaultValue = "0")
+    @Schema(description = "How many certificates this discovery found and saved.", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
 
-    @Schema(description = "Number of certificates that were discovered by connector", defaultValue = "0")
+    @Schema(description = "How many certificates the Discovery Provider reported finding. Can be higher than "
+            + "totalCertificatesDiscovered if the discovery ended before everything was collected.", defaultValue = "0")
     private Integer connectorTotalCertificatesDiscovered;
 
     @Schema(description = "UUID of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -49,6 +51,13 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
 
     @Schema(description = "Name of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorName;
+
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "The connector interface this run is driven through, and so which generation drives it. "
+            + "Absent for a run against a legacy v1 connector, which declares no connector interface.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ConnectorInterfaceDto connectorInterface;
 
     @Schema(description = "List of Discovery Attributes", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> attributes = new ArrayList<>();
@@ -77,16 +86,11 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Resource> resources;
 
-    /**
-     * Progress counters reported by the connector, with an optional per-resource breakdown. Omitted when the run is
-     * against a v1 connector, or when the connector reports no progress at all. Individual counters inside it are
-     * independently optional — a connector that cannot estimate a total still reports what it has processed.
-     *
-     * <p>
-     * The prose lives here and not in {@code @Schema} for the hoisting reason in the comment above
-     * ({@code progressComponentsAreIdenticalFromEveryEntryPoint} pins it).
-     */
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "Progress counters reported by the connector, with an optional per-resource breakdown. "
+            + "Omitted for a v1 run and when the connector reports no progress. The counters inside are "
+            + "independently optional.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryProgressDto progress;
 
@@ -108,6 +112,17 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
             + "A non-zero count does not imply the run failed. Always 0 for runs against a v1 Discovery Provider.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
+
+    @Schema(description = "How many items this discovery has collected, across all resource types — exactly "
+            + "what the items listing returns. If the provider produced more than was collected, the difference "
+            + "shows in progress, not here. Not set for a discovery run against a v1 Discovery Provider.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long itemsDiscovered;
+
+    @Schema(description = "How many of the items found were not already in the inventory — what this discovery "
+            + "added, rather than found again.", requiredMode = Schema.RequiredMode.REQUIRED)
+    private long itemsNewlyDiscovered;
 
     /**
      * <b>Provenance:</b> declared by the connector at initiate and refreshed on resume; derived by Core from the

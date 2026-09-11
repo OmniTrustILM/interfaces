@@ -60,16 +60,19 @@ class DiscoveryV2RequestDtoTest {
         metaAttribute.setContent(List.of(new StringAttributeContentV3("abc123")));
         dto.setMeta(List.of(metaAttribute));
 
+        dto.setResources(List.of(Resource.CRYPTOGRAPHIC_KEY));
         dto.setAttributes(List.of());
         dto.setResourceAttributes(Map.of(Resource.CRYPTOGRAPHIC_KEY, List.of()));
 
         String json = mapper.writeValueAsString(dto);
         assertTrue(json.contains("\"runId\":\"11111111-1111-1111-1111-111111111111\""));
         assertTrue(json.contains("\"name\":\"cursor\""));
-        assertTrue(json.contains("\"keys\""));
+        assertTrue(json.contains("\"resources\":[\"keys\"]"));
+        assertTrue(json.contains("\"resourceAttributes\":{\"keys\""));
 
         DiscoveryRunRequestDto back = mapper.readValue(json, DiscoveryRunRequestDto.class);
         assertEquals(runId, back.getRunId());
+        assertEquals(List.of(Resource.CRYPTOGRAPHIC_KEY), back.getResources());
         assertEquals(1, back.getMeta().size());
         MetadataAttributeV3 backMeta = assertInstanceOf(MetadataAttributeV3.class, back.getMeta().get(0));
         assertEquals("cursor", backMeta.getName());
@@ -102,9 +105,9 @@ class DiscoveryV2RequestDtoTest {
     }
 
     @Test
-    void initiateRequestNullResourceElementIsRejected() {
+    void nullResourceElementIsRejected() {
         // @NotEmpty only rejects a missing or empty list, so [null] would otherwise pass while the
-        // initiate contract requires every requested resource to be validated as supported.
+        // contract requires every requested resource to be validated as supported.
         DiscoveryInitiateRequestDto onlyNull = new DiscoveryInitiateRequestDto();
         onlyNull.setRunId(UUID.randomUUID());
         onlyNull.setResources(Collections.singletonList(null));
@@ -139,16 +142,41 @@ class DiscoveryV2RequestDtoTest {
         assertTrue(VALIDATOR.validate(dto).isEmpty(), "a fully populated initiate request must be valid");
     }
 
+    /**
+     * The resource set is run configuration, so every lifecycle call replays it. A connector holding nothing between
+     * calls has no other way to know a resumed run's scope, and {@code resourceAttributes} is not a substitute: Core
+     * omits from it any resource that declares no attributes of its own.
+     */
+    @Test
+    void everyLifecycleRequestCarriesTheResourceSet() {
+        DiscoveryRunRequestDto withoutResources = new DiscoveryRunRequestDto();
+        withoutResources.setRunId(UUID.randomUUID());
+
+        assertTrue(
+                VALIDATOR
+                        .validate(withoutResources)
+                        .stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().equals("resources")),
+                "a status/stop/resume/cancel body without resources must be rejected, not accepted and left "
+                        + "for the connector to guess the run's scope");
+
+        withoutResources.setResources(List.of(Resource.CERTIFICATE));
+        assertTrue(VALIDATOR.validate(withoutResources).isEmpty(),
+                "a lifecycle body carrying runId and resources must be valid on its own");
+    }
+
     @Test
     void drainRequestMaxBytesAboveTheTransportCapIsRejected() {
         // The published schema maximum and the bean-validation bound both come from MAX_BYTES_CAP,
         // so a value the document forbids is one the validator refuses too.
         DiscoveryDrainRequestDto atCap = new DiscoveryDrainRequestDto();
         atCap.setRunId(UUID.randomUUID());
+        atCap.setResources(List.of(Resource.CERTIFICATE));
         atCap.setMaxBytes(DiscoveryDrainRequestDto.MAX_BYTES_CAP);
 
         DiscoveryDrainRequestDto overCap = new DiscoveryDrainRequestDto();
         overCap.setRunId(UUID.randomUUID());
+        overCap.setResources(List.of(Resource.CERTIFICATE));
         overCap.setMaxBytes(DiscoveryDrainRequestDto.MAX_BYTES_CAP + 1);
 
         assertTrue(VALIDATOR.validate(atCap).isEmpty(), "maxBytes exactly at the cap must be accepted");

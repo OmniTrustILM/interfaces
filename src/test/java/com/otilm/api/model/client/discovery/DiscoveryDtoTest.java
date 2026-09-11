@@ -88,6 +88,7 @@ class DiscoveryDtoTest {
         // absent, not null: a v1 consumer's request shape is unchanged
         assertFalse(json.contains("resources"), json);
         assertFalse(json.contains("resourceAttributes"), json);
+        assertFalse(json.contains("interfaceUuid"), json);
     }
 
     @Test

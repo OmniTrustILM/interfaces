@@ -1,9 +1,7 @@
 package com.otilm.api.clients.discovery.v2;
 
+import com.otilm.api.model.connector.discovery.v2.DiscoveredItemPayloadDto;
 import com.otilm.api.model.core.auth.Resource;
-
-import java.util.EnumSet;
-import java.util.Set;
 
 /**
  * The discovery v2 connector routes, defined once for both transports.
@@ -34,12 +32,6 @@ public final class DiscoveryPaths {
     public static final String RESUME = RUNS + "/resume";
     public static final String CANCEL = RUNS + "/cancel";
 
-    /**
-     * The resources a discovery run can report, pinned by the {@code @JsonSubTypes} registered on
-     * {@code DiscoveredItemPayloadDto} — a payload type exists for exactly these two.
-     */
-    private static final Set<Resource> DISCOVERABLE = EnumSet.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY);
-
     private DiscoveryPaths() {
     }
 
@@ -55,9 +47,9 @@ public final class DiscoveryPaths {
      * @throws IllegalArgumentException if {@code resource} is not discoverable
      */
     public static String resourceAttributes(Resource resource) {
-        if (!DISCOVERABLE.contains(resource)) {
-            throw new IllegalArgumentException(
-                    "Resource " + resource + " is not discoverable; expected one of " + DISCOVERABLE);
+        if (!DiscoveredItemPayloadDto.DISCOVERABLE.contains(resource)) {
+            throw new IllegalArgumentException("Resource " + resource + " is not discoverable; expected one of "
+                    + DiscoveredItemPayloadDto.DISCOVERABLE);
         }
         return BASE + "/" + resource.getCode() + ATTRIBUTES_SEGMENT;
     }

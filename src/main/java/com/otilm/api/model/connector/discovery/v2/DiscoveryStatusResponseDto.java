@@ -21,10 +21,9 @@ public class DiscoveryStatusResponseDto {
     @NotNull(message = "state is required")
     private DiscoveryRunState state;
 
-    // Omitted when the connector cannot report progress. No @Schema description on purpose: OpenAPI 3.0 cannot
-    // carry a description beside a $ref, so swagger-core would hoist it onto the shared DiscoveryProgressDto
-    // component, overwriting the component's own for every other endpoint that references it.
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "How far the run has got. Omitted when the connector cannot report progress.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     private DiscoveryProgressDto progress;
 
     @Schema(description = "Run-wide highest item sequence assigned so far — never page-scoped. Consumers must "
