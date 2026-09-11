@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.otilm.api.model.core.acme.AcmeEabKeyDto;
 import com.otilm.api.model.core.acme.AcmeProfileDto;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcmeProfileEabSecretsTest {
+
+    private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
     private final ObjectMapper mapper = JsonMapper.builder().findAndAddModules().build();
 
@@ -44,6 +48,17 @@ class AcmeProfileEabSecretsTest {
         AcmeProfileRequestDto back = mapper.readValue(mapper.writeValueAsString(request), AcmeProfileRequestDto.class);
 
         assertEquals(List.of(secret), back.getEabSecretUuids());
+    }
+
+    @Test
+    void aNullEntryInTheListIsAViolationOnBothCreateAndEdit() throws Exception {
+        AcmeProfileRequestDto create = mapper
+                .readValue("{\"name\":\"p\",\"eabSecretUuids\":[null]}", AcmeProfileRequestDto.class);
+        AcmeProfileEditRequestDto edit = mapper
+                .readValue("{\"eabSecretUuids\":[null]}", AcmeProfileEditRequestDto.class);
+
+        assertFalse(VALIDATOR.validate(create).isEmpty(), "a null element cannot identify a secret");
+        assertFalse(VALIDATOR.validate(edit).isEmpty());
     }
 
     @Test

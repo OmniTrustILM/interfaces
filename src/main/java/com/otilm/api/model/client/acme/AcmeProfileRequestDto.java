@@ -4,6 +4,7 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -55,7 +56,7 @@ public class AcmeProfileRequestDto {
             + "content is the base64url-encoded key. Supplying at least one makes External Account Binding "
             + "mandatory - the directory meta then advertises externalAccountRequired; an empty list leaves "
             + "Account registration open.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<UUID> eabSecretUuids = new ArrayList<>();
+    private List<@NotNull UUID> eabSecretUuids = new ArrayList<>();
 
     @Override
     public String toString() {
