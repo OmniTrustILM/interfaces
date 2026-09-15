@@ -2,6 +2,7 @@ package com.otilm.api.model.client.cryptography.key;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,11 +19,11 @@ import lombok.ToString;
 public class KeyRequestDto {
 
     @Schema(description = "Name of the Cryptographic Key", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
+    @NotBlank
     private String name;
 
     @Schema(description = "Description of the Cryptographic Key", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
+    @NotBlank
     private String description;
 
     @Schema(description = "UUIDs of the groups to associate with key")
