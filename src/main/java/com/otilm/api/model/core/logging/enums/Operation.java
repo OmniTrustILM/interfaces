@@ -66,6 +66,7 @@ public enum Operation implements IPlatformEnum {
     DESTROY("destroy", "Destroy"),
     LIST_KEY_USAGES("listKeyUsages", "List key usages"),
     UPDATE_KEY_USAGE("updateKeyUsage", "Update key usage"),
+    LIST_KEY_CREATION_TYPES("listKeyCreationTypes", "List key creation types"),
     ENCRYPT("encrypt", "Encrypt"),
     DECRYPT("decrypt", "Decrypt"),
     SIGN("sign", "Sign"),
