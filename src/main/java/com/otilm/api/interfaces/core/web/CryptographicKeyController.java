@@ -767,7 +767,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Key Items disabled"),
             @ApiResponse(responseCode = "404", description = "Cryptographic Key item not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PatchMapping(path = "/keys/items/disable", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
