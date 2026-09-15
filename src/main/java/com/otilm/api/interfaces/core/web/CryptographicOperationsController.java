@@ -17,9 +17,7 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -34,21 +32,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/v1/operations/tokens/{tokenInstanceUuid}")
 @Tag(name = "Cryptographic Operations Controller", description = "Cryptographic Operations Controller API")
-@ApiResponses(value = {
-        @ApiResponse(responseCode = "404", description = "Not Found",
-                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-        @ApiResponse(responseCode = "502", description = "Connector Error",
-                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-        @ApiResponse(responseCode = "503", description = "Connector Communication Error",
-                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
 public interface CryptographicOperationsController extends AuthProtectedController {
 
     /////////////////////////////////////////////////////////////////////////////////
     // cipher operations
     /////////////////////////////////////////////////////////////////////////////////
 
-    @Operation(summary = "List of cipher Attributes")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of Attributes retrieved")})
+    /**
+     * @deprecated Use {@link #listEncryptAttributes(String, String, String, String)} or
+     * {@link #listDecryptAttributes(String, String, String, String)} for operation-specific attributes.
+     */
+    @Deprecated(since = "2.20.0", forRemoval = true)
+    @Operation(summary = "List of cipher Attributes", deprecated = true,
+            description = "Legacy attribute discovery for v1 providers only. Use listEncryptAttributes or "
+                    + "listDecryptAttributes instead. Not supported for v2 providers.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed or the key algorithm is unsupported",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "501",
+                    description = "Legacy attribute discovery is not supported for v2 providers; use the "
+                            + "operation-specific attribute endpoints.",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(
             path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/cipher/{algorithm}/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,12 +72,40 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @Parameter(description = "Cryptographic algorithm") @PathVariable KeyAlgorithm algorithm)
             throws ConnectorException, NotFoundException;
 
+    @Operation(summary = "List encryption attributes",
+            description = "Returns the encryption attribute schema for the specified token, profile and key item.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Encrypt attribute schema retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/encrypt/attributes",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listEncryptAttributes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
+            @Parameter(description = "Key UUID") @PathVariable String uuid,
+            @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid)
+            throws ConnectorException, NotFoundException;
+
     @Operation(summary = "Encrypt data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data encrypted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/encrypt",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     EncryptDataResponseDto encryptData(
@@ -75,12 +115,40 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid,
             @RequestBody CipherDataRequestDto request) throws ConnectorException, NotFoundException;
 
+    @Operation(summary = "List decryption attributes",
+            description = "Returns the decryption attribute schema for the specified token, profile and key item.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Decrypt attribute schema retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/decrypt/attributes",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listDecryptAttributes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
+            @Parameter(description = "Key UUID") @PathVariable String uuid,
+            @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid)
+            throws ConnectorException, NotFoundException;
+
     @Operation(summary = "Decrypt data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data decrypted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/decrypt",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     DecryptDataResponseDto decryptData(
@@ -94,8 +162,29 @@ public interface CryptographicOperationsController extends AuthProtectedControll
     // signature operations
     /////////////////////////////////////////////////////////////////////////////////
 
-    @Operation(summary = "List of signature Attributes")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of Attributes retrieved")})
+    /**
+     * @deprecated Use {@link #listSignAttributes(String, String, String, String)} or
+     * {@link #listVerifyAttributes(String, String, String, String)} for operation-specific attributes.
+     */
+    @Deprecated(since = "2.20.0", forRemoval = true)
+    @Operation(summary = "List of signature Attributes", deprecated = true,
+            description = "Legacy attribute discovery for v1 providers only. Use listSignAttributes or "
+                    + "listVerifyAttributes instead. Not supported for v2 providers.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "501",
+                    description = "Legacy attribute discovery is not supported for v2 providers; use the "
+                            + "operation-specific attribute endpoints.",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(
             path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/signature/{algorithm}/attributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -107,12 +196,40 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @Parameter(description = "Cryptographic algorithm") @PathVariable KeyAlgorithm algorithm)
             throws ConnectorException, NotFoundException;
 
+    @Operation(summary = "List signing attributes",
+            description = "Returns the signing attribute schema for the specified token, profile and key item.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sign attribute schema retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/sign/attributes",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listSignAttributes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
+            @Parameter(description = "Key UUID") @PathVariable String uuid,
+            @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid)
+            throws ConnectorException, NotFoundException;
+
     @Operation(summary = "Sign data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data signed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/sign",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     SignDataResponseDto signData(@Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
@@ -121,12 +238,40 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid,
             @RequestBody SignDataRequestDto request) throws ConnectorException, NotFoundException;
 
+    @Operation(summary = "List verification attributes",
+            description = "Returns the verification attribute schema for the specified token, profile and key item.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Verify attribute schema retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/verify/attributes",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BaseAttribute> listVerifyAttributes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
+            @Parameter(description = "Key UUID") @PathVariable String uuid,
+            @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid)
+            throws ConnectorException, NotFoundException;
+
     @Operation(summary = "Verify data using a Key")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Data decrypted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "200", description = "Data verified"),
+            @ApiResponse(responseCode = "404", description = "Token instance, token profile, key or key item not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/keys/{uuid}/items/{keyItemUuid}/verify",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     VerifyDataResponseDto verifyData(
@@ -141,7 +286,17 @@ public interface CryptographicOperationsController extends AuthProtectedControll
     /// //////////////////////////////////////////////////////////////////////////////
 
     @Operation(summary = "List of random generator Attributes")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of Attributes retrieved")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "Token instance not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/random/attributes", produces = {"application/json"})
     List<BaseAttribute> listRandomAttributes(
             @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid)
@@ -150,9 +305,15 @@ public interface CryptographicOperationsController extends AuthProtectedControll
     @Operation(summary = "Generate random data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Random data generated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+            @ApiResponse(responseCode = "404", description = "Token instance not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/random", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     RandomDataResponseDto randomData(
