@@ -16,10 +16,11 @@ import lombok.ToString;
 @ToString
 public class CompromiseKeyRequestDto {
 
-    @Schema(description = "Usages for the Key", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Reason for marking the key items as compromised",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private KeyCompromiseReason reason;
 
-    @Schema(description = "List of UUIDs of the key Items. If not provided, the usage will be updated to all the items"
-            + "in the key")
+    @Schema(description = "UUIDs of the key items to mark as compromised. If omitted or empty, all items in the key"
+            + " are marked as compromised.")
     private List<UUID> uuids;
 }
