@@ -8,7 +8,8 @@ import lombok.Data;
 public class PlatformSettingsUpdateDto implements SettingsDto {
 
     @Valid
-    @Schema(description = "Utils settings of the platform")
+    @Schema(description = "Utils settings of the platform. When present, stored as sent: a URL left out is cleared, "
+            + "and a CBOM sync tunable left out returns to the platform default")
     private UtilsSettingsDto utils;
 
     @Valid
