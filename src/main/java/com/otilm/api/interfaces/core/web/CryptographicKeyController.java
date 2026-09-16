@@ -132,7 +132,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
     @GetMapping(path = "/keys/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
     KeyDetailDto getKey(@Parameter(description = "UUID of the Key") @PathVariable String uuid) throws NotFoundException;
 
-    @Operation(summary = "Get Cryptographic Key Detail")
+    @Operation(summary = "Get Cryptographic Key Item Detail")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cryptographic Key item detail retrieved"),
             @ApiResponse(responseCode = "404", description = "Cryptographic Key item not found",
