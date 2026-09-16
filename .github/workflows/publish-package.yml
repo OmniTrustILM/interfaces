@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
         with:
-          java-version: '21'
+          java-version: '21.0.12+101.0.LTS'
           distribution: 'temurin'
           server-id: central
           server-username: MAVEN_USERNAME
@@ -94,7 +94,7 @@ jobs:
 
       - uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
         with:
-          java-version: '21'
+          java-version: '21.0.12+101.0.LTS'
           distribution: 'temurin'
           server-id: github
           server-username: GITHUB_ACTOR
@@ -159,7 +159,7 @@ jobs:
 
       - uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
         with:
-          java-version: '21'
+          java-version: '21.0.12+101.0.LTS'
           distribution: 'temurin'
           server-id: github
           server-username: GITHUB_ACTOR
