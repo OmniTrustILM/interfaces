@@ -83,6 +83,6 @@ class KeyTransferConstructorCompatibilityTest {
         // then
         assertEquals("name", request.getName());
         assertEquals(List.of("group-uuid"), request.getGroupUuids());
-        assertNull(request.getExportable(), "an unstated exportable intent is read as false by the platform");
+        assertFalse(request.getExportable(), "an unstated exportable intent is read as false by the platform");
     }
 }

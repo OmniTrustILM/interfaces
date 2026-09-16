@@ -15,7 +15,9 @@ import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -100,12 +102,14 @@ public class TokenApiClient extends BaseApiClient implements TokenSyncApiClient 
     public List<KeyRequestType> listSupportedKeyRequestTypes(ApiClientConnectorInfo connector,
             TokenProfileScopedRequestV2Dto body) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        List<KeyRequestType> response = processRequest(r -> requireBody(r
+        ResponseEntity<List<KeyRequestType>> response = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + KEY_REQUEST_TYPES_PATH)
                 .bodyValue(body)
                 .retrieve()
-                .toEntityList(KeyRequestType.class), "listSupportedKeyRequestTypes"), request, connector);
-        requireValid(responseValidator.validateSupportedKeyRequestTypes(response), connector);
-        return response;
+                .toEntity(new ParameterizedTypeReference<List<KeyRequestType>>() {
+                }), "listSupportedKeyRequestTypes"), request, connector);
+        List<KeyRequestType> keyRequestTypes = response.getBody();
+        requireValid(responseValidator.validateSupportedKeyRequestTypes(keyRequestTypes), connector);
+        return keyRequestTypes;
     }
 }

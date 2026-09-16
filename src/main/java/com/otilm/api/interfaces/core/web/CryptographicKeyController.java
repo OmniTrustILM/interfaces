@@ -132,7 +132,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
     @GetMapping(path = "/keys/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
     KeyDetailDto getKey(@Parameter(description = "UUID of the Key") @PathVariable String uuid) throws NotFoundException;
 
-    @Operation(summary = "Get Cryptographic Key Detail")
+    @Operation(summary = "Get Cryptographic Key Item Detail")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cryptographic Key item detail retrieved"),
             @ApiResponse(responseCode = "404", description = "Cryptographic Key item not found",
@@ -165,6 +165,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
     // Create and Update Operation
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
+
     @Operation(summary = "Create a new Cryptographic Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "502", description = "Connector Error",
@@ -184,8 +185,8 @@ public interface CryptographicKeyController extends AuthProtectedController {
             @Parameter(description = "UUID of the Token Instance") @PathVariable String tokenInstanceUuid,
             @Parameter(description = "UUID of the Token Profile") @PathVariable String tokenProfileUuid,
             @Parameter(description = "Type of the key to be created") @PathVariable KeyRequestType type,
-            @RequestBody KeyRequestDto request) throws AlreadyExistException, ValidationException, ConnectorException,
-            AttributeException, NotFoundException;
+            @RequestBody @Valid KeyRequestDto request) throws AlreadyExistException, ValidationException,
+            ConnectorException, AttributeException, NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
@@ -416,11 +417,18 @@ public interface CryptographicKeyController extends AuthProtectedController {
 
     @Operation(summary = "Mark Multiple Key Items as Compromised",
             description = "This API can be used to mark multiple keys items to be marked as compromised.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Key Items marked as compromised")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Key Items marked as compromised"),
+            @ApiResponse(responseCode = "404", description = "Parent cryptographic key not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "One or more requested key items do not exist. The entire batch is rejected "
+                            + "and no key items are updated.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
     @PatchMapping(path = "/keys/items/compromise", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void compromiseKeyItems(@RequestBody BulkCompromiseKeyItemRequestDto request);
+    void compromiseKeyItems(@RequestBody BulkCompromiseKeyItemRequestDto request) throws NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
@@ -511,6 +519,12 @@ public interface CryptographicKeyController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Parent cryptographic key not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "One or more requested key items do not exist. The entire batch is rejected "
+                            + "and no key items are updated.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
             @ApiResponse(responseCode = "204", description = "Keys Items destroyed")})
     @PatchMapping(path = "/keys/items/destroy", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -519,7 +533,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {
                     @ExampleObject(
                             value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> keyItemUuids)
-            throws ConnectorException;
+            throws ConnectorException, NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
@@ -681,14 +695,22 @@ public interface CryptographicKeyController extends AuthProtectedController {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Operation(summary = "Enable multiple Key Items")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Key Items enabled")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Key Items enabled"),
+            @ApiResponse(responseCode = "404", description = "Parent cryptographic key not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "One or more requested key items do not exist. The entire batch is rejected "
+                            + "and no key items are updated.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
     @PatchMapping(path = "/keys/items/enable", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void enableKeyItems(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Key Item UUIDs",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {
                     @ExampleObject(
-                            value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> uuids);
+                            value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> uuids)
+            throws NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
@@ -754,14 +776,22 @@ public interface CryptographicKeyController extends AuthProtectedController {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Operation(summary = "Disable multiple Key Items")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Key Items disabled")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Key Items disabled"),
+            @ApiResponse(responseCode = "404", description = "Parent cryptographic key not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "One or more requested key items do not exist. The entire batch is rejected "
+                            + "and no key items are updated.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
     @PatchMapping(path = "/keys/items/disable", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void disableKeyItems(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Key Item UUIDs",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {
                     @ExampleObject(
-                            value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> uuids);
+                            value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> uuids)
+            throws NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
@@ -812,10 +842,17 @@ public interface CryptographicKeyController extends AuthProtectedController {
 
     @Operation(summary = "Update Key Usages for Multiple Key Items",
             description = "Update the key usages for multiple keys Items")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Key Items Usages Updated")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Key Items Usages Updated"),
+            @ApiResponse(responseCode = "404", description = "Parent cryptographic key not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "One or more requested key items do not exist. The entire batch is rejected "
+                            + "and no key items are updated.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
     @PutMapping(path = "/keys/items/usages", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void updateKeyItemUsages(@RequestBody BulkKeyItemUsageRequestDto request);
+    void updateKeyItemUsages(@RequestBody BulkKeyItemUsageRequestDto request) throws NotFoundException;
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------

@@ -18,7 +18,8 @@ import lombok.ToString;
 @ToString
 public class BulkCompromiseKeyRequestDto implements Loggable {
 
-    @Schema(description = "Usages for the Key", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Reason for marking the key items as compromised",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private KeyCompromiseReason reason;
 
     @Schema(description = "List of UUIDs of the keys. This will mark all the items inside the selected key as compromised")
