@@ -39,8 +39,13 @@ public interface SettingController extends AuthProtectedController {
     @GetMapping(path = "/platform", produces = MediaType.APPLICATION_JSON_VALUE)
     PlatformSettingsDto getPlatformSettings();
 
-    @Operation(summary = "Update platform settings")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Setting updated")})
+    @Operation(summary = "Update platform settings", description = """
+            **Request semantics:** a section left out of the body (`utils`, `certificates`) is left untouched. A \
+            `utils` that is present is stored as sent, so it carries the full desired state of that section: a field \
+            left out is cleared, or returns to the platform default where it has one. Inside `certificates`, each \
+            group (`validation`, `requestAttributes`, `registration`) behaves the same way as a section: one left out \
+            is untouched, one that is present is stored as sent.""")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Settings updated")})
     @PutMapping(path = "/platform", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     void updatePlatformSettings(@Valid @RequestBody PlatformSettingsUpdateDto platformSettingsDto);

@@ -68,13 +68,13 @@ Adding a field grows the generated all-args constructor, so any caller in anothe
 
 ## Numeric bounds on DTO fields: `@Min`/`@Max`, not `@Positive`/`@Negative`, beside `@Schema` bounds
 
-interface-documentation lints the generated OpenAPI with Redocly `recommended-strict`, which rejects a numeric schema carrying both `minimum` and `exclusiveMinimum` (or both `maximum` and `exclusiveMaximum`). swagger-core emits `@Min`/`@Max` and `@Schema(minimum/maximum)` as inclusive `minimum`/`maximum`, but `@Positive`/`@Negative` as `exclusiveMinimum`/`exclusiveMaximum`. A field carrying an inclusive bound *and* `@Positive`/`@Negative` emits both keywords and fails that lint — silently from here, since this repo's build stays green and the break only appears when the docs are regenerated.
+interface-documentation lints the generated OpenAPI with Redocly `recommended-strict`, which rejects a numeric schema carrying both `minimum` and `exclusiveMinimum` (or both `maximum` and `exclusiveMaximum`). swagger-core emits `@Min`/`@Max` and `@Schema(minimum/maximum)` as inclusive `minimum`/`maximum`; springdoc's runtime schema resolver (`SchemaUtils` in `springdoc-openapi-starter-common`, run by core, not by swagger-core) adds `@Positive`/`@Negative` as `exclusiveMinimum`/`exclusiveMaximum`. A field carrying an inclusive bound *and* `@Positive`/`@Negative` emits both keywords and fails that lint — silently from here, since this repo's build stays green, no `ModelConverters` test in this repo can observe the springdoc mapping (guard the annotations reflectively instead), and the break only appears when the docs are regenerated.
 
-Use `@Min(n)`/`@Max(n)` on integral fields; keep `@Positive`/`@Negative` for fields with no other bound. On `float`/`double`, where `@Min`/`@Max` don't fit, use `@DecimalMin`/`@DecimalMax` (inclusive) or `@Positive`/`@Negative` — the same one-bound-keyword-per-field rule applies. (`@PositiveOrZero`/`@NegativeOrZero` emit inclusive `0`, safe beside a matching `@Schema`.)
+Use `@Min(n)`/`@Max(n)` on integral fields; keep `@Positive`/`@Negative` for fields with no other bound. On `float`/`double`, where `@Min`/`@Max` don't fit, use `@DecimalMin`/`@DecimalMax` (inclusive) or `@Positive`/`@Negative` — the same one-bound-keyword-per-field rule applies. (springdoc maps `@PositiveOrZero`/`@NegativeOrZero` to an inclusive `0`, safe beside a matching `@Schema`.)
 
 ```java
 @Schema(description = "...", minimum = "1")
-@Min(1) // not @Positive: that adds a conflicting exclusiveMinimum
+@Min(1) // not @Positive: springdoc adds a conflicting exclusiveMinimum at runtime
 private Integer frequency;
 ```
 
