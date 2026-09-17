@@ -51,6 +51,21 @@ public class AcmeProfileRequestDto {
     @Schema(description = "List of Custom Attributes")
     private List<RequestAttribute> customAttributes;
 
+    private Integer orderBatchSize;
+
+    /**
+     * Maximum number of concurrent authorization challenges. Must be between 1 and 64; values outside that range are
+     * rejected at validation time.
+     */
+    @Schema(description = "Concurrent challenge limit")
+    private Integer challengeConcurrency;
+
+    /**
+     * Retry interval for the Orders.
+     */
+    @Schema(description = "Retry interval for the Orders", defaultValue = "30")
+    private Integer orderRetrySeconds;
+
     @Schema(description = "Associations to set for certificates issued by the protocol",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Valid
