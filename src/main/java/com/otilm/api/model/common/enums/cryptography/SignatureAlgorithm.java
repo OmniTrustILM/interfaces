@@ -27,9 +27,11 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
                 + "signature it produces, so naming the algorithm names that digest. It says nothing about a digest an "
                 + "operation takes as a parameter of its own. Where the code spells its digest out, that is the "
                 + "digest. Where it does not, the platform records the digest it pairs the algorithm with: Ed25519 "
-                + "commits to SHA-512, FALCON-1024 commits to SHA-512, ML-DSA-65 commits to SHA-512, "
-                + "SLH-DSA-SHA2-128F commits to SHA-256, and Ed448 commits to SHAKE256, which is not a "
-                + "DigestAlgorithm value.")
+                + "commits to SHA-512, FALCON-1024 commits to SHA-512, ML-DSA-44 commits to SHA-512, ML-DSA-65 "
+                + "commits to SHA-512, ML-DSA-87 commits to SHA-512, SLH-DSA-SHA2-128S commits to SHA-256, "
+                + "SLH-DSA-SHA2-128F commits to SHA-256, SLH-DSA-SHA2-192S commits to SHA-512, SLH-DSA-SHA2-192F "
+                + "commits to SHA-512, SLH-DSA-SHA2-256S commits to SHA-512, SLH-DSA-SHA2-256F commits to SHA-512, "
+                + "and Ed448 commits to SHAKE256, which is not a DigestAlgorithm value.")
 public enum SignatureAlgorithm implements IPlatformEnum {
     SHA256_WITH_RSA("SHA256withRSA", "RSASSA-PKCS_v1.5 using SHA256", "RSA signature with SHA-256 digest",
             new AlgorithmIdentifier(PKCSObjectIdentifiers.sha256WithRSAEncryption, DERNull.INSTANCE),
@@ -67,14 +69,42 @@ public enum SignatureAlgorithm implements IPlatformEnum {
     FALCON_1024("FALCON-1024", "FALCON-1024", "Post-quantum FALCON-1024 lattice-based signature scheme",
             new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.3.9999.3.14")),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
+    ML_DSA_44("ML-DSA-44", "ML-DSA-44 (Dilithium)",
+            "Post-quantum Module-Lattice-Based digital signature, NIST FIPS 204 level 2",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_ml_dsa_44),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
     ML_DSA_65("ML-DSA-65", "ML-DSA-65 (Dilithium)",
             "Post-quantum Module-Lattice-Based digital signature, NIST FIPS 204 level 3",
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_ml_dsa_65),
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
+    ML_DSA_87("ML-DSA-87", "ML-DSA-87 (Dilithium)",
+            "Post-quantum Module-Lattice-Based digital signature, NIST FIPS 204 level 5",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_ml_dsa_87),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
+    SLH_DSA_SHA2_128S("SLH-DSA-SHA2-128S", "SLH-DSA-SHA2-128S (SPHINCS+)",
+            "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-128S",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_128s),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), true),
     SLH_DSA_SHA2_128F("SLH-DSA-SHA2-128F", "SLH-DSA-SHA2-128F (SPHINCS+)",
             "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-128F",
             new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_128f),
-            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), true);
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256), true),
+    SLH_DSA_SHA2_192S("SLH-DSA-SHA2-192S", "SLH-DSA-SHA2-192S (SPHINCS+)",
+            "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-192S",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_192s),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
+    SLH_DSA_SHA2_192F("SLH-DSA-SHA2-192F", "SLH-DSA-SHA2-192F (SPHINCS+)",
+            "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-192F",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_192f),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
+    SLH_DSA_SHA2_256S("SLH-DSA-SHA2-256S", "SLH-DSA-SHA2-256S (SPHINCS+)",
+            "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-256S",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_256s),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true),
+    SLH_DSA_SHA2_256F("SLH-DSA-SHA2-256F", "SLH-DSA-SHA2-256F (SPHINCS+)",
+            "Post-quantum stateless hash-based signature, NIST FIPS 205 SHA2-256F",
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_slh_dsa_sha2_256f),
+            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512), true);
 
     private static final SignatureAlgorithm[] VALUES;
 
