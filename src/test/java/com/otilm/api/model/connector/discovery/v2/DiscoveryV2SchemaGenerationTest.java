@@ -145,11 +145,15 @@ class DiscoveryV2SchemaGenerationTest {
     void progressComponentsAreIdenticalFromEveryEntryPoint() {
         // The leaf's own description, read standalone: asserting the rule rather than today's wording, which a
         // literal prefix would pin until someone rewords the schema and has to edit the guard to match.
-        String leafOwnDescription = ModelConverters
+        Schema<?> leaf = ModelConverters
                 .getInstance()
                 .readAll(DiscoveryResourceProgressDto.class)
-                .get("DiscoveryResourceProgressDto")
-                .getDescription();
+                .get("DiscoveryResourceProgressDto");
+        assertNotNull(leaf, "DiscoveryResourceProgressDto publishes no schema of its own");
+        assertNotNull(leaf.getDescription(),
+                "DiscoveryResourceProgressDto must describe itself at class level, or every reached copy is null too "
+                        + "and this guard compares null against null");
+        String leafOwnDescription = leaf.getDescription();
         Map<String, Schema> viaEvent = ModelConverters.getInstance().readAll(DiscoveryEvent.class);
         Map<String, Schema> viaStatus = ModelConverters.getInstance().readAll(DiscoveryStatusResponseDto.class);
         Map<String, Schema> viaDetail = ModelConverters.getInstance().readAll(DiscoveryDetailDto.class);

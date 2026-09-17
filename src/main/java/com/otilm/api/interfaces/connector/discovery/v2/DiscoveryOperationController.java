@@ -147,7 +147,7 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "Run cannot be stopped: past the point of no return, or the connector cannot checkpoint this run (errorCode OPERATION_PAST_POINT_OF_NO_RETURN). Core's own gate rejects stops for runs whose effective stoppability is false before they reach the connector, so this refusal is the connector's runtime authority",
+                    description = "Run cannot be stopped: past the point of no return, or the connector cannot checkpoint this run (errorCode OPERATION_PAST_POINT_OF_NO_RETURN); Core's own gate rejects stops for runs whose effective stoppability is false before they reach the connector, so this refusal is the connector's runtime authority. Or the request body is invalid (errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/stop", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -188,7 +188,7 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "Cancel refused: the run is past the point of no return (errorCode OPERATION_PAST_POINT_OF_NO_RETURN)",
+                    description = "Cancel refused: the run is past the point of no return (errorCode OPERATION_PAST_POINT_OF_NO_RETURN), or the request body is invalid (errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
