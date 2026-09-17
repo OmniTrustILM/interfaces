@@ -19,11 +19,17 @@ import com.otilm.api.model.core.connector.ConnectorStatus;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -34,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 class TokenApiClientTest {
 
@@ -62,13 +70,23 @@ class TokenApiClientTest {
 
     private TokenApiClient client;
     private ConnectorDto connector;
-    private WireMockServer mockServer;
+    private static WireMockServer mockServer;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void startMockServer() {
         mockServer = new WireMockServer(options().dynamicPort());
         mockServer.start();
         WireMock.configureFor("localhost", mockServer.port());
+    }
+
+    @AfterAll
+    static void stopMockServer() {
+        mockServer.stop();
+    }
+
+    @BeforeEach
+    void setUp() {
+        mockServer.resetAll();
 
         connector = new ConnectorDto();
         connector.setName("cryptography connector");
@@ -77,11 +95,6 @@ class TokenApiClientTest {
 
         OperationResponseValidator responseValidator = new OperationResponseValidator(VALIDATORS.validator());
         client = new TokenApiClient(BaseApiClient.prepareWebClient(), null, responseValidator);
-    }
-
-    @AfterEach
-    void tearDown() {
-        mockServer.stop();
     }
 
     @Test
@@ -185,6 +198,60 @@ class TokenApiClientTest {
                                 """)));
     }
 
+    @ParameterizedTest
+    @MethodSource("missingKeyRequestTypeBodies")
+    void listSupportedKeyRequestTypes_rejectsMissingBody(HttpStatus status, String responseBody) {
+        // given
+        stubJsonResponse(KEY_REQUEST_TYPES_PATH, status, responseBody);
+        String expectedError = "Connector response body is required";
+
+        // when
+        Executable call = () -> client.listSupportedKeyRequestTypes(connector, tokenProfileScopedRequest());
+
+        // then
+        assertConnectorValidationFailure(call, expectedError);
+    }
+
+    static Stream<Arguments> missingKeyRequestTypeBodies() {
+        return Stream
+                .of(argumentSet("HTTP 200 without a body", HttpStatus.OK, ""),
+                        argumentSet("HTTP 200 with JSON null", HttpStatus.OK, "null"),
+                        argumentSet("HTTP 204 without a body", HttpStatus.NO_CONTENT, ""));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("keyRequestTypeBodiesWithNullElements")
+    void listSupportedKeyRequestTypes_rejectsNullElements(String responseBody) {
+        // given
+        stubJsonResponse(KEY_REQUEST_TYPES_PATH, HttpStatus.OK, responseBody);
+        String expectedError = "Connector response must not contain a null key request type";
+
+        // when
+        Executable call = () -> client.listSupportedKeyRequestTypes(connector, tokenProfileScopedRequest());
+
+        // then
+        assertConnectorValidationFailure(call, expectedError);
+    }
+
+    static Stream<Named<String>> keyRequestTypeBodiesWithNullElements() {
+        return Stream
+                .of(named("null element only", "[null]"), named("valid type followed by null", "[\"secret\",null]"),
+                        named("null followed by valid type", "[null,\"keyPair\"]"));
+    }
+
+    @Test
+    void listSupportedKeyRequestTypes_acceptsEmptyList() throws ConnectorException {
+        // given
+        String emptyListResponse = "[]";
+        stubJsonResponse(KEY_REQUEST_TYPES_PATH, HttpStatus.OK, emptyListResponse);
+
+        // when
+        List<KeyRequestType> result = client.listSupportedKeyRequestTypes(connector, tokenProfileScopedRequest());
+
+        // then
+        assertEquals(List.of(), result);
+    }
+
     @Test
     void getTokenStatus_propagatesConnectorHttpError() {
         // given
@@ -208,6 +275,13 @@ class TokenApiClientTest {
         mockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(path)).withRequestBody(WireMock.equalToJson("""
                 {"tokenAttributes": []}
                 """)));
+    }
+
+    private void assertConnectorValidationFailure(Executable call, String expectedMessage) {
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals(expectedMessage, exception.getMessage());
+        assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+        assertSame(connector, exception.getConnector());
     }
 
     private void stubJsonResponse(String path, HttpStatus status, String body) {

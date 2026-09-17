@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.cryptoasset;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 import lombok.Data;
@@ -9,12 +10,15 @@ import lombok.Data;
  * algorithm found in many documents is one row, with the references counted on it.
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CryptographicAssetDto {
 
     @Schema(description = "UUID of the inventory asset", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID uuid;
 
-    @Schema(description = "Normalized display name of the asset", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Normalized display name of the asset: the producers' name, else the recorded OID. Absent "
+            + "when neither exists to serve, because a refuted OID is never presented as the name",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 
     @Schema(description = "Type of the asset", requiredMode = Schema.RequiredMode.REQUIRED)

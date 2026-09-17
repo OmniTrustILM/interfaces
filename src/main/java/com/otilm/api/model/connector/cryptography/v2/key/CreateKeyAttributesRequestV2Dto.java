@@ -19,4 +19,15 @@ public class CreateKeyAttributesRequestV2Dto extends TokenProfileScopedRequestV2
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "keyRequestType is required")
     private KeyRequestType keyRequestType;
+
+    public static CreateKeyAttributesRequestV2Dto fromTokenProfileScopedRequest(
+            TokenProfileScopedRequestV2Dto requestDto, KeyRequestType keyRequestType) {
+        CreateKeyAttributesRequestV2Dto dto = new CreateKeyAttributesRequestV2Dto();
+        dto.setTokenAttributes(requestDto.getTokenAttributes());
+        dto.setTokenProfileAttributes(requestDto.getTokenProfileAttributes());
+        dto.setKeyUsages(requestDto.getKeyUsages());
+        dto.setKeyRequestType(keyRequestType);
+
+        return dto;
+    }
 }

@@ -6,6 +6,7 @@ import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.NotFoundException;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.interfaces.AuthProtectedController;
+import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.client.cryptography.tokenprofile.AddTokenProfileRequestDto;
 import com.otilm.api.model.client.cryptography.tokenprofile.BulkTokenProfileKeyUsageRequestDto;
 import com.otilm.api.model.client.cryptography.tokenprofile.EditTokenProfileRequestDto;
@@ -210,6 +211,24 @@ public interface TokenProfileController extends AuthProtectedController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<KeyUsage> listSupportedTokenProfileKeyUsages(
             @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid)
+            throws NotFoundException, ConnectorException;
+
+    @Operation(summary = "List supported Key Request Types",
+            description = "Returns the Key Request Types supported for the specified token profile, based on its "
+                    + "token configuration, profile attributes and selected key usages")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Supported Key Request Types retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/keys/types",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<KeyRequestType> listSupportedKeyRequestTypes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid)
             throws NotFoundException, ConnectorException;
 
     @Operation(summary = "Update Key Usage")

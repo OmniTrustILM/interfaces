@@ -1,8 +1,11 @@
 package com.otilm.api.interfaces.core.web;
 
+import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -25,7 +29,11 @@ class TokenProfileControllerContractTest {
 
     private static final String TOKEN_PROFILE_KEY_USAGES_PATH = "/tokens/{tokenInstanceUuid}/tokenProfiles/keyUsages";
 
+    private static final String TOKEN_PROFILE_KEY_REQUEST_TYPES_PATH = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/keys/types";
+
     private static final String TOKEN_INSTANCE_UUID = "tokenInstanceUuid";
+
+    private static final String TOKEN_PROFILE_UUID = "tokenProfileUuid";
 
     @Test
     void tokenProfileAttributesRemainOnTheExistingGetRoute() {
@@ -41,7 +49,7 @@ class TokenProfileControllerContractTest {
         assertNotNull(methodMapping, "token profile attribute discovery must be a GET");
         assertArrayEquals(new String[]{TOKEN_PROFILE_ATTRIBUTES_PATH}, methodMapping.path());
         assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, methodMapping.produces());
-        assertTokenInstancePathVariable(attributes);
+        assertPathVariables(attributes, TOKEN_INSTANCE_UUID);
     }
 
     @Test
@@ -58,7 +66,28 @@ class TokenProfileControllerContractTest {
         assertNotNull(methodMapping, "token profile key-usage discovery must be a GET");
         assertArrayEquals(new String[]{TOKEN_PROFILE_KEY_USAGES_PATH}, methodMapping.path());
         assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, methodMapping.produces());
-        assertTokenInstancePathVariable(keyUsages);
+        assertPathVariables(keyUsages, TOKEN_INSTANCE_UUID);
+    }
+
+    @Test
+    void supportedKeyRequestTypesArePublishedOnTheProfileScopedGetRoute() {
+        // given
+        Method keyRequestTypes = method("listSupportedKeyRequestTypes");
+
+        // when
+        RequestMapping controllerMapping = TokenProfileController.class.getAnnotation(RequestMapping.class);
+        GetMapping methodMapping = keyRequestTypes.getAnnotation(GetMapping.class);
+
+        // then
+        assertControllerBasePath(controllerMapping);
+        assertNotNull(methodMapping, "key request type discovery must be a GET");
+        assertArrayEquals(new String[]{TOKEN_PROFILE_KEY_REQUEST_TYPES_PATH}, methodMapping.path());
+        assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, methodMapping.produces());
+        assertPathVariables(keyRequestTypes, TOKEN_INSTANCE_UUID, TOKEN_PROFILE_UUID);
+        ParameterizedType returnType = assertInstanceOf(ParameterizedType.class,
+                keyRequestTypes.getGenericReturnType());
+        assertEquals(List.class, returnType.getRawType());
+        assertArrayEquals(new Class<?>[]{KeyRequestType.class}, returnType.getActualTypeArguments());
     }
 
     private static void assertControllerBasePath(RequestMapping mapping) {
@@ -66,17 +95,24 @@ class TokenProfileControllerContractTest {
         assertArrayEquals(new String[]{BASE_PATH}, mapping.value());
     }
 
-    private static void assertTokenInstancePathVariable(Method method) {
-        assertEquals(1, method.getParameterCount(), "the token instance must be the route's only parameter");
-        Parameter parameter = method.getParameters()[0];
+    private static void assertPathVariables(Method method, String... expectedNames) {
+        assertEquals(expectedNames.length, method.getParameterCount(),
+                "the route must have exactly its path parameters");
+        Parameter[] parameters = method.getParameters();
+        for (int index = 0; index < expectedNames.length; index++) {
+            assertPathVariable(parameters[index], expectedNames[index]);
+        }
+    }
+
+    private static void assertPathVariable(Parameter parameter, String expectedName) {
         assertEquals(String.class, parameter.getType());
         PathVariable pathVariable = parameter.getAnnotation(PathVariable.class);
-        assertNotNull(pathVariable, "tokenInstanceUuid must be a path variable");
+        assertNotNull(pathVariable, expectedName + " must be a path variable");
 
         String boundName = !pathVariable.value().isEmpty()
                 ? pathVariable.value()
                 : !pathVariable.name().isEmpty() ? pathVariable.name() : parameter.getName();
-        assertEquals(TOKEN_INSTANCE_UUID, boundName, "the path variable must match the route placeholder");
+        assertEquals(expectedName, boundName, "the path variable must match the route placeholder");
     }
 
     private static Method method(String name) {

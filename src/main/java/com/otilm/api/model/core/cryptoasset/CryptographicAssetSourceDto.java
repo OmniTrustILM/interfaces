@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.cryptoasset;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import lombok.Data;
  * normalized projection, because sources disagree and the disagreement is the evidence an operator traces.
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CryptographicAssetSourceDto {
 
     @Schema(description = "UUID of the source CBOM record", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -26,8 +28,8 @@ public class CryptographicAssetSourceDto {
             + "evidence list is capped", requiredMode = Schema.RequiredMode.REQUIRED)
     private long occurrenceCount;
 
-    @Schema(description = "Tool or scan that produced the source CBOM (e.g.: CBOM-Lens)",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Tool or scan that produced the source CBOM (e.g.: CBOM-Lens); absent when the document's "
+            + "metadata component carries no name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String source;
 
     @Schema(description = "Cryptographic properties of the component as this source declared them. Keys follow the "
