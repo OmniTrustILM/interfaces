@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.discovery;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +28,8 @@ public class DiscoveryProviderCertificateDataDto {
 
     @Schema(description = "Run-wide item number the Connector assigned, shared across the run's resources. "
             + "Absent for a v1 Connector, whose provider numbers nothing.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
+    @Min(value = 1, message = "sequence must be positive")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long sequence;
 

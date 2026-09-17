@@ -2,6 +2,8 @@ package com.otilm.api.model.connector.discovery;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.otilm.api.testsupport.ValidatorFixture;
+import jakarta.validation.Validator;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
@@ -51,6 +53,30 @@ class DiscoveryProviderCertificateDataDtoTest {
         DiscoveryProviderCertificateDataDto back = mapper.readValue(json, DiscoveryProviderCertificateDataDto.class);
         assertNull(back.getSequence());
         assertNull(back.getDiscoveredAt());
+    }
+
+    private static final Validator VALIDATOR = new ValidatorFixture().validator();
+
+    /**
+     * The same provider number {@code DiscoveredItemDto} publishes with a minimum of 1: sequence 0 is the cursor's "no
+     * items yet" and cannot identify an item. Absent stays legal, since a v1 provider numbers nothing.
+     */
+    @Test
+    void aSequenceBelowOneIsRejectedWhileAbsentStaysLegal() {
+        for (long bad : new long[]{0L, -1L}) {
+            DiscoveryProviderCertificateDataDto dto = new DiscoveryProviderCertificateDataDto();
+            dto.setSequence(bad);
+            assertTrue(
+                    VALIDATOR.validate(dto).stream().anyMatch(v -> v.getPropertyPath().toString().equals("sequence")),
+                    "sequence " + bad + " must be rejected: the published minimum is 1");
+        }
+        DiscoveryProviderCertificateDataDto v1 = new DiscoveryProviderCertificateDataDto();
+        assertFalse(VALIDATOR.validate(v1).stream().anyMatch(v -> v.getPropertyPath().toString().equals("sequence")),
+                "a v1 payload carries no sequence and must not be refused for it");
+        DiscoveryProviderCertificateDataDto first = new DiscoveryProviderCertificateDataDto();
+        first.setSequence(1L);
+        assertFalse(VALIDATOR.validate(first).stream().anyMatch(v -> v.getPropertyPath().toString().equals("sequence")),
+                "1 is the first legal sequence");
     }
 
     @Test
