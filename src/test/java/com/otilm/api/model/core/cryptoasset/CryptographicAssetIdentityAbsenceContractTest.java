@@ -12,6 +12,8 @@ import com.otilm.api.model.common.enums.IPlatformEnum;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
 import com.otilm.api.model.core.cbom.CbomDto;
+import com.otilm.api.model.core.cbom.CbomSyncSkipDto;
+import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -60,7 +62,8 @@ class CryptographicAssetIdentityAbsenceContractTest {
             .of(CryptographicAssetDto.class, CryptographicAssetDetailDto.class, CryptographicAssetVerdictDto.class,
                     CryptographicAssetNormalizedFieldsDto.class, CryptographicAssetSourceDto.class,
                     CryptographicAssetEvidenceDto.class, CryptographicAssetOidDto.class,
-                    CryptographicAssetStatisticsDto.class, CryptographicAssetSyncCompletenessDto.class, CbomDto.class);
+                    CryptographicAssetStatisticsDto.class, CryptographicAssetSyncCompletenessDto.class, CbomDto.class,
+                    CbomSyncSkipDto.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -96,6 +99,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
         sweepEnum(CryptographicAssetType.class, problems);
         sweepEnum(PqcVerdict.class, problems);
         sweepEnum(CbomAssetSyncState.class, problems);
+        sweepEnum(CbomSyncSkipState.class, problems);
         assertTrue(problems.isEmpty(), String.join("\n", problems));
     }
 

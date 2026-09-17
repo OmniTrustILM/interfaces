@@ -13,6 +13,11 @@ import lombok.Data;
 
 @Data
 public class CbomDto implements AttributeProjectable {
+
+    /** Shared by every member that carries a failure reason: what the text is, and what it is never. */
+    public static final String OPERATOR_WORDED_REASON = "in words meant for an operator; never a raw driver or parser "
+            + "message";
+
     @Schema(description = "UUID of a CBOM record", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID uuid;
 
@@ -60,6 +65,13 @@ public class CbomDto implements AttributeProjectable {
             + "neither advance nor clear it. Platform versions predating the asset sync omit the field.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private OffsetDateTime assetSyncedAt;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "Why the last cryptographic asset sync attempt for this record failed or refused the "
+            + "document, " + OPERATOR_WORDED_REASON + ". A later attempt that succeeds clears it. Absent while there "
+            + "is no failure to report, and on platform versions predating it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String assetSyncError;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     // No example: the platform registers no custom, metadata or data attributes against this resource, so the

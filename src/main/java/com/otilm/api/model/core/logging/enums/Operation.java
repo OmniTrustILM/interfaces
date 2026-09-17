@@ -62,6 +62,9 @@ public enum Operation implements IPlatformEnum {
     CMP_CONFIRM("cmpConfirm", "CMP confirm"),
     UPLOAD("upload", "Upload"),
     SYNC("sync", "Sync"),
+    RETRY("retry", "Retry",
+            "Operator-driven retry of a CBOM Repository entry the sync had given up on: the entry goes back to "
+                    + "retrying with a full budget."),
     COMPROMISE("compromise", "Compromise"),
     DESTROY("destroy", "Destroy"),
     LIST_KEY_USAGES("listKeyUsages", "List key usages"),
