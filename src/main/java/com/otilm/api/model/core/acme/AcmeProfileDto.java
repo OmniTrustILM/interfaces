@@ -65,6 +65,14 @@ public class AcmeProfileDto extends NameAndUuidDto {
             + "externalAccountRequired.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<UUID> eabSecretUuids = new ArrayList<>();
 
+    @Schema(description = "Identifiers an account may obtain from this profile without proving control of them.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
+
+    @Schema(description = "What happens to an ordered identifier the pre-authorization policy does not cover.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -86,6 +94,8 @@ public class AcmeProfileDto extends NameAndUuidDto {
                 .append("revokeCertificateAttributes", revokeCertificateAttributes)
                 .append("customAttributes", customAttributes)
                 .append("eabSecretUuids", eabSecretUuids)
+                .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
+                .append("identifierAuthorizationMode", identifierAuthorizationMode)
                 .toString();
     }
 }

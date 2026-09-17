@@ -1,12 +1,17 @@
 package com.otilm.api.model.client.acme;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otilm.api.model.client.attribute.RequestAttribute;
+import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
+import com.otilm.api.model.core.acme.AcmePreauthorizedIdentifierDto;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -58,6 +63,19 @@ public class AcmeProfileRequestDto {
             + "Account registration open.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<@NotNull UUID> eabSecretUuids = new ArrayList<>();
 
+    @Valid
+    @Schema(description = "Identifiers an account may obtain from this profile without proving control of them. "
+            + "An order whose identifiers are all covered is ready at creation and carries no challenges.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<@NotNull AcmePreauthorizedIdentifierDto> preauthorizedIdentifiers = new ArrayList<>();
+
+    @Schema(description = "What happens to an ordered identifier the pre-authorization policy does not cover. "
+            + "'preauthorizedOrChallenge', the default, sends it through the usual http-01 and dns-01 flow. "
+            + "'preauthorizedOnly' refuses the order, and needs at least one pre-authorized identifier - to stop "
+            + "a profile accepting orders at all, disable new orders instead.",
+            defaultValue = "preauthorizedOrChallenge", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -76,6 +94,8 @@ public class AcmeProfileRequestDto {
                 .append("requireTermsOfService", requireTermsOfService)
                 .append("customAttributes", customAttributes)
                 .append("eabSecretUuids", eabSecretUuids)
+                .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
+                .append("identifierAuthorizationMode", identifierAuthorizationMode)
                 .toString();
     }
 
@@ -85,5 +105,14 @@ public class AcmeProfileRequestDto {
 
     public Boolean isRequireContact() {
         return requireContact;
+    }
+
+    @JsonIgnore
+    @AssertTrue(
+            message = "preauthorizedOnly needs at least one pre-authorized identifier; to stop the profile accepting orders, disable new orders instead")
+    @Schema(hidden = true)
+    public boolean isPreauthorizedOnlyBackedByEntries() {
+        return identifierAuthorizationMode != AcmeIdentifierAuthorizationMode.PREAUTHORIZED_ONLY
+                || (preauthorizedIdentifiers != null && preauthorizedIdentifiers.stream().anyMatch(Objects::nonNull));
     }
 }
