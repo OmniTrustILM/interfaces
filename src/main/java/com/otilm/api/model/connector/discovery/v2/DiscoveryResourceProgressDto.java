@@ -8,35 +8,29 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Progress counters for a single resource type. Every field is optional; a connector that cannot estimate progress at
- * all sends an all-null instance.
- *
- * <p>
- * This is the leaf of the progress model, and deliberately carries no {@code byResource} of its own: a per-resource
- * breakdown of a per-resource breakdown has no meaning. Keeping it a leaf also keeps the generated schema graph finite
- * — a self-referential progress type made swagger-core emit a truncated {@code DiscoveryProgressDto} component whenever
- * the graph was entered through {@link DiscoveryEvent}, silently dropping {@code byResource} from the published
- * contract that Go and Python connector authors generate their clients from.
+ * What a run has yielded for one resource type — the leaf of the progress model. Item counts only: a failure belongs to
+ * the work a connector attempted, not to any one resource, so {@link DiscoveryProgressDto} counts that.
  */
 @Getter
 @Setter
 @ToString
-@Schema(description = "Progress counters. Used for a whole run and, keyed by resource code inside "
-        + "byResource (e.g. \"certificates\", \"keys\"), for one resource type at a time. Every "
-        + "field is optional.")
+@Schema(description = "How many items of one resource type have been found, keyed by resource code inside "
+        + "byResource (e.g. \"certificates\", \"keys\"). Every field is optional, but a provider with nothing to "
+        + "report MUST leave the whole object out rather than send an empty one — a client keeping the last "
+        + "progress it was sent cannot tell an empty report from a missing one.")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiscoveryResourceProgressDto {
 
-    @Schema(description = "Number of items processed so far; omitted when the connector cannot report it",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Long processed;
+    @Schema(description = "How many items of this resource type the provider has found so far; omitted if it "
+            + "cannot count them", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Long produced;
 
-    @Schema(description = "Estimated total number of items for the run; omitted when the connector cannot "
-            + "produce an estimate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Estimated total number of items of this resource type for the whole discovery; "
+            + "omitted if the provider cannot estimate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long totalEstimate;
 
-    @Schema(description = "Connector-defined free-text phase label (e.g. \"scanning\", \"enumerating\"); "
-            + "omitted when the connector has no phase concept", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Free-text label for what the provider is doing with this resource type; omitted if "
+            + "it has none", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String phase;
 }

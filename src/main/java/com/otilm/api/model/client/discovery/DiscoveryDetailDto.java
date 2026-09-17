@@ -6,6 +6,7 @@ import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryProgressDto;
 import com.otilm.api.model.core.auth.Resource;
+import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.workflows.TriggerDto;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -20,7 +21,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class DiscoveryDetailDto extends NameAndUuidDto {
 
-    @Schema(description = "Discovery Kind", examples = {"IP-HostName"}, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Discovery Kind. Absent for a run against a v2 Discovery Provider, which has no kinds.",
+            examples = {"IP-HostName"}, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String kind;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -38,10 +41,12 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(description = "Date and time when Discovery finished", nullable = true)
     private OffsetDateTime endTime;
 
-    @Schema(description = "Number of certificates that are discovered", defaultValue = "0")
+    @Schema(description = "How many certificates this discovery found and saved.", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
 
-    @Schema(description = "Number of certificates that were discovered by connector", defaultValue = "0")
+    @Schema(description = "How many certificate items the Discovery Provider reported. Counts items, so a certificate "
+            + "found on several hosts counts once per host; totalCertificatesDiscovered counts it once.",
+            defaultValue = "0")
     private Integer connectorTotalCertificatesDiscovered;
 
     @Schema(description = "UUID of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -49,6 +54,13 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
 
     @Schema(description = "Name of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorName;
+
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "The connector interface this run is driven through, and so which generation drives it. "
+            + "Absent for a run against a legacy v1 connector, which declares no connector interface.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ConnectorInterfaceDto connectorInterface;
 
     @Schema(description = "List of Discovery Attributes", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> attributes = new ArrayList<>();
@@ -77,16 +89,11 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Resource> resources;
 
-    /**
-     * Progress counters reported by the connector, with an optional per-resource breakdown. Omitted when the run is
-     * against a v1 connector, or when the connector reports no progress at all. Individual counters inside it are
-     * independently optional — a connector that cannot estimate a total still reports what it has processed.
-     *
-     * <p>
-     * The prose lives here and not in {@code @Schema} for the hoisting reason in the comment above
-     * ({@code progressComponentsAreIdenticalFromEveryEntryPoint} pins it).
-     */
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "Progress counters reported by the connector, with an optional per-resource breakdown. "
+            + "Omitted for a v1 run and when the connector reports no progress. The counters inside are "
+            + "independently optional.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryProgressDto progress;
 
@@ -108,6 +115,35 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
             + "A non-zero count does not imply the run failed. Always 0 for runs against a v1 Discovery Provider.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
+
+    /** The drain cursor: the highest item sequence received from the Provider. */
+    @Schema(description = "How many items this discovery has received from the Discovery Provider, across all "
+            + "resource types. Usually the same as the number the items listing returns, and larger when an item "
+            + "could not be kept — a malformed payload, or one already collected earlier in the run. Whatever the "
+            + "provider has produced but not yet handed over shows in progress, not here. Not set for a discovery "
+            + "run against a v1 Discovery Provider.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long itemsDiscovered;
+
+    @Schema(description = "How many of the items collected were not already in the inventory when this run staged "
+            + "them. Counted per item rather than per object, so the same certificate found on two hosts counts "
+            + "twice.", requiredMode = Schema.RequiredMode.REQUIRED)
+    private long itemsNewlyDiscovered;
+
+    /**
+     * Counted from the platform's own rows on every read, in one query with {@code itemsFailed} and
+     * {@code itemsNewlyDiscovered}, so the three never disagree.
+     */
+    @Schema(description = "How many of the newly discovered items are now in the inventory. Counts only items that "
+            + "were imported cleanly; one the platform could not import is counted by itemsFailed instead. "
+            + "itemsNewlyDiscovered less this and itemsFailed is what the run has still to import.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private long itemsProcessed;
+
+    @Schema(description = "How many of the newly discovered items the platform could not import, each for a reason "
+            + "recorded against the item in the items listing. A discovery can finish with a non-zero count here — "
+            + "it ends with a warning rather than a failure.", requiredMode = Schema.RequiredMode.REQUIRED)
+    private long itemsFailed;
 
     /**
      * <b>Provenance:</b> declared by the connector at initiate and refreshed on resume; derived by Core from the

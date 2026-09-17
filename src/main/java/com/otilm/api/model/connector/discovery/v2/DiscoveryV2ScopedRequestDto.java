@@ -3,7 +3,9 @@ package com.otilm.api.model.connector.discovery.v2;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.core.auth.Resource;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +15,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Abstract base for all discovery v2 request bodies. The discovery connector is stateless and keeps no Core-visible
- * state, so identity ({@code runId}) and configuration (the attribute lists) are replayed on every lifecycle call.
+ * Base of every discovery v2 request body. The connector is stateless, so identity, configuration and the checkpoint
+ * are replayed on every lifecycle call.
  */
 @Getter
 @Setter
@@ -26,29 +28,32 @@ public abstract class DiscoveryV2ScopedRequestDto {
     @NotNull(message = "runId is required")
     private UUID runId;
 
-    // Excluded from toString: attributes/resourceAttributes below can carry target credentials,
-    // and meta is an opaque connector-defined handle with no logging value of its own. runId is
-    // deliberately left in (the default, not excluded) since it is the one field worth
-    // correlating log lines by.
-    @Schema(description = "Connector-defined metadata returned in the original discovery initiate/stop/resume "
-            + "response, replayed here so the stateless connector can resolve its run state; absent on "
-            + "the initiate call itself, which is the call that mints it. Serialized size is capped at " + "64 KB.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    @ToString.Exclude
-    private List<MetadataAttribute> meta;
+    // @ArraySchema puts the description on the array, and ALL_OF_REF keeps it off the shared Resource component,
+    // which these bodies also reach through the attribute graph.
+    @ArraySchema(arraySchema = @Schema(
+            description = "Resource types this run covers, fixed at initiate and replayed unchanged on every later "
+                    + "call. Not derivable from resourceAttributes, which omits a resource that declares no "
+                    + "attributes of its own.",
+            requiredMode = Schema.RequiredMode.REQUIRED),
+            schema = @Schema(implementation = Resource.class, schemaResolution = Schema.SchemaResolution.ALL_OF_REF))
+    @NotEmpty(message = "resources is required (must contain at least one resource type)")
+    private List<@NotNull(message = "resources must not contain a null resource type") Resource> resources;
 
-    // Deliberately optional, unlike AuthorityV3ScopedRequestDto's REQUIRED attribute lists (which
-    // use @NotNull(message = "... may be empty list, but must be present")): a discovery connector
-    // that defines no run-level attributes at all is legitimate (for example, one whose targets are
-    // hardcoded or discovered without configuration), so there is no "empty list, but must be
-    // present" value to require here.
-    @Schema(description = "Run-level attributes supplied when the discovery run was initiated; optional, "
-            + "since a connector may define no run-level attributes at all.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // Excluded from toString: the attribute lists can carry target credentials and the checkpoint is opaque. runId
+    // and resources stay in, since log lines correlate by them.
+    @Schema(description = "Opaque run handle from the initiate, stop or resume response that last carried one, "
+            + "replayed so the stateless connector can resolve its run state. Absent on initiate, which mints it. "
+            + "Serialized size is capped at 64 KB.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @ToString.Exclude
+    private List<MetadataAttribute> checkpoint;
+
+    // Optional, unlike the authority v3 request lists: a connector may define no run-level attributes at all.
+    @Schema(description = "Run-level attributes supplied when the run was initiated; optional, since a connector "
+            + "may define none.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<RequestAttribute> attributes;
 
-    @Schema(description = "Per-resource attributes, keyed by resource code (e.g. \"certificates\", \"keys\"); "
+    @Schema(description = "Per-resource attributes keyed by resource code (e.g. \"certificates\", \"keys\"); "
             + "optional, since a connector may define none.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             propertyNames = Resource.class)
     @ToString.Exclude

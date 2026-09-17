@@ -88,6 +88,7 @@ class DiscoveryDtoTest {
         // absent, not null: a v1 consumer's request shape is unchanged
         assertFalse(json.contains("resources"), json);
         assertFalse(json.contains("resourceAttributes"), json);
+        assertFalse(json.contains("interfaceUuid"), json);
     }
 
     @Test
@@ -137,5 +138,24 @@ class DiscoveryDtoTest {
                 "a null element must fail with exactly the element @NotNull violation; got: " + violations);
         assertTrue(violations.iterator().next().getMessage().contains("null resource type"),
                 "unexpected violation message: " + violations.iterator().next().getMessage());
+    }
+
+    /**
+     * A kind scopes a v1 connector's function-group endpoints; a v2 connector registers an interface instead and has
+     * none. A run bound to an interface therefore sends no kind, and the wire says so by omission rather than null.
+     */
+    @Test
+    void aKindIsAV1NotionAndIsOmittedWhenUnset() throws Exception {
+        DiscoveryDto dto = new DiscoveryDto();
+        dto.setName("v2-scan");
+        dto.setConnectorUuid("b9b09548-a97c-4c6a-a06a-e4ee6fc2da98");
+        dto.setInterfaceUuid(UUID.fromString("c2f685d4-6a3e-11ec-90d6-0242ac120003"));
+        dto.setResources(List.of(Resource.CERTIFICATE));
+        dto.setAttributes(List.of());
+
+        String json = mapper.writeValueAsString(dto);
+
+        assertFalse(json.contains("\"kind\""), json);
+        assertTrue(VALIDATOR.validate(dto).isEmpty(), "a v2 request without a kind must violate no constraint");
     }
 }

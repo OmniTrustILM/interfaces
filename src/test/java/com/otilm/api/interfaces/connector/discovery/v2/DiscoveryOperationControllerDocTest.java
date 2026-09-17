@@ -148,13 +148,12 @@ class DiscoveryOperationControllerDocTest {
     }
 
     /**
-     * {@code meta} is declared on {@link DiscoveryV2ScopedRequestDto}, so every operation whose request body extends
-     * that base replays the handle — including results and stream, where a stateless connector needs it most because
-     * the drain doubles as the acknowledgment. The two responses that mint the handle must name all of them, initiate
-     * excepted: that is the call the handle comes back from, so there is nothing to replay yet.
+     * {@code checkpoint} is declared on {@link DiscoveryV2ScopedRequestDto}, so every operation whose request body
+     * extends that base replays it. The two responses that mint it must name all of them, initiate excepted: that is
+     * the call it comes back from.
      */
     @Test
-    void handleMintingResponsesNameEveryOperationThatReplaysMeta() throws NoSuchFieldException {
+    void handleMintingResponsesNameEveryOperationThatReplaysTheCheckpoint() throws NoSuchFieldException {
         List<String> replayingOps = Arrays
                 .stream(DiscoveryOperationController.class.getDeclaredMethods())
                 .filter(m -> m.getParameterCount() == 1)
@@ -162,13 +161,13 @@ class DiscoveryOperationControllerDocTest {
                 .map(Method::getName)
                 .filter(name -> !name.equals("initiate"))
                 .toList();
-        assertFalse(replayingOps.isEmpty(), "expected at least one operation replaying meta");
+        assertFalse(replayingOps.isEmpty(), "expected at least one operation replaying the checkpoint");
 
         for (Class<?> response : List.of(DiscoveryInitiateResponseDto.class, DiscoveryStopResponseDto.class)) {
-            String description = response.getDeclaredField("meta").getAnnotation(Schema.class).description();
+            String description = response.getDeclaredField("checkpoint").getAnnotation(Schema.class).description();
             for (String op : replayingOps) {
-                assertTrue(description.contains(op), response.getSimpleName() + "'s meta description must name the "
-                        + op + " operation, which replays the handle; was: " + description);
+                assertTrue(description.contains(op), response.getSimpleName() + "'s checkpoint description must name "
+                        + "the " + op + " operation, which replays it; was: " + description);
             }
         }
     }

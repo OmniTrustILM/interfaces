@@ -28,11 +28,20 @@ import reactor.core.publisher.Flux;
 
 @RequestMapping("/v2/discoveryProvider/discoveries")
 @Tag(name = "Discovery Operations v2",
-        description = "Stateless discovery v2 run lifecycle: initiate a run, poll or stream its results, "
-                + "and control it (stop/resume/cancel). Every call carries the full runId + meta + "
-                + "attributes context; the connector is not required to hold any state between calls. A "
-                + "connector MUST answer 404 for any runId it does not recognize, including after a restart.")
+        description = "Stateless discovery v2 run lifecycle: initiate a run, poll or stream its results, and "
+                + "control it (stop/resume/cancel).\n\n"
+                + "Every call replays the run's identity, resources, handle and attributes, so you need keep "
+                + "no state between calls: rebuild the run from the request, including after a restart. "
+                + "Answer 404 only for a runId you cannot rebuild — it ends the run at once, and a stopped "
+                + "run may be waiting days for its resume.\n\n"
+                + "If you can rebuild the run but no longer hold the items a drain asks for, answer 404 "
+                + "rather than a later page: Core takes the highest sequence you return as its new cursor, so "
+                + "a page served across a gap loses everything in it.")
 public interface DiscoveryOperationController extends AuthProtectedConnectorController {
+
+    /** Shared by every body-taking operation: the scoped base makes runId and resources mandatory on all of them. */
+    String VALIDATION_FAILED = "The request body is invalid — a missing runId, an empty or unsupported "
+            + "resources set, or an invalid attribute (errorCode VALIDATION_FAILED)";
 
     @Operation(summary = "Initiate a discovery run",
             description = "Starts a new discovery run for the given resource types and attributes. runId is "
@@ -42,7 +51,7 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "runId again with an identical payload MUST be answered idempotently with another 202.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
-                    description = "Run accepted; meta carries the connector's opaque run handle, replayed on every "
+                    description = "Run accepted; checkpoint carries the connector's opaque run handle, replayed on every "
                             + "subsequent lifecycle call, and stoppable, when present, declares whether this run "
                             + "can be stopped and resumed"),
             @ApiResponse(responseCode = "422",
@@ -54,11 +63,16 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     @ResponseStatus(HttpStatus.ACCEPTED)
     DiscoveryInitiateResponseDto initiate(@Valid @RequestBody DiscoveryInitiateRequestDto request);
 
-    @Operation(summary = "Get discovery run status", description = "Returns the run's current state and progress.")
+    @Operation(summary = "Get discovery run status",
+            description = "Returns the run's current state and progress, and the connector's metadata statement about "
+                    + "the run when it has one.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Run status retrieved"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/status", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -74,12 +88,18 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "reached a terminal state, is the full ack. Until the full ack arrives, the connector "
                     + "MUST retain terminal-run state for at least 24 hours after the run reached a terminal "
                     + "state. Once the full ack arrives, the connector MAY discard all state it holds for the "
-                    + "run.")
+                    + "run.\n\n"
+                    + "A connector that bounds its result buffer should size it against Core's polling interval "
+                    + "rather than assume prompt collection: after an empty drain the next one waits out the "
+                    + "interval, which is tens of seconds by default and operator-configurable.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Items retrieved; more indicates whether additional items remain beyond this page"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/results", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -105,19 +125,23 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/stream", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_NDJSON_VALUE)
     Flux<DiscoveryEvent> stream(@Valid @RequestBody DiscoveryStreamRequestDto request);
 
     @Operation(summary = "Stop a discovery run",
-            description = "Halts scanning for an in-progress run. The connector persists a best-effort "
-                    + "checkpoint into the returned meta; this checkpoint MUST preserve the item sequence "
+            description = "Halts scanning for an in-progress run. The connector returns a best-effort "
+                    + "checkpoint, which MUST preserve the item sequence "
                     + "counter, so a subsequent resume continues assigning sequences from where the run left "
                     + "off. Items already discovered but not yet drained remain drainable via POST /results "
                     + "while the run is stopped.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Run stopped; meta carries the checkpoint to resume from"),
+            @ApiResponse(responseCode = "200",
+                    description = "Run stopped; checkpoint carries the handle to resume from"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
@@ -131,12 +155,12 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryStopResponseDto stop(@Valid @RequestBody DiscoveryRunRequestDto request);
 
     @Operation(summary = "Resume a stopped discovery run",
-            description = "Continues a stopped run from the checkpoint carried in the replayed meta. Item "
+            description = "Continues a stopped run from the replayed checkpoint. Item "
                     + "sequences assigned after resuming continue the run's existing sequence space; the "
                     + "connector never restarts numbering for a resumed run.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
-                    description = "Resume accepted; meta carries the connector's (possibly updated) opaque run handle, "
+                    description = "Resume accepted; checkpoint carries the connector's (possibly updated) opaque run handle, "
                             + "and stoppable, when present, re-declares whether the resumed run can be stopped again"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
@@ -144,6 +168,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "410",
                     description = "The checkpoint needed to resume this run is no longer available (errorCode CHECKPOINT_LOST); distinct from 404, which means the run was never known",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/resume", consumes = MediaType.APPLICATION_JSON_VALUE,

@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.discovery.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.MetadataAttributeProperties;
@@ -12,6 +13,7 @@ import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -293,17 +295,17 @@ class DiscoveryV2ResponseDtoTest {
 
     @Test
     void byResourceProgressMapRoundTripsWithWireCodes() throws Exception {
-        DiscoveryProgressDto certProgress = new DiscoveryProgressDto();
-        certProgress.setProcessed(60L);
+        DiscoveryResourceProgressDto certProgress = new DiscoveryResourceProgressDto();
+        certProgress.setProduced(60L);
         certProgress.setTotalEstimate(200L);
 
-        DiscoveryProgressDto keyProgress = new DiscoveryProgressDto();
-        keyProgress.setProcessed(40L);
+        DiscoveryResourceProgressDto keyProgress = new DiscoveryResourceProgressDto();
+        keyProgress.setProduced(40L);
         keyProgress.setTotalEstimate(300L);
 
         DiscoveryProgressDto dto = new DiscoveryProgressDto();
-        dto.setProcessed(100L);
-        dto.setTotalEstimate(500L);
+        dto.setTargetsProcessed(100L);
+        dto.setTargetsTotal(500L);
         dto.setPhase("scanning");
         dto.setByResource(Map.of(Resource.CERTIFICATE, certProgress, Resource.CRYPTOGRAPHIC_KEY, keyProgress));
 
@@ -314,100 +316,213 @@ class DiscoveryV2ResponseDtoTest {
         assertFalse(json.contains("CRYPTOGRAPHIC_KEY"), "byResource keys must not fall back to the enum's Java name");
 
         DiscoveryProgressDto back = mapper.readValue(json, DiscoveryProgressDto.class);
-        assertEquals(100L, back.getProcessed());
-        assertEquals(500L, back.getTotalEstimate());
+        assertEquals(100L, back.getTargetsProcessed());
+        assertEquals(500L, back.getTargetsTotal());
         assertEquals("scanning", back.getPhase());
         assertTrue(back.getByResource().containsKey(Resource.CERTIFICATE));
         assertTrue(back.getByResource().containsKey(Resource.CRYPTOGRAPHIC_KEY));
-        assertEquals(60L, back.getByResource().get(Resource.CERTIFICATE).getProcessed());
+        assertEquals(60L, back.getByResource().get(Resource.CERTIFICATE).getProduced());
         assertEquals(200L, back.getByResource().get(Resource.CERTIFICATE).getTotalEstimate());
-        assertEquals(40L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProcessed());
+        assertEquals(40L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProduced());
         assertEquals(300L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getTotalEstimate());
+    }
+
+    /** Work and yield travel together on one object without sharing a denominator. */
+    @Test
+    void progressCountsWorkRunWideAndYieldPerResource() throws Exception {
+        DiscoveryResourceProgressDto certYield = new DiscoveryResourceProgressDto();
+        certYield.setProduced(12L);
+
+        DiscoveryProgressDto dto = new DiscoveryProgressDto();
+        dto.setTargetsProcessed(4_200L);
+        dto.setTargetsTotal(16_645_890L);
+        dto.setTargetsFailed(4_188L);
+        dto.setByResource(Map.of(Resource.CERTIFICATE, certYield));
+
+        String json = mapper.writeValueAsString(dto);
+        assertTrue(json.contains("\"targetsProcessed\":4200"), json);
+        assertTrue(json.contains("\"targetsTotal\":16645890"), json);
+        assertTrue(json.contains("\"targetsFailed\":4188"), json);
+
+        DiscoveryProgressDto back = mapper.readValue(json, DiscoveryProgressDto.class);
+        assertEquals(4_200L, back.getTargetsProcessed());
+        assertEquals(16_645_890L, back.getTargetsTotal());
+        assertEquals(4_188L, back.getTargetsFailed());
+        assertEquals(12L, back.getByResource().get(Resource.CERTIFICATE).getProduced(),
+                "yield is counted in items, per resource, and never mixed with the run's work counters");
+    }
+
+    /**
+     * {@code updatedAt} dates the report and is set by the platform, so it rides inside the progress object rather than
+     * beside it — one write replaces the counters and their timestamp together, and neither can be left behind. A
+     * provider that sends one is not an error; the value is simply replaced.
+     */
+    @Test
+    void progressCarriesWhenItWasRecorded() throws Exception {
+        // Local mapper: the shared one carries no time module, and registering one there would change how every
+        // other assertion in this class renders its timestamps.
+        ObjectMapper timeAware = new ObjectMapper().registerModule(new JavaTimeModule());
+        OffsetDateTime recorded = OffsetDateTime.parse("2026-09-13T14:32:07+02:00");
+        DiscoveryProgressDto progress = new DiscoveryProgressDto();
+        progress.setTargetsProcessed(12L);
+        progress.setUpdatedAt(recorded);
+
+        String json = timeAware.writeValueAsString(progress);
+        assertTrue(json.contains("\"updatedAt\""), "a stale reading must be datable: " + json);
+
+        DiscoveryProgressDto back = timeAware.readValue(json, DiscoveryProgressDto.class);
+        assertEquals(recorded.toInstant(), back.getUpdatedAt().toInstant());
+    }
+
+    /** Absent rather than null when nothing has been recorded — there is no report to date. */
+    @Test
+    void progressWithoutATimestampOmitsTheField() throws Exception {
+        DiscoveryProgressDto progress = new DiscoveryProgressDto();
+        progress.setTargetsProcessed(12L);
+
+        assertFalse(mapper.writeValueAsString(progress).contains("updatedAt"));
+    }
+
+    /**
+     * The two denominators must not be confused for each other on the wire: a run-level object carries no item counts,
+     * and a per-resource one carries no work counts.
+     */
+    @Test
+    void workAndYieldCountersDoNotAppearOnEachOthersObjects() throws Exception {
+        DiscoveryProgressDto run = new DiscoveryProgressDto();
+        run.setTargetsProcessed(7L);
+        String runJson = mapper.writeValueAsString(run);
+        assertFalse(runJson.contains("\"produced\""), "the run level counts work, not items: " + runJson);
+
+        DiscoveryResourceProgressDto leaf = new DiscoveryResourceProgressDto();
+        leaf.setProduced(7L);
+        String leafJson = mapper.writeValueAsString(leaf);
+        assertFalse(leafJson.contains("targets"), "a resource counts items, not the work that found them: " + leafJson);
     }
 
     @Test
     void progressOmitsAbsentFieldsIndependently() throws Exception {
         DiscoveryProgressDto dto = new DiscoveryProgressDto();
-        dto.setProcessed(42L);
+        dto.setTargetsProcessed(42L);
         dto.setPhase("scanning");
-        // totalEstimate and byResource intentionally left unset.
-
+        // targetsTotal is left unset on purpose: a sweep of an unbounded range has no completion ratio, and the
+        // contract says a consumer must not invent one.
         String json = mapper.writeValueAsString(dto);
-        assertTrue(json.contains("\"processed\":42"));
+        assertTrue(json.contains("\"targetsProcessed\":42"));
         assertTrue(json.contains("\"phase\":\"scanning\""));
-        assertFalse(json.contains("\"totalEstimate\""));
+        assertFalse(json.contains("\"targetsTotal\""));
+        assertFalse(json.contains("\"targetsFailed\""));
         assertFalse(json.contains("\"byResource\""));
 
         DiscoveryProgressDto back = mapper.readValue(json, DiscoveryProgressDto.class);
-        assertEquals(42L, back.getProcessed());
+        assertEquals(42L, back.getTargetsProcessed());
         assertEquals("scanning", back.getPhase());
-        assertNull(back.getTotalEstimate());
+        assertNull(back.getTargetsTotal());
+        assertNull(back.getTargetsFailed());
         assertNull(back.getByResource());
     }
 
     @Test
-    void initiateResponseRoundTripsMetaAndOmitsWhenAbsent() throws Exception {
+    void initiateResponseRoundTripsCheckpointAndOmitsWhenAbsent() throws Exception {
         DiscoveryInitiateResponseDto empty = new DiscoveryInitiateResponseDto();
-        assertEquals("{}", mapper.writeValueAsString(empty), "absent meta must be omitted, not serialized as null");
+        assertEquals("{}", mapper.writeValueAsString(empty),
+                "absent checkpoint must be omitted, not serialized as null");
 
         DiscoveryInitiateResponseDto dto = new DiscoveryInitiateResponseDto();
-        dto.setMeta(List.of(metadataAttribute("cursor", "abc123")));
+        dto.setCheckpoint(List.of(metadataAttribute("cursor", "abc123")));
 
         String json = mapper.writeValueAsString(dto);
         assertTrue(json.contains("\"name\":\"cursor\""));
 
         DiscoveryInitiateResponseDto back = mapper.readValue(json, DiscoveryInitiateResponseDto.class);
-        assertEquals(1, back.getMeta().size());
-        MetadataAttributeV3 backMeta = assertInstanceOf(MetadataAttributeV3.class, back.getMeta().get(0));
+        assertEquals(1, back.getCheckpoint().size());
+        MetadataAttributeV3 backMeta = assertInstanceOf(MetadataAttributeV3.class, back.getCheckpoint().get(0));
         assertEquals("cursor", backMeta.getName());
         assertEquals("abc123", ((StringAttributeContentV3) backMeta.getContent().get(0)).getData());
     }
 
     @Test
-    void stopResponseRoundTripsMetaAndOmitsWhenAbsent() throws Exception {
+    void stopResponseRoundTripsCheckpointAndOmitsWhenAbsent() throws Exception {
         DiscoveryStopResponseDto empty = new DiscoveryStopResponseDto();
-        assertEquals("{}", mapper.writeValueAsString(empty), "absent meta must be omitted, not serialized as null");
+        assertEquals("{}", mapper.writeValueAsString(empty),
+                "absent checkpoint must be omitted, not serialized as null");
 
         DiscoveryStopResponseDto dto = new DiscoveryStopResponseDto();
-        dto.setMeta(List.of(metadataAttribute("cursor", "def456")));
+        dto.setCheckpoint(List.of(metadataAttribute("cursor", "def456")));
 
         String json = mapper.writeValueAsString(dto);
         assertTrue(json.contains("\"name\":\"cursor\""));
 
         DiscoveryStopResponseDto back = mapper.readValue(json, DiscoveryStopResponseDto.class);
-        assertEquals(1, back.getMeta().size());
-        MetadataAttributeV3 backMeta = assertInstanceOf(MetadataAttributeV3.class, back.getMeta().get(0));
+        assertEquals(1, back.getCheckpoint().size());
+        MetadataAttributeV3 backMeta = assertInstanceOf(MetadataAttributeV3.class, back.getCheckpoint().get(0));
         assertEquals("cursor", backMeta.getName());
         assertEquals("def456", ((StringAttributeContentV3) backMeta.getContent().get(0)).getData());
     }
 
     @Test
-    void initiateResponseToStringExcludesMeta() {
+    void initiateResponseToStringExcludesCheckpoint() {
         // The handle is dropped from toString outright, not trusted to render harmlessly:
         // MetadataAttributeV3's own toString walks content and properties, so every entry's
         // structure and label reaches the log line, one nested record per attribute.
         DiscoveryInitiateResponseDto dto = new DiscoveryInitiateResponseDto();
-        dto.setMeta(List.of(metadataAttribute("runHandleCursor", "opaque-run-handle-blob")));
+        dto.setCheckpoint(List.of(metadataAttribute("runHandleCursor", "opaque-run-handle-blob")));
 
         String str = dto.toString();
 
-        assertFalse(str.contains("meta"),
+        assertFalse(str.contains("checkpoint"),
                 "toString must not mention the opaque run handle, which can reach 64 KB: " + str);
         assertFalse(str.contains("runHandleCursor"), "toString must not name the handle's entries: " + str);
         assertFalse(str.contains("opaque-run-handle-blob"), "toString must not write handle content: " + str);
     }
 
     @Test
-    void stopResponseToStringExcludesMeta() {
+    void stopResponseToStringExcludesCheckpoint() {
         DiscoveryStopResponseDto dto = new DiscoveryStopResponseDto();
-        dto.setMeta(List.of(metadataAttribute("resumeCheckpointCursor", "resume-checkpoint-blob")));
+        dto.setCheckpoint(List.of(metadataAttribute("resumeCheckpointCursor", "resume-checkpoint-blob")));
 
         String str = dto.toString();
 
-        assertFalse(str.contains("meta"),
+        assertFalse(str.contains("checkpoint"),
                 "toString must not mention the resume checkpoint, which can reach 64 KB: " + str);
         assertFalse(str.contains("resumeCheckpointCursor"), "toString must not name the checkpoint's entries: " + str);
         assertFalse(str.contains("resume-checkpoint-blob"), "toString must not write checkpoint content: " + str);
+    }
+
+    @Test
+    void statusResponseRoundTripsMetaAndOmitsWhenAbsent() throws Exception {
+        DiscoveryStatusResponseDto silent = new DiscoveryStatusResponseDto();
+        silent.setState(DiscoveryRunState.RUNNING);
+        silent.setHighestSequence(0L);
+        assertFalse(mapper.writeValueAsString(silent).contains("\"meta\""), "absent meta means nothing to say");
+
+        DiscoveryStatusResponseDto dto = new DiscoveryStatusResponseDto();
+        dto.setState(DiscoveryRunState.RUNNING);
+        dto.setHighestSequence(4L);
+        dto.setMeta(List.of(metadataAttribute("resolver", "10.0.0.53")));
+
+        String json = mapper.writeValueAsString(dto);
+        DiscoveryStatusResponseDto back = mapper.readValue(json, DiscoveryStatusResponseDto.class);
+
+        assertTrue(json.contains("\"meta\":["), json);
+        assertEquals(1, back.getMeta().size());
+        MetadataAttributeV3 backMeta = assertInstanceOf(MetadataAttributeV3.class, back.getMeta().get(0));
+        assertEquals("resolver", backMeta.getName());
+        assertEquals("10.0.0.53", ((StringAttributeContentV3) backMeta.getContent().get(0)).getData());
+    }
+
+    /** An empty set is a statement, "discard what you hold", and must not collapse into absence on the wire. */
+    @Test
+    void statusResponseKeepsAnEmptyMetaOnTheWire() throws Exception {
+        DiscoveryStatusResponseDto dto = new DiscoveryStatusResponseDto();
+        dto.setState(DiscoveryRunState.COMPLETED);
+        dto.setHighestSequence(4L);
+        dto.setMeta(List.of());
+
+        String json = mapper.writeValueAsString(dto);
+
+        assertTrue(json.contains("\"meta\":[]"), json);
+        assertTrue(mapper.readValue(json, DiscoveryStatusResponseDto.class).getMeta().isEmpty());
     }
 
     private MetadataAttribute metadataAttribute(String name, String value) {
