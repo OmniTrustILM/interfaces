@@ -327,7 +327,6 @@ class DiscoveryV2ResponseDtoTest {
         assertEquals(300L, back.getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getTotalEstimate());
     }
 
-    /** Work and yield travel together on one object without sharing a denominator. */
     @Test
     void progressCountsWorkRunWideAndYieldPerResource() throws Exception {
         DiscoveryResourceProgressDto certYield = new DiscoveryResourceProgressDto();
@@ -374,7 +373,6 @@ class DiscoveryV2ResponseDtoTest {
         assertEquals(recorded.toInstant(), back.getUpdatedAt().toInstant());
     }
 
-    /** Absent rather than null when nothing has been recorded — there is no report to date. */
     @Test
     void progressWithoutATimestampOmitsTheField() throws Exception {
         DiscoveryProgressDto progress = new DiscoveryProgressDto();
@@ -383,10 +381,6 @@ class DiscoveryV2ResponseDtoTest {
         assertFalse(mapper.writeValueAsString(progress).contains("updatedAt"));
     }
 
-    /**
-     * The two denominators must not be confused for each other on the wire: a run-level object carries no item counts,
-     * and a per-resource one carries no work counts.
-     */
     @Test
     void workAndYieldCountersDoNotAppearOnEachOthersObjects() throws Exception {
         DiscoveryProgressDto run = new DiscoveryProgressDto();

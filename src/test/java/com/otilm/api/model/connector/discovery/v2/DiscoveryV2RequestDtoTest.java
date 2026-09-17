@@ -81,6 +81,19 @@ class DiscoveryV2RequestDtoTest {
         assertTrue(back.getResourceAttributes().containsKey(Resource.CRYPTOGRAPHIC_KEY));
     }
 
+    /**
+     * Initiate mints the checkpoint, so its request carries none: the key is absent, as the schema promises, not null.
+     */
+    @Test
+    void aRequestWithoutACheckpointOmitsTheKey() throws Exception {
+        DiscoveryInitiateRequestDto dto = new DiscoveryInitiateRequestDto();
+        dto.setRunId(UUID.randomUUID());
+        dto.setResources(List.of(Resource.CERTIFICATE));
+
+        assertFalse(mapper.writeValueAsString(dto).contains("checkpoint"),
+                "an unset checkpoint must not serialize as null");
+    }
+
     @Test
     void scopedRequestHasNoNameField() throws Exception {
         DiscoveryRunRequestDto dto = new DiscoveryRunRequestDto();

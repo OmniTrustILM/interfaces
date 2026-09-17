@@ -1,5 +1,6 @@
 package com.otilm.api.model.connector.discovery.v2;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.core.auth.Resource;
@@ -44,6 +45,7 @@ public abstract class DiscoveryV2ScopedRequestDto {
     @Schema(description = "Opaque run handle from the initiate, stop or resume response that last carried one, "
             + "replayed so the stateless connector can resolve its run state. Absent on initiate, which mints it. "
             + "Serialized size is capped at 64 KB.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;
 

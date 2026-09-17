@@ -2,6 +2,7 @@ package com.otilm.api.model.connector.discovery.v2;
 
 import com.otilm.api.interfaces.core.web.DiscoveryController;
 import com.otilm.api.model.client.discovery.DiscoveryDetailDto;
+import com.otilm.api.model.client.discovery.DiscoveryDto;
 import com.otilm.api.model.client.discovery.DiscoveryListDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.authority.AuthorityInstanceDto;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schemas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -403,5 +405,35 @@ class DiscoveryV2SchemaGenerationTest {
                         + "carry a description beside a $ref");
         assertEquals(List.of("info", "warning", "error"), severity.getEnum(),
                 "the enum ships its wire codes, not its Java member names");
+    }
+
+    /**
+     * What this contract made optional must stay out of its schema's required list: a v2 provider has no kind, and a
+     * vault's interface is null once removed from its connector. Guarded on the generated document, which is what a
+     * generated client reads; the Java annotation alone is not the contract.
+     */
+    @Test
+    void theOptionalContractChangesStayOutOfTheRequiredLists() {
+        assertRequired(DiscoveryDto.class, "name", true);
+        assertRequired(DiscoveryDto.class, "kind", false);
+        assertRequired(DiscoveryDetailDto.class, "kind", false);
+        assertRequired(DiscoveryListDto.class, "kind", false);
+        assertRequired(VaultInstanceDto.class, "connectorInterface", false);
+    }
+
+    private static void assertRequired(Class<?> type, String property, boolean expected) {
+        // By the type's own name: readAll returns every component the type reaches, and another of them can carry a
+        // property of the same name with its own requiredness (CredentialAttributeContentData has a required kind).
+        Schema<?> schema = ModelConverters.getInstance().readAll(type).get(type.getSimpleName());
+        assertNotNull(schema, type.getSimpleName() + " publishes no schema under its own name");
+        assertNotNull(schema.getProperties(), type.getSimpleName() + " publishes no properties");
+        assertTrue(schema.getProperties().containsKey(property), type.getSimpleName() + " has no property " + property);
+        List<String> required = schema.getRequired() == null ? List.of() : schema.getRequired();
+        if (expected) {
+            assertTrue(required.contains(property), property + " must be required on " + type.getSimpleName());
+        } else {
+            assertFalse(required.contains(property),
+                    property + " must be optional on " + type.getSimpleName() + ", was required");
+        }
     }
 }

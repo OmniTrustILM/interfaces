@@ -44,7 +44,6 @@ class DiscoveryListDtoTest {
 
         String json = mapper.writeValueAsString(dto);
 
-        // Absent, not null: a v1 run declares no connector interface, and the field's absence is the signal.
         assertFalse(json.contains("connectorInterface"), json);
         assertNull(mapper.readValue(json, DiscoveryListDto.class).getConnectorInterface());
     }

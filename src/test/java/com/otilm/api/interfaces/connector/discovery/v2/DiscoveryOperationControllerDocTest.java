@@ -15,12 +15,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertNoJargon;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -172,18 +175,29 @@ class DiscoveryOperationControllerDocTest {
         }
     }
 
+    /**
+     * Every operation whose body extends the scoped base can answer 422 for a missing runId or an empty resources set,
+     * so every one of them documents it. Derived from the parameter types rather than a list, so a new operation cannot
+     * slip past by not being named here.
+     */
     @Test
-    void initiateStopAndCancelDocument422() {
-        List<String> opsExpecting422 = List.of("initiate", "stop", "cancel");
+    void everyBodyTakingOperationDocuments422() {
+        List<String> covered = new ArrayList<>();
         for (Method m : DiscoveryOperationController.class.getDeclaredMethods()) {
-            if (!opsExpecting422.contains(m.getName())) {
+            boolean takesScopedBody = Arrays
+                    .stream(m.getParameters())
+                    .anyMatch(p -> DiscoveryV2ScopedRequestDto.class.isAssignableFrom(p.getType()));
+            if (!takesScopedBody) {
                 continue;
             }
             ApiResponses responses = m.getAnnotation(ApiResponses.class);
             assertNotNull(responses, "missing @ApiResponses on " + m.getName());
             boolean has422 = Arrays.stream(responses.value()).anyMatch(r -> r.responseCode().equals("422"));
             assertTrue(has422, "expected a documented 422 on " + m.getName());
+            covered.add(m.getName());
         }
+        assertEquals(Set.of("initiate", "status", "results", "stream", "stop", "resume", "cancel"), Set.copyOf(covered),
+                "the scoped base is replayed by exactly these operations");
     }
 
     /**
