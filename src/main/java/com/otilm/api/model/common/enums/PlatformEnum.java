@@ -39,6 +39,7 @@ import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.authority.CertificateRevocationReason;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
+import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.certificate.CertificateFormat;
 import com.otilm.api.model.core.certificate.CertificateFormatEncoding;
 import com.otilm.api.model.core.certificate.CertificateKeyUsage;
@@ -210,6 +211,7 @@ public enum PlatformEnum implements IPlatformEnum {
 
     // CBOM
     CBOM_ASSET_SYNC_STATE(CbomAssetSyncState.class, "CBOM asset sync state"),
+    CBOM_SYNC_SKIP_STATE(CbomSyncSkipState.class, "CBOM sync skip state"),
     CRYPTOGRAPHIC_ASSET_TYPE(CryptographicAssetType.class, "Cryptographic asset type"),
     PQC_VERDICT(PqcVerdict.class, "PQC readiness verdict"),
 

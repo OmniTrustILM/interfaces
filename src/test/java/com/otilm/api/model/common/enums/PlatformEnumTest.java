@@ -3,6 +3,7 @@ package com.otilm.api.model.common.enums;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
+import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
@@ -85,5 +86,13 @@ class PlatformEnumTest {
         assertNotNull(entry);
         assertEquals(CbomAssetSyncState.class, entry.getEnumClass());
         assertEquals("CbomAssetSyncState", entry.getCode());
+    }
+
+    @Test
+    void cbomSyncSkipStateIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(CbomSyncSkipState.class);
+        assertNotNull(entry);
+        assertEquals(CbomSyncSkipState.class, entry.getEnumClass());
+        assertEquals("CbomSyncSkipState", entry.getCode());
     }
 }

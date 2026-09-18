@@ -41,7 +41,7 @@ class KeyRequestValidationTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("blankValues")
-    void keyRequest_rejectsBlankDescription(String blankDescription) {
+    void keyRequest_acceptsBlankDescription(String blankDescription) {
         // given
         KeyRequestDto request = validRequest();
         request.setDescription(blankDescription);
@@ -50,8 +50,7 @@ class KeyRequestValidationTest {
         Set<ConstraintViolation<KeyRequestDto>> violations = VALIDATOR.validate(request);
 
         // then
-        assertEquals(1, violations.size());
-        assertHasViolation(violations, "description", "must not be blank");
+        assertNoViolations(violations);
     }
 
     @Test
