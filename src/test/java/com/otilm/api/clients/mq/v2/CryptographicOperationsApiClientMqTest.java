@@ -7,7 +7,6 @@ import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationResponseValidator;
 import com.otilm.api.model.connector.cryptography.v2.OperationTrackingRequestV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -22,6 +21,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResultItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.VerificationResponseItemV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.testsupport.RecordingProxyClient;
 import com.otilm.api.testsupport.RecordingProxyClient.Invocation;
@@ -40,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadataAttribute;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenScope;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -400,12 +401,12 @@ class CryptographicOperationsApiClientMqTest {
             case DECRYPT -> client.listDecryptAttributes(connector, (KeyScopedRequestV2Dto) request);
             case SIGN -> client.listSignAttributes(connector, (KeyScopedRequestV2Dto) request);
             case VERIFY -> client.listVerifyAttributes(connector, (KeyScopedRequestV2Dto) request);
-            case RANDOM -> client.listRandomAttributes(connector, (TokenProfileScopedRequestV2Dto) request);
+            case RANDOM -> client.listRandomAttributes(connector, (TokenScopedRequestV2Dto) request);
         };
     }
 
     private static Object attributeRequest(AttributeOperation operation) {
-        return operation == AttributeOperation.RANDOM ? tokenProfileScopedRequest() : keyScopedRequest();
+        return operation == AttributeOperation.RANDOM ? tokenScopedRequest() : keyScopedRequest();
     }
 
     private void assertPlainInvocation(String path, Object body, Class<?> responseType) {
@@ -442,8 +443,8 @@ class CryptographicOperationsApiClientMqTest {
         return request;
     }
 
-    private static TokenProfileScopedRequestV2Dto tokenProfileScopedRequest() {
-        return withValidTokenProfileScope(new TokenProfileScopedRequestV2Dto());
+    private static TokenScopedRequestV2Dto tokenScopedRequest() {
+        return withValidTokenScope(new TokenScopedRequestV2Dto());
     }
 
     private static CipherDataRequestV2Dto cipherRequest() {
@@ -476,7 +477,7 @@ class CryptographicOperationsApiClientMqTest {
     }
 
     private static RandomDataRequestV2Dto randomRequest() {
-        RandomDataRequestV2Dto request = withValidTokenProfileScope(new RandomDataRequestV2Dto());
+        RandomDataRequestV2Dto request = withValidTokenScope(new RandomDataRequestV2Dto());
         request.setLength(ITEM_DATA.length);
         request.setOperationAttributes(List.of());
         return request;
