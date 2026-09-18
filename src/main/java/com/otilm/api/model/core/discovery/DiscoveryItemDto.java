@@ -35,8 +35,10 @@ public class DiscoveryItemDto {
     @Schema(description = "UUID of the staged Discovery item", requiredMode = Schema.RequiredMode.REQUIRED)
     private String uuid;
 
-    @Schema(description = "UUID of the object this item became in inventory. Absent until the item is processed, and "
-            + "absent permanently if its processing failed.")
+    @Schema(description = "UUID of this item's object in inventory. For a certificate, present as soon as one "
+            + "with the same content exists — including from an earlier run, so it may be present while "
+            + "processed is false. For every other resource it is what the item became: absent until "
+            + "processed, and absent permanently if processing failed.")
     private String inventoryUuid;
 
     // Primitive, unlike the connector's DiscoveredItemDto.sequence: that one is inbound, where a boxed Long lets a
@@ -57,8 +59,9 @@ public class DiscoveryItemDto {
     @Schema(description = "When the Discovery Provider reported discovering this item")
     private OffsetDateTime discoveredAt;
 
-    @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource. Absent "
+            + "when the stored payload could no longer be decoded; the item is still listed, so the run's counts hold",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private DiscoveredItemPayloadDto payload;
 
     @Schema(description = "True when the object was not already in the inventory at the time this run staged it, "
@@ -92,7 +95,7 @@ public class DiscoveryItemDto {
     // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
     // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this). The Javadoc above explains the property.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public Resource getResource() {
         return payload != null ? payload.getResource() : null;
     }

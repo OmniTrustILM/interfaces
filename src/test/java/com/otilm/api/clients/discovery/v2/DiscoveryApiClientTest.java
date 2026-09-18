@@ -186,7 +186,7 @@ class DiscoveryApiClientTest {
                                 .aResponse()
                                 .withStatus(202)
                                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"meta\":[],\"stoppable\":true}")));
+                                .withBody("{\"checkpoint\":[],\"stoppable\":true}")));
 
         DiscoveryInitiateRequestDto request = new DiscoveryInitiateRequestDto();
         request.setRunId(RUN_ID);
@@ -194,8 +194,8 @@ class DiscoveryApiClientTest {
 
         DiscoveryInitiateResponseDto response = client.initiate(connector, request);
 
-        Assertions.assertNotNull(response.getMeta());
-        Assertions.assertTrue(response.getMeta().isEmpty());
+        Assertions.assertNotNull(response.getCheckpoint());
+        Assertions.assertTrue(response.getCheckpoint().isEmpty());
         Assertions.assertEquals(Boolean.TRUE, response.getStoppable());
     }
 
@@ -258,15 +258,15 @@ class DiscoveryApiClientTest {
                                 .aResponse()
                                 .withStatus(200)
                                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"meta\":[]}")));
+                                .withBody("{\"checkpoint\":[]}")));
 
         DiscoveryRunRequestDto request = new DiscoveryRunRequestDto();
         request.setRunId(RUN_ID);
 
         DiscoveryStopResponseDto response = client.stop(connector, request);
 
-        Assertions.assertNotNull(response.getMeta());
-        Assertions.assertTrue(response.getMeta().isEmpty());
+        Assertions.assertNotNull(response.getCheckpoint());
+        Assertions.assertTrue(response.getCheckpoint().isEmpty());
     }
 
     @Test
@@ -278,15 +278,15 @@ class DiscoveryApiClientTest {
                                 .aResponse()
                                 .withStatus(202)
                                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"meta\":[]}")));
+                                .withBody("{\"checkpoint\":[]}")));
 
         DiscoveryRunRequestDto request = new DiscoveryRunRequestDto();
         request.setRunId(RUN_ID);
 
         DiscoveryInitiateResponseDto response = client.resume(connector, request);
 
-        Assertions.assertNotNull(response.getMeta());
-        Assertions.assertTrue(response.getMeta().isEmpty());
+        Assertions.assertNotNull(response.getCheckpoint());
+        Assertions.assertTrue(response.getCheckpoint().isEmpty());
         // The stub omits stoppable: absent must decode as null (undeclared), never a defaulted false.
         Assertions.assertNull(response.getStoppable());
     }

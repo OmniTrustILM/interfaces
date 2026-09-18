@@ -2,9 +2,15 @@ package com.otilm.api.model.connector.discovery.v2;
 
 import com.otilm.api.interfaces.core.web.DiscoveryController;
 import com.otilm.api.model.client.discovery.DiscoveryDetailDto;
+import com.otilm.api.model.client.discovery.DiscoveryDto;
+import com.otilm.api.model.client.discovery.DiscoveryListDto;
 import com.otilm.api.model.core.auth.Resource;
+import com.otilm.api.model.core.authority.AuthorityInstanceDto;
+import com.otilm.api.model.core.connector.v2.ConnectorDto;
+import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import com.otilm.api.model.core.discovery.DiscoveryItemDto;
 import com.otilm.api.model.core.discovery.DiscoveryMessageSeverity;
+import com.otilm.api.model.core.vault.VaultInstanceDto;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.converter.ResolvedSchema;
@@ -18,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schemas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -138,6 +145,17 @@ class DiscoveryV2SchemaGenerationTest {
      */
     @Test
     void progressComponentsAreIdenticalFromEveryEntryPoint() {
+        // The leaf's own description, read standalone: asserting the rule rather than today's wording, which a
+        // literal prefix would pin until someone rewords the schema and has to edit the guard to match.
+        Schema<?> leaf = ModelConverters
+                .getInstance()
+                .readAll(DiscoveryResourceProgressDto.class)
+                .get("DiscoveryResourceProgressDto");
+        assertNotNull(leaf, "DiscoveryResourceProgressDto publishes no schema of its own");
+        assertNotNull(leaf.getDescription(),
+                "DiscoveryResourceProgressDto must describe itself at class level, or every reached copy is null too "
+                        + "and this guard compares null against null");
+        String leafOwnDescription = leaf.getDescription();
         Map<String, Schema> viaEvent = ModelConverters.getInstance().readAll(DiscoveryEvent.class);
         Map<String, Schema> viaStatus = ModelConverters.getInstance().readAll(DiscoveryStatusResponseDto.class);
         Map<String, Schema> viaDetail = ModelConverters.getInstance().readAll(DiscoveryDetailDto.class);
@@ -153,9 +171,8 @@ class DiscoveryV2SchemaGenerationTest {
                 "DiscoveryProgressDto's description must not depend on being reached through the run detail");
         Schema<?> leafViaDetail = viaDetail.get("DiscoveryResourceProgressDto");
         assertNotNull(leafViaDetail, "the per-resource leaf component must be emitted on the run-detail path");
-        assertTrue(leafViaDetail.getDescription().startsWith("Progress counters"),
-                "the leaf must keep its own description on the run-detail path; was: "
-                        + leafViaDetail.getDescription());
+        assertEquals(leafOwnDescription, leafViaDetail.getDescription(),
+                "the leaf must keep its own description on the run-detail path");
 
         // If the event path emits the run-level component at all, it must be the whole thing.
         Schema<?> progressViaEvent = viaEvent.get("DiscoveryProgressDto");
@@ -175,9 +192,8 @@ class DiscoveryV2SchemaGenerationTest {
                 "the leaf component's description must not depend on which endpoint reached it");
         assertEquals(leafViaStatus.getProperties().keySet(), leafViaEvent.getProperties().keySet(),
                 "the leaf component's properties must not depend on which endpoint reached it");
-        assertTrue(leafViaEvent.getDescription().startsWith("Progress counters"),
-                "the leaf must keep its own description, not one hoisted from a referencing field; was: "
-                        + leafViaEvent.getDescription());
+        assertEquals(leafOwnDescription, leafViaEvent.getDescription(),
+                "the leaf must keep its own description, not one hoisted from a referencing field");
     }
 
     /**
@@ -198,7 +214,9 @@ class DiscoveryV2SchemaGenerationTest {
                 DiscoveryEvent.class,
                 DiscoverySupportedResourceDto.class,
                 DiscoveryItemDto.class,
-                DiscoveryDetailDto.class}) {
+                DiscoveryDetailDto.class,
+                DiscoveryRunRequestDto.class,
+                DiscoveryInitiateRequestDto.class}) {
             Schema<?> resource = ModelConverters.getInstance().readAll(discoveryRoot).get("Resource");
             if (resource == null) {
                 continue;
@@ -207,6 +225,79 @@ class DiscoveryV2SchemaGenerationTest {
                     "Resource is a platform-wide component; reaching it through " + discoveryRoot.getSimpleName()
                             + " must not change its description. A description on the referencing field gets "
                             + "hoisted onto it, because OpenAPI 3.0 cannot carry one beside a $ref.");
+        }
+    }
+
+    /**
+     * The same guard for {@code ConnectorInterfaceDto}, which the discovery detail and list both reach through a
+     * {@code $ref}: its own description is asserted, not a literal.
+     */
+    @Test
+    void discoveryDoesNotRewriteThePlatformWideConnectorInterfaceComponent() {
+        Schema<?> standalone = ModelConverters
+                .getInstance()
+                .readAll(ConnectorInterfaceDto.class)
+                .get("ConnectorInterfaceDto");
+
+        assertNotNull(standalone, "ConnectorInterfaceDto publishes no schema of its own");
+        assertNotNull(standalone.getDescription(),
+                "ConnectorInterfaceDto must describe itself at class level. Without that, every reached copy is null "
+                        + "too and this guard compares null against null -- passing while the component says nothing "
+                        + "at all.");
+
+        // Authority and vault reference the same component, so a description hoisted from either would rewrite what
+        // discovery publishes.
+        for (Class<?> discoveryRoot : new Class<?>[]{
+                DiscoveryDetailDto.class,
+                DiscoveryListDto.class,
+                AuthorityInstanceDto.class,
+                VaultInstanceDto.class,
+                ConnectorDto.class}) {
+            Schema<?> reached = ModelConverters.getInstance().readAll(discoveryRoot).get("ConnectorInterfaceDto");
+            assertNotNull(reached,
+                    discoveryRoot.getSimpleName() + " no longer emits the ConnectorInterfaceDto component at all. "
+                            + "Skipping that case would let a schema that stopped publishing the component pass this "
+                            + "guard, which exists to catch exactly that kind of contract regression.");
+            assertEquals(standalone.getDescription(), reached.getDescription(),
+                    "ConnectorInterfaceDto is a platform-wide component; reaching it through "
+                            + discoveryRoot.getSimpleName() + " must not change its description. A description on "
+                            + "the referencing field gets hoisted onto it, because OpenAPI 3.0 cannot carry one "
+                            + "beside a $ref.");
+            assertEquals(standalone.getNullable(), reached.getNullable(),
+                    "nullable is hoisted onto the shared component the same way a description is, so "
+                            + discoveryRoot.getSimpleName() + " must not set it either.");
+        }
+    }
+
+    /**
+     * The other half of the rule above: each referencing field carries its own description through {@code ALL_OF_REF}.
+     * swagger-core resolves no javadoc on this classpath, and a plain {@code ALL_OF} drops the description silently.
+     */
+    @Test
+    void eachReferencingFieldStillPublishesItsOwnDescription() {
+        record Field(Class<?> root, String schemaName, String property) {
+        }
+        for (Field field : List
+                .of(new Field(DiscoveryDetailDto.class, "DiscoveryDetailDto", "connectorInterface"),
+                        new Field(DiscoveryListDto.class, "DiscoveryListDto", "connectorInterface"),
+                        new Field(AuthorityInstanceDto.class, "AuthorityInstanceDto", "connectorInterface"),
+                        new Field(VaultInstanceDto.class, "VaultInstanceDto", "connectorInterface"),
+                        new Field(DiscoveryDetailDto.class, "DiscoveryDetailDto", "progress"),
+                        new Field(DiscoveryStatusResponseDto.class, "DiscoveryStatusResponseDto", "progress"),
+                        // @ArraySchema, so the description sits on the array rather than the item. Needed here and
+                        // not on the other collections in this contract because Resource carries no class-level
+                        // description of its own: any prose reaching that component is a change to it, which
+                        // discoveryDoesNotRewriteThePlatformWideResourceComponent refuses. This row is the other
+                        // half — that the description exists at all.
+                        new Field(DiscoveryRunRequestDto.class, "DiscoveryRunRequestDto", "resources"))) {
+            Schema<?> root = ModelConverters.getInstance().readAll(field.root()).get(field.schemaName());
+            assertNotNull(root, "expected a generated schema for " + field.schemaName());
+            Schema<?> property = (Schema<?>) root.getProperties().get(field.property());
+            assertNotNull(property, field.schemaName() + " publishes no " + field.property() + " property");
+            assertNotNull(property.getDescription(),
+                    field.schemaName() + "." + field.property() + " publishes no description. Moving the prose into "
+                            + "a doc comment does not reach the OpenAPI document -- there is no javadoc processor on "
+                            + "this classpath -- and a plain ALL_OF drops it. Use ALL_OF_REF.");
         }
     }
 
@@ -314,5 +405,40 @@ class DiscoveryV2SchemaGenerationTest {
                         + "carry a description beside a $ref");
         assertEquals(List.of("info", "warning", "error"), severity.getEnum(),
                 "the enum ships its wire codes, not its Java member names");
+    }
+
+    /**
+     * What this contract made optional must stay out of its schema's required list: a v2 provider has no kind, and a
+     * vault's interface is null once removed from its connector. Guarded on the generated document, which is what a
+     * generated client reads; the Java annotation alone is not the contract.
+     */
+    @Test
+    void theOptionalContractChangesStayOutOfTheRequiredLists() {
+        assertRequired(DiscoveryDto.class, "name", true);
+        assertRequired(DiscoveryDto.class, "kind", false);
+        assertRequired(DiscoveryDetailDto.class, "kind", false);
+        assertRequired(DiscoveryListDto.class, "kind", false);
+        assertRequired(VaultInstanceDto.class, "connectorInterface", false);
+        // The listing is best-effort: an item whose stored payload no longer decodes is listed without it, and the
+        // resource derived from the payload goes with it.
+        assertRequired(DiscoveryItemDto.class, "payload", false);
+        assertRequired(DiscoveryItemDto.class, "resource", false);
+        assertRequired(DiscoveryItemDto.class, "uniqueRef", true);
+    }
+
+    private static void assertRequired(Class<?> type, String property, boolean expected) {
+        // By the type's own name: readAll returns every component the type reaches, and another of them can carry a
+        // property of the same name with its own requiredness (CredentialAttributeContentData has a required kind).
+        Schema<?> schema = ModelConverters.getInstance().readAll(type).get(type.getSimpleName());
+        assertNotNull(schema, type.getSimpleName() + " publishes no schema under its own name");
+        assertNotNull(schema.getProperties(), type.getSimpleName() + " publishes no properties");
+        assertTrue(schema.getProperties().containsKey(property), type.getSimpleName() + " has no property " + property);
+        List<String> required = schema.getRequired() == null ? List.of() : schema.getRequired();
+        if (expected) {
+            assertTrue(required.contains(property), property + " must be required on " + type.getSimpleName());
+        } else {
+            assertFalse(required.contains(property),
+                    property + " must be optional on " + type.getSimpleName() + ", was required");
+        }
     }
 }

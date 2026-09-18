@@ -42,10 +42,10 @@ class DiscoveryDetailDtoTest {
     @Test
     void roundTripsAllFourV2Fields() throws Exception {
         DiscoveryResourceProgressDto keyProgress = new DiscoveryResourceProgressDto();
-        keyProgress.setProcessed(3L);
+        keyProgress.setProduced(3L);
         DiscoveryProgressDto progress = new DiscoveryProgressDto();
-        progress.setProcessed(11L);
-        progress.setTotalEstimate(40L);
+        progress.setTargetsProcessed(11L);
+        progress.setTargetsTotal(40L);
         progress.setPhase("scanning");
         progress.setByResource(Map.of(Resource.CRYPTOGRAPHIC_KEY, keyProgress));
 
@@ -66,10 +66,10 @@ class DiscoveryDetailDtoTest {
         assertTrue(json.contains("\"stoppable\":"), json);
 
         assertEquals(List.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY), back.getResources());
-        assertEquals(11L, back.getProgress().getProcessed());
-        assertEquals(40L, back.getProgress().getTotalEstimate());
+        assertEquals(11L, back.getProgress().getTargetsProcessed());
+        assertEquals(40L, back.getProgress().getTargetsTotal());
         assertEquals("scanning", back.getProgress().getPhase());
-        assertEquals(3L, back.getProgress().getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProcessed());
+        assertEquals(3L, back.getProgress().getByResource().get(Resource.CRYPTOGRAPHIC_KEY).getProduced());
         assertEquals(2L, back.getRunMessageCount());
         assertEquals(Boolean.TRUE, back.getStoppable());
         assertEquals(DiscoveryStatus.STOPPED, back.getStatus());
@@ -88,7 +88,7 @@ class DiscoveryDetailDtoTest {
     @Test
     void resourceValuesUseWireCodes() throws Exception {
         DiscoveryResourceProgressDto certProgress = new DiscoveryResourceProgressDto();
-        certProgress.setProcessed(1L);
+        certProgress.setProduced(1L);
         DiscoveryProgressDto progress = new DiscoveryProgressDto();
         progress.setByResource(Map.of(Resource.CERTIFICATE, certProgress));
 
@@ -119,9 +119,46 @@ class DiscoveryDetailDtoTest {
         assertTrue(json.contains("\"runMessageCount\":0"), json);
         assertEquals(0L, back.getRunMessageCount());
 
-        // progress is the one genuinely optional field, and it promises absence rather than null
+        // progress and connectorInterface are the genuinely optional fields, and both promise absence rather
+        // than null: a v1 run declares no connector interface, which is how a client tells the generations apart.
         assertFalse(json.contains("progress"), json);
         assertNull(back.getProgress());
+        assertFalse(json.contains("connectorInterface"), json);
+        assertNull(back.getConnectorInterface());
+    }
+
+    /**
+     * The import outcomes. All three are primitives and REQUIRED on purpose: a run that imported nothing reports zero,
+     * and a client rendering them as a bar must never have to tell "none yet" from "not reported".
+     */
+    @Test
+    void carriesBothImportOutcomesAgainstTheirSharedTotal() throws Exception {
+        DiscoveryDetailDto dto = v1Run();
+        dto.setItemsNewlyDiscovered(2306L);
+        dto.setItemsProcessed(1840L);
+        dto.setItemsFailed(6L);
+
+        String json = mapper.writeValueAsString(dto);
+        DiscoveryDetailDto back = mapper.readValue(json, DiscoveryDetailDto.class);
+
+        assertTrue(json.contains("\"itemsProcessed\":1840"), json);
+        assertTrue(json.contains("\"itemsFailed\":6"), json);
+        assertEquals(1840L, back.getItemsProcessed());
+        assertEquals(6L, back.getItemsFailed());
+        assertEquals(2306L, back.getItemsNewlyDiscovered());
+        // The three are one accounting: what is neither imported nor failed is still waiting, and the remainder
+        // must never go negative for a client that renders it.
+        assertTrue(back.getItemsNewlyDiscovered() - back.getItemsProcessed() - back.getItemsFailed() >= 0,
+                "imported plus failed must not exceed the total they are drawn from");
+    }
+
+    @Test
+    void aRunThatImportedNothingReportsZeroRatherThanAbsence() throws Exception {
+        String json = mapper.writeValueAsString(v1Run());
+
+        assertTrue(json.contains("\"itemsProcessed\":0"), json);
+        assertTrue(json.contains("\"itemsFailed\":0"), json);
+        assertTrue(json.contains("\"itemsNewlyDiscovered\":0"), json);
     }
 
     @Test

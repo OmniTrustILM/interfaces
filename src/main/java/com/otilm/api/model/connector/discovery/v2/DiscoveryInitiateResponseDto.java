@@ -19,26 +19,17 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiscoveryInitiateResponseDto {
 
-    // Excluded from toString for the same reason the request side excludes it: meta is an opaque
-    // connector-defined handle with no logging value of its own, and up to 64 KB of it. JSON
-    // serialization is unaffected.
-    @Schema(description = "Connector-defined metadata for this run, replayed by Core on every subsequent "
-            + "lifecycle call — status, results, stream, stop, resume and cancel — so the stateless "
-            + "connector can resolve its run state. Serialized size is capped at 64 KB; Core fails the "
-            + "run outright if this exceeds the cap.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // Excluded from toString: opaque, no logging value, up to 64 KB.
+    @Schema(description = "Opaque run handle the stateless connector resolves its run state from. Core replays it "
+            + "on status, results, stream, stop, resume and cancel, and never renders it. Serialized size is capped "
+            + "at 64 KB; over the cap Core fails the run.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
-    private List<MetadataAttribute> meta;
+    private List<MetadataAttribute> checkpoint;
 
-    /**
-     * Declared per run because checkpointability may depend on the resources scanned and the scan parameters, not only
-     * on the connector. Core snapshots the value onto the run and renders the stop and resume controls from it.
-     */
-    @Schema(description = "Whether this run can be stopped and later resumed.\n\n"
-            + "**Feature gate:** may only narrow the discoveryStopResume feature flag, never widen it — "
-            + "true without the flag advertised is a contract violation and Core clamps the run to "
-            + "not-stoppable.\n\n" + "**Absent:** undeclared — Core gates on the flag alone.\n\n"
-            + "**Refresh:** each resume response replaces the value; omitting it reverts the run to "
-            + "flag-gating.\n\n" + "**Runtime:** the connector may still refuse a stop past the point of no return.",
+    @Schema(description = "Whether this run can be stopped and later resumed. May only narrow the "
+            + "discoveryStopResume feature flag, never widen it: true without the flag is clamped to not-stoppable. "
+            + "Absent: Core gates on the flag alone. Each resume response replaces the value; omitting it there "
+            + "reverts the run to flag-gating. The connector may still refuse a stop past the point of no return.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean stoppable;
 }
