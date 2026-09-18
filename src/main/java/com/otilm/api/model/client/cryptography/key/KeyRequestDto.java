@@ -22,8 +22,7 @@ public class KeyRequestDto {
     @NotBlank
     private String name;
 
-    @Schema(description = "Description of the Cryptographic Key", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @Schema(description = "Description of the Cryptographic Key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
 
     @Schema(description = "UUIDs of the groups to associate with key")
