@@ -27,7 +27,11 @@ public class CbomSyncSkipDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private CbomSyncSkipState state;
 
-    @Schema(description = "Sync runs that tried the entry so far, the one that first failed included",
+    @Schema(description = "Failed attempts charged to the entry's current retry budget, the one that first failed "
+            + "included. The budget is spent when this reaches cbomSyncSkippedRetryRuns + 1. An operator's "
+            + "retry gives the entry a new budget and returns this to 0, while firstSkippedAt, lastAttemptAt "
+            + "and reason keep the record of what has happened so far -- so a count of 0 beside an earlier "
+            + "first failure means a retry was asked for and no run has tried the entry since",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private int attempts;
 

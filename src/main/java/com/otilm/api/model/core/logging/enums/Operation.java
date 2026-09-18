@@ -63,8 +63,8 @@ public enum Operation implements IPlatformEnum {
     UPLOAD("upload", "Upload"),
     SYNC("sync", "Sync"),
     RETRY("retry", "Retry",
-            "Operator-driven retry of a CBOM Repository entry the sync had given up on: the entry goes back to "
-                    + "retrying with a full budget."),
+            "Operator-driven retry of work the platform had given up on: it is queued to be attempted again, with a "
+                    + "full budget where the work has one."),
     COMPROMISE("compromise", "Compromise"),
     DESTROY("destroy", "Destroy"),
     LIST_KEY_USAGES("listKeyUsages", "List key usages"),

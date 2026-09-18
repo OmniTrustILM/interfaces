@@ -126,15 +126,17 @@ public interface CbomController extends AuthProtectedController {
                     the document could not be read, or storing its header failed. Later sync runs retry an entry until its \
                     retry budget (the platform setting `cbomSyncSkippedRetryRuns`) is spent; it is then kept as permanently \
                     skipped until the retention (`cbomSyncSkipRetentionDays`) after its last attempt runs out. Each row \
-                    carries the reason of the last failure, worded for an operator.
+                    carries the reason of the last failure, worded for an operator. An entry leaves the list on the run \
+                    that manages to store its document, or finds the document gone from the repository; nothing else \
+                    removes one but the retention and an operator deleting the CBOM.
 
                     By default the list is ordered newest failure first: last attempt descending, then UUID ascending. \
                     `sort` reorders it and names its field by source `property` and identifier `CBOM_SYNC_SKIP_LAST_ATTEMPT_AT`, \
                     `CBOM_SYNC_SKIP_FIRST_SKIPPED_AT`, `CBOM_SYNC_SKIP_ATTEMPTS` or `CBOM_SYNC_SKIP_SERIAL_NUMBER`. `filters` \
                     may use `CBOM_SYNC_SKIP_STATE` (equals, not equals) and `CBOM_SYNC_SKIP_SERIAL_NUMBER` (equals, not \
-                    equals, contains, not contains, starts with), both of source `property`, as the searchable-fields \
-                    operation of this list publishes them. The rows have a fixed shape: no field is offered as a column, and \
-                    `columns` is accepted and ignored.""")
+                    equals, contains, not contains, starts with), both of source `property`. The searchable-fields \
+                    operation of this list publishes all of them, the three that are ordering keys only among them. The \
+                    rows have a fixed shape: no field is offered as a column, and `columns` is accepted and ignored.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of the entries the sync could not store"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
@@ -159,10 +161,11 @@ public interface CbomController extends AuthProtectedController {
     @Operation(operationId = "getCbomSyncSkipSearchableFields",
             summary = "Get the searchable fields of the entries the sync could not store",
             description = """
-                    The fields the list of entries the sync could not store may be filtered by, each with the conditions it \
-                    accepts and whether the list may also be ordered by it. The ordering keys that take no filter (last \
-                    attempt, first failure, attempts) are named on the list operation and are not part of this catalogue. \
-                    The rows have a fixed shape, so no field is offered as a column: `displayable` is never set.""")
+                    The fields the list of entries the sync could not store may be filtered or ordered by. Each carries the \
+                    conditions it accepts and, where the list may be ordered by it, `sortable`; a field that is an ordering \
+                    key only carries `sortable` with an empty list of conditions, so every identifier `sort` accepts can be \
+                    read from here rather than from prose. The rows have a fixed shape, so no field is offered as a column: \
+                    `displayable` is never set.""")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Searchable field information retrieved")})
     @GetMapping(path = "/syncSkips/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSyncSkipSearchableFields();
@@ -172,7 +175,11 @@ public interface CbomController extends AuthProtectedController {
                     Puts a permanently skipped entry back to retrying with a full budget: `state` becomes `retrying` and \
                     `attempts` becomes 0, while `reason`, `firstSkippedAt` and `lastAttemptAt` keep the values of the last \
                     attempt until the next sync run tries the entry. An entry that is still retrying is left as it is. Answers \
-                    with the row as it now stands.""")
+                    with the row as it now stands.
+
+                    The retry does not make the entry permanent: if the document still cannot be stored, the new budget is \
+                    spent like the first one and the entry is written off again, and the retention then runs from that last \
+                    attempt.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The entry as it now stands"),
             @ApiResponse(responseCode = "404", description = "No such entry",

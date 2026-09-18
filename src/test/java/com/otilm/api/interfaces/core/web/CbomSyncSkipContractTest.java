@@ -101,6 +101,39 @@ class CbomSyncSkipContractTest {
         assertTrue(description.contains("source `property`"), "the description must name the field source");
         assertTrue(description.contains("`columns` is accepted and ignored"),
                 "the description must say the rows have a fixed shape");
+        assertTrue(description.contains("An entry leaves the list on the run that manages to store its document"),
+                "the description must say what becomes of an entry the sync finally stores");
+    }
+
+    /**
+     * A consumer reads the sortable identifiers from the catalogue, not from prose: the platform binds that rule to
+     * {@code SearchSortRequestDto.fieldIdentifier} and reads an absent flag as false. So the catalogue has to carry the
+     * ordering keys that take no filter, and say that it does.
+     */
+    @Test
+    void theCatalogueSaysItCarriesTheOrderingKeysThatTakeNoFilter() {
+        String description = method("getSyncSkipSearchableFields").getAnnotation(Operation.class).description();
+        assertTrue(description.contains("may be filtered or ordered by"),
+                "the catalogue must say it names both what may be filtered and what may be ordered on");
+        assertTrue(description
+                .contains("a field that is an ordering key only carries `sortable` with an empty list of conditions"),
+                "the catalogue must say how an ordering-only field is published");
+        assertTrue(
+                method("listSyncSkips")
+                        .getAnnotation(Operation.class)
+                        .description()
+                        .contains("the three that are ordering keys only among them"),
+                "the list must point at the catalogue for every identifier its sort accepts");
+    }
+
+    /** The retry hands back a budget; it does not take the entry out of the lifecycle. */
+    @Test
+    void theRetrySaysTheEntryCanBeWrittenOffAgain() {
+        String description = method("retrySyncSkip").getAnnotation(Operation.class).description();
+        assertTrue(description.contains("written off again"),
+                "the retry must say a document that still cannot be stored is written off again");
+        assertTrue(description.contains("the retention then runs from that last attempt"),
+                "the retry must say when the retention starts counting again");
     }
 
     @Test
