@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * The three CBOM sync policy tunables an operator sets from the Settings UI: optional in the contract (omitted means
- * the platform default), bounded at zero and at a cap, and carrying that default in the schema so a form can pre-fill
- * it.
+ * The CBOM sync policy tunables an operator sets from the Settings UI: optional in the contract (omitted means the
+ * platform default), bounded at a floor (zero, or one for the retention) and at a cap, and carrying that default in the
+ * schema so a form can pre-fill it.
  */
 class UtilsSettingsDtoTest {
 
@@ -35,13 +35,15 @@ class UtilsSettingsDtoTest {
     private static final ValidatorFixture VALIDATORS = new ValidatorFixture();
     private static final Validator VALIDATOR = VALIDATORS.validator();
 
-    private record Tunable(String name, int defaultValue, int cap) {
+    private record Tunable(String name, int min, int defaultValue, int cap) {
     }
 
-    /** Defaults and caps as literals: an expectation that read them from the class could not notice a narrowing. */
+    /** Bounds and defaults as literals: an expectation that read them from the class could not notice a narrowing. */
     private static final List<Tunable> TUNABLES = List
-            .of(new Tunable("cbomSyncOverlapSeconds", 60, 86_400), new Tunable("cbomSyncSkippedRetryRuns", 3, 1_000),
-                    new Tunable("cbomSyncMaxIngestDocuments", 50, 10_000));
+            .of(new Tunable("cbomSyncOverlapSeconds", 0, 60, 86_400),
+                    new Tunable("cbomSyncSkippedRetryRuns", 0, 3, 1_000),
+                    new Tunable("cbomSyncMaxIngestDocuments", 0, 50, 10_000),
+                    new Tunable("cbomSyncSkipRetentionDays", 1, 90, 3_650));
 
     @Test
     void theSchemaPublishesEachTunableAsOptionalBoundedAndDefaulted() {
@@ -53,7 +55,7 @@ class UtilsSettingsDtoTest {
             Schema property = properties.get(tunable.name());
             assertNotNull(property, tunable.name() + " must be a property of the utils settings");
             assertFalse(required.contains(tunable.name()), tunable.name() + " is optional: omitted means the default");
-            assertEquals(0, property.getMinimum().intValue(), tunable.name() + " is bounded at zero");
+            assertEquals(tunable.min(), property.getMinimum().intValue(), tunable.name() + " carries its floor");
             assertEquals(tunable.cap(), property.getMaximum().intValue(), tunable.name() + " carries its cap");
             assertNull(property.getExclusiveMinimum(), tunable.name() + ": no exclusiveMinimum beside minimum");
             assertNull(property.getExclusiveMinimumValue(), tunable.name() + ": no exclusiveMinimum beside minimum");
@@ -76,7 +78,7 @@ class UtilsSettingsDtoTest {
             Min min = field.getAnnotation(Min.class);
             Max max = field.getAnnotation(Max.class);
             assertNotNull(min, tunable.name() + " must carry @Min");
-            assertEquals(0, min.value(), tunable.name() + " @Min");
+            assertEquals(tunable.min(), min.value(), tunable.name() + " @Min");
             assertNotNull(max, tunable.name() + " must carry @Max: the contract is published, widening later is free, "
                     + "narrowing is not");
             assertEquals(tunable.cap(), max.value(), tunable.name() + " @Max");
@@ -87,15 +89,17 @@ class UtilsSettingsDtoTest {
 
     /** Both bounds of every field fire, each naming its field; the cap messages carry the cap as published. */
     @Test
-    void aValueBelowZeroOrAboveTheCapIsRejectedOnEachField() {
+    void aValueBelowTheFloorOrAboveTheCapIsRejectedOnEachField() {
         UtilsSettingsDto dto = new UtilsSettingsDto();
         dto.setCbomSyncOverlapSeconds(-1);
         dto.setCbomSyncSkippedRetryRuns(UtilsSettingsDto.MAX_CBOM_SYNC_SKIPPED_RETRY_RUNS + 1);
         dto.setCbomSyncMaxIngestDocuments(UtilsSettingsDto.MAX_CBOM_SYNC_MAX_INGEST_DOCUMENTS + 1);
+        dto.setCbomSyncSkipRetentionDays(0);
 
         Set<ConstraintViolation<UtilsSettingsDto>> violations = VALIDATOR.validate(dto);
 
-        assertEquals(3, violations.size(), "each tunable is bounded on its own");
+        assertEquals(4, violations.size(), "each tunable is bounded on its own");
+        assertHasViolation(violations, "cbomSyncSkipRetentionDays", "cbomSyncSkipRetentionDays must be at least 1");
         assertHasViolation(violations, "cbomSyncOverlapSeconds", "cbomSyncOverlapSeconds must not be negative");
         assertHasViolation(violations, "cbomSyncSkippedRetryRuns", "cbomSyncSkippedRetryRuns must not exceed 1000");
         assertHasViolation(violations, "cbomSyncMaxIngestDocuments",
@@ -105,10 +109,13 @@ class UtilsSettingsDtoTest {
         mirrored.setCbomSyncOverlapSeconds(UtilsSettingsDto.MAX_CBOM_SYNC_OVERLAP_SECONDS + 1);
         mirrored.setCbomSyncSkippedRetryRuns(-1);
         mirrored.setCbomSyncMaxIngestDocuments(-1);
+        mirrored.setCbomSyncSkipRetentionDays(UtilsSettingsDto.MAX_CBOM_SYNC_SKIP_RETENTION_DAYS + 1);
 
         Set<ConstraintViolation<UtilsSettingsDto>> mirroredViolations = VALIDATOR.validate(mirrored);
 
-        assertEquals(3, mirroredViolations.size(), "each tunable is bounded on its own");
+        assertEquals(4, mirroredViolations.size(), "each tunable is bounded on its own");
+        assertHasViolation(mirroredViolations, "cbomSyncSkipRetentionDays",
+                "cbomSyncSkipRetentionDays must not exceed 3650");
         assertHasViolation(mirroredViolations, "cbomSyncOverlapSeconds",
                 "cbomSyncOverlapSeconds must not exceed 86400");
         assertHasViolation(mirroredViolations, "cbomSyncSkippedRetryRuns",
@@ -136,17 +143,19 @@ class UtilsSettingsDtoTest {
     }
 
     @Test
-    void zeroTheCapAndUnsetAreAccepted() {
-        UtilsSettingsDto zero = new UtilsSettingsDto();
-        zero.setCbomSyncOverlapSeconds(0);
-        zero.setCbomSyncSkippedRetryRuns(0);
-        zero.setCbomSyncMaxIngestDocuments(0);
-        assertNoViolations(VALIDATOR.validate(zero));
+    void theFloorTheCapAndUnsetAreAccepted() {
+        UtilsSettingsDto floor = new UtilsSettingsDto();
+        floor.setCbomSyncOverlapSeconds(0);
+        floor.setCbomSyncSkippedRetryRuns(0);
+        floor.setCbomSyncMaxIngestDocuments(0);
+        floor.setCbomSyncSkipRetentionDays(1);
+        assertNoViolations(VALIDATOR.validate(floor));
 
         UtilsSettingsDto cap = new UtilsSettingsDto();
         cap.setCbomSyncOverlapSeconds(UtilsSettingsDto.MAX_CBOM_SYNC_OVERLAP_SECONDS);
         cap.setCbomSyncSkippedRetryRuns(UtilsSettingsDto.MAX_CBOM_SYNC_SKIPPED_RETRY_RUNS);
         cap.setCbomSyncMaxIngestDocuments(UtilsSettingsDto.MAX_CBOM_SYNC_MAX_INGEST_DOCUMENTS);
+        cap.setCbomSyncSkipRetentionDays(UtilsSettingsDto.MAX_CBOM_SYNC_SKIP_RETENTION_DAYS);
         assertNoViolations(VALIDATOR.validate(cap));
 
         assertNoViolations(VALIDATOR.validate(new UtilsSettingsDto()));

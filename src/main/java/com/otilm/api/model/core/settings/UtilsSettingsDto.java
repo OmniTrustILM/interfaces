@@ -8,7 +8,8 @@ import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 
 /**
- * The utils section of the platform settings: the two auxiliary service URLs and the CBOM sync policy.
+ * The utils section of the platform settings: the two auxiliary service URLs and the CBOM sync policy, including how
+ * long a document the sync gave up on stays listed.
  *
  * <p>
  * The policy values are flat {@code cbomSync*} siblings of the URLs, not a nested object. Settled in interfaces#974
@@ -20,7 +21,8 @@ import org.hibernate.validator.constraints.URL;
  * A {@code utils} update is stored as sent, the policy values included: a value left out returns to the platform
  * default, as a URL left out is cleared. Decided 2026-09-16 against "left out means unchanged": an absent field and an
  * explicit null are the same {@code null} here, so "unchanged" would leave no way back to the default through the API
- * ({@code 0} is a real value), and one rule per section beats two.
+ * ({@code 0} is a real value), and one rule per section beats two. The retention is the one value with a floor of one
+ * rather than zero: it counts days after a write-off, and nothing kept for no time could be listed at all.
  */
 @Data
 public class UtilsSettingsDto implements Serializable {
@@ -35,6 +37,8 @@ public class UtilsSettingsDto implements Serializable {
     public static final int MAX_CBOM_SYNC_SKIPPED_RETRY_RUNS = 1_000;
     /** Every catch-up document is read and extracted; ten thousand per run is already a very large repository. */
     public static final int MAX_CBOM_SYNC_MAX_INGEST_DOCUMENTS = 10_000;
+    /** Ten years: a written-off document kept longer than that is history, not an operator's backlog. */
+    public static final int MAX_CBOM_SYNC_SKIP_RETENTION_DAYS = 3_650;
 
     @URL
     @Schema(description = "URL of the Util Service", examples = {"http://util-service:8080"},
@@ -70,5 +74,14 @@ public class UtilsSettingsDto implements Serializable {
             + "turns that catch-up off", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "0",
             maximum = "" + MAX_CBOM_SYNC_MAX_INGEST_DOCUMENTS, defaultValue = "50")
     private Integer cbomSyncMaxIngestDocuments;
+
+    @Min(value = 1, message = "cbomSyncSkipRetentionDays must be at least 1")
+    @Max(value = MAX_CBOM_SYNC_SKIP_RETENTION_DAYS, message = "cbomSyncSkipRetentionDays must not exceed {value}")
+    @Schema(description = "How many days after its last attempt a CBOM Repository entry the sync gave up on "
+            + "(permanently skipped) stays listed before its record is removed; an entry still being retried is kept "
+            + "whatever its age. At least one day: a retention of nothing would remove a write-off as it lands",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1",
+            maximum = "" + MAX_CBOM_SYNC_SKIP_RETENTION_DAYS, defaultValue = "90")
+    private Integer cbomSyncSkipRetentionDays;
 
 }

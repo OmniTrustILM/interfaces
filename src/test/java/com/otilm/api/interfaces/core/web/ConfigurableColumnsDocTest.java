@@ -2,11 +2,13 @@ package com.otilm.api.interfaces.core.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otilm.api.model.client.certificate.SearchRequestDto;
 import com.otilm.api.model.core.cbom.CbomDto;
 import com.otilm.api.model.core.certificate.CertificateDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDto;
 import com.otilm.api.model.core.search.AttributeProjectable;
 import com.otilm.api.model.core.search.ConfigurableColumnsDocs;
+import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
 import com.otilm.api.model.core.secret.SecretDto;
 import com.otilm.api.model.core.signing.signingrecord.SigningRecordListDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,11 +16,15 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertNoJargon;
@@ -37,22 +43,54 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * quietly loses the wording, or gains {@code sort} and {@code columns} without it, is a contract that is documented
  * everywhere but there. The lists below are deliberately explicit: adding a resource to the contract means adding it
  * here too.
+ *
+ * <p>
+ * Each endpoint is addressed by controller <em>and</em> method, because a controller may serve more than one listing:
+ * {@code CbomController} serves the CBOM inventory and, beside it, the fixed-shape list of the entries the sync could
+ * not store. Keying by controller alone silently excused every listing after the first, so a second one could gain
+ * {@code sort} and {@code columns} with none of this wording and nothing would say so.
  */
 class ConfigurableColumnsDocTest {
 
-    /** The listings whose request body carries {@code sort} and {@code columns}, by controller and method name. */
-    private static final Map<Class<?>, String> LISTINGS = Map
-            .of(CertificateController.class, "listCertificates", CryptographicKeyController.class,
-                    "listCryptographicKeys", DiscoveryController.class, "listDiscoveries",
-                    SecretManagementController.class, "listSecrets", CbomController.class, "listCboms",
-                    SigningRecordController.class, "listSigningRecords",
-                    com.otilm.api.interfaces.core.web.v2.ConnectorController.class, "listConnectors");
+    /** One listing or catalogue operation, addressed as the contract addresses it: a controller and a method. */
+    private record Endpoint(Class<?> controller, String method) {
+
+        @Override
+        public String toString() {
+            return controller.getSimpleName() + "." + method;
+        }
+    }
+
+    /** The listings whose request body carries {@code sort} and {@code columns}. */
+    private static final List<Endpoint> LISTINGS = List
+            .of(new Endpoint(CertificateController.class, "listCertificates"),
+                    new Endpoint(CryptographicKeyController.class, "listCryptographicKeys"),
+                    new Endpoint(DiscoveryController.class, "listDiscoveries"),
+                    new Endpoint(SecretManagementController.class, "listSecrets"),
+                    new Endpoint(CbomController.class, "listCboms"),
+                    new Endpoint(SigningRecordController.class, "listSigningRecords"),
+                    new Endpoint(com.otilm.api.interfaces.core.web.v2.ConnectorController.class, "listConnectors"));
 
     /** The field catalogues that feed those listings. All seven declare the operation under the same method name. */
-    private static final List<Class<?>> CATALOGUES = List
-            .of(CertificateController.class, CryptographicKeyController.class, DiscoveryController.class,
-                    SecretManagementController.class, CbomController.class, SigningRecordController.class,
-                    com.otilm.api.interfaces.core.web.v2.ConnectorController.class);
+    private static final List<Endpoint> CATALOGUES = LISTINGS
+            .stream()
+            .map(listing -> new Endpoint(listing.controller(), "getSearchableFieldInformation"))
+            .toList();
+
+    /**
+     * Listings and catalogues on the same controllers that are deliberately outside this contract, each with the reason
+     * it is out.
+     *
+     * <p>
+     * The entries the CBOM sync could not store are a fixed-shape list: every row has the same members, so there is
+     * nothing to choose as a column, and its catalogue serves two filter fields and three ordering keys by hand rather
+     * than through {@code FilterField}. It therefore carries neither the ordering-and-columns wording nor the
+     * catalogue-flags wording. Naming it here is what keeps the guard able to notice the next second listing, which may
+     * well not be exempt.
+     */
+    private static final List<Endpoint> OUTSIDE_THE_CONTRACT = List
+            .of(new Endpoint(CbomController.class, "listSyncSkips"),
+                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"));
 
     /** The listing objects that carry the projected attribute values. */
     private static final List<Class<?>> PROJECTION_CARRIERS = List
@@ -75,30 +113,58 @@ class ConfigurableColumnsDocTest {
 
     @Test
     void everyListingDocumentsOrderingAndColumns() {
-        LISTINGS.forEach((controller, methodName) -> {
-            Operation op = operation(controller, methodName);
+        LISTINGS.forEach(listing -> {
+            Operation op = operation(listing);
             assertTrue(op.description().contains(ConfigurableColumnsDocs.SORT_AND_COLUMNS),
-                    methodName + " does not carry the shared ordering and columns wording");
+                    listing + " does not carry the shared ordering and columns wording");
             assertTrue(op.description().contains(ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION),
-                    methodName + " does not carry the shared attribute projection wording");
-            assertNoJargon(methodName, op.description());
+                    listing + " does not carry the shared attribute projection wording");
+            assertNoJargon(listing.toString(), op.description());
         });
+    }
+
+    /**
+     * A listing or a catalogue on one of these controllers is either in the contract or named as being out of it. The
+     * guard reads the controllers themselves rather than this file's lists, so a second listing added later cannot
+     * quietly fall outside every assertion above.
+     */
+    @Test
+    void everySearchListingAndCatalogueOnTheseControllersIsAccountedFor() {
+        Set<Endpoint> accounted = new HashSet<>(LISTINGS);
+        accounted.addAll(CATALOGUES);
+        accounted.addAll(OUTSIDE_THE_CONTRACT);
+
+        Stream
+                .concat(LISTINGS.stream(), CATALOGUES.stream())
+                .map(Endpoint::controller)
+                .distinct()
+                .forEach(controller -> {
+                    for (Method method : controller.getDeclaredMethods()) {
+                        if (!takesASearchRequest(method) && !servesAFieldCatalogue(method)) {
+                            continue;
+                        }
+                        Endpoint endpoint = new Endpoint(controller, method.getName());
+                        assertTrue(accounted.contains(endpoint), endpoint
+                                + " is a listing or a field catalogue that this guard does not know about: add it to"
+                                + " LISTINGS or CATALOGUES, or to OUTSIDE_THE_CONTRACT with the reason it is exempt");
+                    }
+                });
     }
 
     @Test
     void everyListingCarriesAWorkedRequestExample() {
-        LISTINGS.forEach((controller, methodName) -> {
-            ExampleObject[] examples = requestBodyExamples(controller, methodName);
-            assertTrue(examples.length > 0, methodName + " declares no request example");
+        LISTINGS.forEach(listing -> {
+            ExampleObject[] examples = requestBodyExamples(listing);
+            assertTrue(examples.length > 0, listing + " declares no request example");
             for (ExampleObject example : examples) {
                 JsonNode body = assertDoesNotThrow(() -> MAPPER.readTree(example.value()),
-                        methodName + " request example is not valid JSON, so it reaches the document as a string");
-                assertTrue(body.has("sort"), methodName + " request example does not show sort");
-                assertTrue(body.has("columns"), methodName + " request example does not show columns");
+                        listing + " request example is not valid JSON, so it reaches the document as a string");
+                assertTrue(body.has("sort"), listing + " request example does not show sort");
+                assertTrue(body.has("columns"), listing + " request example does not show columns");
                 for (JsonNode column : body.get("columns")) {
                     assertTrue(column.has("fieldSource") && column.has("fieldIdentifier"),
-                            methodName + " request example addresses a column without both halves of its address");
-                    assertIdentifierMatchesItsSource(methodName, column.get("fieldSource").asText(),
+                            listing + " request example addresses a column without both halves of its address");
+                    assertIdentifierMatchesItsSource(listing.toString(), column.get("fieldSource").asText(),
                             column.get("fieldIdentifier").asText());
                 }
             }
@@ -107,11 +173,11 @@ class ConfigurableColumnsDocTest {
 
     @Test
     void everyFieldCatalogueDocumentsTheCapabilityFlags() {
-        for (Class<?> controller : CATALOGUES) {
-            Operation op = operation(controller, "getSearchableFieldInformation");
+        for (Endpoint catalogue : CATALOGUES) {
+            Operation op = operation(catalogue);
             assertTrue(op.description().contains(ConfigurableColumnsDocs.CATALOGUE_FLAGS),
-                    controller.getSimpleName() + " does not document displayable and sortable");
-            assertNoJargon(controller.getSimpleName(), op.description());
+                    catalogue + " does not document displayable and sortable");
+            assertNoJargon(catalogue.toString(), op.description());
         }
     }
 
@@ -169,29 +235,39 @@ class ConfigurableColumnsDocTest {
 
     @Test
     void theUnpagedConnectorListingPointsAtTheOneThatTakesColumns() {
-        Operation op = operation(ConnectorController.class, "listConnectors");
+        Operation op = operation(new Endpoint(ConnectorController.class, "listConnectors"));
         assertTrue(op.description().contains("POST /v2/connectors/list"),
                 "the v1 Connector listing does not say where filters, ordering and columns live");
         assertNoJargon("v1 listConnectors", op.description());
     }
 
-    private static Operation operation(Class<?> controller, String methodName) {
-        Method method = Arrays
-                .stream(controller.getDeclaredMethods())
-                .filter(m -> m.getName().equals(methodName))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(controller.getSimpleName() + " has no " + methodName));
-        Operation op = method.getAnnotation(Operation.class);
-        assertNotNull(op, "missing @Operation on " + controller.getSimpleName() + "." + methodName);
+    /** A listing takes the platform's search request; a catalogue answers with the platform's field groups. */
+    private static boolean takesASearchRequest(Method method) {
+        return Arrays.stream(method.getParameterTypes()).anyMatch(SearchRequestDto.class::isAssignableFrom);
+    }
+
+    private static boolean servesAFieldCatalogue(Method method) {
+        return List.class.equals(method.getReturnType())
+                && method.getGenericReturnType() instanceof ParameterizedType parameterized
+                && SearchFieldDataByGroupDto.class.equals(parameterized.getActualTypeArguments()[0]);
+    }
+
+    private static Operation operation(Endpoint endpoint) {
+        Operation op = declaredMethod(endpoint).getAnnotation(Operation.class);
+        assertNotNull(op, "missing @Operation on " + endpoint);
         return op;
     }
 
-    private static ExampleObject[] requestBodyExamples(Class<?> controller, String methodName) {
-        Method method = Arrays
-                .stream(controller.getDeclaredMethods())
-                .filter(m -> m.getName().equals(methodName))
+    private static Method declaredMethod(Endpoint endpoint) {
+        return Arrays
+                .stream(endpoint.controller().getDeclaredMethods())
+                .filter(m -> m.getName().equals(endpoint.method()))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError(controller.getSimpleName() + " has no " + methodName));
+                .orElseThrow(() -> new AssertionError(endpoint + " does not exist"));
+    }
+
+    private static ExampleObject[] requestBodyExamples(Endpoint endpoint) {
+        Method method = declaredMethod(endpoint);
         return Arrays
                 .stream(method.getParameters())
                 .map(p -> p.getAnnotation(io.swagger.v3.oas.annotations.parameters.RequestBody.class))

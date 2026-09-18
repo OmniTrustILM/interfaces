@@ -62,6 +62,9 @@ public enum Operation implements IPlatformEnum {
     CMP_CONFIRM("cmpConfirm", "CMP confirm"),
     UPLOAD("upload", "Upload"),
     SYNC("sync", "Sync"),
+    RETRY("retry", "Retry",
+            "Operator-driven retry of work the platform had given up on: it is queued to be attempted again, with a "
+                    + "full budget where the work has one."),
     COMPROMISE("compromise", "Compromise"),
     DESTROY("destroy", "Destroy"),
     LIST_KEY_USAGES("listKeyUsages", "List key usages"),
