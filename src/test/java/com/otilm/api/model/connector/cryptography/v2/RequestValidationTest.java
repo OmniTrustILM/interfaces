@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -33,6 +34,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenScope;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
 
@@ -259,6 +261,18 @@ class RequestValidationTest {
                         named("sign", validSignRequest()), named("verify", validVerifyRequest()));
     }
 
+    @Test
+    void randomRequest_rejectsTokenProfileScopeProperties() {
+        // given
+        RandomDataRequestV2Dto request = new RandomDataRequestV2Dto();
+
+        // when
+        Executable setProfileScope = () -> request.rejectUnknownProperty("keyUsages", Set.of("sign"));
+
+        // then
+        assertThrows(IllegalArgumentException.class, setProfileScope);
+    }
+
     private static TokenScopedRequestV2Dto validTokenScope() {
         return withValidTokenScope(new TokenScopedRequestV2Dto());
     }
@@ -309,7 +323,7 @@ class RequestValidationTest {
     }
 
     private static RandomDataRequestV2Dto validRandomRequest() {
-        RandomDataRequestV2Dto request = withValidTokenProfileScope(new RandomDataRequestV2Dto());
+        RandomDataRequestV2Dto request = withValidTokenScope(new RandomDataRequestV2Dto());
         request.setLength(1);
         request.setOperationAttributes(List.of());
         return request;

@@ -5,7 +5,6 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationTrackingRequestV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -16,6 +15,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponse
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -200,7 +200,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/random/attributes", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listRandomAttributes(@RequestBody @Valid TokenProfileScopedRequestV2Dto request);
+    List<BaseAttribute> listRandomAttributes(@RequestBody @Valid TokenScopedRequestV2Dto request);
 
     @Operation(summary = "Generate random data", description = "Generate random data on the token (always synchronous)")
     @ApiResponses({

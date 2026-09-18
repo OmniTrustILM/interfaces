@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadataAttribute;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenScope;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
@@ -557,7 +558,7 @@ class CryptographicOperationDtoValidationTest {
     }
 
     private static RandomDataRequestV2Dto validRandomRequest() {
-        RandomDataRequestV2Dto request = withValidTokenProfileScope(new RandomDataRequestV2Dto());
+        RandomDataRequestV2Dto request = withValidTokenScope(new RandomDataRequestV2Dto());
         request.setLength(1);
         request.setOperationAttributes(List.of());
         return request;
