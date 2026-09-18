@@ -22,7 +22,7 @@ public class EditKeyRequestDto {
     @Schema(description = "Name of the Cryptographic Key", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = "Description of the Cryptographic Key", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Description of the Cryptographic Key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
 
     @Schema(description = "Key Owner UUID")
