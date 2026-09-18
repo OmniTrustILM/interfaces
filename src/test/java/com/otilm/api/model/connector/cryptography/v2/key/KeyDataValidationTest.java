@@ -188,8 +188,15 @@ class KeyDataValidationTest {
     static Stream<Named<PqcAlgorithm>> supportedPqcAlgorithms() {
         return Stream
                 .of(named("FALCON", new PqcAlgorithm("FALCON-512", KeyAlgorithm.FALCON)),
-                        named("ML-DSA", new PqcAlgorithm("ML-DSA-44", KeyAlgorithm.MLDSA)),
-                        named("SLH-DSA", new PqcAlgorithm("SLH-DSA-SHA2-128F", KeyAlgorithm.SLHDSA)),
+                        named("ML-DSA-44", new PqcAlgorithm("ML-DSA-44", KeyAlgorithm.MLDSA)),
+                        named("ML-DSA-65", new PqcAlgorithm("ML-DSA-65", KeyAlgorithm.MLDSA)),
+                        named("ML-DSA-87", new PqcAlgorithm("ML-DSA-87", KeyAlgorithm.MLDSA)),
+                        named("SLH-DSA-SHA2-128S", new PqcAlgorithm("SLH-DSA-SHA2-128S", KeyAlgorithm.SLHDSA)),
+                        named("SLH-DSA-SHA2-128F", new PqcAlgorithm("SLH-DSA-SHA2-128F", KeyAlgorithm.SLHDSA)),
+                        named("SLH-DSA-SHA2-192S", new PqcAlgorithm("SLH-DSA-SHA2-192S", KeyAlgorithm.SLHDSA)),
+                        named("SLH-DSA-SHA2-192F", new PqcAlgorithm("SLH-DSA-SHA2-192F", KeyAlgorithm.SLHDSA)),
+                        named("SLH-DSA-SHA2-256S", new PqcAlgorithm("SLH-DSA-SHA2-256S", KeyAlgorithm.SLHDSA)),
+                        named("SLH-DSA-SHA2-256F", new PqcAlgorithm("SLH-DSA-SHA2-256F", KeyAlgorithm.SLHDSA)),
                         named("ML-KEM", new PqcAlgorithm("ML-KEM-512", KeyAlgorithm.MLKEM)),
                         named("CRYSTALS-Dilithium", new PqcAlgorithm("DILITHIUM2", KeyAlgorithm.DILITHIUM)),
                         named("SPHINCS+", new PqcAlgorithm("SPHINCS+-SHA2-128F", KeyAlgorithm.SPHINCSPLUS)));
