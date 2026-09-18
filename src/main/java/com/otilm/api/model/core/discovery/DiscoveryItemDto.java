@@ -94,7 +94,6 @@ public class DiscoveryItemDto {
     // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
     // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
     // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this). The Javadoc above explains the property.
-    // NOT_REQUIRED with the payload it is derived from: absent when the payload is.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public Resource getResource() {

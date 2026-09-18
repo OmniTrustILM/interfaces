@@ -212,7 +212,8 @@ public interface DiscoveryController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "Discovery not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
-                    description = "Delete refused: a v2 Discovery that has not ended must be cancelled first",
+                    description = "Delete refused: cancel a v2 Discovery that has not ended, or wait for it to "
+                            + "end once it is processing and can no longer be cancelled",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/{uuid}", produces = {"application/json"})
