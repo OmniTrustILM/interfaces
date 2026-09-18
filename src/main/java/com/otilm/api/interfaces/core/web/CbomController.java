@@ -159,9 +159,10 @@ public interface CbomController extends AuthProtectedController {
     @Operation(operationId = "getCbomSyncSkipSearchableFields",
             summary = "Get the searchable fields of the entries the sync could not store",
             description = """
-                    The fields the list of entries the sync could not store may be filtered and ordered by, each with the \
-                    conditions it accepts and whether the list may be ordered by it. The rows have a fixed shape, so no field \
-                    is offered as a column: `displayable` is never set.""")
+                    The fields the list of entries the sync could not store may be filtered by, each with the conditions it \
+                    accepts and whether the list may also be ordered by it. The ordering keys that take no filter (last \
+                    attempt, first failure, attempts) are named on the list operation and are not part of this catalogue. \
+                    The rows have a fixed shape, so no field is offered as a column: `displayable` is never set.""")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Searchable field information retrieved")})
     @GetMapping(path = "/syncSkips/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSyncSkipSearchableFields();
