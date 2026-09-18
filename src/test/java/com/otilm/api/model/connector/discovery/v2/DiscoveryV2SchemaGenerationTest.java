@@ -419,6 +419,11 @@ class DiscoveryV2SchemaGenerationTest {
         assertRequired(DiscoveryDetailDto.class, "kind", false);
         assertRequired(DiscoveryListDto.class, "kind", false);
         assertRequired(VaultInstanceDto.class, "connectorInterface", false);
+        // The listing is best-effort: an item whose stored payload no longer decodes is listed without it, and the
+        // resource derived from the payload goes with it.
+        assertRequired(DiscoveryItemDto.class, "payload", false);
+        assertRequired(DiscoveryItemDto.class, "resource", false);
+        assertRequired(DiscoveryItemDto.class, "uniqueRef", true);
     }
 
     private static void assertRequired(Class<?> type, String property, boolean expected) {

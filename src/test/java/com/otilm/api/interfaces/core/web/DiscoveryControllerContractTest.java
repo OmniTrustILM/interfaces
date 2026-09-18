@@ -209,6 +209,16 @@ class DiscoveryControllerContractTest {
         assertEquals(LIFECYCLE_METHODS, declared, "the three lifecycle operations must all be declared");
     }
 
+    /**
+     * A v2 run that has not ended cannot be deleted out from under its agenda; Core refuses with 422 and expects a
+     * cancel first. Documented so a generated client, and the administrator UI, know the rule exists.
+     */
+    @Test
+    void deleteDocumentsTheCancelFirstRefusal() {
+        assertTrue(documentedCodes(method("deleteDiscovery")).contains("422"),
+                "a live v2 run is refused deletion with 422; the contract must say so");
+    }
+
     private Set<String> documentedCodes(Method m) {
         ApiResponses responses = m.getAnnotation(ApiResponses.class);
         assertNotNull(responses, "missing @ApiResponses on " + m.getName());

@@ -59,8 +59,9 @@ public class DiscoveryItemDto {
     @Schema(description = "When the Discovery Provider reported discovering this item")
     private OffsetDateTime discoveredAt;
 
-    @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource. Absent "
+            + "when the stored payload could no longer be decoded; the item is still listed, so the run's counts hold",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private DiscoveredItemPayloadDto payload;
 
     @Schema(description = "True when the object was not already in the inventory at the time this run staged it, "
@@ -93,8 +94,9 @@ public class DiscoveryItemDto {
     // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
     // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
     // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this). The Javadoc above explains the property.
+    // NOT_REQUIRED with the payload it is derived from: absent when the payload is.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public Resource getResource() {
         return payload != null ? payload.getResource() : null;
     }
