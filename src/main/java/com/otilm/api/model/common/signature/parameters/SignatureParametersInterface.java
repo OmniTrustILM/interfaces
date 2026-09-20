@@ -4,6 +4,7 @@ import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureParametersDto;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serializable;
 
 /**
  * OpenAPI schema for the polymorphic {@link SignatureParametersDto} hierarchy.
@@ -22,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
         discriminatorMapping = {
                 @DiscriminatorMapping(value = SignatureFamily.Codes.PADES, schema = PadesSignatureParametersDto.class)},
         oneOf = {PadesSignatureParametersDto.class})
-public interface SignatureParametersInterface {
+public interface SignatureParametersInterface extends Serializable {
 
     @Schema(description = "Signature family these parameters belong to", requiredMode = Schema.RequiredMode.REQUIRED,
             examples = {SignatureFamily.Codes.PADES})

@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SignatureParameterGroupTest {
 
     @Test
-    void theSixGroupsAreTheWholeEnum() {
-        assertEquals(6, SignatureParameterGroup.values().length);
+    void theSevenGroupsAreTheWholeEnum() {
+        assertEquals(7, SignatureParameterGroup.values().length);
     }
 
     @Test
@@ -24,6 +24,7 @@ class SignatureParameterGroupTest {
         assertEquals("signature_scope", SignatureParameterGroup.SIGNATURE_SCOPE.getCode());
         assertEquals("visible_signature_placement", SignatureParameterGroup.VISIBLE_SIGNATURE_PLACEMENT.getCode());
         assertEquals("visible_signature_content", SignatureParameterGroup.VISIBLE_SIGNATURE_CONTENT.getCode());
+        assertEquals("visible_signature_style", SignatureParameterGroup.VISIBLE_SIGNATURE_STYLE.getCode());
     }
 
     /** appliesTo declares what is implemented, not what ETSI allows: PAdES is the only family with parameters in v1. */
@@ -46,7 +47,7 @@ class SignatureParameterGroupTest {
 
     @Test
     void anUnknownCodeIsRejected() {
-        assertThrows(ValidationException.class, () -> SignatureParameterGroup.findByCode("appearance_styling"));
+        assertThrows(ValidationException.class, () -> SignatureParameterGroup.findByCode("signature_policy"));
     }
 
     @Test

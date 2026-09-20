@@ -5,6 +5,8 @@ import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSo
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.signature.SignatureParameterGroup;
+import com.otilm.api.model.common.signature.parameters.SignatureParametersDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -29,13 +31,14 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class ContentSigningWorkflowDto extends WorkflowDto {
 
-    @Schema(description = "Signature Formatting Provider that constructs the data-to-be-signed (DTBS) for Content signing. "
-            + "Present only when ILM-managed signing is used; null for delegated signing.",
+    @Schema(description = "Signature Formatting Provider that constructs the data-to-be-signed (DTBS) for Content "
+            + "signing. Present only when ILM-managed signing is used; null for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private NameAndUuidDto signatureFormattingConnector;
 
     @Schema(description = "Attributes configured on the Signature Formatting Provider that control DTBS construction "
-            + "for the content signing workflow. " + "Applicable only when ILM-managed signing is used.",
+            + "for the content signing workflow. Applicable only when ILM-managed signing is used. These attributes "
+            + "carry operator-only knobs; caller-influenceable parameters live in defaultSignatureParameters.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
@@ -67,6 +70,20 @@ public class ContentSigningWorkflowDto extends WorkflowDto {
             + "(1.3.6.1.5.5.7.3.36 is RFC 9336 id-kp-documentSigning). An empty set accepts any extended key "
             + "usage. Applies to ILM-managed signing only.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Set<String> requiredExtendedKeyUsageOids = new LinkedHashSet<>();
+
+    @Schema(description = "Signature parameter groups which a signing request may supply. Empty for delegated signing. "
+            + "Membership is the only permission mechanism. A request carrying any field of a group absent from this "
+            + "list is rejected, even when the value matches the profile's own. An empty list accepts no "
+            + "request-supplied group. Independent of defaultSignatureParameters: a group may be allowed with no "
+            + "default (pure pass-through), or carry a default without being allowed (operator-fixed).",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Set<SignatureParameterGroup> allowedRequestParameterGroups = new LinkedHashSet<>();
+
+    @Schema(description = "Signature parameters this profile applies when a request does not override them. Null for "
+            + "delegated signing. Merged field by field with the request winning; list-typed fields, and a placement "
+            + "in a different addressing mode, replace the default wholesale.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SignatureParametersDto defaultSignatureParameters;
 
     public ContentSigningWorkflowDto() {
         super(SigningWorkflowType.CONTENT_SIGNING);

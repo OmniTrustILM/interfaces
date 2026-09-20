@@ -44,6 +44,11 @@ class PadesParameterEnumsTest {
         values.addAll(List.of(CommitmentType.values()));
         values.addAll(List.of(HorizontalAlignment.values()));
         values.addAll(List.of(VerticalAlignment.values()));
+        values.addAll(List.of(TextWrapping.values()));
+        values.addAll(List.of(TextPosition.values()));
+        values.addAll(List.of(TextHorizontalAlignment.values()));
+        values.addAll(List.of(TextVerticalAlignment.values()));
+        values.addAll(List.of(ImageScaling.values()));
 
         for (IPlatformEnum value : values) {
             assertFalse(value.getCode().isBlank(), value.toString());
@@ -64,5 +69,35 @@ class PadesParameterEnumsTest {
         assertEquals(VerticalAlignment.BOTTOM, VerticalAlignment.findByCode("bottom"));
         assertThrows(ValidationException.class, () -> HorizontalAlignment.findByCode("justify"));
         assertThrows(ValidationException.class, () -> VerticalAlignment.findByCode("baseline"));
+    }
+
+    @Test
+    void theStyleEnumsTravelAsTheirCodes() {
+        assertEquals("font_based", TextWrapping.FONT_BASED.getCode());
+        assertEquals("fill_box", TextWrapping.FILL_BOX.getCode());
+        assertEquals("fill_box_and_linebreak", TextWrapping.FILL_BOX_AND_LINEBREAK.getCode());
+        assertEquals("top", TextPosition.TOP.getCode());
+        assertEquals("bottom", TextPosition.BOTTOM.getCode());
+        assertEquals("left", TextPosition.LEFT.getCode());
+        assertEquals("right", TextPosition.RIGHT.getCode());
+        assertEquals("left", TextHorizontalAlignment.LEFT.getCode());
+        assertEquals("center", TextHorizontalAlignment.CENTER.getCode());
+        assertEquals("right", TextHorizontalAlignment.RIGHT.getCode());
+        assertEquals("top", TextVerticalAlignment.TOP.getCode());
+        assertEquals("middle", TextVerticalAlignment.MIDDLE.getCode());
+        assertEquals("bottom", TextVerticalAlignment.BOTTOM.getCode());
+        assertEquals("stretch", ImageScaling.STRETCH.getCode());
+        assertEquals("zoom_and_center", ImageScaling.ZOOM_AND_CENTER.getCode());
+        assertEquals("center", ImageScaling.CENTER.getCode());
+        assertEquals(TextWrapping.FILL_BOX, TextWrapping.findByCode("fill_box"));
+        assertEquals(TextPosition.RIGHT, TextPosition.findByCode("right"));
+        assertEquals(TextHorizontalAlignment.CENTER, TextHorizontalAlignment.findByCode("center"));
+        assertEquals(TextVerticalAlignment.MIDDLE, TextVerticalAlignment.findByCode("middle"));
+        assertEquals(ImageScaling.ZOOM_AND_CENTER, ImageScaling.findByCode("zoom_and_center"));
+        assertThrows(ValidationException.class, () -> TextWrapping.findByCode("ellipsis"));
+        assertThrows(ValidationException.class, () -> TextPosition.findByCode("behind"));
+        assertThrows(ValidationException.class, () -> TextHorizontalAlignment.findByCode("justify"));
+        assertThrows(ValidationException.class, () -> TextVerticalAlignment.findByCode("baseline"));
+        assertThrows(ValidationException.class, () -> ImageScaling.findByCode("tile"));
     }
 }

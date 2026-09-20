@@ -7,6 +7,7 @@ import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureParametersDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -27,11 +28,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "family",
         visible = true)
 @JsonSubTypes({@Type(value = PadesSignatureParametersDto.class, name = SignatureFamily.Codes.PADES)})
 @Schema(implementation = SignatureParametersInterface.class)
-public abstract class SignatureParametersDto implements SignatureParametersInterface {
+public abstract class SignatureParametersDto implements SignatureParametersInterface, SignatureParameterContainer {
 
     @NotNull(message = "family is required")
     @Schema(description = "Signature family these parameters belong to, and the discriminator selecting the "
@@ -41,6 +43,9 @@ public abstract class SignatureParametersDto implements SignatureParametersInter
     protected SignatureParametersDto(SignatureFamily family) {
         this.family = family;
     }
+
+    @Override
+    public abstract void describe(SignatureParameterSink sink);
 
     /**
      * Refuses to repoint the discriminator.
