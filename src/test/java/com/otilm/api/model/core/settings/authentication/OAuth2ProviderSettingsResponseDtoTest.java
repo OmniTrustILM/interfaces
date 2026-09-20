@@ -37,6 +37,8 @@ class OAuth2ProviderSettingsResponseDtoTest {
         }
 
         Assertions.assertEquals("unavailable", JwkSetLoadFailure.UNAVAILABLE.getCode());
+        Assertions.assertEquals("invalid", JwkSetLoadFailure.INVALID.getCode());
+        Assertions.assertEquals("tooLarge", JwkSetLoadFailure.TOO_LARGE.getCode());
         Assertions.assertEquals(JwkSetLoadFailure.class, PlatformEnum.JWK_SET_LOAD_FAILURE.getEnumClass());
         Assertions.assertThrows(ValidationException.class, () -> JwkSetLoadFailure.findByCode("unknown"));
 
