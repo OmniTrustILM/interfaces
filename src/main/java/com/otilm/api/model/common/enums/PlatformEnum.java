@@ -81,6 +81,7 @@ import com.otilm.api.model.core.search.FilterFieldType;
 import com.otilm.api.model.core.search.SortDirection;
 import com.otilm.api.model.core.secret.SecretState;
 import com.otilm.api.model.core.settings.SettingsSection;
+import com.otilm.api.model.core.settings.authentication.JwkSetLoadFailure;
 import com.otilm.api.model.core.signing.SigningProtocol;
 import com.otilm.api.model.core.signing.TspAuthenticationMethod;
 import com.otilm.api.model.core.workflows.ConditionType;
@@ -101,6 +102,7 @@ public enum PlatformEnum implements IPlatformEnum {
     FILTER_FIELD_SOURCE(FilterFieldSource.class, "Filter field source"),
     SORT_DIRECTION(SortDirection.class, "Sort direction"),
     SETTINGS_SECTION(SettingsSection.class, "Settings section"),
+    JWK_SET_LOAD_FAILURE(JwkSetLoadFailure.class, "JWK Set load failure"),
 
     // connectors
     AUTH_TYPE(AuthType.class, "Authentication type"),
