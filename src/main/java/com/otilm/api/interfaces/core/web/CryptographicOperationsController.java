@@ -286,7 +286,9 @@ public interface CryptographicOperationsController extends AuthProtectedControll
     // generate random operations
     /// //////////////////////////////////////////////////////////////////////////////
 
-    @Operation(summary = "List of random generator Attributes")
+    @Operation(summary = "List of random generator Attributes",
+            description = "Serves v1 tokens. A v2 token scopes random-data generation by token profile and "
+                    + "must use listRandomAttributes with a token profile instead.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "404", description = "Token instance not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
@@ -303,7 +305,29 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid)
             throws ConnectorException, NotFoundException;
 
-    @Operation(summary = "Generate random data")
+    @Operation(summary = "List of random generator Attributes for a token profile",
+            description = "A cryptography provider v2 token requires this form, because its contract scopes "
+                    + "random-data generation by token profile, while listRandomAttributes serves v1 tokens.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "200", description = "List of Attributes retrieved"),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = String.class))))})
+    @GetMapping(path = "/tokenProfiles/{tokenProfileUuid}/random/attributes", produces = {"application/json"})
+    List<BaseAttribute> listRandomAttributes(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid)
+            throws ConnectorException, NotFoundException;
+
+    @Operation(summary = "Generate random data",
+            description = "Serves v1 tokens. A v2 token scopes random-data generation by token profile and "
+                    + "must use randomData with a token profile instead.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Random data generated"),
             @ApiResponse(responseCode = "404", description = "Token instance not found",
@@ -319,5 +343,26 @@ public interface CryptographicOperationsController extends AuthProtectedControll
             produces = MediaType.APPLICATION_JSON_VALUE)
     RandomDataResponseDto randomData(
             @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @RequestBody RandomDataRequestDto request) throws ConnectorException, NotFoundException;
+
+    @Operation(summary = "Generate random data with a token profile",
+            description = "A cryptography provider v2 token requires this form, because its contract scopes "
+                    + "random-data generation by token profile, while randomData serves v1 tokens.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Random data generated"),
+            @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = String.class))))})
+    @PostMapping(path = "/tokenProfiles/{tokenProfileUuid}/random", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    RandomDataResponseDto randomData(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
             @RequestBody RandomDataRequestDto request) throws ConnectorException, NotFoundException;
 }
