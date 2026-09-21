@@ -13,6 +13,7 @@ import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationResponseValidator;
 import com.otilm.api.model.connector.cryptography.v2.OperationTrackingRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -25,7 +26,6 @@ import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataReques
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import com.otilm.api.testsupport.ValidatorFixture;
@@ -46,7 +46,6 @@ import org.springframework.http.ResponseEntity;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
-import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenScope;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -470,14 +469,14 @@ class CryptographicOperationsApiClientTest {
             case DECRYPT -> client.listDecryptAttributes(connector, keyScopedRequest());
             case SIGN -> client.listSignAttributes(connector, keyScopedRequest());
             case VERIFY -> client.listVerifyAttributes(connector, keyScopedRequest());
-            case RANDOM -> client.listRandomAttributes(connector, tokenScopedRequest());
+            case RANDOM -> client.listRandomAttributes(connector, tokenProfileScopedRequest());
         };
     }
 
     private void verifyAttributeRequest(AttributeOperation operation) {
         RequestPatternBuilder request = WireMock.postRequestedFor(WireMock.urlEqualTo(operation.path()));
         if (operation == AttributeOperation.RANDOM) {
-            request.withRequestBody(WireMock.matchingJsonPath("$.tokenAttributes", WireMock.equalToJson("[]")));
+            request.withRequestBody(WireMock.matchingJsonPath("$.keyUsages[0]", WireMock.equalTo("sign")));
         } else {
             request
                     .withRequestBody(
@@ -536,8 +535,8 @@ class CryptographicOperationsApiClientTest {
         return withValidKeyScope(new KeyScopedRequestV2Dto());
     }
 
-    private static TokenScopedRequestV2Dto tokenScopedRequest() {
-        return withValidTokenScope(new TokenScopedRequestV2Dto());
+    private static TokenProfileScopedRequestV2Dto tokenProfileScopedRequest() {
+        return withValidTokenProfileScope(new TokenProfileScopedRequestV2Dto());
     }
 
     private static CipherDataRequestV2Dto cipherRequest() {
@@ -570,7 +569,7 @@ class CryptographicOperationsApiClientTest {
     }
 
     private static RandomDataRequestV2Dto randomRequest() {
-        RandomDataRequestV2Dto request = withValidTokenScope(new RandomDataRequestV2Dto());
+        RandomDataRequestV2Dto request = withValidTokenProfileScope(new RandomDataRequestV2Dto());
         request.setLength(ITEM_DATA.length);
         request.setOperationAttributes(List.of());
         return request;

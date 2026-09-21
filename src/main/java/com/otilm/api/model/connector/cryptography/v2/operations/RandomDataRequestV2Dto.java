@@ -2,7 +2,7 @@ package com.otilm.api.model.connector.cryptography.v2.operations;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.client.attribute.RequestAttribute;
-import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,7 +20,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(name = "RandomDataRequestV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
-public class RandomDataRequestV2Dto extends TokenScopedRequestV2Dto {
+public class RandomDataRequestV2Dto extends TokenProfileScopedRequestV2Dto {
 
     public static final int MAX_LENGTH = 1_048_576;
 

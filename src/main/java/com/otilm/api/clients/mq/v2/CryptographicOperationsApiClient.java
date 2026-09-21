@@ -9,6 +9,7 @@ import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationResponseValidator;
 import com.otilm.api.model.connector.cryptography.v2.OperationTrackingRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationValidationResult;
+import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -19,7 +20,6 @@ import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponse
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -136,8 +136,8 @@ public class CryptographicOperationsApiClient implements CryptographicOperations
     }
 
     @Override
-    public List<BaseAttribute> listRandomAttributes(ApiClientConnectorInfo connector, TokenScopedRequestV2Dto request)
-            throws ConnectorException {
+    public List<BaseAttribute> listRandomAttributes(ApiClientConnectorInfo connector,
+            TokenProfileScopedRequestV2Dto request) throws ConnectorException {
         List<BaseAttribute> response = sendAttributes(connector, RANDOM_ATTRIBUTES_PATH, request,
                 "listRandomAttributes");
         requireValid(responseValidator.validateAttributeList(response), connector);
