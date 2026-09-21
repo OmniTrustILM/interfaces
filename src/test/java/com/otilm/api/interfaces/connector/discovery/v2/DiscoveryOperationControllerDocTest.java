@@ -15,12 +15,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertNoJargon;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -148,13 +151,12 @@ class DiscoveryOperationControllerDocTest {
     }
 
     /**
-     * {@code meta} is declared on {@link DiscoveryV2ScopedRequestDto}, so every operation whose request body extends
-     * that base replays the handle — including results and stream, where a stateless connector needs it most because
-     * the drain doubles as the acknowledgment. The two responses that mint the handle must name all of them, initiate
-     * excepted: that is the call the handle comes back from, so there is nothing to replay yet.
+     * {@code checkpoint} is declared on {@link DiscoveryV2ScopedRequestDto}, so every operation whose request body
+     * extends that base replays it. The two responses that mint it must name all of them, initiate excepted: that is
+     * the call it comes back from.
      */
     @Test
-    void handleMintingResponsesNameEveryOperationThatReplaysMeta() throws NoSuchFieldException {
+    void handleMintingResponsesNameEveryOperationThatReplaysTheCheckpoint() throws NoSuchFieldException {
         List<String> replayingOps = Arrays
                 .stream(DiscoveryOperationController.class.getDeclaredMethods())
                 .filter(m -> m.getParameterCount() == 1)
@@ -162,29 +164,40 @@ class DiscoveryOperationControllerDocTest {
                 .map(Method::getName)
                 .filter(name -> !name.equals("initiate"))
                 .toList();
-        assertFalse(replayingOps.isEmpty(), "expected at least one operation replaying meta");
+        assertFalse(replayingOps.isEmpty(), "expected at least one operation replaying the checkpoint");
 
         for (Class<?> response : List.of(DiscoveryInitiateResponseDto.class, DiscoveryStopResponseDto.class)) {
-            String description = response.getDeclaredField("meta").getAnnotation(Schema.class).description();
+            String description = response.getDeclaredField("checkpoint").getAnnotation(Schema.class).description();
             for (String op : replayingOps) {
-                assertTrue(description.contains(op), response.getSimpleName() + "'s meta description must name the "
-                        + op + " operation, which replays the handle; was: " + description);
+                assertTrue(description.contains(op), response.getSimpleName() + "'s checkpoint description must name "
+                        + "the " + op + " operation, which replays it; was: " + description);
             }
         }
     }
 
+    /**
+     * Every operation whose body extends the scoped base can answer 422 for a missing runId or an empty resources set,
+     * so every one of them documents it. Derived from the parameter types rather than a list, so a new operation cannot
+     * slip past by not being named here.
+     */
     @Test
-    void initiateStopAndCancelDocument422() {
-        List<String> opsExpecting422 = List.of("initiate", "stop", "cancel");
+    void everyBodyTakingOperationDocuments422() {
+        List<String> covered = new ArrayList<>();
         for (Method m : DiscoveryOperationController.class.getDeclaredMethods()) {
-            if (!opsExpecting422.contains(m.getName())) {
+            boolean takesScopedBody = Arrays
+                    .stream(m.getParameters())
+                    .anyMatch(p -> DiscoveryV2ScopedRequestDto.class.isAssignableFrom(p.getType()));
+            if (!takesScopedBody) {
                 continue;
             }
             ApiResponses responses = m.getAnnotation(ApiResponses.class);
             assertNotNull(responses, "missing @ApiResponses on " + m.getName());
             boolean has422 = Arrays.stream(responses.value()).anyMatch(r -> r.responseCode().equals("422"));
             assertTrue(has422, "expected a documented 422 on " + m.getName());
+            covered.add(m.getName());
         }
+        assertEquals(Set.of("initiate", "status", "results", "stream", "stop", "resume", "cancel"), Set.copyOf(covered),
+                "the scoped base is replayed by exactly these operations");
     }
 
     /**

@@ -37,7 +37,9 @@ public class ConnectorDto extends NameAndUuidDto implements AttributeProjectable
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<FunctionGroupDto> functionGroups = new ArrayList<>();
 
-    @Schema(description = "List of connector interfaces implemented by the Connector",
+    // Worded to describe one connector interface rather than this field's use of them, so it reads correctly wherever
+    // swagger-core puts it. ConnectorInterfaceDto's own class-level description is what keeps this prose off it.
+    @Schema(description = "A connector interface implemented by the Connector",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ConnectorInterfaceDto> interfaces = new ArrayList<>();
 

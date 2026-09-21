@@ -1,23 +1,11 @@
 package com.otilm.api.model.connector.discovery.v2;
 
-import com.otilm.api.model.core.auth.Resource;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Body for the discovery v2 /initiate call: starts a new discovery run for the given resource types.
+ * Body for the discovery v2 /initiate call: opens a new run over the resource types and attributes carried by the
+ * scoped base. A distinct type so the endpoint signature and its 422 contract hang off it.
  */
-@Getter
-@Setter
 @ToString(callSuper = true)
 public class DiscoveryInitiateRequestDto extends DiscoveryV2ScopedRequestDto {
-
-    @Schema(description = "Resource types to discover in this run", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "resources is required (must contain at least one resource type)")
-    private List<@NotNull(message = "resources must not contain a null resource type") Resource> resources;
 }

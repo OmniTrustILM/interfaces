@@ -43,17 +43,17 @@ class DiscoveryEventTest {
     void progressLineParsesAndRoundTripsVerbatim() throws Exception {
         // A progress event as a connector emits it on the NDJSON stream. The irregular whitespace
         // is deliberate: parsing must not depend on this module's own serializer formatting.
-        String json = "{\"type\": \"progress\",     \"processed\": 1200, \"totalEstimate\": 5000, "
-                + "\"phase\": \"scan\", \"byResource\": {\"certificates\": {\"processed\": 900}}}";
+        String json = "{\"type\": \"progress\",     \"targetsProcessed\": 1200, \"targetsTotal\": 5000, "
+                + "\"phase\": \"scan\", \"byResource\": {\"certificates\": {\"produced\": 900}}}";
 
         DiscoveryEvent event = mapper.readValue(json, DiscoveryEvent.class);
 
         assertEquals(DiscoveryEventType.PROGRESS, event.getType());
         DiscoveryProgressEvent progress = assertInstanceOf(DiscoveryProgressEvent.class, event);
-        assertEquals(1200L, progress.getProcessed());
-        assertEquals(5000L, progress.getTotalEstimate());
+        assertEquals(1200L, progress.getTargetsProcessed());
+        assertEquals(5000L, progress.getTargetsTotal());
         assertEquals("scan", progress.getPhase());
-        assertEquals(900L, progress.getByResource().get(Resource.CERTIFICATE).getProcessed());
+        assertEquals(900L, progress.getByResource().get(Resource.CERTIFICATE).getProduced());
 
         String reSerialized = mapper.writeValueAsString(event);
         assertFalse(reSerialized.contains("\n"), "an NDJSON line must not contain an embedded newline");
@@ -354,11 +354,11 @@ class DiscoveryEventTest {
 
     @Test
     void unknownAdditionalPropertyOnProgressEventIsTolerated() throws Exception {
-        String json = "{\"type\":\"progress\",\"processed\":10,\"etaSeconds\":42}";
+        String json = "{\"type\":\"progress\",\"targetsProcessed\":10,\"etaSeconds\":42}";
 
         DiscoveryEvent event = mapper.readValue(json, DiscoveryEvent.class);
         DiscoveryProgressEvent progress = assertInstanceOf(DiscoveryProgressEvent.class, event);
-        assertEquals(10L, progress.getProcessed());
+        assertEquals(10L, progress.getTargetsProcessed());
 
         Set<ConstraintViolation<DiscoveryProgressEvent>> violations = VALIDATOR.validate(progress);
         assertTrue(violations.isEmpty(),
