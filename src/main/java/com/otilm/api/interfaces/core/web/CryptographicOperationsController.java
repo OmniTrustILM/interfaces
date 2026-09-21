@@ -312,7 +312,8 @@ public interface CryptographicOperationsController extends AuthProtectedControll
     @Operation(operationId = "listRandomAttributesWithTokenProfile",
             summary = "List of random generator Attributes for a token profile",
             description = "A cryptography provider v2 token requires this form, because its contract scopes "
-                    + "random-data generation by token profile, while listRandomAttributes serves v1 tokens.")
+                    + "random-data generation by token profile. A v1 token is served here too, so a client needs "
+                    + "no version detection; the token profile is then ignored.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
@@ -357,7 +358,8 @@ public interface CryptographicOperationsController extends AuthProtectedControll
 
     @Operation(operationId = "randomDataWithTokenProfile", summary = "Generate random data with a token profile",
             description = "A cryptography provider v2 token requires this form, because its contract scopes "
-                    + "random-data generation by token profile, while randomData serves v1 tokens.")
+                    + "random-data generation by token profile. A v1 token is served here too, so a client needs "
+                    + "no version detection; the token profile is then ignored.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Random data generated"),
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
