@@ -15,7 +15,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class VerifyDataRequestDto extends SignDataRequestDto {
 
-    @Schema(description = "Signatures to verify", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Signatures to verify, paired with the data by position; an identifier sent on both lists "
+            + "must therefore be in the same order", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<SignatureRequestData> signatures;
 
 }
