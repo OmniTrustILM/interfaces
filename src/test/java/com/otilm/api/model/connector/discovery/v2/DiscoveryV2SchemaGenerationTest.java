@@ -419,10 +419,11 @@ class DiscoveryV2SchemaGenerationTest {
         assertRequired(DiscoveryDetailDto.class, "kind", false);
         assertRequired(DiscoveryListDto.class, "kind", false);
         assertRequired(VaultInstanceDto.class, "connectorInterface", false);
-        // The listing is best-effort: an item whose stored payload no longer decodes is listed without it, and the
-        // resource derived from the payload goes with it.
+        // The listing is best-effort about the payload: an item whose stored payload no longer decodes is listed
+        // without it. The resource is stored beside the payload rather than read off it, so that item still says
+        // what it is -- which is what lets a client group or route the row instead of dropping it.
         assertRequired(DiscoveryItemDto.class, "payload", false);
-        assertRequired(DiscoveryItemDto.class, "resource", false);
+        assertRequired(DiscoveryItemDto.class, "resource", true);
         assertRequired(DiscoveryItemDto.class, "uniqueRef", true);
     }
 

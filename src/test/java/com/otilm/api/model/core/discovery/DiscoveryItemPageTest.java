@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.otilm.api.model.client.discovery.DiscoveryCertificateResponseDto;
+import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.PaginationResponseDto;
 import com.otilm.api.model.common.attribute.v3.MetadataAttributeV3;
 import com.otilm.api.model.connector.discovery.v2.DiscoveredCertificateDto;
@@ -13,6 +14,7 @@ import com.otilm.api.model.core.auth.Resource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.testsupport.PagedResponseFixture.pageOf;
@@ -42,6 +44,7 @@ class DiscoveryItemPageTest {
         payload.setCertificateData("MIIBOgIBAAJBAK");
         DiscoveryItemDto item = new DiscoveryItemDto();
         item.setUuid("6f1b8c1e-0000-4000-8000-000000000001");
+        item.setResource(Resource.CERTIFICATE);
         item.setSequence(1L);
         item.setUniqueRef("10.0.0.7:443");
         item.setPayload(payload);
@@ -58,7 +61,7 @@ class DiscoveryItemPageTest {
         item.setMeta(List.of(where));
         item.setNewlyDiscovered(true);
         item.setProcessed(true);
-        item.setInventoryUuid(null);
+        item.setInventory(null);
         return item;
     }
 
@@ -106,7 +109,7 @@ class DiscoveryItemPageTest {
         assertEquals(1L, item.getSequence());
         assertEquals("10.0.0.7:443", item.getUniqueRef());
         assertEquals("key algorithm not supported", item.getProcessedError());
-        assertNull(item.getInventoryUuid(), "an item whose processing failed never produced an inventory object");
+        assertNull(item.getInventory(), "an item whose processing failed never produced an inventory object");
         assertEquals("discoverySource", item.getMeta().get(0).getName(),
                 "the provider-reported location context must survive the round trip");
         assertTrue(item.isNewlyDiscovered());
@@ -125,23 +128,62 @@ class DiscoveryItemPageTest {
         assertTrue(emitted.has("newlyDiscovered"), emitted.toString());
         assertTrue(emitted.has("processed"), emitted.toString());
         // NON_NULL at class level: the schema promises absence, not null, for what never happened.
-        assertFalse(emitted.has("inventoryUuid"), emitted.toString());
+        assertFalse(emitted.has("inventory"), emitted.toString());
         assertTrue(emitted.has("meta"), emitted.toString());
     }
 
     /**
-     * A payload-less item is trivially buildable — no-args constructor plus setters is exactly the state a Core mapper
-     * passes through before populating one — so the derived getter's null branch is a real code path: no payload means
-     * no resource, and with class-level {@code NON_NULL} the serialized item carries no {@code resource} property even
-     * though the schema marks it required for every item Core actually publishes.
+     * One reference rather than loose parts: a client listing items renders what the operator will search the inventory
+     * by, and has no second call to make for it. An item that produced no inventory object carries the whole reference
+     * absent, so there is one absence to read instead of parts that could disagree.
      */
     @Test
-    void payloadlessItemHasNoResource() {
-        DiscoveryItemDto empty = new DiscoveryItemDto();
+    void theInventoryReferenceTravelsAsOneObject() throws Exception {
+        DiscoveryItemDto imported = processedItem();
+        imported
+                .setInventory(new NameAndUuidDto(UUID.fromString("0a2a5d6c-0000-4000-8000-00000000000a"),
+                        "discovered_10.0.0.7:443_2b9c1d4e"));
 
-        assertNull(empty.getResource());
-        assertFalse(mapper.valueToTree(empty).has("resource"),
-                "the derived resource must stay out of the emitted JSON when there is no payload to derive it from");
+        NameAndUuidDto back = roundTrip(pageOf(imported)).getItems().get(0).getInventory();
+
+        assertEquals("0a2a5d6c-0000-4000-8000-00000000000a", back.getUuid());
+        assertEquals("discovered_10.0.0.7:443_2b9c1d4e", back.getName());
+    }
+
+    /**
+     * An item whose stored payload could no longer be decoded is still listed, so the run's counts hold — and it is
+     * still a key or a certificate. Storing the resource rather than deriving it from the payload is what lets it say
+     * so, which is also what lets a client group or route such a row instead of dropping it.
+     */
+    @Test
+    void anItemWithNoReadablePayloadStillSaysWhatItIs() {
+        DiscoveryItemDto undecodable = new DiscoveryItemDto();
+        undecodable.setResource(Resource.CERTIFICATE);
+        undecodable
+                .setInventory(new NameAndUuidDto(UUID.fromString("0a2a5d6c-0000-4000-8000-00000000000b"),
+                        "CN=web.example.com"));
+
+        JsonNode emitted = mapper.valueToTree(undecodable);
+
+        // The reference is followed by the item's resource, so the row routes to the certificate it became even
+        // though nothing can read the payload it was staged from.
+        assertEquals(Resource.CERTIFICATE.getCode(), emitted.get("resource").asText());
+        assertEquals("CN=web.example.com", emitted.get("inventory").get("name").asText());
+    }
+
+    /**
+     * The resource does not follow the payload: swapping one leaves the other alone, which is the point of storing it.
+     * Core sets both from the same staged row, so the pair can only disagree if a mapper sets one and forgets the other
+     * — and that is what this pins.
+     */
+    @Test
+    void theResourceIsNotReadOffThePayload() {
+        DiscoveryItemDto item = certificateItem();
+        DiscoveredKeyDto keyPayload = new DiscoveredKeyDto();
+        keyPayload.setFingerprint("2b:9c:...");
+        item.setPayload(keyPayload);
+
+        assertEquals(Resource.CERTIFICATE, item.getResource());
     }
 
     /**
@@ -178,8 +220,7 @@ class DiscoveryItemPageTest {
         DiscoveredKeyDto keyPayload = new DiscoveredKeyDto();
         keyPayload.setFingerprint("2b:9c:...");
         keyItem.setPayload(keyPayload);
-        // No item-level resource to set: the accessor derives it from the payload, so the two disagreeing
-        // is unrepresentable — swapping the payload above IS what makes this a key item.
+        keyItem.setResource(Resource.CRYPTOGRAPHIC_KEY);
 
         JsonNode items = mapper.valueToTree(pageOf(certificateItem(), keyItem)).get("items");
         assertEquals("certificates", items.get(0).get("payload").get("resource").asText());

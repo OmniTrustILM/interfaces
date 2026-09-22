@@ -1,7 +1,7 @@
 package com.otilm.api.model.core.discovery;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.connector.discovery.v2.DiscoveredItemPayloadDto;
 import com.otilm.api.model.core.auth.Resource;
@@ -35,11 +35,12 @@ public class DiscoveryItemDto {
     @Schema(description = "UUID of the staged Discovery item", requiredMode = Schema.RequiredMode.REQUIRED)
     private String uuid;
 
-    @Schema(description = "UUID of this item's object in inventory. For a certificate, present as soon as one "
-            + "with the same content exists — including from an earlier run, so it may be present while "
-            + "processed is false. For every other resource it is what the item became: absent until "
-            + "processed, and absent permanently if processing failed.")
-    private String inventoryUuid;
+    @Schema(description = "The object in inventory this item became, named as the object itself names it. For a "
+            + "certificate, present as soon as one with the same content exists — including from an earlier run, "
+            + "so it may be present while processed is false. For every other resource it is what the item became: "
+            + "absent until processed, and absent permanently if processing failed. Its resource is the item's "
+            + "own, which every item carries.")
+    private NameAndUuidDto inventory;
 
     // Primitive, unlike the connector's DiscoveredItemDto.sequence: that one is inbound, where a boxed Long lets a
     // value the connector omitted arrive as null and be rejected rather than silently becoming 0. This one is
@@ -59,6 +60,18 @@ public class DiscoveryItemDto {
     @Schema(description = "When the Discovery Provider reported discovering this item")
     private OffsetDateTime discoveredAt;
 
+    /**
+     * Stored with the item rather than derived from {@link #payload}, which is what makes it answerable for every item:
+     * the payload is absent when it could no longer be decoded, and an item that publishes no resource cannot be
+     * grouped, routed or read at all by a client listing a run that targeted more than one. It is also the value the
+     * {@code resource} query filter matches on, so a listing filtered by it must publish it.
+     */
+    // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
+    // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
+    // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this). The Javadoc above explains the property.
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Resource resource;
+
     @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource. Absent "
             + "when the stored payload could no longer be decoded; the item is still listed, so the run's counts hold",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -70,7 +83,7 @@ public class DiscoveryItemDto {
     private boolean newlyDiscovered;
 
     @Schema(description = "Indicator whether processing of the staged item has been attempted; processedError and "
-            + "inventoryUuid convey the outcome.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "inventory convey the outcome.", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean processed;
 
     @Schema(description = "Reason recorded against this item, if any — not only a failure, and not tied to "
@@ -82,21 +95,4 @@ public class DiscoveryItemDto {
             + "(e.g. IP address and port). Absent when the provider reported none.")
     private List<MetadataAttribute> meta;
 
-    /**
-     * Derived from the payload rather than stored, so the two can never disagree — the same reasoning as the
-     * connector's {@code DiscoveredItemDto}, which hides its derived accessor with {@code @JsonIgnore}. This one stays
-     * on the wire deliberately: it is the value the {@code resource} query filter matches on, and clients group by it
-     * without reaching into the payload union.
-     */
-    // READ_ONLY, not just getter-only: a bare getter serializes but is unknown to deserialization, so a strict
-    // mapper (FAIL_ON_UNKNOWN_PROPERTIES) would reject this DTO's own serialized form. READ_ONLY registers the
-    // property and ignores it on input, so the derived value always wins.
-    // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
-    // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
-    // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this). The Javadoc above explains the property.
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    public Resource getResource() {
-        return payload != null ? payload.getResource() : null;
-    }
 }
