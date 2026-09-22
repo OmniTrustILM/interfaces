@@ -16,4 +16,8 @@ public class OAuth2ProviderSettingsResponseDto extends OAuth2ProviderSettingsUpd
 
     @Schema(description = "List of public keys used by the provider", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<JwkDto> jwkSetKeys;
+
+    @Schema(description = "Reason the configured JWK Set could not be loaded. Absent when loading succeeded or no explicit JWK Set source is configured.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private JwkSetLoadFailure jwkSetLoadFailure;
 }
