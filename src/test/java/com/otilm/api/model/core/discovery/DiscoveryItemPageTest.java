@@ -133,9 +133,7 @@ class DiscoveryItemPageTest {
     }
 
     /**
-     * One reference rather than loose parts: a client listing items renders what the operator will search the inventory
-     * by, and has no second call to make for it. An item that produced no inventory object carries the whole reference
-     * absent, so there is one absence to read instead of parts that could disagree.
+     * The reference travels as one object; an item that produced no inventory object carries none.
      */
     @Test
     void theInventoryReferenceTravelsAsOneObject() throws Exception {

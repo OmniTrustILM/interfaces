@@ -35,11 +35,10 @@ public class DiscoveryItemDto {
     @Schema(description = "UUID of the staged Discovery item", requiredMode = Schema.RequiredMode.REQUIRED)
     private String uuid;
 
-    @Schema(description = "The object in inventory this item became, named as the object itself names it. For a "
-            + "certificate, present as soon as one with the same content exists — including from an earlier run, "
-            + "so it may be present while processed is false. For every other resource it is what the item became: "
-            + "absent until processed, and absent permanently if processing failed. Its resource is the item's "
-            + "own, which every item carries.")
+    @Schema(description = "The inventory object this item became. For a certificate, present as soon as one with "
+            + "the same content exists, including from an earlier run, so it may be present while processed is "
+            + "false. For other resources, absent until processed and permanently absent if processing failed. Its "
+            + "resource is the item's resource.")
     private NameAndUuidDto inventory;
 
     // Primitive, unlike the connector's DiscoveredItemDto.sequence: that one is inbound, where a boxed Long lets a
@@ -61,14 +60,12 @@ public class DiscoveryItemDto {
     private OffsetDateTime discoveredAt;
 
     /**
-     * Stored with the item rather than derived from {@link #payload}, which is what makes it answerable for every item:
-     * the payload is absent when it could no longer be decoded, and an item that publishes no resource cannot be
-     * grouped, routed or read at all by a client listing a run that targeted more than one. It is also the value the
-     * {@code resource} query filter matches on, so a listing filtered by it must publish it.
+     * Stored rather than derived from {@link #payload}, so an item whose payload could no longer be decoded still
+     * states its resource. It is also the value the {@code resource} query filter matches on.
      */
     // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
     // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
-    // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this). The Javadoc above explains the property.
+    // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this).
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Resource resource;
 
