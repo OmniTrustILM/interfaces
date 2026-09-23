@@ -72,9 +72,9 @@ public class DiscoveryItemDto {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Resource resource;
 
-    @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource. Absent "
-            + "when the stored payload could no longer be decoded; the item is still listed, so the run's counts hold",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Resource-specific data the Discovery Provider reported, discriminated by resource, which "
+            + "is always the item's own resource. Absent when the stored payload could no longer be decoded; the item "
+            + "is still listed, so the run's counts hold", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private DiscoveredItemPayloadDto payload;
 
     @Schema(description = "True when the object was not already in the inventory at the time this run staged it, "

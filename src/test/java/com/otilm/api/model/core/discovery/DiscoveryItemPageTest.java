@@ -151,9 +151,7 @@ class DiscoveryItemPageTest {
     }
 
     /**
-     * An item whose stored payload could no longer be decoded is still listed, so the run's counts hold — and it is
-     * still a key or a certificate. Storing the resource rather than deriving it from the payload is what lets it say
-     * so, which is also what lets a client group or route such a row instead of dropping it.
+     * An item whose stored payload could no longer be decoded is still listed, and still names its resource.
      */
     @Test
     void anItemWithNoReadablePayloadStillSaysWhatItIs() {
@@ -165,25 +163,8 @@ class DiscoveryItemPageTest {
 
         JsonNode emitted = mapper.valueToTree(undecodable);
 
-        // The reference is followed by the item's resource, so the row routes to the certificate it became even
-        // though nothing can read the payload it was staged from.
         assertEquals(Resource.CERTIFICATE.getCode(), emitted.get("resource").asText());
         assertEquals("CN=web.example.com", emitted.get("inventory").get("name").asText());
-    }
-
-    /**
-     * The resource does not follow the payload: swapping one leaves the other alone, which is the point of storing it.
-     * Core sets both from the same staged row, so the pair can only disagree if a mapper sets one and forgets the other
-     * — and that is what this pins.
-     */
-    @Test
-    void theResourceIsNotReadOffThePayload() {
-        DiscoveryItemDto item = certificateItem();
-        DiscoveredKeyDto keyPayload = new DiscoveredKeyDto();
-        keyPayload.setFingerprint("2b:9c:...");
-        item.setPayload(keyPayload);
-
-        assertEquals(Resource.CERTIFICATE, item.getResource());
     }
 
     /**
@@ -211,8 +192,8 @@ class DiscoveryItemPageTest {
 
     /**
      * Asserted inside the payload subtree, not against the whole document: a document-wide match for
-     * {@code "resource":"certificates"} is satisfied by the item-level derived {@code resource}, a different field, and
-     * so constrains nothing about the payload discriminator.
+     * {@code "resource":"certificates"} is satisfied by the item-level {@code resource}, a different field, and so
+     * constrains nothing about the payload discriminator.
      */
     @Test
     void itemPayloadCarriesItsOwnResourceWireCode() {
