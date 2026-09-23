@@ -178,8 +178,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     List<BaseAttribute> listVerifyAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
     @Operation(summary = "Verify data",
-            description = "Verify signatures with the given key (always synchronous). Each data item is the signed "
-                    + "message, and each signature follows its algorithm's X.509 and CMS profile, as /sign produces it.")
+            description = "Verify signatures with the given key (always synchronous)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signatures verified"),
             @ApiResponse(responseCode = "422",
