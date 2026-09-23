@@ -60,13 +60,9 @@ public class DiscoveryItemDto {
     @Schema(description = "When the Discovery Provider reported discovering this item")
     private OffsetDateTime discoveredAt;
 
-    /**
-     * Stored rather than derived from {@link #payload}, so an item whose payload could no longer be decoded still
-     * states its resource. It is also the value the {@code resource} query filter matches on.
-     */
-    // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
-    // carry a description beside a $ref — swagger-core would hoist the text onto the shared component
-    // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this).
+    /** Stored, not derived from {@link #payload}, so an item whose payload cannot be decoded still names it. */
+    // No description: it would be hoisted onto the shared Resource component (see
+    // discoveryDoesNotRewriteThePlatformWideResourceComponent).
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Resource resource;
 
