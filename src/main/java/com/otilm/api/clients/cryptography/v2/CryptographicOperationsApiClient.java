@@ -133,13 +133,15 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
     public SignatureAlgorithmResponseV2Dto resolveSignatureAlgorithm(ApiClientConnectorInfo connector,
             SignatureAlgorithmRequestV2Dto body) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        return processRequest(
+        SignatureAlgorithmResponseV2Dto response = processRequest(
                 r -> requireBody(r
                         .uri(connector.getUrl() + SIGN_ALGORITHM_PATH)
                         .bodyValue(body)
                         .retrieve()
                         .toEntity(SignatureAlgorithmResponseV2Dto.class), "resolveSignatureAlgorithm"),
                 request, connector);
+        requireValid(responseValidator.validateSignatureAlgorithm(response), connector);
+        return response;
     }
 
     @Override

@@ -64,6 +64,7 @@ class CryptographyResponseClosedContractTest {
                         response("verify response", VerifyDataResponseV2Dto.class),
                         response("random response", RandomDataResponseV2Dto.class),
                         response("sign status response", SignOperationStatusResponseV2Dto.class),
+                        response("signature algorithm response", SignatureAlgorithmResponseV2Dto.class),
                         response("key operation response", KeyOperationResponseV2Dto.class),
                         response("token status response", TokenStatusResponseV2Dto.class));
     }

@@ -393,6 +393,54 @@ class CryptographicOperationDtoValidationTest {
                                 "identifiers must be unique within the batch; duplicates item at index 0"));
     }
 
+    @Test
+    void signatureAlgorithmRequest_validateAcceptsPresentButEmptyAttributes() {
+        // given
+        SignatureAlgorithmRequestV2Dto request = validSignatureAlgorithmRequest();
+
+        // when
+        Set<ConstraintViolation<SignatureAlgorithmRequestV2Dto>> violations = VALIDATOR.validate(request);
+
+        // then
+        assertTrue(violations.isEmpty());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidSignatureAlgorithmRequests")
+    void signatureAlgorithmRequest_validateRejectsAbsentOrNullAttributes(InvalidDto invalid) {
+        // given
+
+        // when
+        Set<ConstraintViolation<Object>> violations = validate(invalid);
+
+        // then
+        assertHasViolation(violations, invalid.path(), invalid.message());
+    }
+
+    static Stream<Named<InvalidDto>> invalidSignatureAlgorithmRequests() {
+        SignatureAlgorithmRequestV2Dto absent = validSignatureAlgorithmRequest();
+        absent.setSignatureAttributes(null);
+        SignatureAlgorithmRequestV2Dto nullItem = validSignatureAlgorithmRequest();
+        nullItem.setSignatureAttributes(Collections.singletonList(null));
+        return Stream
+                .of(invalid("absent attributes", absent, "signatureAttributes",
+                        "signatureAttributes is required (may be empty list, but must be present)"),
+                        invalid("null attribute item", nullItem, "signatureAttributes[0].<list element>",
+                                "signatureAttributes must not contain null items"));
+    }
+
+    @Test
+    void signatureAlgorithmResponse_validateRequiresAlgorithm() {
+        // given
+        SignatureAlgorithmResponseV2Dto response = new SignatureAlgorithmResponseV2Dto();
+
+        // when
+        Set<ConstraintViolation<SignatureAlgorithmResponseV2Dto>> violations = VALIDATOR.validate(response);
+
+        // then
+        assertHasViolation(violations, "signatureAlgorithm", "signatureAlgorithm is required");
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("validItemBatchResponses")
     void itemBatchResponse_validateAcceptsValidUniqueItems(Object response) {
@@ -593,6 +641,12 @@ class CryptographicOperationDtoValidationTest {
         SignOperationStatusResponseV2Dto response = new SignOperationStatusResponseV2Dto();
         response.setItems(List.of(signResult("item-1")));
         return response;
+    }
+
+    private static SignatureAlgorithmRequestV2Dto validSignatureAlgorithmRequest() {
+        SignatureAlgorithmRequestV2Dto request = withValidKeyScope(new SignatureAlgorithmRequestV2Dto());
+        request.setSignatureAttributes(List.of());
+        return request;
     }
 
     private static VerifyDataRequestV2Dto validVerifyRequest() {

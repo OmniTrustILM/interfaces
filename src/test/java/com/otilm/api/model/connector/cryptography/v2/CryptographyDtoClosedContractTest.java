@@ -18,6 +18,7 @@ import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMateri
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
@@ -86,6 +87,7 @@ class CryptographyDtoClosedContractTest {
                         dto("cipher-data request", CipherDataRequestV2Dto.class),
                         dto("random-data request", RandomDataRequestV2Dto.class),
                         dto("sign-data request", SignDataRequestV2Dto.class),
+                        dto("signature-algorithm request", SignatureAlgorithmRequestV2Dto.class),
                         dto("verify-data request", VerifyDataRequestV2Dto.class),
                         dto("cipher-data item", CipherDataV2Dto.class),
                         dto("signature-data item", SignatureDataV2Dto.class),

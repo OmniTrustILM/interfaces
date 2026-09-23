@@ -100,7 +100,10 @@ public class CryptographicOperationsApiClient implements CryptographicOperations
     @Override
     public SignatureAlgorithmResponseV2Dto resolveSignatureAlgorithm(ApiClientConnectorInfo connector,
             SignatureAlgorithmRequestV2Dto request) throws ConnectorException {
-        return send(connector, SIGN_ALGORITHM_PATH, request, SignatureAlgorithmResponseV2Dto.class);
+        SignatureAlgorithmResponseV2Dto response = send(connector, SIGN_ALGORITHM_PATH, request,
+                SignatureAlgorithmResponseV2Dto.class);
+        requireValid(responseValidator.validateSignatureAlgorithm(response), connector);
+        return response;
     }
 
     @Override

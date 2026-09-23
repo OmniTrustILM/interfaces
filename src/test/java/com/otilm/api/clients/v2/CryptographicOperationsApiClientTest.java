@@ -8,6 +8,7 @@ import com.otilm.api.clients.cryptography.v2.CryptographicOperationsApiClient;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ConnectorServerException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
@@ -22,6 +23,8 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
@@ -61,6 +64,7 @@ class CryptographicOperationsApiClientTest {
     private static final String DECRYPT_PATH = BASE_PATH + "/decrypt";
     private static final String SIGN_PATH = BASE_PATH + "/sign";
     private static final String SIGN_STATUS_PATH = SIGN_PATH + "/status";
+    private static final String SIGN_ALGORITHM_PATH = SIGN_PATH + "/algorithm";
     private static final String SIGN_CANCEL_PATH = SIGN_PATH + "/cancel";
     private static final String VERIFY_PATH = BASE_PATH + "/verify";
     private static final String RANDOM_PATH = BASE_PATH + "/random";
@@ -327,6 +331,34 @@ class CryptographicOperationsApiClientTest {
     }
 
     @Test
+    void resolveSignatureAlgorithm_postsRequestAndReturnsAlgorithm() throws ConnectorException {
+        // given
+        String responseJson = """
+                {"signatureAlgorithm":"SHA384withRSA"}
+                """;
+        stubJsonResponse(SIGN_ALGORITHM_PATH, HttpStatus.OK, responseJson);
+
+        // when
+        SignatureAlgorithmResponseV2Dto result = client
+                .resolveSignatureAlgorithm(connector, signatureAlgorithmRequest());
+
+        // then
+        assertEquals(SignatureAlgorithm.SHA384_WITH_RSA, result.getSignatureAlgorithm());
+    }
+
+    @Test
+    void resolveSignatureAlgorithm_rejectsResponseWithoutAlgorithm() {
+        // given
+        stubJsonResponse(SIGN_ALGORITHM_PATH, HttpStatus.OK, "{}");
+
+        // when
+        Executable call = () -> client.resolveSignatureAlgorithm(connector, signatureAlgorithmRequest());
+
+        // then
+        assertValidationFailure(call);
+    }
+
+    @Test
     void cancelSign_postsRequestAndPreservesStatus() throws ConnectorException {
         // given
         HttpStatus connectorStatus = HttpStatus.NO_CONTENT;
@@ -551,6 +583,12 @@ class CryptographicOperationsApiClientTest {
         request.setExecutionMode(mode);
         request.setSignatureAttributes(List.of());
         request.setData(List.of(new SignatureDataV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
+        return request;
+    }
+
+    private static SignatureAlgorithmRequestV2Dto signatureAlgorithmRequest() {
+        SignatureAlgorithmRequestV2Dto request = withValidKeyScope(new SignatureAlgorithmRequestV2Dto());
+        request.setSignatureAttributes(List.of());
         return request;
     }
 

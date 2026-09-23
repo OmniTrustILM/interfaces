@@ -16,6 +16,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
@@ -163,6 +164,10 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     public OperationValidationResult validateSignStatus(SignOperationStatusResponseV2Dto response) {
+        return validateBeanConstraints(response);
+    }
+
+    public OperationValidationResult validateSignatureAlgorithm(SignatureAlgorithmResponseV2Dto response) {
         return validateBeanConstraints(response);
     }
 
