@@ -177,8 +177,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listVerifyAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
-    @Operation(summary = "Verify data",
-            description = "Verify signatures with the given key (always synchronous)")
+    @Operation(summary = "Verify data", description = "Verify signatures with the given key (always synchronous)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signatures verified"),
             @ApiResponse(responseCode = "422",
