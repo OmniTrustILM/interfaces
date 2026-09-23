@@ -119,10 +119,12 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
 
     @Operation(summary = "Sign data",
             description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202). "
-                    + "Every signature is produced with the algorithm the signatureAlgorithm attribute selects and "
-                    + "verifies under that algorithm's X.509 algorithm identifier. For RSA-PSS, whose identifier carries "
-                    + "parameters, the selected algorithm alone sets them: MGF1 with the same digest, a salt as long as "
-                    + "the digest, and trailer field 1.")
+                    + "Each data item is the message; the connector computes any digest the algorithm needs. Every "
+                    + "signature is produced with the algorithm the signatureAlgorithm attribute selects and follows that "
+                    + "algorithm's X.509 and CMS profile: it verifies under the algorithm's X.509 algorithm identifier, an "
+                    + "ECDSA signature is a DER Ecdsa-Sig-Value, and ML-DSA and SLH-DSA sign with the empty context "
+                    + "string. For RSA-PSS, whose identifier carries parameters, the selected algorithm alone sets them: "
+                    + "MGF1 with the same digest, a salt as long as the digest, and trailer field 1.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed synchronously"),
             @ApiResponse(responseCode = "202",
@@ -181,7 +183,9 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listVerifyAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
-    @Operation(summary = "Verify data", description = "Verify signatures with the given key (always synchronous)")
+    @Operation(summary = "Verify data",
+            description = "Verify signatures with the given key (always synchronous). Each data item is the signed "
+                    + "message, and each signature follows its algorithm's X.509 and CMS profile, as /sign produces it.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signatures verified"),
             @ApiResponse(responseCode = "422",
