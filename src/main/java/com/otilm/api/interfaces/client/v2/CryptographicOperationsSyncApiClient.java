@@ -14,6 +14,8 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import java.util.List;
@@ -38,6 +40,9 @@ public interface CryptographicOperationsSyncApiClient {
 
     List<BaseAttribute> listSignAttributes(ApiClientConnectorInfo connector, KeyScopedRequestV2Dto request)
             throws ConnectorException;
+
+    SignatureAlgorithmResponseV2Dto resolveSignatureAlgorithm(ApiClientConnectorInfo connector,
+            SignatureAlgorithmRequestV2Dto request) throws ConnectorException;
 
     ResponseEntity<SignDataResponseV2Dto> signData(ApiClientConnectorInfo connector, SignDataRequestV2Dto request)
             throws ConnectorException;
