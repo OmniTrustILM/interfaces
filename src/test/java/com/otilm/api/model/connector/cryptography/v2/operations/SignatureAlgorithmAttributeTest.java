@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class SignatureAlgorithmAttributeTest {
 
@@ -72,27 +73,43 @@ class SignatureAlgorithmAttributeTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("selectionsOfNoPlatformAlgorithm")
-    void selectedAlgorithm_refusesASelectionOfNoPlatformAlgorithm(List<RequestAttribute> attributes) {
+    void selectedAlgorithm_refusesASelectionOfNoPlatformAlgorithm(List<RequestAttribute> attributes,
+            String expectedMessage) {
         // when
         Executable read = () -> SignatureAlgorithmAttribute.selectedAlgorithm(attributes);
 
         // then
-        assertThrows(ValidationException.class, read);
+        assertEquals(expectedMessage, assertThrows(ValidationException.class, read).getMessage());
     }
 
-    static Stream<Named<List<RequestAttribute>>> selectionsOfNoPlatformAlgorithm() {
+    static Stream<Arguments> selectionsOfNoPlatformAlgorithm() {
+        String noSelection = "Signature attributes must select one value of signatureAlgorithm.";
         return Stream
-                .of(named("no attributes", null), named("no selection", List.of(otherAttribute())),
-                        named("a code outside the enum",
-                                List.of(selection(new StringAttributeContentV2("SHA1withRSA")))),
-                        named("an object value", List
-                                .of(selection(
-                                        new ObjectAttributeContentV2(new HashMap<>(Map.of("code", "SHA256withRSA")))))),
-                        named("two values",
+                .of(arguments(named("no attributes", null), noSelection),
+                        arguments(named("no selection", List.of(otherAttribute())), noSelection),
+                        arguments(
+                                named("a code outside the enum",
+                                        List.of(selection(new StringAttributeContentV2("SHA1withRSA")))),
+                                "Unknown signature algorithm code SHA1withRSA"),
+                        arguments(
+                                named("an object value",
+                                        List
+                                                .of(selection(new ObjectAttributeContentV2(
+                                                        new HashMap<>(Map.of("code", "SHA256withRSA")))))),
+                                "Signature attribute signatureAlgorithm must carry a string value."),
+                        arguments(named("two values",
                                 List
                                         .of(selection(new StringAttributeContentV2("SHA256withRSA"),
                                                 new StringAttributeContentV2("SHA384withRSA")))),
-                        named("an empty value", List.of(selection(new StringAttributeContentV2()))));
+                                noSelection),
+                        arguments(
+                                named("two attributes", List
+                                        .of(SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA),
+                                                SignatureAlgorithmAttribute
+                                                        .request(SignatureAlgorithm.SHA384_WITH_RSA))),
+                                "Signature attribute signatureAlgorithm must be supplied once."),
+                        arguments(named("an empty value", List.of(selection(new StringAttributeContentV2()))),
+                                noSelection));
     }
 
     private static RequestAttribute selection(BaseAttributeContentV2<?>... values) {

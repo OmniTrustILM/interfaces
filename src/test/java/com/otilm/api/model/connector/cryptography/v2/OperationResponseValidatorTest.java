@@ -4,6 +4,7 @@ import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
+import com.otilm.api.model.common.attribute.v2.InfoAttributeV2;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
@@ -601,6 +602,44 @@ class OperationResponseValidatorTest {
     }
 
     @Test
+    void validateSignAttributeList_findsTheSignatureAlgorithmAfterOtherAttributes() {
+        // given
+        DataAttributeV2 other = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        other.setName("signatureScheme");
+        List<BaseAttribute> schema = List
+                .of(other, SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsANonDataAttributeNamedSignatureAlgorithm() {
+        // given
+        InfoAttributeV2 info = new InfoAttributeV2();
+        info.setName(SignatureAlgorithmAttribute.NAME);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(info));
+
+        // then
+        assertInvalid(result, "Sign attributes must declare the signatureAlgorithm data attribute");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureAlgorithmOffersOfTheWrongShape")
+    void validateSignAttributeList_rejectsAnOfferThatIsNotARequiredSingleSelect(DataAttributeV2 definition) {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+
+        // then
+        assertInvalid(result, "signatureAlgorithm must be a required single-select attribute");
+    }
+
+    @Test
     void validateSignAttributeList_rejectsASchemaWithoutTheSignatureAlgorithm() {
         // given
         DataAttributeV2 unrelated = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
@@ -639,9 +678,30 @@ class OperationResponseValidatorTest {
         DataAttributeV2 notAString = SignatureAlgorithmAttribute
                 .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
         notAString.setContentType(AttributeContentType.INTEGER);
+        DataAttributeV2 noContent = SignatureAlgorithmAttribute.definition(List.of());
+        noContent.setContent(null);
+        DataAttributeV2 nullOption = SignatureAlgorithmAttribute.definition(List.of());
+        nullOption.setContent(Collections.singletonList(null));
+        DataAttributeV2 optionWithoutData = SignatureAlgorithmAttribute.definition(List.of());
+        optionWithoutData.setContent(List.of(new StringAttributeContentV2()));
         return Stream
                 .of(named("a code outside the enum", outsideTheEnum), named("no value", nothingOffered),
-                        named("a non-string attribute", notAString));
+                        named("a non-string attribute", notAString), named("no content", noContent),
+                        named("a null option", nullOption), named("an option without data", optionWithoutData));
+    }
+
+    static Stream<Named<DataAttributeV2>> signatureAlgorithmOffersOfTheWrongShape() {
+        DataAttributeV2 optional = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        optional.getProperties().setRequired(false);
+        DataAttributeV2 multiSelect = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        multiSelect.getProperties().setMultiSelect(true);
+        DataAttributeV2 noProperties = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        noProperties.setProperties(null);
+        return Stream
+                .of(named("optional", optional), named("multi-select", multiSelect),
+                        named("no properties", noProperties));
     }
 
     static Stream<Named<CreateKeyCase>> validCreateKeyResponses() {

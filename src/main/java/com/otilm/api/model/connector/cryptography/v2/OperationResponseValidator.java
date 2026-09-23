@@ -5,6 +5,7 @@ import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.common.DataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
+import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
@@ -27,7 +28,6 @@ import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedD
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import jakarta.validation.Validator;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -112,6 +112,11 @@ public final class OperationResponseValidator extends ResponseChecks {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Sign attributes must declare the " + SignatureAlgorithmAttribute.NAME + " data attribute"));
+        DataAttributeProperties properties = definition.getProperties();
+        if (properties == null || !properties.isRequired() || properties.isMultiSelect()) {
+            throw new IllegalArgumentException(
+                    SignatureAlgorithmAttribute.NAME + " must be a required single-select attribute");
+        }
         List<? extends AttributeContent> options = definition.getContent();
         if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
                 || !options.stream().allMatch(OperationResponseValidator::isSignatureAlgorithmCode)) {
@@ -122,7 +127,7 @@ public final class OperationResponseValidator extends ResponseChecks {
 
     private static boolean isSignatureAlgorithmCode(AttributeContent option) {
         return option != null && option.getData() instanceof String code
-                && Arrays.stream(SignatureAlgorithm.values()).anyMatch(a -> a.getCode().equalsIgnoreCase(code));
+                && SignatureAlgorithm.lookupByCode(code).isPresent();
     }
 
     public OperationValidationResult validateKeyUsageList(List<KeyUsage> response) {

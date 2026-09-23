@@ -59,18 +59,22 @@ public final class SignatureAlgorithmAttribute {
     }
 
     /**
-     * The algorithm the signature attributes select.
+     * The signature attributes must select exactly one platform signature algorithm, through a single
+     * {@code signatureAlgorithm} attribute.
      *
-     * @throws ValidationException when they select none, or a value that is not a platform signature algorithm
+     * @throws ValidationException when they select none, several, or a value that is not a platform signature algorithm
      */
     public static SignatureAlgorithm selectedAlgorithm(List<? extends RequestAttribute> signatureAttributes) {
-        List<RequestAttribute> selections = signatureAttributes == null
+        List<? extends RequestAttribute> selections = signatureAttributes == null
                 ? List.of()
                 : signatureAttributes
                         .stream()
                         .filter(attribute -> attribute != null && NAME.equals(attribute.getName()))
-                        .map(RequestAttribute.class::cast)
                         .toList();
+        if (selections.size() > 1) {
+            throw new ValidationException(
+                    ValidationError.create("Signature attribute {} must be supplied once.", NAME));
+        }
         List<StringAttributeContentV2> values;
         try {
             values = AttributeDefinitionUtils.getAttributeContent(NAME, selections, StringAttributeContentV2.class);

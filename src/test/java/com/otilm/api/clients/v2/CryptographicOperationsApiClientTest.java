@@ -87,6 +87,7 @@ class CryptographicOperationsApiClientTest {
                 "type": "data",
                 "contentType": "string",
                 "version": 2,
+                "properties": {"label": "Signature Algorithm", "required": true, "list": true},
                 "content": [{"data": "SHA256withRSA"}]
               }
             ]

@@ -119,15 +119,18 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
 
     @Operation(summary = "Sign data",
             description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202). "
-                    + "Every signature is produced with the algorithm the signatureAlgorithm attribute selects, including "
-                    + "the RSA-PSS parameters that algorithm implies. A selection the key does not support is refused with 422.")
+                    + "Every signature is produced with the algorithm the signatureAlgorithm attribute selects and "
+                    + "verifies under that algorithm's X.509 algorithm identifier. For RSA-PSS, whose identifier carries "
+                    + "parameters, the selected algorithm alone sets them: MGF1 with the same digest, a salt as long as "
+                    + "the digest, and trailer field 1.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed synchronously"),
             @ApiResponse(responseCode = "202",
                     description = "Signing accepted asynchronously; body carries operationMeta tracking handle for the batch"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or the signatureAlgorithm selection names an algorithm "
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/sign", consumes = MediaType.APPLICATION_JSON_VALUE,
