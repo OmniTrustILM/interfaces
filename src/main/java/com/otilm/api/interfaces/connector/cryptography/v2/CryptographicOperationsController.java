@@ -118,13 +118,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     List<BaseAttribute> listSignAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
     @Operation(summary = "Sign data",
-            description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202). "
-                    + "Each data item is the message; the connector computes any digest the algorithm needs. Every "
-                    + "signature is produced with the algorithm the signatureAlgorithm attribute selects and follows that "
-                    + "algorithm's X.509 and CMS profile: it verifies under the algorithm's X.509 algorithm identifier, an "
-                    + "ECDSA signature is a DER Ecdsa-Sig-Value, and ML-DSA and SLH-DSA sign with the empty context "
-                    + "string. For RSA-PSS, whose identifier carries parameters, the selected algorithm alone sets them: "
-                    + "MGF1 with the same digest, a salt as long as the digest, and trailer field 1.")
+            description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed synchronously"),
             @ApiResponse(responseCode = "202",
