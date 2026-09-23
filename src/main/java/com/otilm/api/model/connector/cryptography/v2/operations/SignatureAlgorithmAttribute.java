@@ -3,14 +3,13 @@ package com.otilm.api.model.connector.cryptography.v2.operations;
 import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.attribute.RequestAttribute;
-import com.otilm.api.model.client.attribute.RequestAttributeV2;
-import com.otilm.api.model.common.attribute.common.AttributeType;
+import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
-import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
-import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
+import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
+import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.core.util.AttributeDefinitionUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +28,7 @@ public final class SignatureAlgorithmAttribute {
     }
 
     /** The definition a provider publishes from {@code /sign/attributes}, offering the algorithms the key supports. */
-    public static DataAttributeV2 definition(Collection<SignatureAlgorithm> supported) {
+    public static DataAttributeV3 definition(Collection<SignatureAlgorithm> supported) {
         DataAttributeProperties properties = new DataAttributeProperties();
         properties.setLabel("Signature Algorithm");
         properties.setRequired(true);
@@ -38,31 +37,25 @@ public final class SignatureAlgorithmAttribute {
         properties.setMultiSelect(false);
         properties.setReadOnly(false);
 
-        DataAttributeV2 attribute = new DataAttributeV2();
+        DataAttributeV3 attribute = new DataAttributeV3();
         attribute.setUuid(ATTRIBUTE_UUID.toString());
         attribute.setName(NAME);
         attribute.setDescription("Signature algorithm the signature is produced with");
-        attribute.setType(AttributeType.DATA);
         attribute.setContentType(AttributeContentType.STRING);
         attribute.setProperties(properties);
         attribute.setContent(supported.stream().map(SignatureAlgorithmAttribute::content).toList());
         return attribute;
     }
 
-    public static RequestAttributeV2 request(SignatureAlgorithm algorithm) {
-        RequestAttributeV2 attribute = new RequestAttributeV2();
-        attribute.setUuid(ATTRIBUTE_UUID);
-        attribute.setName(NAME);
-        attribute.setContentType(AttributeContentType.STRING);
-        attribute.setContent(List.of(content(algorithm)));
-        return attribute;
+    public static RequestAttributeV3 request(SignatureAlgorithm algorithm) {
+        return new RequestAttributeV3(ATTRIBUTE_UUID, NAME, AttributeContentType.STRING, List.of(content(algorithm)));
     }
 
     /**
-     * The signature attributes must select exactly one platform signature algorithm, through a single
+     * The signature attributes must select exactly one platform signature algorithm, through a single v3
      * {@code signatureAlgorithm} attribute.
      *
-     * @throws ValidationException when they select none, several, or a value that is not a platform signature algorithm
+     * @throws ValidationException when the signature attributes break that rule
      */
     public static SignatureAlgorithm selectedAlgorithm(List<? extends RequestAttribute> signatureAttributes) {
         List<? extends RequestAttribute> selections = signatureAttributes == null
@@ -75,22 +68,30 @@ public final class SignatureAlgorithmAttribute {
             throw new ValidationException(
                     ValidationError.create("Signature attribute {} must be supplied once.", NAME));
         }
-        List<StringAttributeContentV2> values;
-        try {
-            values = AttributeDefinitionUtils.getAttributeContent(NAME, selections, StringAttributeContentV2.class);
-        } catch (IllegalArgumentException e) {
+        if (selections.isEmpty()) {
+            throw noSelection();
+        }
+        if (!(selections.get(0) instanceof RequestAttributeV3 selection)) {
+            throw new ValidationException(
+                    ValidationError.create("Signature attribute {} must be a v3 attribute.", NAME));
+        }
+        List<BaseAttributeContentV3<?>> values = selection.getContent();
+        if (values == null || values.size() != 1 || values.get(0) == null || values.get(0).getData() == null) {
+            throw noSelection();
+        }
+        if (!(values.get(0) instanceof StringAttributeContentV3 value)) {
             throw new ValidationException(
                     ValidationError.create("Signature attribute {} must carry a string value.", NAME));
-        }
-        StringAttributeContentV2 value = values == null || values.size() != 1 ? null : values.get(0);
-        if (value == null || value.getData() == null) {
-            throw new ValidationException(
-                    ValidationError.create("Signature attributes must select one value of {}.", NAME));
         }
         return SignatureAlgorithm.findByCode(value.getData());
     }
 
-    private static StringAttributeContentV2 content(SignatureAlgorithm algorithm) {
-        return new StringAttributeContentV2(algorithm.getLabel(), algorithm.getCode());
+    private static ValidationException noSelection() {
+        return new ValidationException(
+                ValidationError.create("Signature attributes must select one value of {}.", NAME));
+    }
+
+    private static StringAttributeContentV3 content(SignatureAlgorithm algorithm) {
+        return new StringAttributeContentV3(algorithm.getLabel(), algorithm.getCode());
     }
 }

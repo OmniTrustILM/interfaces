@@ -3,9 +3,9 @@ package com.otilm.api.model.connector.cryptography.v2;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.common.attribute.common.DataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
+import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
@@ -104,14 +104,14 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema) {
-        DataAttribute definition = schema
+        DataAttributeV3 definition = schema
                 .stream()
                 .filter(attribute -> SignatureAlgorithmAttribute.NAME.equals(attribute.getName()))
-                .filter(DataAttribute.class::isInstance)
-                .map(DataAttribute.class::cast)
+                .filter(DataAttributeV3.class::isInstance)
+                .map(DataAttributeV3.class::cast)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Sign attributes must declare the " + SignatureAlgorithmAttribute.NAME + " data attribute"));
+                .orElseThrow(() -> new IllegalArgumentException("Sign attributes must declare "
+                        + SignatureAlgorithmAttribute.NAME + " as a v3 data attribute"));
         DataAttributeProperties properties = definition.getProperties();
         if (properties == null || !properties.isRequired() || properties.isMultiSelect()) {
             throw new IllegalArgumentException(

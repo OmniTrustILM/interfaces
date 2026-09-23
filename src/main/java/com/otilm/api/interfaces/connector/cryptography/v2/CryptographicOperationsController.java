@@ -105,7 +105,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
 
     @Operation(summary = "List signing attributes",
             description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context. "
-                    + "The schema includes the signatureAlgorithm attribute, offering the signature algorithms the key supports.")
+                    + "The schema includes signatureAlgorithm, a v3 data attribute offering the signature algorithms the key supports.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
