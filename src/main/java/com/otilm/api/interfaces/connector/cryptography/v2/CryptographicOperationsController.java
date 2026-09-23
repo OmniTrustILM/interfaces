@@ -14,8 +14,6 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmRequestV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -106,7 +104,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     // ---- Sign ----
 
     @Operation(summary = "List signing attributes",
-            description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema includes the signatureAlgorithm attribute, offering the signature algorithms the key supports.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -118,22 +117,10 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listSignAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
-    @Operation(summary = "Resolve the signature algorithm",
-            description = "Returns the signing algorithm for the supplied key and signature attributes.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Signature algorithm resolved"),
-            @ApiResponse(responseCode = "422",
-                    description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
-    @PostMapping(path = "/sign/algorithm", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    SignatureAlgorithmResponseV2Dto resolveSignatureAlgorithm(
-            @RequestBody @Valid SignatureAlgorithmRequestV2Dto request);
-
     @Operation(summary = "Sign data",
-            description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202).")
+            description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202). "
+                    + "Every signature is produced with the algorithm the signatureAlgorithm attribute selects, including "
+                    + "the RSA-PSS parameters that algorithm implies. A selection the key does not support is refused with 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed synchronously"),
             @ApiResponse(responseCode = "202",

@@ -17,8 +17,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmRequestV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
@@ -59,7 +58,6 @@ class CryptographicOperationsApiClientMqTest {
     private static final String DECRYPT_PATH = BASE_PATH + "/decrypt";
     private static final String SIGN_PATH = BASE_PATH + "/sign";
     private static final String SIGN_STATUS_PATH = SIGN_PATH + "/status";
-    private static final String SIGN_ALGORITHM_PATH = SIGN_PATH + "/algorithm";
     private static final String SIGN_CANCEL_PATH = SIGN_PATH + "/cancel";
     private static final String VERIFY_PATH = BASE_PATH + "/verify";
     private static final String RANDOM_PATH = BASE_PATH + "/random";
@@ -107,6 +105,33 @@ class CryptographicOperationsApiClientMqTest {
 
         // when
         Executable call = () -> invokeAttributeOperation(operation, request);
+
+        // then
+        assertValidationFailure(call);
+    }
+
+    @Test
+    void listSignAttributes_delegatesPostAndReturnsASchemaThatOffersTheSignatureAlgorithm() throws ConnectorException {
+        // given
+        KeyScopedRequestV2Dto request = keyScopedRequest();
+        BaseAttribute definition = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        proxyClient.respondWith(new BaseAttribute[]{definition});
+
+        // when
+        List<BaseAttribute> result = client.listSignAttributes(connector, request);
+
+        // then
+        assertEquals(List.of(definition), result);
+        assertPlainInvocation(AttributeOperation.SIGN.path(), request, BaseAttribute[].class);
+    }
+
+    @Test
+    void listSignAttributes_rejectsASchemaWithoutTheSignatureAlgorithm() {
+        // given
+        proxyClient.respondWith(new BaseAttribute[]{validMetadataAttribute()});
+
+        // when
+        Executable call = () -> client.listSignAttributes(connector, keyScopedRequest());
 
         // then
         assertValidationFailure(call);
@@ -273,34 +298,6 @@ class CryptographicOperationsApiClientMqTest {
     }
 
     @Test
-    void resolveSignatureAlgorithm_delegatesPostAndReturnsAlgorithm() throws ConnectorException {
-        // given
-        SignatureAlgorithmRequestV2Dto request = signatureAlgorithmRequest();
-        SignatureAlgorithmResponseV2Dto response = new SignatureAlgorithmResponseV2Dto();
-        response.setSignatureAlgorithm(SignatureAlgorithm.SHA384_WITH_RSA);
-        proxyClient.respondWith(response);
-
-        // when
-        SignatureAlgorithmResponseV2Dto result = client.resolveSignatureAlgorithm(connector, request);
-
-        // then
-        assertSame(response, result);
-        assertPlainInvocation(SIGN_ALGORITHM_PATH, request, SignatureAlgorithmResponseV2Dto.class);
-    }
-
-    @Test
-    void resolveSignatureAlgorithm_rejectsResponseWithoutAlgorithm() {
-        // given
-        proxyClient.respondWith(new SignatureAlgorithmResponseV2Dto());
-
-        // when
-        Executable call = () -> client.resolveSignatureAlgorithm(connector, signatureAlgorithmRequest());
-
-        // then
-        assertValidationFailure(call);
-    }
-
-    @Test
     void cancelSign_delegatesPostAndPreservesStatus() throws ConnectorException {
         // given
         OperationTrackingRequestV2Dto request = signOperationRequest();
@@ -420,7 +417,6 @@ class CryptographicOperationsApiClientMqTest {
         return Stream
                 .of(named("encrypt attributes", AttributeOperation.ENCRYPT),
                         named("decrypt attributes", AttributeOperation.DECRYPT),
-                        named("sign attributes", AttributeOperation.SIGN),
                         named("verify attributes", AttributeOperation.VERIFY),
                         named("random attributes", AttributeOperation.RANDOM));
     }
@@ -496,12 +492,6 @@ class CryptographicOperationsApiClientMqTest {
     private static OperationTrackingRequestV2Dto signOperationRequest() {
         OperationTrackingRequestV2Dto request = new OperationTrackingRequestV2Dto();
         request.setOperationMeta(validMetadata());
-        return request;
-    }
-
-    private static SignatureAlgorithmRequestV2Dto signatureAlgorithmRequest() {
-        SignatureAlgorithmRequestV2Dto request = withValidKeyScope(new SignatureAlgorithmRequestV2Dto());
-        request.setSignatureAttributes(List.of());
         return request;
     }
 

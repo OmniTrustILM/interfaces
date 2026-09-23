@@ -1,7 +1,12 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
+import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
+import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ExportKeyRequestV2Dto;
@@ -18,6 +23,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.security.KeyPairGenerator;
@@ -579,6 +585,63 @@ class OperationResponseValidatorTest {
 
         // then
         assertInvalid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_acceptsASchemaThatOffersTheSignatureAlgorithm() {
+        // given
+        List<BaseAttribute> schema = List
+                .of(SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsASchemaWithoutTheSignatureAlgorithm() {
+        // given
+        DataAttributeV2 unrelated = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        unrelated.setName("signatureScheme");
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(unrelated));
+
+        // then
+        assertInvalid(result, "Sign attributes must declare the signatureAlgorithm data attribute");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("malformedSignatureAlgorithmOffers")
+    void validateSignAttributeList_rejectsAnOfferThatNamesNoSignatureAlgorithm(DataAttributeV2 definition) {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+
+        // then
+        assertInvalid(result, "signatureAlgorithm must offer at least one value, and only signature algorithm codes");
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsANullDefinition() {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(Collections.singletonList(null));
+
+        // then
+        assertInvalid(result);
+    }
+
+    static Stream<Named<DataAttributeV2>> malformedSignatureAlgorithmOffers() {
+        DataAttributeV2 outsideTheEnum = SignatureAlgorithmAttribute.definition(List.of());
+        outsideTheEnum.setContent(List.of(new StringAttributeContentV2("SHA1withRSA")));
+        DataAttributeV2 nothingOffered = SignatureAlgorithmAttribute.definition(List.of());
+        DataAttributeV2 notAString = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        notAString.setContentType(AttributeContentType.INTEGER);
+        return Stream
+                .of(named("a code outside the enum", outsideTheEnum), named("no value", nothingOffered),
+                        named("a non-string attribute", notAString));
     }
 
     static Stream<Named<CreateKeyCase>> validCreateKeyResponses() {

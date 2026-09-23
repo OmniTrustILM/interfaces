@@ -1,7 +1,11 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.DataAttribute;
+import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
@@ -16,13 +20,14 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import jakarta.validation.Validator;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -87,6 +92,37 @@ public final class OperationResponseValidator extends ResponseChecks {
 
     public OperationValidationResult validateAttributeList(List<BaseAttribute> response) {
         return validateResponseElements(response, "attribute");
+    }
+
+    /** A caller names the signature algorithm from the selection before it signs, so the schema must offer it. */
+    public OperationValidationResult validateSignAttributeList(List<BaseAttribute> response) {
+        OperationValidationResult elements = validateAttributeList(response);
+        if (!elements.isValid()) {
+            return elements;
+        }
+        return validate(() -> requireSignatureAlgorithmOffered(response));
+    }
+
+    private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema) {
+        DataAttribute definition = schema
+                .stream()
+                .filter(attribute -> SignatureAlgorithmAttribute.NAME.equals(attribute.getName()))
+                .filter(DataAttribute.class::isInstance)
+                .map(DataAttribute.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Sign attributes must declare the " + SignatureAlgorithmAttribute.NAME + " data attribute"));
+        List<? extends AttributeContent> options = definition.getContent();
+        if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
+                || !options.stream().allMatch(OperationResponseValidator::isSignatureAlgorithmCode)) {
+            throw new IllegalArgumentException(SignatureAlgorithmAttribute.NAME
+                    + " must offer at least one value, and only signature algorithm codes");
+        }
+    }
+
+    private static boolean isSignatureAlgorithmCode(AttributeContent option) {
+        return option != null && option.getData() instanceof String code
+                && Arrays.stream(SignatureAlgorithm.values()).anyMatch(a -> a.getCode().equalsIgnoreCase(code));
     }
 
     public OperationValidationResult validateKeyUsageList(List<KeyUsage> response) {
@@ -164,10 +200,6 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     public OperationValidationResult validateSignStatus(SignOperationStatusResponseV2Dto response) {
-        return validateBeanConstraints(response);
-    }
-
-    public OperationValidationResult validateSignatureAlgorithm(SignatureAlgorithmResponseV2Dto response) {
         return validateBeanConstraints(response);
     }
 

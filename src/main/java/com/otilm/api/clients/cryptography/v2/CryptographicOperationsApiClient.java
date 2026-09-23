@@ -18,8 +18,6 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmRequestV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import java.util.List;
@@ -40,7 +38,6 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
     private static final String DECRYPT_ATTRIBUTES_PATH = BASE_PATH + "/decrypt/attributes";
     private static final String DECRYPT_PATH = BASE_PATH + "/decrypt";
     private static final String SIGN_ATTRIBUTES_PATH = BASE_PATH + "/sign/attributes";
-    private static final String SIGN_ALGORITHM_PATH = BASE_PATH + "/sign/algorithm";
     private static final String SIGN_PATH = BASE_PATH + "/sign";
     private static final String SIGN_STATUS_PATH = BASE_PATH + "/sign/status";
     private static final String SIGN_CANCEL_PATH = BASE_PATH + "/sign/cancel";
@@ -125,22 +122,7 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listSignAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
-        return response;
-    }
-
-    @Override
-    public SignatureAlgorithmResponseV2Dto resolveSignatureAlgorithm(ApiClientConnectorInfo connector,
-            SignatureAlgorithmRequestV2Dto body) throws ConnectorException {
-        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        SignatureAlgorithmResponseV2Dto response = processRequest(
-                r -> requireBody(r
-                        .uri(connector.getUrl() + SIGN_ALGORITHM_PATH)
-                        .bodyValue(body)
-                        .retrieve()
-                        .toEntity(SignatureAlgorithmResponseV2Dto.class), "resolveSignatureAlgorithm"),
-                request, connector);
-        requireValid(responseValidator.validateSignatureAlgorithm(response), connector);
+        requireValid(responseValidator.validateSignAttributeList(response), connector);
         return response;
     }
 
