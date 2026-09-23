@@ -35,10 +35,11 @@ public class DiscoveryItemDto {
     @Schema(description = "UUID of the staged Discovery item", requiredMode = Schema.RequiredMode.REQUIRED)
     private String uuid;
 
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
     @Schema(description = "The inventory object this item became. For a certificate, present as soon as one with "
             + "the same content exists, including from an earlier run, so it may be present while processed is "
             + "false. For other resources, absent until processed and permanently absent if processing failed. Its "
-            + "resource is the item's resource.")
+            + "resource is the item's resource.", schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     private NameAndUuidDto inventory;
 
     // Primitive, unlike the connector's DiscoveredItemDto.sequence: that one is inbound, where a boxed Long lets a

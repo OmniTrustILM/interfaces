@@ -4,6 +4,7 @@ import com.otilm.api.interfaces.core.web.DiscoveryController;
 import com.otilm.api.model.client.discovery.DiscoveryDetailDto;
 import com.otilm.api.model.client.discovery.DiscoveryDto;
 import com.otilm.api.model.client.discovery.DiscoveryListDto;
+import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.authority.AuthorityInstanceDto;
 import com.otilm.api.model.core.connector.v2.ConnectorDto;
@@ -270,6 +271,26 @@ class DiscoveryV2SchemaGenerationTest {
     }
 
     /**
+     * The same guard for {@code NameAndUuidDto}, which most of the platform uses to point at a named object. It carries
+     * no description of its own, so any prose reaching the component is discovery's.
+     */
+    @Test
+    void discoveryDoesNotRewriteThePlatformWideNameAndUuidComponent() {
+        String ownDescription = ModelConverters
+                .getInstance()
+                .readAll(NameAndUuidDto.class)
+                .get("NameAndUuidDto")
+                .getDescription();
+
+        Schema<?> reached = ModelConverters.getInstance().readAll(DiscoveryItemDto.class).get("NameAndUuidDto");
+        assertNotNull(reached, "DiscoveryItemDto no longer emits the NameAndUuidDto component at all");
+        assertEquals(ownDescription, reached.getDescription(),
+                "NameAndUuidDto is a platform-wide component; reaching it through DiscoveryItemDto must not change "
+                        + "its description. A description on the referencing field gets hoisted onto it, because "
+                        + "OpenAPI 3.0 cannot carry one beside a $ref.");
+    }
+
+    /**
      * The other half of the rule above: each referencing field carries its own description through {@code ALL_OF_REF}.
      * swagger-core resolves no javadoc on this classpath, and a plain {@code ALL_OF} drops the description silently.
      */
@@ -284,6 +305,7 @@ class DiscoveryV2SchemaGenerationTest {
                         new Field(VaultInstanceDto.class, "VaultInstanceDto", "connectorInterface"),
                         new Field(DiscoveryDetailDto.class, "DiscoveryDetailDto", "progress"),
                         new Field(DiscoveryStatusResponseDto.class, "DiscoveryStatusResponseDto", "progress"),
+                        new Field(DiscoveryItemDto.class, "DiscoveryItemDto", "inventory"),
                         // @ArraySchema, so the description sits on the array rather than the item. Needed here and
                         // not on the other collections in this contract because Resource carries no class-level
                         // description of its own: any prose reaching that component is a change to it, which
