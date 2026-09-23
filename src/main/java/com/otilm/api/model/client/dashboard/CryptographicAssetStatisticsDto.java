@@ -21,9 +21,13 @@ public class CryptographicAssetStatisticsDto {
             + "documents whose assets are not yet synced do not count")
     private Long sourceCbomCount;
 
-    @Schema(description = "Asset count by asset type. Keys are CryptographicAssetType codes; every type is present, "
-            + "with 0 when none")
+    @Schema(description = "Asset count by asset type. Keys are the four CycloneDX asset type codes; every one is "
+            + "present, with 0 when none. Assets with no asset type are counted in untypedAssetCount instead")
     private Map<String, Long> statByType;
+
+    @Schema(description = "Number of assets served with no asset type, because their producer declared none of the "
+            + "CycloneDX asset types. Never counted in statByType")
+    private Long untypedAssetCount;
 
     @Schema(description = "Asset count by PQC readiness verdict. Keys are PqcVerdict codes; every verdict is "
             + "present, with 0 when none")

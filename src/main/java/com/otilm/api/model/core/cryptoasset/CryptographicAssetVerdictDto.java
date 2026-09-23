@@ -28,7 +28,8 @@ public class CryptographicAssetVerdictDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String reason;
 
-    @Schema(description = "Values of the asset fields the deciding rule evaluated, recorded at decision time",
+    @Schema(description = "Values of the asset fields the deciding rule evaluated, recorded at decision time "
+            + "and as stored, so assetType may be unroutable for an asset served with no type",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, Object> evaluatedFields;
 
