@@ -66,13 +66,27 @@ class ListViewColumnDtoTest {
     }
 
     @Test
-    void rejectsABlankHeading() {
-        // given — a whitespace-only heading would pin a blank column title instead of falling back to the catalogue
-        var violations = VALIDATOR.validate(new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   "));
+    void acceptsABlankHeadingAndReadsItBackAsGiven() throws Exception {
+        // given — a column carrying only an icon is headed by nothing, which is a choice and not an absent override
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "");
 
         // then
-        assertEquals(1, violations.size());
-        assertEquals("label", violations.iterator().next().getPropertyPath().toString());
+        assertTrue(VALIDATOR.validate(dto).isEmpty());
+
+        var json = mapper.writeValueAsString(dto);
+        assertTrue(json.contains("\"label\":\"\""));
+        assertEquals("", mapper.readValue(json, ListViewColumnDto.class).getLabel());
+    }
+
+    @Test
+    void tellsABlankHeadingFromAnAbsentOne() throws Exception {
+        // given — the two mean different things: blank pins no title, absent follows the catalogue
+        var blank = mapper.writeValueAsString(new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", ""));
+        var absent = mapper.writeValueAsString(new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", null));
+
+        // then
+        assertEquals("", mapper.readValue(blank, ListViewColumnDto.class).getLabel());
+        assertNull(mapper.readValue(absent, ListViewColumnDto.class).getLabel());
     }
 
     @Test
