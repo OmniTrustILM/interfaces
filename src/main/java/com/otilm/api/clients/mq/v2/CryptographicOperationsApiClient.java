@@ -90,7 +90,7 @@ public class CryptographicOperationsApiClient implements CryptographicOperations
     public List<BaseAttribute> listSignAttributes(ApiClientConnectorInfo connector, KeyScopedRequestV2Dto request)
             throws ConnectorException {
         List<BaseAttribute> response = sendAttributes(connector, SIGN_ATTRIBUTES_PATH, request, "listSignAttributes");
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateSignAttributeList(response), connector);
         return response;
     }
 

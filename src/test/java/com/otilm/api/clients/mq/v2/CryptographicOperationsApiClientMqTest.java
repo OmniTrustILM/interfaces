@@ -2,6 +2,7 @@ package com.otilm.api.clients.mq.v2;
 
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
@@ -16,6 +17,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
@@ -103,6 +105,33 @@ class CryptographicOperationsApiClientMqTest {
 
         // when
         Executable call = () -> invokeAttributeOperation(operation, request);
+
+        // then
+        assertValidationFailure(call);
+    }
+
+    @Test
+    void listSignAttributes_delegatesPostAndReturnsASchemaThatOffersTheSignatureAlgorithm() throws ConnectorException {
+        // given
+        KeyScopedRequestV2Dto request = keyScopedRequest();
+        BaseAttribute definition = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        proxyClient.respondWith(new BaseAttribute[]{definition});
+
+        // when
+        List<BaseAttribute> result = client.listSignAttributes(connector, request);
+
+        // then
+        assertEquals(List.of(definition), result);
+        assertPlainInvocation(AttributeOperation.SIGN.path(), request, BaseAttribute[].class);
+    }
+
+    @Test
+    void listSignAttributes_rejectsASchemaWithoutTheSignatureAlgorithm() {
+        // given
+        proxyClient.respondWith(new BaseAttribute[]{validMetadataAttribute()});
+
+        // when
+        Executable call = () -> client.listSignAttributes(connector, keyScopedRequest());
 
         // then
         assertValidationFailure(call);
@@ -388,7 +417,6 @@ class CryptographicOperationsApiClientMqTest {
         return Stream
                 .of(named("encrypt attributes", AttributeOperation.ENCRYPT),
                         named("decrypt attributes", AttributeOperation.DECRYPT),
-                        named("sign attributes", AttributeOperation.SIGN),
                         named("verify attributes", AttributeOperation.VERIFY),
                         named("random attributes", AttributeOperation.RANDOM));
     }

@@ -122,7 +122,7 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listSignAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateSignAttributeList(response), connector);
         return response;
     }
 
