@@ -7,14 +7,10 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-/**
- * How a certificate extension's value is carried.
- *
- * <p>
- * The field is named for the job rather than the notation: a value's shape is described by an ASN.1 module, which is
- * what X.697 calls a schema when it uses ASN.1 as one for JSON.
- */
 @Data
+@Schema(description = "How a certificate extension's value is carried. The valueSchema field is named for the job "
+        + "rather than the notation: a value's shape is described by an ASN.1 module, which is what X.697 calls a "
+        + "schema when it uses ASN.1 as one for JSON.")
 public class CertificateExtensionOidPropertiesDto implements AdditionalOidPropertiesDto {
 
     @Schema(description = "Whether this extension should be marked critical by default when placed in a certificate",
