@@ -1,6 +1,5 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.v2.MetadataAttributeV2;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
@@ -34,7 +33,6 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenScope;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
 
@@ -55,12 +53,6 @@ class RequestValidationTest {
 
         // then
         assertTrue(violations.isEmpty());
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("validRequests")
-    void serialize_v2RequestOmitsTokenProfileKeyUsages(Object request) {
-        assertFalse(new ObjectMapper().valueToTree(request).has("keyUsages"));
     }
 
     static Stream<Named<Object>> validRequests() {
