@@ -18,11 +18,9 @@ import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMaterialV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
-import java.util.Set;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
@@ -73,7 +71,6 @@ public final class CryptographyDtoFixtures {
     public static <T extends TokenProfileScopedRequestV2Dto> T withValidTokenProfileScope(T dto) {
         withValidTokenScope(dto);
         dto.setTokenProfileAttributes(List.of());
-        dto.setKeyUsages(Set.of(KeyUsage.SIGN));
         return dto;
     }
 

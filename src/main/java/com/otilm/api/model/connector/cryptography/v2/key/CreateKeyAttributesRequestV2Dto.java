@@ -25,7 +25,6 @@ public class CreateKeyAttributesRequestV2Dto extends TokenProfileScopedRequestV2
         CreateKeyAttributesRequestV2Dto dto = new CreateKeyAttributesRequestV2Dto();
         dto.setTokenAttributes(requestDto.getTokenAttributes());
         dto.setTokenProfileAttributes(requestDto.getTokenProfileAttributes());
-        dto.setKeyUsages(requestDto.getKeyUsages());
         dto.setKeyRequestType(keyRequestType);
 
         return dto;

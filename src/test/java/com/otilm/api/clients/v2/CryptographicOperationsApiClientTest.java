@@ -514,7 +514,9 @@ class CryptographicOperationsApiClientTest {
     private void verifyAttributeRequest(AttributeOperation operation) {
         RequestPatternBuilder request = WireMock.postRequestedFor(WireMock.urlEqualTo(operation.path()));
         if (operation == AttributeOperation.RANDOM) {
-            request.withRequestBody(WireMock.matchingJsonPath("$.keyUsages[0]", WireMock.equalTo("sign")));
+            request.withRequestBody(WireMock.equalToJson("""
+                    {"tokenAttributes":[],"tokenProfileAttributes":[]}
+                    """));
         } else {
             request
                     .withRequestBody(
