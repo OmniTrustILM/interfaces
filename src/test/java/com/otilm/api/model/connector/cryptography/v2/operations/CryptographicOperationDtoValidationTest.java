@@ -249,7 +249,7 @@ class CryptographicOperationDtoValidationTest {
         return Stream
                 .of(invalid("missing mode", missingMode, "executionMode", "executionMode is required"),
                         invalid("missing attributes", missingAttributes, "signatureAttributes",
-                                "signatureAttributes is required (may be empty list, but must be present)"),
+                                "signatureAttributes is required"),
                         invalid("null attribute", nullAttribute, "signatureAttributes[0].<list element>",
                                 "signatureAttributes must not contain null items"),
                         invalid("empty data", emptyData, "data", "data must contain at least one item"),

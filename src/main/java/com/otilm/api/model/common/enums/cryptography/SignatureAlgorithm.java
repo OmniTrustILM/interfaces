@@ -7,6 +7,7 @@ import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.Getter;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -158,12 +159,13 @@ public enum SignatureAlgorithm implements IPlatformEnum {
         return this.description;
     }
 
+    public static Optional<SignatureAlgorithm> lookupByCode(String code) {
+        return Arrays.stream(VALUES).filter(k -> k.code.equalsIgnoreCase(code)).findFirst();
+    }
+
     @JsonCreator
     public static SignatureAlgorithm findByCode(String code) {
-        return Arrays
-                .stream(VALUES)
-                .filter(k -> k.code.equalsIgnoreCase(code))
-                .findFirst()
+        return lookupByCode(code)
                 .orElseThrow(() -> new ValidationException(
                         ValidationError.create("Unknown signature algorithm code {}", code)));
     }

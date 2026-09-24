@@ -104,7 +104,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     // ---- Sign ----
 
     @Operation(summary = "List signing attributes",
-            description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema includes signatureAlgorithm, a v3 data attribute offering the signature algorithms the key supports.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -124,7 +125,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
                     description = "Signing accepted asynchronously; body carries operationMeta tracking handle for the batch"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or the signatureAlgorithm selection names an algorithm "
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/sign", consumes = MediaType.APPLICATION_JSON_VALUE,

@@ -22,6 +22,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
@@ -75,6 +76,19 @@ class CryptographicOperationsApiClientTest {
                 "type": "data",
                 "contentType": "string",
                 "version": 2
+              }
+            ]
+            """;
+    private static final String SIGN_ATTRIBUTE_LIST_JSON = """
+            [
+              {
+                "uuid": "9180267f-c82f-4b7b-8160-d2363d813869",
+                "name": "signatureAlgorithm",
+                "type": "data",
+                "contentType": "string",
+                "version": 3,
+                "properties": {"label": "Signature Algorithm", "required": true, "list": true},
+                "content": [{"contentType": "string", "data": "SHA256withRSA"}]
               }
             ]
             """;
@@ -153,6 +167,31 @@ class CryptographicOperationsApiClientTest {
         assertEquals(1, result.size());
         assertEquals("operationAttribute", result.get(0).getName());
         verifyAttributeRequest(operation);
+    }
+
+    @Test
+    void listSignAttributes_returnsASchemaThatOffersTheSignatureAlgorithm() throws ConnectorException {
+        // given
+        stubJsonResponse(AttributeOperation.SIGN.path(), HttpStatus.OK, SIGN_ATTRIBUTE_LIST_JSON);
+
+        // when
+        List<BaseAttribute> result = invokeAttributeOperation(AttributeOperation.SIGN);
+
+        // then
+        assertEquals(SignatureAlgorithmAttribute.NAME, result.get(0).getName());
+        verifyAttributeRequest(AttributeOperation.SIGN);
+    }
+
+    @Test
+    void listSignAttributes_rejectsASchemaWithoutTheSignatureAlgorithm() {
+        // given
+        stubJsonResponse(AttributeOperation.SIGN.path(), HttpStatus.OK, VALID_ATTRIBUTE_LIST_JSON);
+
+        // when
+        Executable call = () -> invokeAttributeOperation(AttributeOperation.SIGN);
+
+        // then
+        assertValidationFailure(call);
     }
 
     @Test
@@ -458,7 +497,6 @@ class CryptographicOperationsApiClientTest {
         return Stream
                 .of(named("encrypt attributes", AttributeOperation.ENCRYPT),
                         named("decrypt attributes", AttributeOperation.DECRYPT),
-                        named("sign attributes", AttributeOperation.SIGN),
                         named("verify attributes", AttributeOperation.VERIFY),
                         named("random attributes", AttributeOperation.RANDOM));
     }

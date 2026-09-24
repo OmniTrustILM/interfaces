@@ -1,7 +1,15 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
+import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
+import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
+import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
+import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ExportKeyRequestV2Dto;
@@ -18,6 +26,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.security.KeyPairGenerator;
@@ -579,6 +588,132 @@ class OperationResponseValidatorTest {
 
         // then
         assertInvalid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_acceptsASchemaThatOffersTheSignatureAlgorithm() {
+        // given
+        List<BaseAttribute> schema = List
+                .of(SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_findsTheSignatureAlgorithmAfterOtherAttributes() {
+        // given
+        DataAttributeV3 other = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        other.setName("signatureScheme");
+        List<BaseAttribute> schema = List
+                .of(other, SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureAlgorithmOffersOfAnotherAttributeKind")
+    void validateSignAttributeList_rejectsAnOfferThatIsNotAV3DataAttribute(BaseAttribute definition) {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+
+        // then
+        assertInvalid(result, "Sign attributes must declare signatureAlgorithm as a v3 data attribute");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureAlgorithmOffersOfTheWrongShape")
+    void validateSignAttributeList_rejectsAnOfferThatIsNotARequiredSingleSelect(DataAttributeV3 definition) {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+
+        // then
+        assertInvalid(result, "signatureAlgorithm must be a required single-select attribute");
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsASchemaWithoutTheSignatureAlgorithm() {
+        // given
+        DataAttributeV3 unrelated = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        unrelated.setName("signatureScheme");
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(unrelated));
+
+        // then
+        assertInvalid(result, "Sign attributes must declare signatureAlgorithm as a v3 data attribute");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("malformedSignatureAlgorithmOffers")
+    void validateSignAttributeList_rejectsAnOfferThatNamesNoSignatureAlgorithm(DataAttributeV3 definition) {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+
+        // then
+        assertInvalid(result, "signatureAlgorithm must offer at least one value, and only signature algorithm codes");
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsANullDefinition() {
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(Collections.singletonList(null));
+
+        // then
+        assertInvalid(result);
+    }
+
+    static Stream<Named<DataAttributeV3>> malformedSignatureAlgorithmOffers() {
+        DataAttributeV3 outsideTheEnum = SignatureAlgorithmAttribute.definition(List.of());
+        outsideTheEnum.setContent(List.of(new StringAttributeContentV3("SHA1withRSA")));
+        DataAttributeV3 nothingOffered = SignatureAlgorithmAttribute.definition(List.of());
+        DataAttributeV3 notAString = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        notAString.setContentType(AttributeContentType.INTEGER);
+        DataAttributeV3 noContent = SignatureAlgorithmAttribute.definition(List.of());
+        noContent.setContent(null);
+        DataAttributeV3 nullOption = SignatureAlgorithmAttribute.definition(List.of());
+        nullOption.setContent(Collections.singletonList(null));
+        DataAttributeV3 optionWithoutData = SignatureAlgorithmAttribute.definition(List.of());
+        optionWithoutData.setContent(List.of(new StringAttributeContentV3()));
+        return Stream
+                .of(named("a code outside the enum", outsideTheEnum), named("no value", nothingOffered),
+                        named("a non-string attribute", notAString), named("no content", noContent),
+                        named("a null option", nullOption), named("an option without data", optionWithoutData));
+    }
+
+    static Stream<Named<DataAttributeV3>> signatureAlgorithmOffersOfTheWrongShape() {
+        DataAttributeV3 optional = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        optional.getProperties().setRequired(false);
+        DataAttributeV3 multiSelect = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        multiSelect.getProperties().setMultiSelect(true);
+        DataAttributeV3 noProperties = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        noProperties.setProperties(null);
+        return Stream
+                .of(named("optional", optional), named("multi-select", multiSelect),
+                        named("no properties", noProperties));
+    }
+
+    static Stream<Named<BaseAttribute>> signatureAlgorithmOffersOfAnotherAttributeKind() {
+        InfoAttributeV3 info = new InfoAttributeV3();
+        info.setName(SignatureAlgorithmAttribute.NAME);
+        DataAttributeV3 offer = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        DataAttributeV2 v2Offer = new DataAttributeV2();
+        v2Offer.setUuid(offer.getUuid());
+        v2Offer.setName(offer.getName());
+        v2Offer.setContentType(offer.getContentType());
+        v2Offer.setProperties(offer.getProperties());
+        v2Offer.setContent(List.of(new StringAttributeContentV2(SignatureAlgorithm.SHA256_WITH_RSA.getCode())));
+        return Stream.of(named("an info attribute", info), named("a v2 data attribute", v2Offer));
     }
 
     static Stream<Named<CreateKeyCase>> validCreateKeyResponses() {
