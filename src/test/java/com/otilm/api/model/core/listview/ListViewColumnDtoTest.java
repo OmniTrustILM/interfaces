@@ -76,6 +76,12 @@ class ListViewColumnDtoTest {
         var json = mapper.writeValueAsString(dto);
         assertTrue(json.contains("\"label\":\"\""));
         assertEquals("", mapper.readValue(json, ListViewColumnDto.class).getLabel());
+
+        // and a whitespace-only heading is preserved as given rather than trimmed to empty, so a client
+        // reading one back can tell it apart from the blank the frontend sends
+        var spaces = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   ");
+        assertTrue(VALIDATOR.validate(spaces).isEmpty());
+        assertEquals("   ", mapper.readValue(mapper.writeValueAsString(spaces), ListViewColumnDto.class).getLabel());
     }
 
     @Test

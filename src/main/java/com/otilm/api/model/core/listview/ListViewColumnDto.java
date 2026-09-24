@@ -38,8 +38,7 @@ public class ListViewColumnDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "Heading to show instead of the field's catalogue label. Absent means the column uses the "
             + "catalogue label, so a field that is later relabelled follows along; setting this pins the heading for "
-            + "this view only. An empty heading is a heading in its own right - it pins a column to no visible title, "
-            + "which is what a column carrying only an icon wants - so it is stored and read back as given rather "
-            + "than treated as absent.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "this view only. An empty string pins a column to no visible heading and is preserved as given \u2014 only "
+            + "an absent value falls back to the catalogue label.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String label;
 }
