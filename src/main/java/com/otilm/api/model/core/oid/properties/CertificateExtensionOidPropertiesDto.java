@@ -7,6 +7,13 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * How a certificate extension's value is carried.
+ *
+ * <p>
+ * The field is named for the job rather than the notation: a value's shape is described by an ASN.1 module, which is
+ * what X.697 calls a schema when it uses ASN.1 as one for JSON.
+ */
 @Data
 public class CertificateExtensionOidPropertiesDto implements AdditionalOidPropertiesDto {
 
@@ -20,9 +27,13 @@ public class CertificateExtensionOidPropertiesDto implements AdditionalOidProper
     @NotNull(message = "valueEncoding is required")
     private ExtensionValueEncoding valueEncoding;
 
-    @Schema(description = "Inline JSON Schema (draft 2020-12) describing the shape of the extension's JSON value; "
-            + "only applicable when valueEncoding is DER, where the value is authored as a structural ASN.1 JSON "
-            + "tree", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "ASN.1 module defining the extension's value type, in the subset of X.680 the platform "
+            + "supports; only applicable when valueEncoding is DER. An extension with a module takes values "
+            + "written as JSON naming its members, in the JSON Encoding Rules of X.697; an extension without one "
+            + "takes its value as base64-encoded DER.",
+            example = "Demo DEFINITIONS IMPLICIT TAGS ::= BEGIN\n\n" + "ServiceEntitlement ::= SEQUENCE {\n"
+                    + "     serviceId   UTF8String (SIZE (5..32)),\n" + "     tier        INTEGER (1..3) }\n\n" + "END",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String valueSchema;
 
     @AssertTrue(message = "valueSchema is only applicable when valueEncoding is DER")
