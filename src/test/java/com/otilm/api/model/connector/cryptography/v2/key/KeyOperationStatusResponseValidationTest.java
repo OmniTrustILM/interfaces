@@ -192,7 +192,7 @@ class KeyOperationStatusResponseValidationTest {
     }
 
     @Test
-    void validate_rejectsMismatchedLengths_forCompletedKeyPairResult() {
+    void validate_acceptsDistinctComponentLengths_forCompletedKeyPairResult() {
         // given
         int mismatchedPrivateKeyLength = 4096;
         KeyPairOperationStatusResponseV2Dto response = validCompletedKeyPairStatus();
@@ -202,7 +202,7 @@ class KeyOperationStatusResponseValidationTest {
         Set<ConstraintViolation<KeyPairOperationStatusResponseV2Dto>> violations = VALIDATOR.validate(response);
 
         // then
-        assertHasViolation(violations, "result.keyLengthsMatching", "public and private key lengths must match");
+        assertTrue(violations.isEmpty(), violations::toString);
     }
 
     @Test

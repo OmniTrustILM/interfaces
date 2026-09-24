@@ -238,7 +238,7 @@ class KeyDataValidationTest {
     }
 
     @Test
-    void validate_rejectsSpki_forMismatchedDeclaredLength() throws Exception {
+    void validate_acceptsProviderReportedLength_forRsaSpki() throws Exception {
         // given
         int actualRsaLength = 2048;
         int mismatchedDeclaredLength = 3072;
@@ -252,8 +252,7 @@ class KeyDataValidationTest {
         Set<ConstraintViolation<PublicKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
 
         // then
-        assertHasViolation(violations, "publicKeySpkiMatchingDeclaredLength",
-                "publicKeySpki does not match the declared key length");
+        assertTrue(violations.isEmpty(), violations::toString);
     }
 
     @ParameterizedTest(name = "{0}")

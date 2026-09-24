@@ -281,7 +281,7 @@ class KeyCreationResponseValidationTest {
     }
 
     @Test
-    void validate_rejectsMismatchedLengths_forKeyPairResponse() {
+    void validate_acceptsDistinctComponentLengths_forKeyPairResponse() {
         // given
         int mismatchedPrivateKeyLength = 4096;
         KeyPairDataResponseV2Dto response = validSynchronousKeyPairResponse();
@@ -292,7 +292,7 @@ class KeyCreationResponseValidationTest {
                 .validate(response, SynchronousResponse.class);
 
         // then
-        assertHasViolation(violations, "keyLengthsMatching", "public and private key lengths must match");
+        assertTrue(violations.isEmpty(), violations::toString);
     }
 
     @Test

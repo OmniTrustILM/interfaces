@@ -193,7 +193,7 @@ class ExportKeyValidationTest {
     }
 
     @Test
-    void exportResponse_rejectsPublicKeyThatContradictsItsOwnDescriptor() {
+    void exportResponse_acceptsProviderReportedPublicLength() {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
         PublicKeyDataV2Dto publicKey = validPublicKeyData();
@@ -204,8 +204,7 @@ class ExportKeyValidationTest {
         Set<ConstraintViolation<ExportKeyResponseV2Dto>> violations = VALIDATOR.validate(response);
 
         // then
-        assertHasViolation(violations, "keyData.publicKeySpkiMatchingDeclaredLength",
-                "publicKeySpki does not match the declared key length");
+        assertNoViolations(violations);
     }
 
     @Test

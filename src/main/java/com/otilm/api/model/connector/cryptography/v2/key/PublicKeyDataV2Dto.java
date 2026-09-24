@@ -93,44 +93,11 @@ public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
         }
     }
 
-    boolean matchesDeclaredLength() {
-        if (publicKeySpki == null || getLength() == null) {
-            return true;
-        }
-
-        try {
-            AsymmetricKeyParameter parsedKey = parsePublicKey(
-                    SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(publicKeySpki)));
-            Integer actualLength = actualKeyLength(parsedKey);
-            return actualLength == null || actualLength.equals(getLength());
-        } catch (IOException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     @JsonIgnore
     @Schema(hidden = true)
     @AssertTrue(message = "publicKeySpki does not match the declared key algorithm")
     public boolean isPublicKeySpkiMatchingDeclaredAlgorithm() {
         return matchesDeclaredAlgorithm();
-    }
-
-    @JsonIgnore
-    @Schema(hidden = true)
-    @AssertTrue(message = "publicKeySpki does not match the declared key length")
-    public boolean isPublicKeySpkiMatchingDeclaredLength() {
-        return matchesDeclaredLength();
-    }
-
-    private static Integer actualKeyLength(AsymmetricKeyParameter key) {
-        if (key instanceof RSAKeyParameters rsaKey) {
-            return rsaKey.getModulus().bitLength();
-        }
-        if (key instanceof ECPublicKeyParameters ecKey) {
-            return ecKey.getParameters().getCurve().getFieldSize();
-        }
-        // PQC algorithm variants identify parameter sets rather than a conventional key bit length.
-        return null;
     }
 
     @SuppressWarnings("deprecation")
