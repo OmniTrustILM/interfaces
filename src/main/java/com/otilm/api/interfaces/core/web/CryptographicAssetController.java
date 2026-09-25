@@ -49,7 +49,8 @@ public interface CryptographicAssetController extends AuthProtectedController {
             filters. When no sort is supplied, rows are ordered by name ascending, then UUID ascending, a \
             deterministic default within a deployment. The name ordered on, whether by default or by a \
             `CBOM_ASSET_NAME` sort, is the name the listing serves: the producers' name, else the recorded \
-            OID, so an asset known only by its OID sorts among the named ones. Page numbering is positional, \
+            OID unless it is refuted, so an asset known only by its OID sorts among the named ones. An asset \
+            with no name to serve sorts last in either direction. Page numbering is positional, \
             so a sync landing between requests can shift rows across page boundaries.
 
             """ + ConfigurableColumnsDocs.SORT_AND_COLUMNS + ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION)
