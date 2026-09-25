@@ -23,8 +23,9 @@ class CryptographicAssetStatisticsDtoTest {
         dto.setSourceCbomCount(11L);
         dto
                 .setStatByType(Map
-                        .of("algorithm", 1500L, "certificate", 400L, "protocol", 120L, "related-crypto-material", 105L,
-                                "unroutable", 4L));
+                        .of("algorithm", 1500L, "certificate", 400L, "protocol", 120L, "related-crypto-material",
+                                105L));
+        dto.setUntypedAssetCount(4L);
         dto.setStatByPqcVerdict(Map.of("ready", 300L, "notReady", 1600L, "notApplicable", 100L, "unknown", 129L));
         dto.setStatByAlgorithmFamily(Map.of("AES", 700L, "RSA", 500L));
         dto.setDistinctAlgorithmFamilyCount(41L);
@@ -41,6 +42,7 @@ class CryptographicAssetStatisticsDtoTest {
         JsonNode tree = mapper.readTree(json);
         Assertions.assertEquals(2129L, tree.get("totalAssets").asLong());
         Assertions.assertEquals(1600L, tree.get("statByPqcVerdict").get("notReady").asLong());
+        Assertions.assertEquals(4L, tree.get("untypedAssetCount").asLong());
         Assertions.assertEquals(12L, tree.get("syncCompleteness").get("cbomStatBySyncState").get("synced").asLong());
     }
 
