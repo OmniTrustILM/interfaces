@@ -215,7 +215,7 @@ public interface TokenProfileController extends AuthProtectedController {
 
     @Operation(summary = "List supported Key Request Types",
             description = "Returns the Key Request Types supported for the specified token profile, based on its "
-                    + "token configuration, profile attributes and selected key usages")
+                    + "token configuration and profile attributes")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Supported Key Request Types retrieved"),
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",

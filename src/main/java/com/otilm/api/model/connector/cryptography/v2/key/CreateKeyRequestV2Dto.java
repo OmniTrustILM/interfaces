@@ -33,7 +33,7 @@ public class CreateKeyRequestV2Dto extends TokenProfileScopedRequestV2Dto {
 
     @Schema(description = """
             Identifier of a key creation operation. Replays must use the same keyRequestType, executionMode,
-            tokenAttributes, tokenProfileAttributes, keyUsages, and createKeyAttributes. An asynchronous replay
+            tokenAttributes, tokenProfileAttributes, and createKeyAttributes. An asynchronous replay
             returns HTTP 202 with the original operationMeta. A synchronous replay returns HTTP 200 with the
             original result. Non-equivalent reuse returns RESOURCE_ALREADY_EXISTS (HTTP 409).
             """, requiredMode = Schema.RequiredMode.REQUIRED, minLength = 1, maxLength = 256)
