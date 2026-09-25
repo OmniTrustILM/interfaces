@@ -38,7 +38,8 @@ public class ListViewColumnDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "Heading to show instead of the field's catalogue label. Absent means the column uses the "
             + "catalogue label, so a field that is later relabelled follows along; setting this pins the heading for "
-            + "this view only. An empty string pins a column to no visible heading and is preserved as given — only "
-            + "an absent value falls back to the catalogue label.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "this view only. An empty or whitespace-only string pins a column to no visible heading and is preserved as "
+            + "given; an absent or null value falls back to the catalogue label.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String label;
 }

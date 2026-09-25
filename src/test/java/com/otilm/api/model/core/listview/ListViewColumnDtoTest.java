@@ -92,7 +92,7 @@ class ListViewColumnDtoTest {
 
     @Test
     void preservesAWhitespaceOnlyHeading() throws Exception {
-        // given — kept as given rather than trimmed, so a client can tell it apart from the empty heading
+        // given
         var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   ");
 
         // when
