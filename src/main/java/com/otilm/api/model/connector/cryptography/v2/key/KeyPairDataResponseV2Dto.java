@@ -75,14 +75,6 @@ public final class KeyPairDataResponseV2Dto extends KeyCreationResponseV2Dto {
                 .equals(publicKeyData.getKeyData().getAlgorithm(), privateKeyData.getKeyData().getAlgorithm());
     }
 
-    @JsonIgnore
-    @Schema(hidden = true)
-    @AssertTrue(message = "public and private key lengths must match")
-    public boolean isKeyLengthsMatching() {
-        return isMissingAnyKeyDescriptor()
-                || Objects.equals(publicKeyData.getKeyData().getLength(), privateKeyData.getKeyData().getLength());
-    }
-
     private boolean isMissingAnyKeyDescriptor() {
         return publicKeyData == null || privateKeyData == null || publicKeyData.getKeyData() == null
                 || privateKeyData.getKeyData() == null;

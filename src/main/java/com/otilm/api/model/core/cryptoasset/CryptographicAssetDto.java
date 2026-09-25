@@ -21,7 +21,9 @@ public class CryptographicAssetDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 
-    @Schema(description = "Type of the asset", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Type of the asset, as the producer declared it in CycloneDX cryptoProperties.assetType. "
+            + "Absent when the producer declared none of the CycloneDX asset types",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CryptographicAssetType type;
 
     @Schema(description = "Post-quantum readiness verdict computed by the platform rule set",

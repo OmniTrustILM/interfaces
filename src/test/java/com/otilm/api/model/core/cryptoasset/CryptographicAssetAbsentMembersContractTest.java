@@ -14,24 +14,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Two members of the inventory surface are absent by design, and the contract has to say so. A row whose producers
- * recorded no name, and whose recorded OID may not stand in for one because it is refuted, has no {@code name}. A
- * source CBOM whose metadata component carries no name has no {@code source}. Core's wire mapper omits nulls, so both
- * are absent on the wire rather than null: the schema must not require them, and the DTOs must omit them when
- * serialized on their own, the way the detail already omits its optional members.
+ * Some members of the inventory surface are absent by design, and the contract has to say so. A row whose producers
+ * recorded no name, and whose recorded OID may not stand in for one because it is refuted, has no {@code name}. A row
+ * whose producers declared none of the CycloneDX asset types has no {@code type}. A source CBOM whose metadata
+ * component carries no name has no {@code source}. Core's wire mapper omits nulls, so each is absent on the wire rather
+ * than null: the schema must not require them, and the DTOs must omit them when serialized on their own, the way the
+ * detail already omits its optional members.
  */
 class CryptographicAssetAbsentMembersContractTest {
 
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
     @Test
-    void theRowSchemaDoesNotRequireTheName() {
+    void theRowSchemaDoesNotRequireTheNameOrTheType() {
         List<String> required = requiredOf(CryptographicAssetDto.class);
         assertFalse(required.contains("name"), "name is absent for a nameless refuted-OID row, got " + required);
-        assertTrue(
-                required
-                        .containsAll(List
-                                .of("uuid", "type", "pqcVerdict", "sourceCbomCount", "occurrenceCount", "quarantined")),
+        assertFalse(required.contains("type"),
+                "type is absent for a row with no CycloneDX asset type, got " + required);
+        assertTrue(required
+                .containsAll(List.of("uuid", "pqcVerdict", "sourceCbomCount", "occurrenceCount", "quarantined")),
                 "the always-present row members stay required, got " + required);
     }
 
@@ -54,6 +55,18 @@ class CryptographicAssetAbsentMembersContractTest {
         JsonNode json = mapper.readTree(mapper.writeValueAsString(row));
 
         assertFalse(json.has("name"), "a row with no servable name omits the member, it does not send null");
+    }
+
+    @Test
+    void aRowWithoutAnAssetTypeSerializesWithoutTheType() throws Exception {
+        CryptographicAssetDto row = new CryptographicAssetDto();
+        row.setUuid(UUID.fromString("d3adbeef-0000-4000-8000-000000002313"));
+        row.setName("untyped-component");
+        row.setPqcVerdict(PqcVerdict.NOT_APPLICABLE);
+
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(row));
+
+        assertFalse(json.has("type"), "a row with no asset type omits the member, it does not send null");
     }
 
     @Test
