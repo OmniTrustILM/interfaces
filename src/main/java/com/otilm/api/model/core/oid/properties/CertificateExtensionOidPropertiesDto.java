@@ -24,9 +24,9 @@ public class CertificateExtensionOidPropertiesDto implements AdditionalOidProper
     private ExtensionValueEncoding valueEncoding;
 
     @Schema(description = "ASN.1 module defining the extension's value type, in the subset of X.680 the platform "
-            + "supports; only applicable when valueEncoding is DER. An extension with a module takes values "
-            + "written as JSON naming its members, in the JSON Encoding Rules of X.697; an extension without one "
-            + "takes its value as base64-encoded DER.",
+            + "supports; only applicable when valueEncoding is DER. Base64-encoded DER is accepted as the value "
+            + "whether or not a module is registered; a module additionally admits values written as JSON naming "
+            + "the type's members, in the JSON Encoding Rules of X.697.",
             example = "Demo DEFINITIONS IMPLICIT TAGS ::= BEGIN\n\n" + "ServiceEntitlement ::= SEQUENCE {\n"
                     + "     serviceId   UTF8String (SIZE (5..32)),\n" + "     tier        INTEGER (1..3) }\n\n" + "END",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
