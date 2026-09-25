@@ -103,8 +103,8 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
     }
 
     /**
-     * Validates that an export describes the key the platform holds a record of: the algorithm and length must match,
-     * and for a key pair the public key must be the one on record, byte for byte.
+     * Validates that an export describes the key the platform holds a record of: the algorithm must match, a secret
+     * key's length must match, and a key pair's public key must be the one on record, byte for byte.
      *
      * @param expected the descriptor of the key the platform holds, built from its own record
      * @param response the connector's export response, already validated with {@link #validateExportKey}
@@ -132,7 +132,7 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
             throw new IllegalArgumentException("Connector exported a key with algorithm " + actual.getAlgorithm()
                     + "; expected " + expected.getAlgorithm());
         }
-        if (!Objects.equals(expected.getLength(), actual.getLength())) {
+        if (!(expected instanceof PublicKeyDataV2Dto) && !Objects.equals(expected.getLength(), actual.getLength())) {
             throw new IllegalArgumentException(
                     "Connector exported a key of length " + actual.getLength() + "; expected " + expected.getLength());
         }
