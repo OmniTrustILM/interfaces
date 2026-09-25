@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.EXPORT_PASSPHRASE;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyData;
@@ -142,9 +143,10 @@ class ExportKeyValidationTest {
     }
 
     @Test
-    void exportResponse_hasNoViolations_whenFullyPopulated() {
+    void exportResponse_hasNoViolations_whenFullyPopulated() throws Exception {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
+        response.setKeyData(validDistinctLengthKeyPairResponse(KeyAlgorithm.ECDSA).getPublicKeyData().getKeyData());
 
         // when
         Set<ConstraintViolation<ExportKeyResponseV2Dto>> violations = VALIDATOR.validate(response);
@@ -193,18 +195,19 @@ class ExportKeyValidationTest {
     }
 
     @Test
-    void exportResponse_acceptsProviderReportedPublicLength() {
+    void exportResponse_cascadesPublicKeyAlgorithmConstraint() {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
         PublicKeyDataV2Dto publicKey = validPublicKeyData();
-        publicKey.setLength(4096);
+        publicKey.setAlgorithm(KeyAlgorithm.ECDSA);
         response.setKeyData(publicKey);
 
         // when
         Set<ConstraintViolation<ExportKeyResponseV2Dto>> violations = VALIDATOR.validate(response);
 
         // then
-        assertNoViolations(violations);
+        assertHasViolation(violations, "keyData.publicKeySpkiMatchingDeclaredAlgorithm",
+                "publicKeySpki does not match the declared key algorithm");
     }
 
     @Test

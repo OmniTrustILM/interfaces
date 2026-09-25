@@ -2,6 +2,7 @@ package com.otilm.api.model.connector.cryptography.v2.key;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -98,6 +99,23 @@ public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
     @AssertTrue(message = "publicKeySpki does not match the declared key algorithm")
     public boolean isPublicKeySpkiMatchingDeclaredAlgorithm() {
         return matchesDeclaredAlgorithm();
+    }
+
+    @JsonIgnore
+    @Schema(hidden = true)
+    @AssertTrue(message = "publicKeySpki does not match the declared RSA key length")
+    public boolean isPublicKeySpkiMatchingDeclaredRsaLength() {
+        if (getAlgorithm() != KeyAlgorithm.RSA || publicKeySpki == null || getLength() == null) {
+            return true;
+        }
+
+        try {
+            AsymmetricKeyParameter parsedKey = parsePublicKey(
+                    SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(publicKeySpki)));
+            return parsedKey instanceof RSAKeyParameters rsaKey && rsaKey.getModulus().bitLength() == getLength();
+        } catch (IOException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     @SuppressWarnings("deprecation")

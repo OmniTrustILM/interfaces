@@ -18,6 +18,7 @@ import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
@@ -131,7 +132,7 @@ class KeyDataValidationTest {
     }
 
     @Test
-    void validate_hasNoViolations_forMatchingRsaSpki() throws Exception {
+    void validate_hasNoViolations_forRsaSpkiWithMatchingModulusLength() throws Exception {
         // given
         int declaredRsaLength = 2048;
         byte[] rsaSpki = generateRsaSpki(declaredRsaLength);
@@ -148,15 +149,15 @@ class KeyDataValidationTest {
     }
 
     @Test
-    void validate_hasNoViolations_forMatchingEcSpki() throws Exception {
+    void validate_hasNoViolations_forEcSpkiWithProviderReportedLength() throws Exception {
         // given
-        int declaredEcLength = 256;
+        int reportedEcLength = 512;
         KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
         generator.initialize(new ECGenParameterSpec("secp256r1"));
         byte[] ecSpki = generator.generateKeyPair().getPublic().getEncoded();
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(KeyAlgorithm.ECDSA);
-        keyData.setLength(declaredEcLength);
+        keyData.setLength(reportedEcLength);
         keyData.setPublicKeySpki(ecSpki);
 
         // when
@@ -170,11 +171,14 @@ class KeyDataValidationTest {
     @MethodSource("supportedPqcAlgorithms")
     void validate_hasNoViolations_forSupportedPqcSpki(PqcAlgorithm algorithm) throws Exception {
         // given
-        int parameterSetLength = 1;
         byte[] pqcSpki = generateSpki(algorithm.generatorName());
+        int reportedLength = SubjectPublicKeyInfo
+                .getInstance(ASN1Primitive.fromByteArray(pqcSpki))
+                .getPublicKeyData()
+                .getBytes().length * Byte.SIZE;
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(algorithm.declaredAlgorithm());
-        keyData.setLength(parameterSetLength);
+        keyData.setLength(reportedLength);
         keyData.setPublicKeySpki(pqcSpki);
 
         // when
@@ -238,7 +242,7 @@ class KeyDataValidationTest {
     }
 
     @Test
-    void validate_acceptsProviderReportedLength_forRsaSpki() throws Exception {
+    void validate_rejectsSpki_forMismatchedRsaLength() throws Exception {
         // given
         int actualRsaLength = 2048;
         int mismatchedDeclaredLength = 3072;
@@ -252,7 +256,8 @@ class KeyDataValidationTest {
         Set<ConstraintViolation<PublicKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
 
         // then
-        assertTrue(violations.isEmpty(), violations::toString);
+        assertHasViolation(violations, "publicKeySpkiMatchingDeclaredRsaLength",
+                "publicKeySpki does not match the declared RSA key length");
     }
 
     @ParameterizedTest(name = "{0}")

@@ -15,8 +15,10 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadataAttribute;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyDataResponse;
@@ -280,12 +282,11 @@ class KeyCreationResponseValidationTest {
         assertHasViolation(violations, "keyAlgorithmsMatching", "public and private key algorithms must match");
     }
 
-    @Test
-    void validate_acceptsDistinctComponentLengths_forKeyPairResponse() {
+    @ParameterizedTest
+    @EnumSource(value = KeyAlgorithm.class, names = {"ECDSA", "MLDSA"})
+    void validate_acceptsDistinctComponentLengths_forKeyPairResponse(KeyAlgorithm algorithm) throws Exception {
         // given
-        int mismatchedPrivateKeyLength = 4096;
-        KeyPairDataResponseV2Dto response = validSynchronousKeyPairResponse();
-        response.getPrivateKeyData().getKeyData().setLength(mismatchedPrivateKeyLength);
+        KeyPairDataResponseV2Dto response = validDistinctLengthKeyPairResponse(algorithm);
 
         // when
         Set<ConstraintViolation<KeyPairDataResponseV2Dto>> violations = VALIDATOR
