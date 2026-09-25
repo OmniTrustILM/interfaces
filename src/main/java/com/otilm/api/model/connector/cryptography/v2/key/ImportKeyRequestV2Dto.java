@@ -37,7 +37,7 @@ public class ImportKeyRequestV2Dto extends TokenProfileScopedRequestV2Dto {
             Identifier of a key import operation, so a retry cannot create a second key in the technology.
 
             A replay is the same operation only when every one of these matches the first submission: `executionMode`,
-            `keyRequestType`, `keyReference`, `tokenAttributes`, `tokenProfileAttributes`, `keyUsages`,
+            `keyRequestType`, `keyReference`, `tokenAttributes`, `tokenProfileAttributes`,
             `importKeyAttributes`, `exportable`, and the imported key itself. Because the platform re-protects the
             material for every submission, the key's identity decides equivalence rather than the envelope bytes.
 
