@@ -31,8 +31,8 @@ class CryptographicAssetAbsentMembersContractTest {
         assertFalse(required.contains("name"), "name is absent for a nameless refuted-OID row, got " + required);
         assertFalse(required.contains("type"),
                 "type is absent for a row with no CycloneDX asset type, got " + required);
-        assertTrue(required
-                .containsAll(List.of("uuid", "pqcVerdict", "sourceCbomCount", "occurrenceCount", "quarantined")),
+        assertTrue(
+                required.containsAll(List.of("uuid", "pqcVerdict", "sourceCbomCount", "sightingCount", "quarantined")),
                 "the always-present row members stay required, got " + required);
     }
 
@@ -41,7 +41,7 @@ class CryptographicAssetAbsentMembersContractTest {
         List<String> required = requiredOf(CryptographicAssetSourceDto.class);
         assertFalse(required.contains("source"),
                 "source is absent when the CBOM's metadata component has no name, got " + required);
-        assertTrue(required.containsAll(List.of("cbomUuid", "serialNumber", "version", "occurrenceCount")),
+        assertTrue(required.containsAll(List.of("cbomUuid", "serialNumber", "version", "locationCount")),
                 "the always-present source members stay required, got " + required);
     }
 
@@ -75,7 +75,7 @@ class CryptographicAssetAbsentMembersContractTest {
         source.setCbomUuid(UUID.fromString("00000000-0000-4000-8000-000000000299"));
         source.setSerialNumber("urn:uuid:11111111-2222-3333-4444-555555555555");
         source.setVersion(3);
-        source.setOccurrenceCount(3L);
+        source.setLocationCount(3L);
 
         JsonNode json = mapper.readTree(mapper.writeValueAsString(source));
 

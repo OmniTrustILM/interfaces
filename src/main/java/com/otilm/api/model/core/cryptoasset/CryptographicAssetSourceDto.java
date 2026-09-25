@@ -24,9 +24,10 @@ public class CryptographicAssetSourceDto {
     @Schema(description = "Version of the source CBOM", requiredMode = Schema.RequiredMode.REQUIRED)
     private int version;
 
-    @Schema(description = "Number of occurrences this source recorded for the asset, counted before the served "
-            + "evidence list is capped", requiredMode = Schema.RequiredMode.REQUIRED)
-    private long occurrenceCount;
+    @Schema(description = "Number of evidence.occurrences entries this source recorded for the asset, counted before "
+            + "the served evidence list is capped. 0 when the source did not record where it found the asset; the "
+            + "source still counts as one sighting of the asset", requiredMode = Schema.RequiredMode.REQUIRED)
+    private long locationCount;
 
     @Schema(description = "Tool or scan that produced the source CBOM (e.g.: CBOM-Lens); absent when the document's "
             + "metadata component carries no name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -40,7 +41,6 @@ public class CryptographicAssetSourceDto {
     private Map<String, Object> payload;
 
     @Schema(description = "Occurrence evidence recorded from this source, sorted deterministically and capped; "
-            + "occurrenceCount carries the pre-cap total. May be empty",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "locationCount carries the pre-cap total. May be empty", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<CryptographicAssetEvidenceDto> evidence;
 }
