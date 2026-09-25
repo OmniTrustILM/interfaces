@@ -689,7 +689,11 @@ class BaseApiClientTest {
             clientLogger.setLevel(null);
         }
 
-        Assertions.assertFalse(recorder.list.isEmpty(), "the rejection is still logged");
+        String rejection = "Connector " + connector.getName() + " request rejected: "
+                + ValidationException.class.getName();
+        Assertions
+                .assertTrue(recorder.list.stream().anyMatch(event -> event.getFormattedMessage().equals(rejection)),
+                        "the rejection is logged by who rejected it and how");
         Assertions
                 .assertTrue(recorder.list.stream().noneMatch(event -> event.getFormattedMessage().contains(echoed)),
                         "the log must not carry the connector's words");
