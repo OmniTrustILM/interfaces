@@ -40,7 +40,7 @@ public enum FeatureFlag implements IPlatformEnum {
     KEY_EXPORT("keyExport", "Key Export",
             "Supports exporting key material as a protected PKCS#8 envelope; only keys created or imported as "
                     + "exportable can be exported. A connector declaring this must publish the reserved keyExportable attribute "
-                    + "in its create-key attribute schema: a data attribute named keyExportable with boolean content, exactly "
+                    + "in its create-key attribute schema: a v3 data attribute named keyExportable with boolean content, exactly "
                     + "one content item, required, defaulting to false. It carries the exportable intent at creation time, so "
                     + "key creation needs no field of its own, and it participates in keyCreationId replay equivalence like any "
                     + "other create-key attribute. The connector maps it to the technology's own extractability control, which "

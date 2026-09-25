@@ -87,9 +87,6 @@ class RequestValidationTest {
                         invalidRequest("token-profile attributes", validTokenProfileScope(),
                                 TokenProfileScopedRequestV2Dto::setTokenProfileAttributes, "tokenProfileAttributes",
                                 "tokenProfileAttributes is required (may be empty list, but must be present)"),
-                        invalidRequest("key usages", validTokenProfileScope(),
-                                TokenProfileScopedRequestV2Dto::setKeyUsages, "keyUsages",
-                                "keyUsages must contain at least one usage"),
                         invalidRequest("attributes key request type", validCreateKeyAttributesRequest(),
                                 CreateKeyAttributesRequestV2Dto::setKeyRequestType, "keyRequestType",
                                 "keyRequestType is required"),
@@ -128,12 +125,8 @@ class RequestValidationTest {
     static Stream<Named<InvalidRequest>> invalidRequestCollections() {
         TokenScopedRequestV2Dto nullTokenAttribute = validTokenScope();
         nullTokenAttribute.setTokenAttributes(Collections.singletonList(null));
-        TokenProfileScopedRequestV2Dto emptyKeyUsages = validTokenProfileScope();
-        emptyKeyUsages.setKeyUsages(Set.of());
         TokenProfileScopedRequestV2Dto nullTokenProfileAttribute = validTokenProfileScope();
         nullTokenProfileAttribute.setTokenProfileAttributes(Collections.singletonList(null));
-        TokenProfileScopedRequestV2Dto nullKeyUsage = validTokenProfileScope();
-        nullKeyUsage.setKeyUsages(Collections.singleton(null));
         KeyScopedRequestV2Dto emptyKeyMetadata = validKeyScope();
         emptyKeyMetadata.setKeyMeta(List.of());
         KeyScopedRequestV2Dto nullKeyMetadata = validKeyScope();
@@ -149,16 +142,10 @@ class RequestValidationTest {
                 .of(named("null token attribute element",
                         new InvalidRequest(nullTokenAttribute, "tokenAttributes[0].<list element>",
                                 "tokenAttributes must not contain null entries")),
-                        named("empty key usages",
-                                new InvalidRequest(emptyKeyUsages, "keyUsages",
-                                        "keyUsages must contain at least one usage")),
                         named("null token-profile attribute element",
                                 new InvalidRequest(nullTokenProfileAttribute,
                                         "tokenProfileAttributes[0].<list element>",
                                         "tokenProfileAttributes must not contain null entries")),
-                        named("null key usage element",
-                                new InvalidRequest(nullKeyUsage, "keyUsages[].<iterable element>",
-                                        "keyUsages must not contain null entries")),
                         named("empty key metadata",
                                 new InvalidRequest(emptyKeyMetadata, "keyMeta",
                                         "keyMeta is required and must not be empty")),

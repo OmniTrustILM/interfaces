@@ -74,13 +74,18 @@ class KeyControllerDocTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("expected a listCreateKeyAttributes operation"));
 
-        String operationProse = createAttributes.getAnnotation(Operation.class).description();
+        // A text block keeps its line breaks, which the rendered document reads as spaces.
+        String operationProse = createAttributes.getAnnotation(Operation.class).description().replaceAll("\\s+", " ");
         assertTrue(operationProse.contains(KeyExportableAttribute.NAME),
                 "the key-creation attribute operation must name the reserved attribute a connector has to publish");
+        assertTrue(operationProse.contains("v3 data attribute"),
+                "the key-creation attribute operation must name the version of the reserved attribute");
 
         String flagProse = FeatureFlag.KEY_EXPORT.getDescription();
         assertTrue(flagProse.contains(KeyExportableAttribute.NAME),
                 "the key-export flag must name the attribute declaring it obliges a connector to publish");
+        assertTrue(flagProse.contains("v3 data attribute"),
+                "the key-export flag must name the version of the reserved attribute");
     }
 
     @Test

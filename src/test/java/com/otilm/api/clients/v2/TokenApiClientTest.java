@@ -192,8 +192,7 @@ class TokenApiClientTest {
                         .withRequestBody(WireMock.equalToJson("""
                                 {
                                   "tokenAttributes": [],
-                                  "tokenProfileAttributes": [],
-                                  "keyUsages": ["sign"]
+                                  "tokenProfileAttributes": []
                                 }
                                 """)));
     }

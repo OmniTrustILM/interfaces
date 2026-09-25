@@ -33,7 +33,7 @@ public class SignDataRequestV2Dto extends KeyScopedRequestV2Dto {
     private OperationExecutionMode executionMode;
 
     @Schema(description = "Signature attributes", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "signatureAttributes is required (may be empty list, but must be present)")
+    @NotNull(message = "signatureAttributes is required")
     private List<@NotNull(
             message = "signatureAttributes must not contain null items") RequestAttribute> signatureAttributes;
 
