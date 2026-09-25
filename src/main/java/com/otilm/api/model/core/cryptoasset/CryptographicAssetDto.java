@@ -1,7 +1,12 @@
 package com.otilm.api.model.core.cryptoasset;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
+import com.otilm.api.model.core.search.AttributeProjectable;
+import com.otilm.api.model.core.search.FilterFieldSource;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Data;
 
@@ -11,7 +16,7 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CryptographicAssetDto {
+public class CryptographicAssetDto implements AttributeProjectable {
 
     @Schema(description = "UUID of the inventory asset", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID uuid;
@@ -41,4 +46,11 @@ public class CryptographicAssetDto {
     @Schema(description = "True when sources make contradicting claims about this asset that are quarantined "
             + "pending reconciliation", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean quarantined;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    // No example: the platform registers no custom, metadata or data attributes against this resource, so the
+    // shared one - which shows custom values - documents a payload this listing cannot produce.
+    @Schema(description = AttributeProjectable.ATTRIBUTE_VALUES_DESCRIPTION,
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues;
 }
