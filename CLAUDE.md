@@ -62,6 +62,12 @@ Start the server in `@BeforeAll`, stop it in `@AfterAll`, and call `mockServer.r
 
 Every upload in the platform travels base64-encoded inside a JSON body; there is no multipart endpoint, and `KeyTransferWebContractTest` refuses one. A file that may carry key material is typed `UploadedFile` (`com.otilm.api.model.core.secret`), never `String` or `byte[]`: its deserializer decodes the token straight to bytes, refuses other types with a fixed message that quotes nothing, and the value is excluded from rendering and can be cleared. Request bodies that take a file extend `UploadRequestDto`, which carries the field, its size limit and the shared description.
 
+## Attributes on v2 connector surfaces are v3
+
+Every attribute published by or sent to a v2 connector interface must be a v3 attribute: `DataAttributeV3` in a schema, `RequestAttributeV3` in a request. The wire schema allows both, since `RequestAttribute` is a `oneOf` with a `version` discriminator, but a v2 content item names no content type, so go-sdk cannot decode it and a Go connector rejects the whole request with `400 INVALID_JSON`. Java decodes both versions, so a test against a Java connector or WireMock never shows the problem: assert on the wire instead, `"version":"v3"` on the attribute and a `contentType` on every content item.
+
+A reserved attribute gets a public `ATTRIBUTE_UUID`, its `definition(...)`, a `request(...)` writer and a reader here, so no caller builds one by hand or picks its envelope; `SignatureAlgorithmAttribute` and `KeyExportableAttribute` are the pattern. The reader of an attribute that was once stated as v2 keeps reading both versions, so a platform that has not upgraded is still understood.
+
 ## Adding a field to a DTO with `@AllArgsConstructor`
 
 Adding a field grows the generated all-args constructor, so any caller in another repository that builds the class positionally stops compiling. Append the field last and declare the previous signature explicitly, delegating to the full constructor with the new field left at its default. `TokenInstanceDetailDto`, `TokenProfileDetailDto`, `KeyItemDetailDto` and `KeyRequestDto` are the pattern, and `KeyTransferConstructorCompatibilityTest` is what holds those signatures in place. Appending last also matters on its own: a field inserted in the middle keeps the arity and silently reorders the parameters, which no compiler reports.

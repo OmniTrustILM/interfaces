@@ -72,12 +72,12 @@ public interface KeyController extends AuthProtectedConnectorController {
             List attributes for creating the requested key type. Definitions must not contain resolved credentials or
             secret values.
 
-            A connector that declares `keyExport` must include the reserved `keyExportable` attribute here: a data
-            attribute named `keyExportable` with boolean content, exactly one content item, required, defaulting to
-            `false`. That is how the exportable intent reaches key creation, so the create request needs no field of
-            its own for it, and it takes part in `keyCreationId` replay equivalence like any other create-key
-            attribute. A connector that does not declare `keyExport` must not publish it, and must create keys
-            non-extractable wherever the technology expresses the distinction.
+            A connector that declares `keyExport` must include the reserved `keyExportable` attribute here: a v3
+            data attribute named `keyExportable` with boolean content, exactly one content item, required, defaulting
+            to `false`. That is how the exportable intent reaches key creation, so the create request needs no field
+            of its own for it, and it takes part in `keyCreationId` replay equivalence like any other create-key
+            attribute. A connector that does not declare `keyExport` must not publish it and is never sent it, and
+            must create keys non-extractable wherever the technology expresses the distinction.
             """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Schema retrieved"),
