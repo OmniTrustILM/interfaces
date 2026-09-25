@@ -1,5 +1,9 @@
 package com.otilm.api.clients;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -55,6 +59,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.http.HttpMethod;
@@ -647,6 +652,47 @@ class BaseApiClientTest {
                                                 .toBodilessEntity()
                                                 .block(),
                                         client.prepareRequest(HttpMethod.GET, connector, false), connector));
+    }
+
+    /**
+     * A 422 body is the connector's own words, and a request that carried a secret can have it echoed there. The
+     * rejection is logged by who rejected it and how, never with that text.
+     */
+    @Test
+    void aRejectionIsLoggedWithoutTheConnectorsWords() {
+        String echoed = "correct horse battery staple";
+        mockServer
+                .stubFor(get(urlEqualTo("/rejected"))
+                        .willReturn(aResponse()
+                                .withStatus(422)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("[\"refused for " + echoed + "\"]")));
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE,
+                List.of());
+        WebClient.RequestBodyUriSpec request = client.prepareRequest(HttpMethod.GET, connector, false);
+        Logger clientLogger = (Logger) LoggerFactory.getLogger(BaseApiClient.class);
+        ListAppender<ILoggingEvent> recorder = new ListAppender<>();
+        recorder.start();
+        clientLogger.addAppender(recorder);
+        clientLogger.setLevel(Level.DEBUG);
+        try {
+            Assertions
+                    .assertThrows(ValidationException.class,
+                            () -> BaseApiClient
+                                    .processRequest(r -> r
+                                            .uri("http://localhost:" + mockServer.port() + "/rejected")
+                                            .retrieve()
+                                            .toBodilessEntity()
+                                            .block(), request, connector));
+        } finally {
+            clientLogger.detachAppender(recorder);
+            clientLogger.setLevel(null);
+        }
+
+        Assertions.assertFalse(recorder.list.isEmpty(), "the rejection is still logged");
+        Assertions
+                .assertTrue(recorder.list.stream().noneMatch(event -> event.getFormattedMessage().contains(echoed)),
+                        "the log must not carry the connector's words");
     }
 
     @Test
