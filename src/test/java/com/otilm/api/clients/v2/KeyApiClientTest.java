@@ -837,8 +837,7 @@ class KeyApiClientTest {
         return WireMock.postRequestedFor(WireMock.urlEqualTo(path)).withRequestBody(WireMock.equalToJson("""
                 {
                   "tokenAttributes": [],
-                  "tokenProfileAttributes": [],
-                  "keyUsages": ["sign"]
+                  "tokenProfileAttributes": []
                 }
                 """, true, true));
     }

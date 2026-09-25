@@ -218,16 +218,22 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "listSignatureAttributesForCertificate",
             summary = "Get signing operation attribute descriptors for a certificate",
             description = "Returns the signing operation attribute descriptors (e.g. signature scheme, digest algorithm) "
-                    + "derived from the key algorithm of the given certificate. "
+                    + "for the key of the given certificate. "
                     + "Intended for use during Signing Profile creation to populate the signingOperationAttributes field.")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+
             @ApiResponse(responseCode = "200", description = "Signature attribute descriptors retrieved"),
             @ApiResponse(responseCode = "404", description = "Certificate not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/certificates/{certificateUuid}/signatureAttributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listSignatureAttributesForCertificate(
-            @Parameter(description = "Certificate UUID") @PathVariable UUID certificateUuid) throws NotFoundException;
+            @Parameter(description = "Certificate UUID") @PathVariable UUID certificateUuid)
+            throws NotFoundException, ConnectorException;
 
     @Operation(operationId = "listSignatureFormattingConnectorAttributes",
             summary = "Get formatting attribute descriptors from a Signature Formatting Provider",

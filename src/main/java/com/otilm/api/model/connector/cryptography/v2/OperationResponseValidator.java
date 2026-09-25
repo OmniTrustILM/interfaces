@@ -1,7 +1,12 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
+import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
+import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
@@ -16,6 +21,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
@@ -86,6 +92,42 @@ public final class OperationResponseValidator extends ResponseChecks {
 
     public OperationValidationResult validateAttributeList(List<BaseAttribute> response) {
         return validateResponseElements(response, "attribute");
+    }
+
+    /** A caller names the signature algorithm from the selection before it signs, so the schema must offer it. */
+    public OperationValidationResult validateSignAttributeList(List<BaseAttribute> response) {
+        OperationValidationResult elements = validateAttributeList(response);
+        if (!elements.isValid()) {
+            return elements;
+        }
+        return validate(() -> requireSignatureAlgorithmOffered(response));
+    }
+
+    private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema) {
+        DataAttributeV3 definition = schema
+                .stream()
+                .filter(attribute -> SignatureAlgorithmAttribute.NAME.equals(attribute.getName()))
+                .filter(DataAttributeV3.class::isInstance)
+                .map(DataAttributeV3.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Sign attributes must declare "
+                        + SignatureAlgorithmAttribute.NAME + " as a v3 data attribute"));
+        DataAttributeProperties properties = definition.getProperties();
+        if (properties == null || !properties.isRequired() || properties.isMultiSelect()) {
+            throw new IllegalArgumentException(
+                    SignatureAlgorithmAttribute.NAME + " must be a required single-select attribute");
+        }
+        List<? extends AttributeContent> options = definition.getContent();
+        if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
+                || !options.stream().allMatch(OperationResponseValidator::isSignatureAlgorithmCode)) {
+            throw new IllegalArgumentException(SignatureAlgorithmAttribute.NAME
+                    + " must offer at least one value, and only signature algorithm codes");
+        }
+    }
+
+    private static boolean isSignatureAlgorithmCode(AttributeContent option) {
+        return option != null && option.getData() instanceof String code
+                && SignatureAlgorithm.lookupByCode(code).isPresent();
     }
 
     public OperationValidationResult validateKeyUsageList(List<KeyUsage> response) {
