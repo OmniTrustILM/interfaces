@@ -23,6 +23,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2D
 import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.PublicKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
@@ -42,6 +43,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
@@ -1083,17 +1085,18 @@ class OperationResponseValidatorTest {
     }
 
     @Test
-    void validateExportedKeyDescriptor_acceptsADescriptorMatchingTheRecord() {
+    void validateExportedKeyDescriptor_rejectsAnotherSecretLength() {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
+        response.setKeyData(validSecretKeyData());
+        SecretKeyDataV2Dto expected = validSecretKeyData();
+        expected.setLength(3072);
 
         // when
-        OperationValidationResult result = VALIDATOR
-                .keyTransfer()
-                .validateExportedKeyDescriptor(validPublicKeyData(), response);
+        OperationValidationResult result = VALIDATOR.keyTransfer().validateExportedKeyDescriptor(expected, response);
 
         // then
-        assertTrue(result.isValid());
+        assertInvalid(result, "Connector exported a key of length 2048; expected 3072");
     }
 
     @Test
@@ -1129,18 +1132,23 @@ class OperationResponseValidatorTest {
     }
 
     @Test
-    void validateExportedKeyDescriptor_rejectsAnotherLength() {
+    void validateExportedKeyDescriptor_acceptsAnotherPublicLengthForTheSameSpki() throws Exception {
         // given
-        PublicKeyDataV2Dto expected = validPublicKeyData();
-        expected.setLength(3072);
+        PublicKeyDataV2Dto actual = validDistinctLengthKeyPairResponse(KeyAlgorithm.ECDSA)
+                .getPublicKeyData()
+                .getKeyData();
+        PublicKeyDataV2Dto expected = new PublicKeyDataV2Dto();
+        expected.setAlgorithm(KeyAlgorithm.ECDSA);
+        expected.setLength(256);
+        expected.setPublicKeySpki(actual.getPublicKeySpki());
+        ExportKeyResponseV2Dto response = validExportKeyResponse();
+        response.setKeyData(actual);
 
         // when
-        OperationValidationResult result = VALIDATOR
-                .keyTransfer()
-                .validateExportedKeyDescriptor(expected, validExportKeyResponse());
+        OperationValidationResult result = VALIDATOR.keyTransfer().validateExportedKeyDescriptor(expected, response);
 
         // then
-        assertInvalid(result, "Connector exported a key of length 2048; expected 3072");
+        assertValid(result);
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.otilm.api.model.connector.cryptography.v2.key;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -93,21 +94,6 @@ public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
         }
     }
 
-    boolean matchesDeclaredLength() {
-        if (publicKeySpki == null || getLength() == null) {
-            return true;
-        }
-
-        try {
-            AsymmetricKeyParameter parsedKey = parsePublicKey(
-                    SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(publicKeySpki)));
-            Integer actualLength = actualKeyLength(parsedKey);
-            return actualLength == null || actualLength.equals(getLength());
-        } catch (IOException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     @JsonIgnore
     @Schema(hidden = true)
     @AssertTrue(message = "publicKeySpki does not match the declared key algorithm")
@@ -117,20 +103,19 @@ public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
 
     @JsonIgnore
     @Schema(hidden = true)
-    @AssertTrue(message = "publicKeySpki does not match the declared key length")
-    public boolean isPublicKeySpkiMatchingDeclaredLength() {
-        return matchesDeclaredLength();
-    }
+    @AssertTrue(message = "publicKeySpki does not match the declared RSA key length")
+    public boolean isPublicKeySpkiMatchingDeclaredRsaLength() {
+        if (getAlgorithm() != KeyAlgorithm.RSA || publicKeySpki == null || getLength() == null) {
+            return true;
+        }
 
-    private static Integer actualKeyLength(AsymmetricKeyParameter key) {
-        if (key instanceof RSAKeyParameters rsaKey) {
-            return rsaKey.getModulus().bitLength();
+        try {
+            AsymmetricKeyParameter parsedKey = parsePublicKey(
+                    SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(publicKeySpki)));
+            return parsedKey instanceof RSAKeyParameters rsaKey && rsaKey.getModulus().bitLength() == getLength();
+        } catch (IOException | IllegalArgumentException e) {
+            return false;
         }
-        if (key instanceof ECPublicKeyParameters ecKey) {
-            return ecKey.getParameters().getCurve().getFieldSize();
-        }
-        // PQC algorithm variants identify parameter sets rather than a conventional key bit length.
-        return null;
     }
 
     @SuppressWarnings("deprecation")
