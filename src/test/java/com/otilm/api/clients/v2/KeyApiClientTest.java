@@ -188,7 +188,7 @@ class KeyApiClientTest {
         String responseJson = """
                 {
                   "keyRequestType": "secret",
-                  "keyData": {"type":"Secret","algorithm":"RSA","length":2048},
+                  "keyData": {"type":"Secret","algorithm":"AES","length":256},
                   "keyMeta": [%s]
                 }
                 """.formatted(VALID_METADATA_JSON);
@@ -201,7 +201,7 @@ class KeyApiClientTest {
         // then
         assertEquals(HttpStatus.OK, result.getStatusCode());
         SecretKeyDataResponseV2Dto body = assertInstanceOf(SecretKeyDataResponseV2Dto.class, result.getBody());
-        assertEquals(KeyAlgorithm.RSA, body.getKeyData().getAlgorithm());
+        assertEquals(KeyAlgorithm.AES, body.getKeyData().getAlgorithm());
         assertEquals(METADATA_NAME, body.getKeyMeta().get(0).getName());
         verifyCreateRequest(OperationExecutionMode.SYNCHRONOUS);
     }
@@ -246,7 +246,7 @@ class KeyApiClientTest {
         String secretKeyResponse = """
                 {
                   "keyRequestType": "secret",
-                  "keyData": {"type":"Secret","algorithm":"RSA","length":2048},
+                  "keyData": {"type":"Secret","algorithm":"AES","length":256},
                   "keyMeta": [%s]
                 }
                 """.formatted(VALID_METADATA_JSON);
@@ -475,7 +475,7 @@ class KeyApiClientTest {
         String responseJson = """
                 {
                   "keyRequestType": "secret",
-                  "keyData": {"type":"Secret","algorithm":"RSA","length":2048},
+                  "keyData": {"type":"Secret","algorithm":"AES","length":256},
                   "keyMeta": [%s]
                 }
                 """.formatted(VALID_METADATA_JSON);
@@ -488,7 +488,7 @@ class KeyApiClientTest {
         // then
         assertEquals(HttpStatus.OK, result.getStatusCode());
         SecretKeyDataResponseV2Dto body = assertInstanceOf(SecretKeyDataResponseV2Dto.class, result.getBody());
-        assertEquals(KeyAlgorithm.RSA, body.getKeyData().getAlgorithm());
+        assertEquals(KeyAlgorithm.AES, body.getKeyData().getAlgorithm());
         verifyImportRequest(OperationExecutionMode.SYNCHRONOUS);
     }
 
@@ -602,7 +602,7 @@ class KeyApiClientTest {
                   "status": "completed",
                   "result": {
                     "keyRequestType": "secret",
-                    "keyData": {"type":"Secret","algorithm":"RSA","length":2048},
+                    "keyData": {"type":"Secret","algorithm":"AES","length":256},
                     "keyMeta": [%s]
                   }
                 }
