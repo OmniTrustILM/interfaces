@@ -6,6 +6,7 @@ import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
 import com.otilm.api.model.common.events.data.ApprovalEventData;
+import com.otilm.api.model.common.events.data.CbomSyncedEventData;
 import com.otilm.api.model.common.events.data.CertificateActionPerformedEventData;
 import com.otilm.api.model.common.events.data.CertificateDiscoveredEventData;
 import com.otilm.api.model.common.events.data.CertificateEventData;
@@ -14,6 +15,7 @@ import com.otilm.api.model.common.events.data.CertificateNotCompliantEventData;
 import com.otilm.api.model.common.events.data.CertificateRegisteredEventData;
 import com.otilm.api.model.common.events.data.CertificateStatusChangedEventData;
 import com.otilm.api.model.common.events.data.CommentEventData;
+import com.otilm.api.model.common.events.data.CryptoAssetAddedEventData;
 import com.otilm.api.model.common.events.data.DiscoveryFinishedEventData;
 import com.otilm.api.model.common.events.data.EventData;
 import com.otilm.api.model.common.events.data.ScheduledJobFinishedEventData;
@@ -72,6 +74,12 @@ public enum ResourceEvent implements IPlatformEnum {
             "Event when a comment thread is resolved or reopened, with the host resource, object, thread and acting "
                     + "user; the resolved flag in the payload distinguishes the two",
             Resource.COMMENT, List.of(Resource.GROUP), CommentEventData.class, false),
+
+    CBOM_SYNCED(Codes.CBOM_SYNCED, "CBOM synced", "Event after a CBOM's cryptographic assets have been ingested",
+            Resource.CBOM, CbomSyncedEventData.class, false),
+    CRYPTO_ASSET_ADDED(Codes.CRYPTO_ASSET_ADDED, "Cryptographic asset added",
+            "Event for a newly created cryptographic asset retained after its CBOM ingest settles",
+            Resource.CRYPTO_ASSET, List.of(Resource.CBOM), CryptoAssetAddedEventData.class, false),
 
     // Scheduler
     SCHEDULED_JOB_FINISHED(Codes.SCHEDULED_JOB_FINISHED, "Scheduled job finished",
@@ -159,6 +167,9 @@ public enum ResourceEvent implements IPlatformEnum {
         public static final String APPROVAL_CLOSED = "approval_closed";
         public static final String COMMENT_CREATED = "comment_created";
         public static final String COMMENT_RESOLVED = "comment_resolved";
+
+        public static final String CBOM_SYNCED = "cbom_synced";
+        public static final String CRYPTO_ASSET_ADDED = "crypto_asset_added";
 
         public static final String SCHEDULED_JOB_FINISHED = "scheduled_job_finished";
         public static final String CERTIFICATE_NOT_COMPLIANT = "certificate_not_compliant";
