@@ -23,8 +23,8 @@ public class CertificateEntryKeyDestinationDto {
     @NotBlank(message = "tokenProfileUuid is required")
     private String tokenProfileUuid;
 
-    @Schema(description = "Name for the imported key. The platform derives one from the certificate when this is "
-            + "absent.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Name for the imported key. The platform takes the entry's alias when this is absent, and "
+            + "otherwise its certificate's common name.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String keyName;
 
     @Schema(description = """

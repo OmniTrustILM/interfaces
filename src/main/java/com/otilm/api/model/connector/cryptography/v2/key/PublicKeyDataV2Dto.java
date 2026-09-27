@@ -129,6 +129,7 @@ public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
             case MLKEM -> key instanceof MLKEMPublicKeyParameters;
             case DILITHIUM -> key instanceof DilithiumPublicKeyParameters;
             case SPHINCSPLUS -> key instanceof SPHINCSPlusPublicKeyParameters;
+            case AES -> false;
             case UNKNOWN -> true;
         };
     }

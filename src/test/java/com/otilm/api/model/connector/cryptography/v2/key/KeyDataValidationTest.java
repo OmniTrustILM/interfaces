@@ -242,6 +242,24 @@ class KeyDataValidationTest {
     }
 
     @Test
+    void validate_rejectsSpki_whenDeclaredAlgorithmHasNoPublicKeyForm() throws Exception {
+        // given
+        int rsaLength = 2048;
+        byte[] rsaSpki = generateRsaSpki(rsaLength);
+        PublicKeyDataV2Dto keyData = validPublicKeyData();
+        keyData.setAlgorithm(KeyAlgorithm.AES);
+        keyData.setLength(rsaLength);
+        keyData.setPublicKeySpki(rsaSpki);
+
+        // when
+        Set<ConstraintViolation<PublicKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertHasViolation(violations, "publicKeySpkiMatchingDeclaredAlgorithm",
+                "publicKeySpki does not match the declared key algorithm");
+    }
+
+    @Test
     void validate_rejectsSpki_forMismatchedRsaLength() throws Exception {
         // given
         int actualRsaLength = 2048;
