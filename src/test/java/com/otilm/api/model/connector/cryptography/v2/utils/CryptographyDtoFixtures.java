@@ -81,8 +81,8 @@ public final class CryptographyDtoFixtures {
 
     public static SecretKeyDataV2Dto validSecretKeyData() {
         SecretKeyDataV2Dto keyData = new SecretKeyDataV2Dto();
-        keyData.setAlgorithm(KeyAlgorithm.RSA);
-        keyData.setLength(2048);
+        keyData.setAlgorithm(KeyAlgorithm.AES);
+        keyData.setLength(256);
         return keyData;
     }
 

@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.cryptography.v2.key;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -9,6 +10,7 @@ import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -59,6 +61,22 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
 
     protected KeyDataV2Dto(KeyTypeV2 type) {
         this.type = type;
+    }
+
+    /**
+     * A descriptor names an algorithm of its own kind: a secret key a secret-key algorithm, a public or private key a
+     * key-pair algorithm. {@link KeyAlgorithm#UNKNOWN} fits either.
+     *
+     * @return whether the algorithm fits the key type
+     */
+    @JsonIgnore
+    @Schema(hidden = true)
+    @AssertTrue(message = "key algorithm must fit the key type")
+    public boolean isAlgorithmMatchingType() {
+        if (type == null || algorithm == null || algorithm == KeyAlgorithm.UNKNOWN) {
+            return true;
+        }
+        return algorithm.isKeyPairAlgorithm() == (type != KeyTypeV2.SECRET);
     }
 
     /**

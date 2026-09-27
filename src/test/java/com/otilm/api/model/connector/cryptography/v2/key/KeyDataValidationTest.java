@@ -260,6 +260,50 @@ class KeyDataValidationTest {
     }
 
     @Test
+    void validate_rejectsASecretKeyDescriptorNamingAKeyPairAlgorithm() {
+        // given
+        SecretKeyDataV2Dto keyData = validSecretKeyData();
+        keyData.setAlgorithm(KeyAlgorithm.RSA);
+
+        // when
+        Set<ConstraintViolation<SecretKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertHasViolation(violations, "algorithmMatchingType", "key algorithm must fit the key type");
+    }
+
+    @Test
+    void validate_rejectsAPrivateKeyDescriptorNamingASecretKeyAlgorithm() {
+        // given
+        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
+        keyData.setAlgorithm(KeyAlgorithm.AES);
+        keyData.setLength(256);
+
+        // when
+        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertHasViolation(violations, "algorithmMatchingType", "key algorithm must fit the key type");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("descriptorsOfAnUnknownAlgorithm")
+    void validate_hasNoViolations_forAnUnknownAlgorithmOfEitherKind(KeyDataV2Dto keyData) {
+        // given
+        keyData.setAlgorithm(KeyAlgorithm.UNKNOWN);
+
+        // when
+        Set<ConstraintViolation<KeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertTrue(violations.isEmpty());
+    }
+
+    static Stream<Named<KeyDataV2Dto>> descriptorsOfAnUnknownAlgorithm() {
+        return Stream.of(named("secret key", validSecretKeyData()), named("private key", validPrivateKeyData()));
+    }
+
+    @Test
     void validate_rejectsSpki_forMismatchedRsaLength() throws Exception {
         // given
         int actualRsaLength = 2048;
