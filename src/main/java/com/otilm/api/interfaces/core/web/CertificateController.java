@@ -220,6 +220,8 @@ public interface CertificateController extends AuthProtectedController {
 
             It is a separate operation from the certificate content download, which serves certificates only. Only a
             key created or imported as exportable can be included.
+
+            keytool opens the file only when its passphrase is printable ASCII.
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Keystore downloaded",
