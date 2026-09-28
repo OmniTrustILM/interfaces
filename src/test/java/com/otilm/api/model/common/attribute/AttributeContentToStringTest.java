@@ -12,26 +12,44 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AttributeContentToStringTest {
 
     @Test
-    void v2ContentNamesItsReferenceButNotItsData() {
+    void v2ContentNamesItsTypeButNotItsReferenceOrData() {
         String text = new StringAttributeContentV2("activation code", "4711-0815").toString();
 
-        assertTrue(text.contains("activation code"));
+        assertTrue(text.contains("StringAttributeContentV2"));
+        assertFalse(text.contains("activation code"));
         assertFalse(text.contains("4711-0815"));
     }
 
     @Test
-    void v3ContentNamesItsReferenceButNotItsData() {
+    void v2ContentBuiltFromItsDataAloneDoesNotPrintIt() {
+        String text = new StringAttributeContentV2("4711-0815").toString();
+
+        assertTrue(text.contains("StringAttributeContentV2"));
+        assertFalse(text.contains("4711-0815"));
+    }
+
+    @Test
+    void v3ContentNamesItsTypeButNotItsReferenceOrData() {
         String text = new StringAttributeContentV3("activation code", "4711-0815").toString();
 
-        assertTrue(text.contains("activation code"));
+        assertTrue(text.contains("StringAttributeContentV3"));
+        assertFalse(text.contains("activation code"));
         assertFalse(text.contains("4711-0815"));
     }
 
     @Test
-    void secretContentNamesItsReferenceButNotItsSecret() {
+    void v3ContentBuiltFromItsDataAloneDoesNotPrintIt() {
+        String text = new StringAttributeContentV3("4711-0815").toString();
+
+        assertTrue(text.contains("StringAttributeContentV3"));
+        assertFalse(text.contains("4711-0815"));
+    }
+
+    @Test
+    void secretContentNamesItsTypeButNotItsSecret() {
         String text = new SecretAttributeContentV2("pin", new SecretAttributeContentData("4711-0815")).toString();
 
-        assertTrue(text.contains("pin"));
+        assertTrue(text.contains("SecretAttributeContentV2"));
         assertFalse(text.contains("4711-0815"));
     }
 }
