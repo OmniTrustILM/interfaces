@@ -60,6 +60,10 @@ public class CertificateDetailDto extends CertificateDto {
     @Schema(description = "Key Pair of the certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyDto key;
 
+    @Schema(description = "Whether the certificate can be downloaded with its private key as PKCS#12",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean keystoreAvailable;
+
     @Schema(description = "Alternative Key Pair of the certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyDto altKey;
 

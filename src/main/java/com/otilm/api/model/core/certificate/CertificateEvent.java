@@ -26,7 +26,8 @@ public enum CertificateEvent {
     DISCOVERY("Certificate Discovered"),
     UPDATE_LOCATION("Update Location"),
     ARCHIVE("Archive certificate"),
-    UNARCHIVE("Unarchive certificate");
+    UNARCHIVE("Unarchive certificate"),
+    DOWNLOAD_KEYSTORE("Download Keystore");
 
     @Schema(description = "Certificate Event", examples = {"Issue Certificate"},
             requiredMode = Schema.RequiredMode.REQUIRED)
