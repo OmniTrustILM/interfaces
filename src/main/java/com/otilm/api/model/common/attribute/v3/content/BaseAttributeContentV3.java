@@ -81,4 +81,10 @@ public class BaseAttributeContentV3<T extends Serializable> extends AttributeCon
         return Objects.hash(reference, data);
     }
 
+    /** Names the content by its reference and type, never its data, which can be a secret. */
+    @Override
+    public String toString() {
+        return "%s[reference=%s, contentType=%s]".formatted(getClass().getSimpleName(), reference, getContentType());
+    }
+
 }

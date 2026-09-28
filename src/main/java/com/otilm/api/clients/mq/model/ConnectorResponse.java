@@ -29,12 +29,15 @@ public class ConnectorResponse implements Serializable {
     @Schema(description = "HTTP response headers from the connector")
     private Map<String, String> headers;
 
+    @ToString.Exclude
     @Schema(description = "Response body as JSON object (if Content-Type is application/json)")
     private Object body;
 
+    @ToString.Exclude
     @Schema(description = "Base64-encoded response body for non-JSON content types")
     private String bodyText;
 
+    @ToString.Exclude
     @Schema(description = "Error message if request failed (empty on success)")
     private String error;
 
