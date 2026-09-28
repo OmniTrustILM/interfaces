@@ -1,6 +1,7 @@
 package com.otilm.api.model.client.signing.protocols.tsp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +26,7 @@ public class TspBasicCredentialUpdateRequestDto {
     @Schema(description = "Basic password (write-only). Blank keeps the existing secret and a value rotates it; "
             + "a value is also required when the username changes.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Sensitive
     private String password;
 
     @NotNull

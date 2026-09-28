@@ -7,6 +7,7 @@ import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.KeyFormat;
 import com.otilm.api.model.common.enums.cryptography.KeyType;
 import com.otilm.api.model.core.compliance.ComplianceStatus;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,7 @@ public class KeyItemDetailDto extends NameAndUuidDto {
 
     @ToString.Exclude
     @Schema(description = "Key Data", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Sensitive
     private String keyData;
 
     @Schema(description = "Key Length", requiredMode = Schema.RequiredMode.REQUIRED)

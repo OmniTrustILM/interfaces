@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.validator.constraints.URL;
 
 @Data
@@ -20,6 +21,7 @@ public class OAuth2ProviderSettingsUpdateDto implements Serializable {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String clientId;
 
+    @ToString.Exclude
     @Sensitive
     @Schema(description = "The client secret used by the client application to authenticate with the authorization server.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
