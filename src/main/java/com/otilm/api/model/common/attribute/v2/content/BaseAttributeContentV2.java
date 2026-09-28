@@ -66,10 +66,10 @@ public class BaseAttributeContentV2<T extends Serializable> extends AttributeCon
         return null;
     }
 
-    /** Names the content by its type only: its data can be a secret, and a reference can repeat the data. */
+    /** Names the content by its class only: its data can be a secret, and a reference can repeat the data. */
     @Override
     public String toString() {
-        return "%s[contentType=%s]".formatted(getClass().getSimpleName(), getContentType());
+        return getClass().getSimpleName();
     }
 
 }

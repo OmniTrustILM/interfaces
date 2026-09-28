@@ -6,26 +6,21 @@ import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AttributeContentToStringTest {
 
     @Test
-    void v2ContentNamesItsTypeButNotItsReferenceOrData() {
-        String text = new StringAttributeContentV2("activation code", "4711-0815").toString();
-
-        assertTrue(text.contains("StringAttributeContentV2"));
-        assertFalse(text.contains("activation code"));
-        assertFalse(text.contains("4711-0815"));
+    void v2ContentPrintsOnlyItsClass() {
+        assertEquals("StringAttributeContentV2",
+                new StringAttributeContentV2("activation code", "4711-0815").toString());
     }
 
     @Test
     void v2ContentBuiltFromItsDataAloneDoesNotPrintIt() {
-        String text = new StringAttributeContentV2("4711-0815").toString();
-
-        assertTrue(text.contains("StringAttributeContentV2"));
-        assertFalse(text.contains("4711-0815"));
+        assertEquals("StringAttributeContentV2", new StringAttributeContentV2("4711-0815").toString());
     }
 
     @Test
@@ -46,10 +41,8 @@ class AttributeContentToStringTest {
     }
 
     @Test
-    void secretContentNamesItsTypeButNotItsSecret() {
-        String text = new SecretAttributeContentV2("pin", new SecretAttributeContentData("4711-0815")).toString();
-
-        assertTrue(text.contains("SecretAttributeContentV2"));
-        assertFalse(text.contains("4711-0815"));
+    void secretContentPrintsOnlyItsClass() {
+        assertEquals("SecretAttributeContentV2",
+                new SecretAttributeContentV2("pin", new SecretAttributeContentData("4711-0815")).toString());
     }
 }
