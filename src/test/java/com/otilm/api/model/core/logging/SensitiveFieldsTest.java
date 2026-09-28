@@ -8,6 +8,7 @@ import com.otilm.api.model.client.scep.BaseScepProfileRequestDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialCreateRequestDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialUpdateRequestDto;
 import com.otilm.api.model.common.attribute.common.content.data.FileAttributeContentData;
+import com.otilm.api.model.common.events.data.CertificateRegisteredEventData;
 import com.otilm.api.model.connector.cryptography.v2.key.ExportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.secrets.content.ApiKeySecretContent;
@@ -70,6 +71,7 @@ class SensitiveFieldsTest {
                         Arguments.of(ClientCertificateRekeyRequestDto.class, "authorizationSecret"),
                         Arguments.of(ClientCertificateRegistrationDto.class, "authorizationSecret"),
                         Arguments.of(ClientCertificateRenewRequestDto.class, "authorizationSecret"),
+                        Arguments.of(CertificateRegisteredEventData.class, "credential"),
                         Arguments.of(AcmeEabKeyDto.class, "key"),
                         Arguments.of(BaseEndEntityRequestDto.class, "password"),
                         Arguments.of(ClientBaseEndEntityRequestDto.class, "password"));
