@@ -5,9 +5,11 @@ import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Provider;
+import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +22,13 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyGenerationParameters;
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyPairGenerator;
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumParameters;
+import org.bouncycastle.pqc.crypto.util.SubjectPublicKeyInfoFactory;
+import org.bouncycastle.pqc.legacy.sphincsplus.SPHINCSPlusKeyGenerationParameters;
+import org.bouncycastle.pqc.legacy.sphincsplus.SPHINCSPlusKeyPairGenerator;
+import org.bouncycastle.pqc.legacy.sphincsplus.SPHINCSPlusParameters;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -376,8 +385,30 @@ class KeyDataValidationTest {
     }
 
     private static byte[] generateSpki(String algorithm) throws Exception {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm, BOUNCY_CASTLE);
-        return generator.generateKeyPair().getPublic().getEncoded();
+        return switch (algorithm) {
+            case "DILITHIUM2" -> generateDilithium2Spki();
+            case "SPHINCS+-SHA2-128F" -> generateSphincsPlusSha2128fSpki();
+            default ->
+                KeyPairGenerator.getInstance(algorithm, BOUNCY_CASTLE).generateKeyPair().getPublic().getEncoded();
+        };
+    }
+
+    // Bouncy Castle 1.85 dropped the JCA names for pre-standard Dilithium and SPHINCS+; its lightweight
+    // generators still produce their keys.
+    private static byte[] generateDilithium2Spki() throws IOException {
+        DilithiumKeyPairGenerator generator = new DilithiumKeyPairGenerator();
+        generator.init(new DilithiumKeyGenerationParameters(new SecureRandom(), DilithiumParameters.dilithium2));
+        return SubjectPublicKeyInfoFactory
+                .createSubjectPublicKeyInfo(generator.generateKeyPair().getPublic())
+                .getEncoded();
+    }
+
+    private static byte[] generateSphincsPlusSha2128fSpki() throws IOException {
+        SPHINCSPlusKeyPairGenerator generator = new SPHINCSPlusKeyPairGenerator();
+        generator.init(new SPHINCSPlusKeyGenerationParameters(new SecureRandom(), SPHINCSPlusParameters.sha2_128f));
+        return SubjectPublicKeyInfoFactory
+                .createSubjectPublicKeyInfo(generator.generateKeyPair().getPublic())
+                .getEncoded();
     }
 
     private static KeyDataV2Dto copyOf(KeyDataV2Dto source) {
