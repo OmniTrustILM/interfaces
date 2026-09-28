@@ -18,6 +18,7 @@ import com.otilm.api.model.core.cryptography.tokenprofile.TokenProfileDetailDto;
 import com.otilm.api.model.core.cryptography.tokenprofile.TokenProfileDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -38,16 +39,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping("/v1")
 @Tag(name = "Token Profile Management", description = "Token Profile Management API")
 
 public interface TokenProfileController extends AuthProtectedController {
-    @Operation(summary = "List of available Token Profiles")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Token Profiles retrieved")})
+    @Operation(summary = "List of available Token Profiles",
+            description = "With importable, lists only the token profiles whose provider imports every given key"
+                    + " type and algorithm, as far as the platform has recorded. A profile whose provider declares key"
+                    + " import but whose answer is not recorded yet is listed; the import then checks it.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token Profiles retrieved"),
+            @ApiResponse(responseCode = "422",
+                    description = "An importable value is not a key request type and an" + " algorithm",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/tokenProfiles", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<TokenProfileDto> listTokenProfiles(Optional<Boolean> enabled);
+    List<TokenProfileDto> listTokenProfiles(Optional<Boolean> enabled, @Parameter(
+            description = "A key request type and an algorithm the token profile must import, as"
+                    + " `type:algorithm` codes such as `keyPair:RSA`. Repeat the parameter per pair.",
+            explode = Explode.TRUE) @RequestParam(name = "importable", required = false) List<String> importable);
 
     @Operation(summary = "List Token Profile Attributes")
     @ApiResponses(value = {

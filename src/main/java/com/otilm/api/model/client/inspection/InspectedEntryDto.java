@@ -32,6 +32,10 @@ public class InspectedEntryDto {
     @Schema(description = "What this entry turned out to be", requiredMode = Schema.RequiredMode.REQUIRED)
     private InspectedEntryKind kind;
 
+    @Schema(description = "The name the file gives the entry, such as a keystore alias or a PKCS#12 friendly name",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String alias;
+
     @Schema(description = "Subject distinguished name of the entry's certificate",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
