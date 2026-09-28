@@ -34,6 +34,7 @@ public class KeyItemDetailDto extends NameAndUuidDto {
     @Schema(description = "Key Format", requiredMode = Schema.RequiredMode.REQUIRED)
     private KeyFormat format;
 
+    @ToString.Exclude
     @Schema(description = "Key Data", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String keyData;
 

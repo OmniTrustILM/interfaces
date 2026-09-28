@@ -15,6 +15,7 @@ import lombok.ToString;
 public class EprkiKeyValue extends KeyValue {
 
     @Schema(description = "Base64 ASN.1 encoded EncryptedPrivateKeyInfo", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ToString.Exclude
     private String value;
 
 }

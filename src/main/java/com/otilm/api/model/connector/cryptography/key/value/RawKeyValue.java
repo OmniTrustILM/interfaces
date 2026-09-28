@@ -15,6 +15,7 @@ import lombok.ToString;
 public class RawKeyValue extends KeyValue {
 
     @Schema(description = "Base64 raw value of the Key", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ToString.Exclude
     private String value;
 
 }
