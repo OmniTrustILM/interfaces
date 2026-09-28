@@ -3,6 +3,7 @@ package com.otilm.api.model.core.v2;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.util.UUID;
@@ -78,6 +79,7 @@ public class ClientCertificateRekeyRequestDto {
     @Schema(description = "One-time authorization secret for rekeying a certificate that has an active "
             + "registration. Write-only; ignored for certificates without one.",
             accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Sensitive
     private String authorizationSecret;
 
     // Deliberate allowlist — avoid leaking CSR/request or secrets via logs.

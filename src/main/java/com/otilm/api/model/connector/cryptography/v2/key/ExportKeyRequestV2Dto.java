@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.cryptography.v2.key;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -61,5 +62,6 @@ public class ExportKeyRequestV2Dto extends KeyScopedRequestV2Dto {
             is platform policy, applied before the request is sent.
             """, requiredMode = Schema.RequiredMode.REQUIRED, accessMode = Schema.AccessMode.WRITE_ONLY)
     @NotBlank(message = "passphrase is required")
+    @Sensitive
     private String passphrase;
 }

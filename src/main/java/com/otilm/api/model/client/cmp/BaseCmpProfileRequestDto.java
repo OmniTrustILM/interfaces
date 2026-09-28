@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.cmp.validation.ValidUuid;
 import com.otilm.api.model.core.cmp.ProtectionMethod;
+import com.otilm.api.model.core.logging.Sensitive;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,6 +47,7 @@ public class BaseCmpProfileRequestDto {
     @Schema(description = "Shared secret for the CMP Request, used when Protection Method is Shared Secret. "
             + "Required when creating a CMP Profile. When editing, a blank or omitted value keeps the "
             + "existing shared secret; a value is required if no shared secret is stored yet.")
+    @Sensitive
     private String sharedSecret;
 
     @ValidUuid

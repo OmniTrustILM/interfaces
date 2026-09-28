@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.secrets.content;
 
 import com.otilm.api.model.connector.secrets.SecretType;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class KeyValueSecretContent extends SecretContent {
     @ToString.Exclude
     @Schema(description = "Key-Value pairs stored as the secret content, represented by JSON object",
             requiredMode = Schema.RequiredMode.REQUIRED)
+    @Sensitive
     private Map<String, Object> content;
 
     public KeyValueSecretContent() {

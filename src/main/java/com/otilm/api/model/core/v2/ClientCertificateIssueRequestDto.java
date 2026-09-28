@@ -3,6 +3,7 @@ package com.otilm.api.model.core.v2;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.util.UUID;
@@ -72,6 +73,7 @@ public class ClientCertificateIssueRequestDto {
     @Schema(description = "One-time authorization secret proving the caller may complete a pre-registered "
             + "certificate. Write-only; ignored for certificates without an active registration.",
             accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Sensitive
     private String authorizationSecret;
 
     // Deliberate allowlist — only non-sensitive fields. Never append request (the CSR) or authorizationSecret.
