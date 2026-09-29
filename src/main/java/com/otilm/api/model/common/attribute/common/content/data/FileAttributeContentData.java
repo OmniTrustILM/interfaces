@@ -2,6 +2,7 @@ package com.otilm.api.model.common.attribute.common.content.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otilm.api.exception.ValidationException;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import org.springframework.util.MimeType;
 public class FileAttributeContentData implements AttributeContentData {
 
     @Schema(description = "File content", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Sensitive
     private String content;
 
     @Schema(description = "Name of the file", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -44,10 +46,12 @@ public class FileAttributeContentData implements AttributeContentData {
         return Objects.hash(content, fileName);
     }
 
+    // Never append the raw content — only its length (or "none"), so a credential or connector-auth keystore
+    // never reaches a log line through this toString().
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("content", content)
+                .append("content", content == null ? "none" : content.length())
                 .append("fileName", fileName)
                 .append("mimeType", mimeType)
                 .toString();

@@ -42,6 +42,7 @@ public class ConnectorRequest implements Serializable {
             + "Variables in path like {uuid} will be replaced with values from this map")
     private Map<String, String> pathVariables;
 
+    @ToString.Exclude
     @Schema(description = "Additional HTTP headers to include in the request")
     private Map<String, String> headers;
 

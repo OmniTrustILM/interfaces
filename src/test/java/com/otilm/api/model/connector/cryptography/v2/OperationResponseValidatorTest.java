@@ -1096,7 +1096,7 @@ class OperationResponseValidatorTest {
         OperationValidationResult result = VALIDATOR.keyTransfer().validateExportedKeyDescriptor(expected, response);
 
         // then
-        assertInvalid(result, "Connector exported a key of length 2048; expected 3072");
+        assertInvalid(result, "Connector exported a key of length 256; expected 3072");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.otilm.api.model.client.signing.protocols.tsp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ public class TspBasicCredentialCreateRequestDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(description = "Basic password (write-only). Required on create.",
             requiredMode = Schema.RequiredMode.REQUIRED, accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Sensitive
     private String password;
 
     @NotNull

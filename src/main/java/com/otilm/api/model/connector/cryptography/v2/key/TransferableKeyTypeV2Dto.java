@@ -54,7 +54,7 @@ public abstract class TransferableKeyTypeV2Dto {
 
     /**
      * A declaration is what the platform decides from, so it must not pair a key type with an algorithm that cannot
-     * produce it. Only key-pair algorithms exist today, which is why no secret key type can be declared yet.
+     * produce it: a secret key type is declared with secret-key algorithms, a key pair type with key-pair algorithms.
      *
      * @return whether every declared algorithm can produce the declared key type
      */

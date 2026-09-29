@@ -5,6 +5,7 @@ import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMaterialV2Dto;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -98,6 +99,7 @@ public class ImportKeyRequestV2Dto extends TokenProfileScopedRequestV2Dto {
             user-supplied password, and the connector must discard it once the material is decrypted.
             """, requiredMode = Schema.RequiredMode.REQUIRED, accessMode = Schema.AccessMode.WRITE_ONLY)
     @NotBlank(message = "passphrase is required")
+    @Sensitive
     private String passphrase;
 
     @Schema(description = """

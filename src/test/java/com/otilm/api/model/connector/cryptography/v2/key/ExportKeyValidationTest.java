@@ -353,12 +353,36 @@ class ExportKeyValidationTest {
                 "algorithms must be able to produce the declared keyRequestType");
     }
 
-    /**
-     * Every algorithm the platform names produces a key pair, so no secret key type can be declared until a secret-key
-     * algorithm exists. The rule is written against that classification rather than against today's list.
-     */
     @Test
-    void noSecretKeyTypeCanBeDeclaredWhileEveryAlgorithmProducesAKeyPair() {
+    void exportableKeyType_acceptsASecretKeyTypeDeclaredWithASecretKeyAlgorithm() {
+        // given
+        ExportableKeyTypeV2Dto exportableKeyType = validExportableKeyType();
+        exportableKeyType.setKeyRequestType(KeyRequestType.SECRET);
+        exportableKeyType.setAlgorithms(Set.of(KeyAlgorithm.AES));
+
+        // when
+        Set<ConstraintViolation<ExportableKeyTypeV2Dto>> violations = VALIDATOR.validate(exportableKeyType);
+
+        // then
+        assertNoViolations(violations);
+    }
+
+    @Test
+    void exportableKeyType_rejectsASecretKeyAlgorithmDeclaredForAKeyPairType() {
+        // given
+        ExportableKeyTypeV2Dto exportableKeyType = validExportableKeyType();
+        exportableKeyType.setAlgorithms(Set.of(KeyAlgorithm.AES));
+
+        // when
+        Set<ConstraintViolation<ExportableKeyTypeV2Dto>> violations = VALIDATOR.validate(exportableKeyType);
+
+        // then
+        assertHasViolation(violations, "algorithmsMatchingKeyType",
+                "algorithms must be able to produce the declared keyRequestType");
+    }
+
+    @Test
+    void onlyAesIsClassifiedAsASecretKeyAlgorithm() {
         // given
         // when
         long secretAlgorithms = Arrays
@@ -368,8 +392,7 @@ class ExportKeyValidationTest {
                 .count();
 
         // then
-        assertEquals(0, secretAlgorithms,
-                "when a secret-key algorithm is added, a secret key type becomes declarable with no rule change");
+        assertEquals(1, secretAlgorithms, "AES is the only secret-key algorithm the platform names");
     }
 
     @Test

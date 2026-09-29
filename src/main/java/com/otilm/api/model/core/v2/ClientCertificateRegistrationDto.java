@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.connector.v3.certificate.CertificateExtension;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -102,6 +103,7 @@ public class ClientCertificateRegistrationDto {
             + "into challenge-gated issuance; the platform never generates one. Challenge verification "
             + "gates issue of this pre-registered certificate, and renew and rekey of it once issued.",
             accessMode = Schema.AccessMode.WRITE_ONLY, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Sensitive
     private String authorizationSecret;
 
     @Future
