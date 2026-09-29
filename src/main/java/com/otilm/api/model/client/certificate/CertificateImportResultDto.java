@@ -1,5 +1,6 @@
 package com.otilm.api.model.client.certificate;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.client.inspection.InspectedEntryKind;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -26,12 +27,23 @@ public class CertificateImportResultDto {
     @Schema(description = "What the entry turned out to be", requiredMode = Schema.RequiredMode.REQUIRED)
     private InspectedEntryKind kind;
 
-    @Schema(description = "Whether this entry was imported", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Whether the entry's objects are in the inventory after the call",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean imported;
+
+    @Schema(description = "What became of the certificate, when the entry carried one",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ImportOutcome certificateOutcome;
 
     @Schema(description = "UUID of the certificate the entry produced, when it carried one",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String certificateUuid;
+
+    @Schema(description = "What became of the key, when the entry carried key material",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ImportOutcome keyOutcome;
 
     @Schema(description = "UUID of the key the entry produced, when it carried key material",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
