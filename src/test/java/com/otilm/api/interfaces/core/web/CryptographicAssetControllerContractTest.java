@@ -6,6 +6,7 @@ import com.otilm.api.model.common.PaginationResponseDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetDetailDto;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetDto;
+import com.otilm.api.model.core.cryptoasset.CryptographicAssetPqcExplanationDto;
 import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -98,6 +99,37 @@ class CryptographicAssetControllerContractTest {
         assertNotNull(detail.getParameters()[0].getAnnotation(PathVariable.class), "uuid must be a path variable");
         assertTrue(Arrays.asList(detail.getExceptionTypes()).contains(NotFoundException.class),
                 "detail must declare NotFoundException");
+    }
+
+    @Test
+    void theExplanationIsAGetByUuid() {
+        Method explanation = method("getCryptographicAssetPqcExplanation");
+        GetMapping mapping = explanation.getAnnotation(GetMapping.class);
+        assertNotNull(mapping, "explanation must be a GET");
+        assertArrayEquals(new String[]{"/{uuid}/pqcExplanation"}, mapping.path());
+        assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, mapping.produces());
+
+        Operation operation = explanation.getAnnotation(Operation.class);
+        assertNotNull(operation, "missing @Operation");
+        assertEquals("getCryptographicAssetPqcExplanation", operation.operationId());
+
+        assertEquals(CryptographicAssetPqcExplanationDto.class, explanation.getReturnType());
+        assertEquals(UUID.class, explanation.getParameters()[0].getType());
+        assertNotNull(explanation.getParameters()[0].getAnnotation(PathVariable.class), "uuid must be a path variable");
+        assertTrue(Arrays.asList(explanation.getExceptionTypes()).contains(NotFoundException.class),
+                "explanation must declare NotFoundException");
+    }
+
+    /**
+     * An operator reading an explanation needs to know the rules are not theirs to change, when a stored verdict is
+     * re-checked, and how to re-run the evaluation.
+     */
+    @Test
+    void theExplanationDocumentsHowVerdictsAreReEvaluated() {
+        String description = method("getCryptographicAssetPqcExplanation").getAnnotation(Operation.class).description();
+        assertTrue(description.contains("fixed by the platform"), "must say the rule set is fixed by the platform");
+        assertTrue(description.contains("hourly"), "must say stored verdicts are re-checked hourly");
+        assertTrue(description.contains("re-runs the evaluation on demand"), "must say how to re-run");
     }
 
     @Test

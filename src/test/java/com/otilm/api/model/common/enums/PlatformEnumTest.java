@@ -5,6 +5,7 @@ import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
 import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
+import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
@@ -78,6 +79,14 @@ class PlatformEnumTest {
         assertNotNull(entry);
         assertEquals(PqcVerdict.class, entry.getEnumClass());
         assertEquals("PqcVerdict", entry.getCode());
+    }
+
+    @Test
+    void pqcExplanationStepOutcomeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(PqcExplanationStepOutcome.class);
+        assertNotNull(entry);
+        assertEquals(PqcExplanationStepOutcome.class, entry.getEnumClass());
+        assertEquals("PqcExplanationStepOutcome", entry.getCode());
     }
 
     @Test

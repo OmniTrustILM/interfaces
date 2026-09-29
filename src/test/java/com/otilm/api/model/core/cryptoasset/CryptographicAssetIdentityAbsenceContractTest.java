@@ -62,6 +62,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
             .of(CryptographicAssetDto.class, CryptographicAssetDetailDto.class, CryptographicAssetVerdictDto.class,
                     CryptographicAssetNormalizedFieldsDto.class, CryptographicAssetSourceDto.class,
                     CryptographicAssetEvidenceDto.class, CryptographicAssetOidDto.class,
+                    CryptographicAssetPqcExplanationDto.class, PqcExplanationStepDto.class,
                     CryptographicAssetStatisticsDto.class, CryptographicAssetSyncCompletenessDto.class, CbomDto.class,
                     CbomSyncSkipDto.class);
 
@@ -98,6 +99,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
         List<String> problems = new ArrayList<>();
         sweepEnum(CryptographicAssetType.class, problems);
         sweepEnum(PqcVerdict.class, problems);
+        sweepEnum(PqcExplanationStepOutcome.class, problems);
         sweepEnum(CbomAssetSyncState.class, problems);
         sweepEnum(CbomSyncSkipState.class, problems);
         assertTrue(problems.isEmpty(), String.join("\n", problems));
