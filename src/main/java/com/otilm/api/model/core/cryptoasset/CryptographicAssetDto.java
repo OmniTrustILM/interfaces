@@ -8,7 +8,7 @@ import lombok.Data;
 /**
  * One row of the cross-CBOM cryptographic asset inventory. A row is a deduplicated asset, not a component: the same
  * algorithm found in many documents is one row, with the references counted on it. The two counts never contradict:
- * {@code sightingCount} is at least {@code sourceCbomCount}.
+ * {@code occurrenceCount} is at least {@code sourceCbomCount}.
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,15 +35,15 @@ public class CryptographicAssetDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private int sourceCbomCount;
 
-    @Schema(description = "Number of times the asset was sighted, summed over its source CBOMs. A source that recorded "
-            + "where it found the asset contributes one sighting per evidence.occurrences entry, counted in full, "
+    @Schema(description = "Number of occurrences of the asset, summed over its source CBOMs. A source that recorded "
+            + "where it found the asset contributes one occurrence per evidence.occurrences entry, counted in full, "
             + "including entries beyond the cap on the detail's per-source evidence list; a source that recorded no "
-            + "location contributes one sighting, the report itself. Never lower than sourceCbomCount, and 0 only when "
+            + "location counts as one occurrence, the report itself. Never lower than sourceCbomCount, and 0 only when "
             + "sourceCbomCount is 0. Related crypto material with no digest, value or identifier is keyed on its "
             + "occurrence entries (location, line and offset), so such a row stands for one set of entries and its "
-            + "sightings count how often sources reported them, not how many keys or locations exist",
+            + "occurrences count how often sources reported them, not how many keys or locations exist",
             requiredMode = Schema.RequiredMode.REQUIRED)
-    private long sightingCount;
+    private long occurrenceCount;
 
     @Schema(description = "True when sources make contradicting claims about this asset that are quarantined "
             + "pending reconciliation", requiredMode = Schema.RequiredMode.REQUIRED)
