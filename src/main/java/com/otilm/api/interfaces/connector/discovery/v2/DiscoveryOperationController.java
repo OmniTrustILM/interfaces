@@ -3,14 +3,12 @@ package com.otilm.api.interfaces.connector.discovery.v2;
 import com.otilm.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryDrainRequestDto;
-import com.otilm.api.model.connector.discovery.v2.DiscoveryEvent;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryResultsResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryRunRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStatusResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
-import com.otilm.api.model.connector.discovery.v2.DiscoveryStreamRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,11 +22,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import reactor.core.publisher.Flux;
 
 @RequestMapping("/v2/discoveryProvider/discoveries")
 @Tag(name = "Discovery Operations v2",
-        description = "Stateless discovery v2 run lifecycle: initiate a run, poll or stream its results, and "
+        description = "Stateless discovery v2 run lifecycle: initiate a run, poll its status and results, and "
                 + "control it (stop/resume/cancel).\n\n"
                 + "Every call replays the run's identity, resources, handle and attributes, so you need keep "
                 + "no state between calls: rebuild the run from the request, including after a restart. "
@@ -105,33 +102,6 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     @PostMapping(path = "/results", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     DiscoveryResultsResponseDto results(@Valid @RequestBody DiscoveryDrainRequestDto request);
-
-    @Operation(summary = "Stream discovery events",
-            description = "Opens a chunked application/x-ndjson response, one JSON event object per line, "
-                    + "replaying items with sequence greater than afterSequence and then continuing to emit "
-                    + "live events (progress, resultBatch, stateChanged, heartbeat, error) until the run "
-                    + "reaches a terminal state or the caller disconnects. Only one stream may be active per "
-                    + "run at a time: a new call to this endpoint for the same runId supersedes any prior "
-                    + "one, and the connector MUST close the earlier response as it begins serving the new "
-                    + "one. This endpoint is reached by direct HTTP only and never traverses the platform "
-                    + "proxy; a connector reachable only through the proxy MUST NOT advertise the "
-                    + "discoveryStreaming feature flag.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    description = "NDJSON event stream opened; the body is one flat JSON "
-                            + "DiscoveryEvent object per line, never a JSON array of events",
-                    content = @Content(mediaType = MediaType.APPLICATION_NDJSON_VALUE,
-                            schema = @Schema(implementation = DiscoveryEvent.class))),
-            @ApiResponse(responseCode = "404",
-                    description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
-    @PostMapping(path = "/stream", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_NDJSON_VALUE)
-    Flux<DiscoveryEvent> stream(@Valid @RequestBody DiscoveryStreamRequestDto request);
 
     @Operation(summary = "Stop a discovery run",
             description = "Halts scanning for an in-progress run. The connector returns a best-effort "

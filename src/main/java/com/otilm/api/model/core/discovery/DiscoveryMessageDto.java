@@ -18,9 +18,8 @@ import lombok.ToString;
  * usually what an operator is looking for.
  *
  * <p>
- * <b>Curated text only</b>, the same rule {@code DiscoveryErrorEvent} states for the connector side of the contract:
- * what a connector contributes to an entry here is {@code code}, from a closed vocabulary, never its own prose. The
- * constraint on {@code message} itself is on that field.
+ * <b>Curated text only</b>: an entry's text is the platform's, never a connector's own prose. The constraint on
+ * {@code message} itself is on that field.
  */
 // No class-level NON_NULL, unlike its siblings: every field here is REQUIRED, so there is no optional field for
 // it to hide and it could only turn a mapping bug that left one unset into a silently absent key.
@@ -39,10 +38,6 @@ public class DiscoveryMessageDto {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private DiscoveryMessageSeverity severity;
 
-    /**
-     * Connector-supplied for problems a Discovery Provider reported, matching {@code DiscoveryErrorEvent.code} and
-     * bounded to the same length; platform-assigned for the platform's own.
-     */
     @Schema(description = "Identifier for the kind of problem, from a closed vocabulary — what an operator or a "
             + "support engineer matches on. Entries are aggregated by code together with the message text, so "
             + "several entries in one run may share a code.", maxLength = 64,
