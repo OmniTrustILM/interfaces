@@ -21,8 +21,10 @@ public final class ConfigurableColumnsDocs {
             searchable-fields operation of this resource.
 
             `sort` orders the whole result set before it is paged, so paging walks the sorted set rather than sorting \
-            one page at a time; only fields the catalogue marks `sortable` may be used. `columns` names the fields the \
-            caller means to display, and only fields the catalogue marks `displayable` may be named. It does not \
+            one page at a time; only fields the catalogue marks `sortable` may be used. Objects without a value for \
+            the sorted field come last in both directions; a field holding several values sorts by its smallest value \
+            ascending and its largest descending. `columns` names the fields the caller means to display, and only \
+            fields the catalogue marks `displayable` may be named. It does not \
             narrow the response: every listing object comes back whole, and naming a property field asks for nothing \
             extra because the object already carries it. Naming an attribute-sourced field is what has an effect, \
             described below.
