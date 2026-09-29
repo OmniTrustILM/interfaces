@@ -1,16 +1,13 @@
 package com.otilm.api.interfaces.connector.discovery.v2;
 
 import com.otilm.api.model.connector.discovery.v2.DiscoveryDrainRequestDto;
-import com.otilm.api.model.connector.discovery.v2.DiscoveryEvent;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryResultsResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryRunRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStatusResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
-import com.otilm.api.model.connector.discovery.v2.DiscoveryStreamRequestDto;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -31,11 +28,6 @@ class DiscoveryOperationControllerCompileTest {
         @Override
         public DiscoveryResultsResponseDto results(DiscoveryDrainRequestDto request) {
             return new DiscoveryResultsResponseDto();
-        }
-
-        @Override
-        public Flux<DiscoveryEvent> stream(DiscoveryStreamRequestDto request) {
-            return Flux.empty();
         }
 
         @Override

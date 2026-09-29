@@ -12,9 +12,7 @@ import lombok.ToString;
 
 /**
  * Run-level progress: how far through its own work the connector is, plus what that work has yielded per resource.
- * Carried by the {@code progress} field of {@link DiscoveryStatusResponseDto} (polled) and, through the
- * {@code type}-carrying subclass {@link com.otilm.api.model.connector.discovery.v2.event.DiscoveryProgressEvent}, by
- * the flat {@code progress} stream event (pushed).
+ * Carried by the {@code progress} field of {@link DiscoveryStatusResponseDto}.
  *
  * <p>
  * Work and yield are separate quantities: only work gives a completion ratio, and yield is well defined only per
@@ -22,8 +20,7 @@ import lombok.ToString;
  *
  * <p>
  * Nesting stops here: {@code byResource} holds the leaf type, never this one. A self-referential progress type makes
- * swagger-core truncate the component, dropping {@code byResource}, when the graph is entered through
- * {@link DiscoveryEvent}.
+ * swagger-core truncate the component on some entry paths, dropping {@code byResource}.
  */
 @Getter
 @Setter
