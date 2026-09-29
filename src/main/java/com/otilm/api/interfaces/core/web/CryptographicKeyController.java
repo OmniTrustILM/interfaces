@@ -237,11 +237,16 @@ public interface CryptographicKeyController extends AuthProtectedController {
             re-protects the material before it reaches the provider, so neither the file nor that passphrase is ever
             forwarded.
 
+            A key the platform already holds in full, in any token profile, is answered as it is and nothing is
+            imported; a caller who may not see that key in detail is refused with "The key already exists." A public key
+            held on its own takes the imported private key: its record keeps its name, owner, groups and custom
+            attributes, and importing into it needs permission to update it.
+
             Certificates found alongside a key are not imported here. Use the certificate import operation for a file
             that carries both.
             """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Key imported"),
+            @ApiResponse(responseCode = "201", description = "The imported key, or the key already held"),
             @ApiResponse(responseCode = "404", description = "Token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
