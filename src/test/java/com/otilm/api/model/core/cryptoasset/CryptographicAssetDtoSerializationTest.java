@@ -111,6 +111,20 @@ class CryptographicAssetDtoSerializationTest {
     }
 
     @Test
+    void aSourceWithoutLocationsStillSerializesItsZeroOccurrenceCount() throws Exception {
+        CryptographicAssetSourceDto source = new CryptographicAssetSourceDto();
+        source.setCbomUuid(UUID.fromString("00000000-0000-4000-8000-000000002299"));
+        source.setSerialNumber("urn:uuid:11111111-2222-3333-4444-555555555555");
+        source.setVersion(1);
+        source.setEvidence(List.of());
+
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(source));
+
+        Assertions.assertTrue(json.has("occurrenceCount"), "a zero occurrence count is served, not omitted");
+        Assertions.assertEquals(0, json.get("occurrenceCount").asLong());
+    }
+
+    @Test
     void absentOptionalMembersAreOmittedFromJson() throws Exception {
         CryptographicAssetVerdictDto verdict = new CryptographicAssetVerdictDto();
         verdict.setRuleSetVersion(2);
