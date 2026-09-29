@@ -53,23 +53,27 @@ public class ScheduledJobDto {
     @Schema(description = "When the scheduler will next fire the job: the fire time the scheduler holds for the "
             + "job's trigger, computed by the scheduler from the trigger's own schedule, not projected from the "
             + "stored CRON expression. Absent while the schedule state is 'paused', 'notScheduled' or 'unknown', "
-            + "and when the trigger has no further fire time. While the state is 'scheduled', a value in the past "
-            + "means the scheduler is not firing.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "and when the trigger has no further fire time. While the state is 'scheduled', either of two signs "
+            + "means the scheduler is not firing: this value is in the past, or previousFireTime is older than one "
+            + "period of the schedule. Check both: a scheduler that is alive but stuck keeps moving this value to "
+            + "about now, so it may be only seconds in the past.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant nextFireTime;
 
     @Schema(description = "When the scheduler last fired the job, as the scheduler service reported it. Absent "
             + "when the schedule state is 'unknown' or 'notScheduled' and until the trigger has fired once. A "
-            + "firing newer than both lastExecutionStartTime and lastSkippedAt has not reached the platform.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "firing newer than both lastExecutionStartTime and lastSkippedAt, which the platform stamps after the "
+            + "firing it acts on, has not reached the platform.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant previousFireTime;
 
-    @Schema(description = "When the last recorded run of the job started; absent while the job has no run in its "
-            + "history.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "When the last recorded run of the job started, by the platform's own clock as it began "
+            + "the run, after the scheduler fired it; absent while the job has no run in its history.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant lastExecutionStartTime;
 
     @Schema(description = "When the job last ran and declined the run -- nothing to do, or a condition it could not "
-            + "proceed under. A declined run leaves no history row; this is what shows the job is alive. Absent "
-            + "until the job has declined a run.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "proceed under -- by the platform's own clock as it recorded the skip, after the scheduler fired the "
+            + "run. A declined run leaves no history row; this is what shows the job is alive. Absent until the job "
+            + "has declined a run.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant lastSkippedAt;
 
     @Schema(description = "Why the run at lastSkippedAt was declined, in the task's own words; absent with it.",
