@@ -26,6 +26,8 @@ class CryptographicAssetPqcExplanationContractTest {
 
     private static final UUID KEY_UUID = UUID.fromString("d3adbeef-0000-4000-8000-000000002360");
 
+    private static final UUID SIGNATURE_UUID = UUID.fromString("d3adbeef-0000-4000-8000-000000002362");
+
     private static final OffsetDateTime EXPLAINED_AT = OffsetDateTime.of(2026, 9, 29, 12, 0, 0, 0, ZoneOffset.UTC);
 
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
@@ -62,8 +64,9 @@ class CryptographicAssetPqcExplanationContractTest {
         JsonNode steps = mapper.readTree(json).get("steps");
         assertEquals("notMatched", steps.get(0).get("outcome").asText());
         assertEquals("resolved", steps.get(1).get("outcome").asText());
-        assertEquals(KEY_UUID.toString(), steps.get(1).get("referencedAsset").get("uuid").asText());
-        assertEquals("ml-kem", steps.get(1).get("referencedAsset").get("name").asText());
+        assertEquals(SIGNATURE_UUID.toString(), steps.get(1).get("referencedAsset").get("uuid").asText());
+        assertEquals("sha256withrsa", steps.get(1).get("referencedAsset").get("name").asText());
+        assertEquals("algorithm", steps.get(1).get("referencedAsset").get("type").asText());
         assertTrue(steps.get(1).get("referencedAsset").get("visible").asBoolean());
         assertEquals("notReached", steps.get(2).get("outcome").asText());
     }
@@ -174,7 +177,7 @@ class CryptographicAssetPqcExplanationContractTest {
                 PqcExplanationStepOutcome.RESOLVED, "The certificate is signed with a weaker algorithm");
         resolved.setVerdict(PqcVerdict.NOT_READY);
         resolved.setEvaluatedFields(Map.of("assetType", "certificate", "signatureAlgorithmRef", "alg-sig"));
-        resolved.setReferencedAsset(referencedKey());
+        resolved.setReferencedAsset(referencedSignatureAlgorithm());
 
         PqcExplanationStepDto notReached = step("CERT-REFERENCE-UNRESOLVED", "Unresolved certificate reference",
                 PqcExplanationStepOutcome.NOT_REACHED, "Not evaluated: an earlier rule decided");
@@ -190,6 +193,16 @@ class CryptographicAssetPqcExplanationContractTest {
         explanation.setSteps(List.of(notMatched, resolved, notReached, catchAll));
         explanation.setExplainedAt(EXPLAINED_AT);
         return explanation;
+    }
+
+    /** What a resolved signature-algorithm step carries: the algorithm asset whose verdict it took. */
+    private static PqcReferencedAssetDto referencedSignatureAlgorithm() {
+        PqcReferencedAssetDto algorithm = new PqcReferencedAssetDto();
+        algorithm.setUuid(SIGNATURE_UUID);
+        algorithm.setVisible(true);
+        algorithm.setName("sha256withrsa");
+        algorithm.setType(CryptographicAssetType.ALGORITHM);
+        return algorithm;
     }
 
     private static PqcReferencedAssetDto referencedKey() {

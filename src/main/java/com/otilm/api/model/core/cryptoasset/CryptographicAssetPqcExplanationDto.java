@@ -15,7 +15,8 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "A PQC verdict recomputed from the asset as stored, rule by rule; nothing is written back. "
-        + "storedVerdict, storedRuleId and storedEvaluatedAt are absent when the asset has not been evaluated yet. When "
+        + "storedVerdict, storedRuleId and storedEvaluatedAt are absent when the asset has not been evaluated yet, and "
+        + "storedRuleId also for a stored verdict no rule decided. When "
         + "the rule set cannot evaluate the asset, verdict is unknown, ruleId is EVALUATION-FAILED, inputs is empty and "
         + "steps holds one failed step")
 public class CryptographicAssetPqcExplanationDto {
@@ -59,8 +60,8 @@ public class CryptographicAssetPqcExplanationDto {
     @Schema(description = "The verdict stored on the asset", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PqcVerdict storedVerdict;
 
-    @Schema(description = "The rule that decided the stored verdict; absent when the asset has not been evaluated yet",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "The rule that decided the stored verdict; absent when the asset has not been evaluated "
+            + "yet, or when no rule decided it", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String storedRuleId;
 
     @Schema(description = "When the stored verdict was last evaluated; absent when the asset has not been evaluated "
