@@ -9,6 +9,7 @@ import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
+import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -103,5 +104,13 @@ class PlatformEnumTest {
         assertNotNull(entry);
         assertEquals(CbomSyncSkipState.class, entry.getEnumClass());
         assertEquals("CbomSyncSkipState", entry.getCode());
+    }
+
+    @Test
+    void scheduledJobScheduleStateIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(ScheduledJobScheduleState.class);
+        assertEquals(PlatformEnum.SCHEDULED_JOB_SCHEDULE_STATE, entry);
+        assertEquals(ScheduledJobScheduleState.class, entry.getEnumClass());
+        assertEquals("ScheduledJobScheduleState", entry.getCode());
     }
 }
