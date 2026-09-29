@@ -24,8 +24,10 @@ public class CryptographicAssetSourceDto {
     @Schema(description = "Version of the source CBOM", requiredMode = Schema.RequiredMode.REQUIRED)
     private int version;
 
-    @Schema(description = "Number of occurrences this source recorded for the asset, counted before the served "
-            + "evidence list is capped", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Number of evidence.occurrences entries this source recorded for the asset, counted before "
+            + "the served evidence list is capped. 0 when the source did not record where it found the asset; the "
+            + "source still counts as one occurrence of the asset on the row",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private long occurrenceCount;
 
     @Schema(description = "Tool or scan that produced the source CBOM (e.g.: CBOM-Lens); absent when the document's "
