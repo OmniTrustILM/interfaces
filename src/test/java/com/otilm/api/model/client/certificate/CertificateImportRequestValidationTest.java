@@ -22,9 +22,10 @@ class CertificateImportRequestValidationTest {
     private static final String TOKEN_PROFILE = "8f1c2d3e-4a5b-46c7-88d9-0e1f2a3b4c5d";
 
     @Test
-    void hasNoViolations_whenEachEntryIsNamedOnce() {
+    void hasNoViolations_whenEachEntryIsNamedOnceAndIdentifiedOnce() {
         // given
-        CertificateImportRequestDto request = request(entry("fingerprint-a"), entry("fingerprint-b"));
+        CertificateImportRequestDto request = request(entry("fingerprint-a", "import-a"),
+                entry("fingerprint-b", "import-b"));
 
         // when
         Set<ConstraintViolation<CertificateImportRequestDto>> violations = VALIDATOR.validate(request);
@@ -36,7 +37,7 @@ class CertificateImportRequestValidationTest {
     @Test
     void requiresTheFile() {
         // given
-        CertificateImportRequestDto request = request(entry("fingerprint-a"));
+        CertificateImportRequestDto request = request(entry("fingerprint-a", "import-a"));
         request.setFile(null);
 
         // when
@@ -59,7 +60,7 @@ class CertificateImportRequestValidationTest {
     }
 
     @Test
-    void requiresAReferenceOnEveryEntry() {
+    void requiresAnIdentifierAndAReferenceOnEveryEntry() {
         // given
         CertificateImportRequestDto request = request(new CertificateImportEntryDto());
 
@@ -68,27 +69,15 @@ class CertificateImportRequestValidationTest {
 
         // then
         assertHasViolation(violations, "entries[0].entryReference", "entryReference is required");
-    }
-
-    /** Retry safety comes from the entry's own content, so nothing else needs a caller-minted identifier. */
-    @Test
-    void validatesWithoutAnImportId() {
-        // given
-        CertificateImportEntryDto entry = new CertificateImportEntryDto();
-        entry.setEntryReference("fingerprint-a");
-
-        // when
-        Set<ConstraintViolation<CertificateImportEntryDto>> violations = VALIDATOR.validate(entry);
-
-        // then
-        assertNoViolations(violations);
+        assertHasViolation(violations, "entries[0].importId", "importId is required");
     }
 
     /** Naming one entry twice would import it twice, or leave which of the two applies undefined. */
     @Test
     void refusesTheSameEntryNamedTwice() {
         // given
-        CertificateImportRequestDto request = request(entry("fingerprint-a"), entry("fingerprint-a"));
+        CertificateImportRequestDto request = request(entry("fingerprint-a", "import-a"),
+                entry("fingerprint-a", "import-b"));
 
         // when
         Set<ConstraintViolation<CertificateImportRequestDto>> violations = VALIDATOR.validate(request);
@@ -97,10 +86,24 @@ class CertificateImportRequestValidationTest {
         assertHasViolation(violations, "eachEntryNamedOnce", "entries must not name the same entryReference twice");
     }
 
+    /** Two entries sharing an identifier would make one of them look like a replay of the other. */
+    @Test
+    void refusesTwoEntriesSharingAnIdentifier() {
+        // given
+        CertificateImportRequestDto request = request(entry("fingerprint-a", "import-a"),
+                entry("fingerprint-b", "import-a"));
+
+        // when
+        Set<ConstraintViolation<CertificateImportRequestDto>> violations = VALIDATOR.validate(request);
+
+        // then
+        assertHasViolation(violations, "eachImportIdentifiedOnce", "entries must not share an importId");
+    }
+
     @Test
     void requiresATokenProfileOnADestinationThatIsGiven() {
         // given
-        CertificateImportEntryDto entry = entry("fingerprint-a");
+        CertificateImportEntryDto entry = entry("fingerprint-a", "import-a");
         entry.setKeyDestination(new CertificateEntryKeyDestinationDto());
         CertificateImportRequestDto request = request(entry);
 
@@ -118,9 +121,10 @@ class CertificateImportRequestValidationTest {
         return request;
     }
 
-    private static CertificateImportEntryDto entry(String entryReference) {
+    private static CertificateImportEntryDto entry(String entryReference, String importId) {
         CertificateImportEntryDto entry = new CertificateImportEntryDto();
         entry.setEntryReference(entryReference);
+        entry.setImportId(importId);
         CertificateEntryKeyDestinationDto destination = new CertificateEntryKeyDestinationDto();
         destination.setTokenProfileUuid(TOKEN_PROFILE);
         entry.setKeyDestination(destination);
