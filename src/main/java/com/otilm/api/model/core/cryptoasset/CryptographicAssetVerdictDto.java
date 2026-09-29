@@ -25,9 +25,15 @@ public class CryptographicAssetVerdictDto {
     private String reason;
 
     @Schema(description = "Values of the asset fields the deciding rule evaluated, recorded at decision time "
-            + "and as stored, so assetType may be unroutable for an asset served with no type",
+            + "and as stored, so assetType may be unroutable for an asset served with no type."
+            + " Values are strings, numbers, booleans or lists of strings, never nested objects",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, Object> evaluatedFields;
+
+    @Schema(description = "The inventory asset whose own verdict decided this one. Present only when the deciding rule "
+            + "carried a verdict over from an asset this one refers to; absent when the asset's own properties "
+            + "decided, or when the reference could not be resolved", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private PqcReferencedAssetDto referencedAsset;
 
     @Schema(description = "When the current verdict value was decided", requiredMode = Schema.RequiredMode.REQUIRED)
     private OffsetDateTime decidedAt;

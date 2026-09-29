@@ -32,7 +32,8 @@ public class CryptographicAssetPqcExplanationDto {
     private String reason;
 
     @Schema(description = "Values of the asset properties the rules read, as derived from the stored asset. A property "
-            + "the asset does not have is omitted; key material and internal deduplication keys are never served",
+            + "the asset does not have is omitted; key material and internal deduplication keys are never served."
+            + " Values are strings, numbers, booleans or lists of strings, never nested objects",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> inputs;
 

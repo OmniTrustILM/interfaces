@@ -62,7 +62,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
             .of(CryptographicAssetDto.class, CryptographicAssetDetailDto.class, CryptographicAssetVerdictDto.class,
                     CryptographicAssetNormalizedFieldsDto.class, CryptographicAssetSourceDto.class,
                     CryptographicAssetEvidenceDto.class, CryptographicAssetOidDto.class,
-                    CryptographicAssetPqcExplanationDto.class, PqcExplanationStepDto.class,
+                    CryptographicAssetPqcExplanationDto.class, PqcExplanationStepDto.class, PqcReferencedAssetDto.class,
                     CryptographicAssetStatisticsDto.class, CryptographicAssetSyncCompletenessDto.class, CbomDto.class,
                     CbomSyncSkipDto.class);
 

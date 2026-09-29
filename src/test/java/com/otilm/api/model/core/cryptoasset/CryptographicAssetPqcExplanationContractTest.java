@@ -43,9 +43,9 @@ class CryptographicAssetPqcExplanationContractTest {
     }
 
     @Test
-    void aStepRequiresItsRuleOutcomeAndMessageOnly() {
+    void aStepRequiresItsRuleTitleOutcomeAndMessageOnly() {
         List<String> required = requiredOf(PqcExplanationStepDto.class);
-        assertEquals(List.of("message", "outcome", "ruleId"), required.stream().sorted().toList());
+        assertEquals(List.of("message", "outcome", "ruleId", "title"), required.stream().sorted().toList());
     }
 
     @Test
@@ -62,7 +62,8 @@ class CryptographicAssetPqcExplanationContractTest {
         JsonNode steps = mapper.readTree(json).get("steps");
         assertEquals("notMatched", steps.get(0).get("outcome").asText());
         assertEquals("resolved", steps.get(1).get("outcome").asText());
-        assertEquals(KEY_UUID.toString(), steps.get(1).get("referencedAssetUuid").asText());
+        assertEquals(KEY_UUID.toString(), steps.get(1).get("referencedAsset").get("uuid").asText());
+        assertEquals("ml-kem", steps.get(1).get("referencedAsset").get("name").asText());
         assertEquals("notReached", steps.get(2).get("outcome").asText());
     }
 
@@ -82,22 +83,52 @@ class CryptographicAssetPqcExplanationContractTest {
 
         assertFalse(notReached.has("verdict"), "a step that was not reached yields no verdict");
         assertFalse(notReached.has("evaluatedFields"), "a step that was not reached read nothing");
-        assertFalse(notReached.has("referencedAssetUuid"), "a step that was not reached refers to nothing");
+        assertFalse(notReached.has("referencedAsset"), "a step that was not reached refers to nothing");
+    }
+
+    @Test
+    void aReferencedAssetOutOfSightServesItsUuidAlone() throws Exception {
+        PqcReferencedAssetDto hidden = new PqcReferencedAssetDto();
+        hidden.setUuid(KEY_UUID);
+
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(hidden));
+
+        assertEquals(KEY_UUID.toString(), json.get("uuid").asText());
+        assertFalse(json.has("name"), "a referenced asset the reader cannot see omits its name, not null");
+        assertFalse(json.has("type"), "a referenced asset the reader cannot see omits its type, not null");
+        assertEquals(List.of("uuid"), requiredOf(PqcReferencedAssetDto.class));
+    }
+
+    @Test
+    void theStoredVerdictCarriesTheReferencedAssetOptionally() throws Exception {
+        assertFalse(requiredOf(CryptographicAssetVerdictDto.class).contains("referencedAsset"),
+                "absent when the asset's own properties decided");
+
+        CryptographicAssetVerdictDto verdict = new CryptographicAssetVerdictDto();
+        verdict.setRuleId("CERT-SUBJECT-KEY");
+        verdict.setReferencedAsset(referencedKey());
+        verdict.setDecidedAt(EXPLAINED_AT);
+        verdict.setEvaluatedAt(EXPLAINED_AT);
+
+        String json = mapper.writeValueAsString(verdict);
+
+        assertEquals(verdict, mapper.readValue(json, CryptographicAssetVerdictDto.class));
+        assertEquals(KEY_UUID.toString(), mapper.readTree(json).get("referencedAsset").get("uuid").asText());
     }
 
     private static CryptographicAssetPqcExplanationDto sampleExplanation() {
-        PqcExplanationStepDto notMatched = step("PROTOCOL-CIPHER-SUITE", PqcExplanationStepOutcome.NOT_MATCHED,
-                "The asset is not a protocol");
+        PqcExplanationStepDto notMatched = step("PROTOCOL-CIPHER-SUITE", "Cipher suites",
+                PqcExplanationStepOutcome.NOT_MATCHED, "The asset is not a protocol");
         notMatched.setEvaluatedFields(Map.of("assetType", "certificate"));
 
-        PqcExplanationStepDto resolved = step("CERT-SUBJECT-KEY", PqcExplanationStepOutcome.RESOLVED,
+        PqcExplanationStepDto resolved = step("CERT-SUBJECT-KEY", "Certified key", PqcExplanationStepOutcome.RESOLVED,
                 "The certified key is not PQC ready");
         resolved.setVerdict(PqcVerdict.NOT_READY);
         resolved.setEvaluatedFields(Map.of("assetType", "certificate"));
-        resolved.setReferencedAssetUuid(KEY_UUID);
+        resolved.setReferencedAsset(referencedKey());
 
-        PqcExplanationStepDto notReached = step("CERT-NO-KEY-RECORDED", PqcExplanationStepOutcome.NOT_REACHED,
-                "An earlier rule decided");
+        PqcExplanationStepDto notReached = step("CERT-NO-KEY-RECORDED", "No certified key",
+                PqcExplanationStepOutcome.NOT_REACHED, "An earlier rule decided");
 
         CryptographicAssetPqcExplanationDto explanation = new CryptographicAssetPqcExplanationDto();
         explanation.setUuid(ASSET_UUID);
@@ -110,9 +141,19 @@ class CryptographicAssetPqcExplanationContractTest {
         return explanation;
     }
 
-    private static PqcExplanationStepDto step(String ruleId, PqcExplanationStepOutcome outcome, String message) {
+    private static PqcReferencedAssetDto referencedKey() {
+        PqcReferencedAssetDto key = new PqcReferencedAssetDto();
+        key.setUuid(KEY_UUID);
+        key.setName("ml-kem");
+        key.setType(CryptographicAssetType.RELATED_CRYPTO_MATERIAL);
+        return key;
+    }
+
+    private static PqcExplanationStepDto step(String ruleId, String title, PqcExplanationStepOutcome outcome,
+            String message) {
         PqcExplanationStepDto step = new PqcExplanationStepDto();
         step.setRuleId(ruleId);
+        step.setTitle(title);
         step.setOutcome(outcome);
         step.setMessage(message);
         return step;

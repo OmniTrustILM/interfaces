@@ -3,7 +3,6 @@ package com.otilm.api.model.core.cryptoasset;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
-import java.util.UUID;
 import lombok.Data;
 
 /**
@@ -17,6 +16,11 @@ public class PqcExplanationStepDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String ruleId;
 
+    @Schema(description = "What the rule checks, in a few words for display beside the rule id, such as \"Certified "
+            + "key\" or \"Symmetric key size\". The same for every asset that walks the rule",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String title;
+
     @Schema(description = "What the rule did for this asset", requiredMode = Schema.RequiredMode.REQUIRED)
     private PqcExplanationStepOutcome outcome;
 
@@ -28,11 +32,11 @@ public class PqcExplanationStepDto {
     private String message;
 
     @Schema(description = "Values of the asset properties this rule read, a subset of the explanation's inputs; "
-            + "absent on a step that was not reached", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "absent on a step that was not reached. Values are strings, numbers, booleans or lists of strings, never nested objects",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, Object> evaluatedFields;
 
-    @Schema(description = "On a resolved step, the inventory asset whose own verdict this rule carried over, such as "
-            + "the key a certificate certifies or the weakest algorithm a protocol's cipher suites name",
+    @Schema(description = "On a resolved step, the inventory asset whose own verdict this rule carried over",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private UUID referencedAssetUuid;
+    private PqcReferencedAssetDto referencedAsset;
 }
