@@ -237,16 +237,17 @@ public interface CryptographicKeyController extends AuthProtectedController {
             re-protects the material before it reaches the provider, so neither the file nor that passphrase is ever
             forwarded.
 
-            A key the platform already holds in full, in any token profile, is answered as it is and nothing is
-            imported; a caller who may not see that key in detail is refused with "The key already exists." A public key
-            held on its own takes the imported private key: its record keeps its name, owner, groups and custom
-            attributes, and importing into it needs permission to update it.
+            A key the platform already holds in full, in any token profile, is answered with 200 as it is, and nothing
+            is imported; a caller who may not see that key in detail is refused with "The key already exists." A
+            public key held on its own takes the imported private key: its record keeps its name, owner, groups and
+            custom attributes, and importing into it needs permission to update it.
 
             Certificates found alongside a key are not imported here. Use the certificate import operation for a file
             that carries both.
             """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "The imported key, or the key already held"),
+            @ApiResponse(responseCode = "201", description = "Key imported"),
+            @ApiResponse(responseCode = "200", description = "The key already held, with nothing imported"),
             @ApiResponse(responseCode = "404", description = "Token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
@@ -254,8 +255,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/keys/{type}/import",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    KeyDetailDto importKey(
+    ResponseEntity<KeyDetailDto> importKey(
             @Parameter(description = "UUID of the Token Instance") @PathVariable String tokenInstanceUuid,
             @Parameter(description = "UUID of the Token Profile") @PathVariable String tokenProfileUuid,
             @Parameter(description = "Type of the key to be imported") @PathVariable KeyRequestType type,
