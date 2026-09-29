@@ -89,10 +89,16 @@ class ConfigurableColumnsDocTest {
      * than through {@code FilterField}. It therefore carries neither the ordering-and-columns wording nor the
      * catalogue-flags wording. Naming it here is what keeps the guard able to notice the next second listing, which may
      * well not be exempt.
+     *
+     * <p>
+     * The assets a CBOM contributed are the cryptographic asset inventory listing scoped to one document, and that
+     * listing is outside this contract for the same reason on its own controller: no asset field is a column, ordering
+     * is fixed, and the field catalogue it filters by is the inventory's, published elsewhere.
      */
     private static final List<Endpoint> OUTSIDE_THE_CONTRACT = List
             .of(new Endpoint(CbomController.class, "listSyncSkips"),
-                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"));
+                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"),
+                    new Endpoint(CbomController.class, "listCbomAssets"));
 
     /** The listing objects that carry the projected attribute values. */
     private static final List<Class<?>> PROJECTION_CARRIERS = List
