@@ -39,7 +39,7 @@ public class CryptographicAssetDto {
             + "where it found the asset contributes one sighting per evidence.occurrences entry, counted in full, "
             + "including entries beyond the cap on the detail's per-source evidence list; a source that recorded no "
             + "location contributes one sighting, the report itself. Never lower than sourceCbomCount, and 0 only when "
-            + "sourceCbomCount is 0. Related crypto material with no fingerprint, value or identifier is keyed on its "
+            + "sourceCbomCount is 0. Related crypto material with no digest, value or identifier is keyed on its "
             + "occurrence entries (location, line and offset), so such a row stands for one set of entries and its "
             + "sightings count how often sources reported them, not how many keys or locations exist",
             requiredMode = Schema.RequiredMode.REQUIRED)
