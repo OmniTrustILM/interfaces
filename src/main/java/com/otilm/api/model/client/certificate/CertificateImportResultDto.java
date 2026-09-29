@@ -36,7 +36,7 @@ public class CertificateImportResultDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ImportOutcome certificateOutcome;
 
-    @Schema(description = "UUID of the certificate the entry produced, when it carried one",
+    @Schema(description = "UUID of the entry's certificate, withheld when the caller may not see it in detail",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String certificateUuid;
 
@@ -45,8 +45,8 @@ public class CertificateImportResultDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ImportOutcome keyOutcome;
 
-    @Schema(description = "UUID of the key the entry produced, when it carried key material",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "UUID of the entry's key, withheld for a key already in the inventory that the caller "
+            + "may not see in detail", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String keyUuid;
 
     @Schema(description = "Why this entry was not imported, when it was not",

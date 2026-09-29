@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -189,16 +189,21 @@ class KeyTransferWebContractTest {
     }
 
     /**
-     * An operation that documents 201 but leaves the status to the implementation answers 200 the moment an
-     * implementation forgets to set it, and generated clients that check for 201 then fail against a correct import.
+     * An import answers 201 and a key the platform already holds 200, so the implementation sets the status per answer
+     * and the contract documents both: a generated client accepts either.
      */
     @Test
-    void keyImportAnswersCreated() {
+    void keyImportAnswersCreatedOrAlreadyHeld() {
         Method importKey = method(CryptographicKeyController.class, "importKey");
-        ResponseStatus status = importKey.getAnnotation(ResponseStatus.class);
+        List<String> documented = Arrays
+                .stream(importKey.getAnnotation(ApiResponses.class).value())
+                .map(ApiResponse::responseCode)
+                .toList();
 
-        assertNotNull(status, "the contract must set the status it documents");
-        assertEquals(HttpStatus.CREATED, status.value());
+        assertEquals(ResponseEntity.class, importKey.getReturnType(), "the implementation sets the status per answer");
+        assertFalse(importKey.isAnnotationPresent(ResponseStatus.class),
+                "a fixed status would hide a key already held");
+        assertTrue(documented.containsAll(List.of("200", "201")), () -> "documented: " + documented);
     }
 
     /**
