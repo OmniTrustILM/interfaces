@@ -8,6 +8,7 @@ import com.otilm.api.model.common.PaginationResponseDto;
 import com.otilm.api.model.core.cbom.CbomContributedAssetDto;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetDto;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
+import com.otilm.api.model.core.search.AttributeProjectable;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.models.media.Schema;
@@ -80,6 +81,8 @@ class CbomContributedAssetsContractTest {
         assertEquals(CbomContributedAssetDto.class, returnType.getActualTypeArguments()[0]);
         assertTrue(CryptographicAssetDto.class.isAssignableFrom(CbomContributedAssetDto.class),
                 "a row is an inventory row, so a client renders it with the inventory's row rendering");
+        assertTrue(AttributeProjectable.class.isAssignableFrom(CbomContributedAssetDto.class),
+                "a row carries the attribute values its requested columns project, as an inventory row does");
         // Only the member this class declares is asserted on its schema: swagger-core may publish the inherited
         // members inline or through an allOf reference, and the parent's own contract test already pins them.
         List<String> required = requiredOf(CbomContributedAssetDto.class);
@@ -90,7 +93,8 @@ class CbomContributedAssetsContractTest {
 
     /**
      * The scope and the ordering are contract: a client pages the list and Core implements both, so the sentences stay
-     * until the behaviour changes.
+     * until the behaviour changes. The shared ordering-and-columns wording speaks of this resource's searchable-fields
+     * operation, which under the CBOM group would read as the CBOM one, so the description names the inventory's.
      */
     @Test
     void theDescriptionStatesTheScopeTheRefsAndTheOrdering() {
@@ -99,8 +103,16 @@ class CbomContributedAssetsContractTest {
         assertFalse(op.summary().isBlank());
         assertTrue(op.description().contains("bomRefs"), "the description must name the refs member");
         assertTrue(op.description().contains("version"), "the description must say the list is scoped to one version");
-        assertTrue(op.description().contains("ordered by name ascending, then UUID ascending"),
-                "the description must document the default ordering");
+        assertTrue(op.description().contains("not this document's"),
+                "the description must say the row's counts are the inventory asset's totals");
+        assertTrue(op.description().contains("what has been stored for the record so far"),
+                "the description must say the list follows what the ingest has stored");
+        String defaultOrder = "When no sort is supplied, rows are ordered by name ascending, then UUID ascending";
+        assertTrue(op.description().contains(defaultOrder), "the description must document the default ordering");
+        assertTrue(op.description().contains("`GET /v1/cryptoAssets/search`"),
+                "the description must name the catalogue its filters, ordering and columns come from");
+        assertTrue(op.description().contains("`POST /v1/cryptoAssets`"),
+                "the description must name the inventory listing it behaves like");
         assertNoJargon("listCbomAssets", op.summary());
         assertNoJargon("listCbomAssets", op.description());
         assertLanguageNeutral("listCbomAssets", op.description());
@@ -118,6 +130,7 @@ class CbomContributedAssetsContractTest {
         assertTrue(json.get("bomRefs").isArray());
         assertEquals(0, json.get("bomRefs").size());
         assertFalse(json.has("name"), "the inherited absent-member rule still holds on the subclass");
+        assertFalse(json.has("attributeValues"), "a row projected for no attribute column carries no values member");
     }
 
     @Test

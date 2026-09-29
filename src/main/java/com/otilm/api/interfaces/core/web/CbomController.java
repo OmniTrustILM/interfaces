@@ -204,9 +204,14 @@ public interface CbomController extends AuthProtectedController {
                     caller needs detail access to the CBOM and list access to cryptographic assets, and an asset the \
                     caller may not list is left out.
 
-                    `filters` accepts the fields the cryptographic asset searchable-fields operation publishes. Rows are \
-                    ordered by name ascending, then UUID ascending; `sort` is not supported and is refused, and no field \
-                    is offered as a column, so `columns` is accepted and ignored.""")
+                    `filters`, `sort` and `columns` take the fields the cryptographic asset searchable-fields operation, \
+                    `GET /v1/cryptoAssets/search`, publishes, and behave exactly as on the inventory listing, \
+                    `POST /v1/cryptoAssets`; wherever the paragraphs that follow speak of the searchable-fields operation \
+                    of this resource, they mean that one. When no sort is supplied, rows are ordered by name ascending, \
+                    then UUID ascending, the name ordered on being the name the listing serves.
+
+                    """
+                    + ConfigurableColumnsDocs.SORT_AND_COLUMNS + ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The cryptographic assets this CBOM contributed"),
             @ApiResponse(responseCode = "404", description = "CBOM not found",
@@ -218,17 +223,26 @@ public interface CbomController extends AuthProtectedController {
             produces = {MediaType.APPLICATION_JSON_VALUE})
     PaginationResponseDto<CbomContributedAssetDto> listCbomAssets(
             @Parameter(description = "CBOM entry UUID") @PathVariable UUID uuid,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-                    schema = @Schema(implementation = SearchRequestDto.class),
-                    examples = {@ExampleObject(name = "Second page of the assets whose name contains aes", value = """
-                            {
-                              "pageNumber": 2,
-                              "itemsPerPage": 50,
-                              "filters": [
-                                {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_NAME",
-                                 "condition": "CONTAINS", "value": ["aes"]}
-                              ]
-                            }""")})) @Valid @RequestBody SearchRequestDto request)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = SearchRequestDto.class),
+                            examples = {
+                                    @ExampleObject(name = "Assets whose name contains aes, by readiness, with columns",
+                                            value = """
+                                                    {
+                                                      "pageNumber": 1,
+                                                      "itemsPerPage": 50,
+                                                      "filters": [
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_NAME",
+                                                         "condition": "CONTAINS", "value": ["aes"]}
+                                                      ],
+                                                      "sort": {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_PQC_VERDICT", "direction": "asc"},
+                                                      "columns": [
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_NAME"},
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_TYPE"},
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_PQC_VERDICT"},
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_SOURCE_COUNT"}
+                                                      ]
+                                                    }""")})) @Valid @RequestBody SearchRequestDto request)
             throws NotFoundException;
 
     @Operation(operationId = "getCbomSearchableFields", summary = "Get Cbom searchable fields information",
