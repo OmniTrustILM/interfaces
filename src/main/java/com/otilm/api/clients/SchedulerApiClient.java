@@ -113,10 +113,8 @@ public class SchedulerApiClient extends PlatformBaseApiClient {
 
     /** {@link #listScheduledJobs()}, giving up once the caller's own {@code timeout} passes. */
     public SchedulerResponseDto listScheduledJobs(final Duration timeout) {
-        // Relative to the client's base URL, which getServiceUrl() supplies; the absolute form the other methods
-        // build resolves to the same address.
         return prepareRequest(HttpMethod.GET)
-                .uri(SCHEDULER_LIST)
+                .uri(schedulerBaseUrl + SCHEDULER_LIST)
                 .retrieve()
                 .bodyToMono(SchedulerResponseDto.class)
                 .block(timeout);

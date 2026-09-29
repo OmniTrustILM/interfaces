@@ -7,6 +7,7 @@ import com.otilm.api.model.scheduler.SchedulerResponseDto;
 import com.otilm.api.model.scheduler.SchedulerStatus;
 import com.otilm.api.model.scheduler.SchedulerTriggerState;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.time.Duration;
 import java.time.Instant;
@@ -86,14 +87,9 @@ class SchedulerApiClientTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws ReflectiveOperationException {
         mockServer.resetAll();
-        client = new SchedulerApiClient() {
-            @Override
-            protected String getServiceUrl() {
-                return mockServer.baseUrl();
-            }
-        };
+        client = clientFor(mockServer.baseUrl());
     }
 
     @Test
@@ -110,6 +106,16 @@ class SchedulerApiClientTest {
         assertEquals(SchedulerTriggerState.NORMAL, job.getTriggerState());
         assertEquals(Instant.parse("2026-09-29T12:30:00Z"), job.getNextFireTime());
         assertEquals(Instant.parse("2026-09-29T11:30:00Z"), job.getPreviousFireTime());
+    }
+
+    /** A base URL that carries a path, such as a scheduler behind a reverse proxy, keeps that path. */
+    @Test
+    void listScheduledJobs_keepsThePathOfTheBaseUrl() throws ReflectiveOperationException {
+        mockServer.stubFor(get(urlPathEqualTo("/ctx" + LIST_PATH)).willReturn(okJson(LIST_JSON)));
+
+        SchedulerResponseDto response = clientFor(mockServer.baseUrl() + "/ctx").listScheduledJobs();
+
+        assertEquals("CryptoAssetPqcSweepTask", response.getSchedulerJobList().get(0).getJobName());
     }
 
     @Test
@@ -194,18 +200,25 @@ class SchedulerApiClientTest {
     }
 
     @Test
-    void listScheduledJobs_failsUncheckedWhenTheSchedulerCannotBeReached() throws IOException {
+    void listScheduledJobs_failsUncheckedWhenTheSchedulerCannotBeReached()
+            throws IOException, ReflectiveOperationException {
         int closedPort;
         try (ServerSocket socket = new ServerSocket(0)) {
             closedPort = socket.getLocalPort();
         }
-        SchedulerApiClient unreachable = new SchedulerApiClient() {
-            @Override
-            protected String getServiceUrl() {
-                return "http://localhost:" + closedPort;
-            }
-        };
+        SchedulerApiClient unreachable = clientFor("http://localhost:" + closedPort);
 
         assertThrows(WebClientRequestException.class, () -> unreachable.listScheduledJobs());
+    }
+
+    /**
+     * The client as Spring builds it: {@code scheduler.base-url} injected into the field the requests are built from.
+     */
+    private static SchedulerApiClient clientFor(String schedulerBaseUrl) throws ReflectiveOperationException {
+        SchedulerApiClient schedulerApiClient = new SchedulerApiClient();
+        Field baseUrl = SchedulerApiClient.class.getDeclaredField("schedulerBaseUrl");
+        baseUrl.setAccessible(true);
+        baseUrl.set(schedulerApiClient, schedulerBaseUrl);
+        return schedulerApiClient;
     }
 }
