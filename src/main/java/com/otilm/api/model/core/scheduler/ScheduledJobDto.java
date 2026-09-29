@@ -50,19 +50,20 @@ public class ScheduledJobDto {
             + "nextFireTime and previousFireTime are then absent.", requiredMode = Schema.RequiredMode.REQUIRED)
     private ScheduledJobScheduleState scheduleState;
 
-    @Schema(description = "When the scheduler will next fire the job: the fire time the scheduler holds for the "
-            + "job's trigger, computed by the scheduler from the trigger's own schedule, not projected from the "
-            + "stored CRON expression. Absent while the schedule state is 'paused', 'notScheduled' or 'unknown', "
-            + "and when the trigger has no further fire time. While the state is 'scheduled', either of two signs "
-            + "means the scheduler is not firing: this value is in the past, or previousFireTime is older than one "
-            + "period of the schedule. Check both: a scheduler that is alive but stuck keeps moving this value to "
-            + "about now, so it may be only seconds in the past.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "When the scheduler will next fire the job: the fire time it holds for the job's trigger, "
+            + "computed from the trigger's own schedule, not projected from the stored CRON expression. Absent "
+            + "while the schedule state is 'paused', 'error', 'notScheduled' or 'unknown', and when the trigger has "
+            + "no further fire time. While the state is 'scheduled', the scheduler is not firing if this value is "
+            + "in the past or previousFireTime is earlier than the last time the schedule should have fired before "
+            + "now. Check both: a scheduler that is alive but stuck keeps moving this value to about now.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant nextFireTime;
 
-    @Schema(description = "When the scheduler last fired the job, as the scheduler service reported it. Absent "
-            + "when the schedule state is 'unknown' or 'notScheduled' and until the trigger has fired once. A "
-            + "firing newer than both lastExecutionStartTime and lastSkippedAt, which the platform stamps after the "
-            + "firing it acts on, has not reached the platform.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "When the scheduler last fired the job, by the scheduler's clock. Absent while the "
+            + "schedule state is 'notScheduled' or 'unknown', and until the trigger has fired once. A firing newer "
+            + "than both lastExecutionStartTime and lastSkippedAt by more than the clock difference between the "
+            + "scheduler and the platform has not reached the platform, which stamps those after the firing it "
+            + "acts on.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant previousFireTime;
 
     @Schema(description = "When the last recorded run of the job started, by the platform's own clock as it began "
