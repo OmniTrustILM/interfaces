@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -90,21 +90,22 @@ class KeyTransferWebContractTest {
     }
 
     /**
-     * Retry safety is per entry because entries succeed and fail on their own: a repeated request has to be able to
-     * return what already succeeded and retry only what did not, which one identifier for the whole batch cannot
-     * express.
+     * Retry safety comes from the entry's own content, its {@code entryReference}, rather than a caller-minted
+     * identifier: repeating the same body is worked out again per entry and reports what it finds, so nothing needs
+     * inventing, tracking or fanning out from the request onto its entries.
      */
     @Test
-    void retrySafetyIsPerImportedEntry() throws Exception {
-        Field entryIdentifier = CertificateImportEntryDto.class.getDeclaredField("importId");
+    void retrySafetyComesFromTheEntrysOwnContent() throws Exception {
+        Field entryReference = CertificateImportEntryDto.class.getDeclaredField("entryReference");
 
-        assertTrue(isRequiredBySchema(entryIdentifier), "each imported entry must carry its own import identifier");
+        assertTrue(isRequiredBySchema(entryReference), "an entry's own content must be enough to identify it");
         assertFalse(
-                Arrays
-                        .stream(CertificateImportRequestDto.class.getDeclaredFields())
+                Stream
+                        .concat(Arrays.stream(CertificateImportRequestDto.class.getDeclaredFields()),
+                                Arrays.stream(CertificateImportEntryDto.class.getDeclaredFields()))
                         .filter(field -> !Modifier.isStatic(field.getModifiers()))
                         .anyMatch(field -> field.getName().toLowerCase(Locale.ROOT).contains("importid")),
-                "an identifier for the whole request would have to be fanned out to the entries anyway");
+                "neither the request nor its entries may carry a caller-minted import identifier");
     }
 
     /**
@@ -188,16 +189,21 @@ class KeyTransferWebContractTest {
     }
 
     /**
-     * An operation that documents 201 but leaves the status to the implementation answers 200 the moment an
-     * implementation forgets to set it, and generated clients that check for 201 then fail against a correct import.
+     * An import answers 201 and a key the platform already holds 200, so the implementation sets the status per answer
+     * and the contract documents both: a generated client accepts either.
      */
     @Test
-    void keyImportAnswersCreated() {
+    void keyImportAnswersCreatedOrAlreadyHeld() {
         Method importKey = method(CryptographicKeyController.class, "importKey");
-        ResponseStatus status = importKey.getAnnotation(ResponseStatus.class);
+        List<String> documented = Arrays
+                .stream(importKey.getAnnotation(ApiResponses.class).value())
+                .map(ApiResponse::responseCode)
+                .toList();
 
-        assertNotNull(status, "the contract must set the status it documents");
-        assertEquals(HttpStatus.CREATED, status.value());
+        assertEquals(ResponseEntity.class, importKey.getReturnType(), "the implementation sets the status per answer");
+        assertFalse(importKey.isAnnotationPresent(ResponseStatus.class),
+                "a fixed status would hide a key already held");
+        assertTrue(documented.containsAll(List.of("200", "201")), () -> "documented: " + documented);
     }
 
     /**
