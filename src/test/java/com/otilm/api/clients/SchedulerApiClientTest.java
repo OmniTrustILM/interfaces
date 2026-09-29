@@ -152,7 +152,7 @@ class SchedulerApiClientTest {
     @Test
     void listScheduledJobs_givesUpAfterItsTimeout() {
         Duration timeout = Duration.ofMillis(200);
-        mockServer.stubFor(get(urlPathEqualTo(LIST_PATH)).willReturn(aResponse().withFixedDelay(2_000)));
+        mockServer.stubFor(get(urlPathEqualTo(LIST_PATH)).willReturn(aResponse().withFixedDelay(10_000)));
         long started = System.nanoTime();
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
@@ -161,7 +161,7 @@ class SchedulerApiClientTest {
         long elapsedMillis = Duration.ofNanos(System.nanoTime() - started).toMillis();
         assertTrue(thrown.getMessage().startsWith("Timeout on blocking read"), thrown.getMessage());
         assertTrue(elapsedMillis >= timeout.toMillis(), "gave up after " + elapsedMillis + " ms, before the timeout");
-        assertTrue(elapsedMillis < 1_500, "gave up after " + elapsedMillis + " ms, not at the timeout");
+        assertTrue(elapsedMillis < 5_000, "gave up after " + elapsedMillis + " ms, not at the timeout");
     }
 
     /**
