@@ -13,7 +13,8 @@ import lombok.Data;
  *
  * <p>
  * Columns are stored as field identifiers and resolved against the live field catalogue when the view is read, so a
- * renamed or deleted attribute degrades to a column that is skipped rather than requiring stored views to be migrated.
+ * renamed or deleted attribute leaves a column the client marks unavailable, rather than requiring stored views to be
+ * migrated.
  */
 @Data
 public class ListViewDto {
@@ -28,8 +29,9 @@ public class ListViewDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Resource resource;
 
-    @Schema(description = "Columns of the view, in display order. Columns whose field is no longer in the resource's "
-            + "catalogue are omitted.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Columns of the view, in display order. A column whose field the resource no longer defines, "
+            + "such as a deleted attribute, is still returned, so a client can show it as unavailable and offer to "
+            + "remove it.", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ListViewColumnDto> columns;
 
     @Schema(description = "Whether this view applies when the listing is opened", defaultValue = "false",
