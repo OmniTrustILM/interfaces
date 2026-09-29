@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.EXPORT_PASSPHRASE;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyData;
@@ -142,9 +143,10 @@ class ExportKeyValidationTest {
     }
 
     @Test
-    void exportResponse_hasNoViolations_whenFullyPopulated() {
+    void exportResponse_hasNoViolations_whenFullyPopulated() throws Exception {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
+        response.setKeyData(validDistinctLengthKeyPairResponse(KeyAlgorithm.ECDSA).getPublicKeyData().getKeyData());
 
         // when
         Set<ConstraintViolation<ExportKeyResponseV2Dto>> violations = VALIDATOR.validate(response);
@@ -193,19 +195,19 @@ class ExportKeyValidationTest {
     }
 
     @Test
-    void exportResponse_rejectsPublicKeyThatContradictsItsOwnDescriptor() {
+    void exportResponse_cascadesPublicKeyAlgorithmConstraint() {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
         PublicKeyDataV2Dto publicKey = validPublicKeyData();
-        publicKey.setLength(4096);
+        publicKey.setAlgorithm(KeyAlgorithm.ECDSA);
         response.setKeyData(publicKey);
 
         // when
         Set<ConstraintViolation<ExportKeyResponseV2Dto>> violations = VALIDATOR.validate(response);
 
         // then
-        assertHasViolation(violations, "keyData.publicKeySpkiMatchingDeclaredLength",
-                "publicKeySpki does not match the declared key length");
+        assertHasViolation(violations, "keyData.publicKeySpkiMatchingDeclaredAlgorithm",
+                "publicKeySpki does not match the declared key algorithm");
     }
 
     @Test
@@ -351,12 +353,36 @@ class ExportKeyValidationTest {
                 "algorithms must be able to produce the declared keyRequestType");
     }
 
-    /**
-     * Every algorithm the platform names produces a key pair, so no secret key type can be declared until a secret-key
-     * algorithm exists. The rule is written against that classification rather than against today's list.
-     */
     @Test
-    void noSecretKeyTypeCanBeDeclaredWhileEveryAlgorithmProducesAKeyPair() {
+    void exportableKeyType_acceptsASecretKeyTypeDeclaredWithASecretKeyAlgorithm() {
+        // given
+        ExportableKeyTypeV2Dto exportableKeyType = validExportableKeyType();
+        exportableKeyType.setKeyRequestType(KeyRequestType.SECRET);
+        exportableKeyType.setAlgorithms(Set.of(KeyAlgorithm.AES));
+
+        // when
+        Set<ConstraintViolation<ExportableKeyTypeV2Dto>> violations = VALIDATOR.validate(exportableKeyType);
+
+        // then
+        assertNoViolations(violations);
+    }
+
+    @Test
+    void exportableKeyType_rejectsASecretKeyAlgorithmDeclaredForAKeyPairType() {
+        // given
+        ExportableKeyTypeV2Dto exportableKeyType = validExportableKeyType();
+        exportableKeyType.setAlgorithms(Set.of(KeyAlgorithm.AES));
+
+        // when
+        Set<ConstraintViolation<ExportableKeyTypeV2Dto>> violations = VALIDATOR.validate(exportableKeyType);
+
+        // then
+        assertHasViolation(violations, "algorithmsMatchingKeyType",
+                "algorithms must be able to produce the declared keyRequestType");
+    }
+
+    @Test
+    void onlyAesIsClassifiedAsASecretKeyAlgorithm() {
         // given
         // when
         long secretAlgorithms = Arrays
@@ -366,8 +392,7 @@ class ExportKeyValidationTest {
                 .count();
 
         // then
-        assertEquals(0, secretAlgorithms,
-                "when a secret-key algorithm is added, a secret key type becomes declarable with no rule change");
+        assertEquals(1, secretAlgorithms, "AES is the only secret-key algorithm the platform names");
     }
 
     @Test

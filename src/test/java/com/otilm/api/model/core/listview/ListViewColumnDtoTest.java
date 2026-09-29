@@ -66,13 +66,72 @@ class ListViewColumnDtoTest {
     }
 
     @Test
-    void rejectsABlankHeading() {
-        // given — a whitespace-only heading would pin a blank column title instead of falling back to the catalogue
-        var violations = VALIDATOR.validate(new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   "));
+    void acceptsAnEmptyHeading() {
+        // given — a column carrying only an icon is headed by nothing, which is a choice and not an absent override
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "");
+
+        // when
+        var violations = VALIDATOR.validate(dto);
 
         // then
-        assertEquals(1, violations.size());
-        assertEquals("label", violations.iterator().next().getPropertyPath().toString());
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void roundTripsAnEmptyHeading() throws Exception {
+        // given
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "");
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+
+        // then
+        assertTrue(json.contains("\"label\":\"\""));
+        assertEquals("", mapper.readValue(json, ListViewColumnDto.class).getLabel());
+    }
+
+    @Test
+    void preservesAWhitespaceOnlyHeading() throws Exception {
+        // given
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   ");
+
+        // when
+        var violations = VALIDATOR.validate(dto);
+        var back = mapper.readValue(mapper.writeValueAsString(dto), ListViewColumnDto.class);
+
+        // then
+        assertTrue(violations.isEmpty());
+        assertEquals("   ", back.getLabel());
+    }
+
+    @Test
+    void readsAnEmptyLabelFromAClientAsAPinnedBlankHeading() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department","label":""}""", ListViewColumnDto.class);
+
+        // then
+        assertEquals("", dto.getLabel());
+    }
+
+    @Test
+    void readsAnOmittedLabelFromAClientAsFollowingTheCatalogue() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department"}""", ListViewColumnDto.class);
+
+        // then
+        assertNull(dto.getLabel());
+    }
+
+    @Test
+    void readsAnExplicitNullLabelFromAClientAsFollowingTheCatalogue() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department","label":null}""", ListViewColumnDto.class);
+
+        // then
+        assertNull(dto.getLabel());
     }
 
     @Test

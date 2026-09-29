@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.otilm.api.model.common.attribute.v1.content.ZonedDateTimeDeserializer;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.ZonedDateTime;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class CertificateRegisteredEventData extends CertificateEventAuthorityDat
     // persist the event payload; core keeps the credential out of internal notifications and event-history.
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @Sensitive
     @Schema(description = "One-time credential the recipient presents to complete issuance on the public portal")
     private String credential;
 }

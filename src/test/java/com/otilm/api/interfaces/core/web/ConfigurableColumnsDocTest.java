@@ -126,6 +126,18 @@ class ConfigurableColumnsDocTest {
     }
 
     /**
+     * The rule covers any field holding several values: property fields reached through a collection, such as a
+     * certificate's groups, sort the same way as a multi-valued attribute.
+     */
+    @Test
+    void theSortContractSaysWhereValuelessRowsGoAndWhichValueOrdersAMultiValuedField() {
+        assertTrue(ConfigurableColumnsDocs.SORT_AND_COLUMNS.contains("last in both directions"));
+        assertTrue(ConfigurableColumnsDocs.SORT_AND_COLUMNS
+                .contains("a field holding several values sorts by its smallest value ascending"));
+        assertTrue(ConfigurableColumnsDocs.SORT_AND_COLUMNS.contains("largest descending"));
+    }
+
+    /**
      * A listing or a catalogue on one of these controllers is either in the contract or named as being out of it. The
      * guard reads the controllers themselves rather than this file's lists, so a second listing added later cannot
      * quietly fall outside every assertion above.

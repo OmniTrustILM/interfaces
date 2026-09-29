@@ -2,6 +2,7 @@ package com.otilm.api.model.core.scheduler;
 
 import com.otilm.api.model.scheduler.SchedulerJobExecutionStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,5 +38,14 @@ public class ScheduledJobDto {
 
     @Schema(description = "Execution status of last job triggered task", requiredMode = Schema.RequiredMode.REQUIRED)
     private SchedulerJobExecutionStatus lastExecutionStatus;
+
+    @Schema(description = "Time at which the job is next due to run, projected from its stored CRON expression -- "
+            + "not an observed value read back from the scheduler, so it does not confirm the scheduler still "
+            + "holds a live trigger for this job. Absent when the job is disabled, when it is a one-time job "
+            + "whose run has succeeded, or when its CRON expression yields no further run. Evaluated in core's "
+            + "JVM default timezone; assumes this matches the timezone the scheduler service had when the job's "
+            + "trigger was created -- if the two differ, this value can be off by the difference between them.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Instant nextFireTime;
 
 }

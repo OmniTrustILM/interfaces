@@ -16,8 +16,8 @@ import lombok.ToString;
 @Schema(name = "InspectionResponseDto", description = "Entries found in an uploaded file")
 public class InspectionResponseDto {
 
-    @Schema(description = "SHA-256 digest of the uploaded file, so a caller can tell two uploads apart and confirm "
-            + "the file it is about to import is the one it read", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The lowercase hex SHA-256 of the uploaded file, so a caller can tell two uploads apart and "
+            + "confirm the file it is about to import is the one it read", requiredMode = Schema.RequiredMode.REQUIRED)
     private String containerDigest;
 
     @Schema(description = "Entries found in the file", requiredMode = Schema.RequiredMode.REQUIRED)
