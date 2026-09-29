@@ -2,6 +2,7 @@ package com.otilm.api.model.client.scep;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
+import com.otilm.api.model.core.logging.Sensitive;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestDto;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,6 +43,7 @@ public class BaseScepProfileRequestDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(description = "Challenge Password for the SCEP Request (write-only).",
             accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Sensitive
     private String challengePassword;
 
     /**
@@ -82,6 +84,7 @@ public class BaseScepProfileRequestDto {
     @ToString.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(description = "Intune Application Key (write-only).", accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Sensitive
     private String intuneApplicationKey;
 
     @Valid

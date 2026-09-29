@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.acme;
 
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -9,6 +10,7 @@ import lombok.ToString;
         + "store it in a secret and register that secret's UUID on an ACME Profile to put the key into use.")
 public class AcmeEabKeyDto {
 
+    @Sensitive
     @ToString.Exclude
     @Schema(description = "Base64url-encoded HMAC key, 256 bits of randomness. This is the value an ACME client "
             + "MACs its External Account Binding with, and the value to store as the secret's content.",

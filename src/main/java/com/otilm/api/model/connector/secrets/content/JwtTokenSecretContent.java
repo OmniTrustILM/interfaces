@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.secrets.content;
 
 import com.otilm.api.model.connector.secrets.SecretType;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class JwtTokenSecretContent extends SecretContent {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED,
             description = "JWT Token content in compact (dot-separated) format specified in [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-3)",
             example = "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk")
+    @Sensitive
     private String content;
 
     public JwtTokenSecretContent() {

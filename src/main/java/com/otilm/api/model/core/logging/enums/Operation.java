@@ -41,6 +41,8 @@ public enum Operation implements IPlatformEnum {
     REKEY("rekey", "Rekey"),
     REVOKE("revoke", "Revoke"),
     EXPORT("export", "Export"),
+    IMPORT("import", "Import"),
+    INSPECT("inspect", "Inspect"),
     GET_STATUS("getStatus", "Get status"),
     GET_CONTENT("getContent", "Get content"),
     GET_CHAIN("getChain", "Get chain"),

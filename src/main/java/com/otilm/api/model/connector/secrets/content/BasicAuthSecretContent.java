@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.secrets.content;
 
 import com.otilm.api.model.connector.secrets.SecretType;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class BasicAuthSecretContent extends SecretContent {
     @NotBlank
     @ToString.Exclude
     @Schema(description = "Password for Basic Authentication", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Sensitive
     private String password;
 
     public BasicAuthSecretContent() {

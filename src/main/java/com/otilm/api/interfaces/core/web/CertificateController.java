@@ -25,7 +25,6 @@ import com.otilm.api.model.client.certificate.UploadCertificateRequestDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.core.certificate.CertificateChainDownloadResponseDto;
 import com.otilm.api.model.core.certificate.CertificateChainResponseDto;
 import com.otilm.api.model.core.certificate.CertificateContentDto;
@@ -189,25 +188,20 @@ public interface CertificateController extends AuthProtectedController {
             Each entry says where its own key material goes, because a file can hold entries of different key types
             and each key type has its own provider attribute schema.
 
-            Entries succeed or fail on their own and the response reports the outcome of each. Each entry carries its
-            own `importId`, so repeating a request returns what already succeeded and retries only what did not: a
-            caller recovering from a lost or partial response resends the same body and needs to work out nothing.
+            Entries succeed or fail on their own and the response reports the outcome of each. A caller recovering
+            from a lost or partial response resends the same body: each entry is worked out again and reports what it
+            found, its outcome.
             """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Selected entries imported"),
+            @ApiResponse(responseCode = "200", description = "The result of each selected entry"),
             @ApiResponse(responseCode = "404", description = "Token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "409",
-                    description = "`RESOURCE_ALREADY_EXISTS` — an entry's `importId` was reused for an import of "
-                            + "something else",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "422", description = """
-                    - `VALIDATION_FAILED` — the body is readable but breaks a field rule, such as a named entry the
-                      file does not carry, key material with nowhere to go, or two entries sharing an `importId`.
-                    """,
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+            @ApiResponse(responseCode = "422",
+                    description = "the file cannot be read, or the selection breaks a rule: an entry the file does "
+                            + "not hold, a certificate request, key material with nowhere to go or a destination for "
+                            + "an entry without key material, or a key with no name to take",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/import", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     CertificateImportResponseDto importCertificates(@RequestBody @Valid CertificateImportRequestDto request)
@@ -223,6 +217,8 @@ public interface CertificateController extends AuthProtectedController {
 
             It is a separate operation from the certificate content download, which serves certificates only. Only a
             key created or imported as exportable can be included.
+
+            keytool opens the file only when its passphrase is printable ASCII.
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Keystore downloaded",

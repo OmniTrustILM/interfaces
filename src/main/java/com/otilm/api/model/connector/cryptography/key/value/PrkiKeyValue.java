@@ -15,6 +15,7 @@ import lombok.ToString;
 public class PrkiKeyValue extends KeyValue {
 
     @Schema(description = "Base64 ASN.1 encoded PrivateKeyInfo", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ToString.Exclude
     private String value;
 
 }

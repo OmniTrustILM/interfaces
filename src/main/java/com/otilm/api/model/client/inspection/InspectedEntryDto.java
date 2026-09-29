@@ -21,14 +21,20 @@ public class InspectedEntryDto {
     @Schema(description = """
             Reference for this entry, used to select it when importing.
 
-            It is derived from the entry's own content — a certificate fingerprint, a public key fingerprint, or a
-            digest of the protected key — never from its position in the file, so a reference cannot come to mean a
-            different entry between inspecting and importing.
+            The lowercase hex SHA-256 of the entry's DER: of the certificate for a certificate, of the
+            `SubjectPublicKeyInfo` for a key pair or private key, of the key as the file holds it for a secret key or
+            a key of an algorithm the platform does not support, and of the request for a certificate request. It is
+            never derived from the entry's position in the file, so a reference cannot come to mean a different entry
+            between inspecting and importing.
             """, requiredMode = Schema.RequiredMode.REQUIRED)
     private String entryReference;
 
     @Schema(description = "What this entry turned out to be", requiredMode = Schema.RequiredMode.REQUIRED)
     private InspectedEntryKind kind;
+
+    @Schema(description = "The name the file gives the entry, such as a keystore alias or a PKCS#12 friendly name",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String alias;
 
     @Schema(description = "Subject distinguished name of the entry's certificate",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
