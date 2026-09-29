@@ -8,17 +8,13 @@ import lombok.Data;
 
 /**
  * Provenance of an asset's PQC verdict. The verdict value itself is the {@code pqcVerdict} carried on the asset row;
- * this block records which rule decided it, when, and from what, so a verdict can be re-examined when the rule set
- * moves on. Evaluation is first-match-wins, so the deciding rule is singular. A re-evaluation that leaves the verdict
- * unchanged advances {@code evaluatedAt} but not {@code decidedAt}.
+ * this block records which rule decided it, when, and from what, so a verdict can be re-examined. Evaluation is
+ * first-match-wins, so the deciding rule is singular. A re-evaluation that leaves the verdict unchanged advances
+ * {@code evaluatedAt} but not {@code decidedAt}.
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CryptographicAssetVerdictDto {
-
-    @Schema(description = "Version of the platform rule set that produced the verdict",
-            requiredMode = Schema.RequiredMode.REQUIRED)
-    private int ruleSetVersion;
 
     @Schema(description = "The rule that decided the verdict; absent when no rule matched and the verdict is the "
             + "rule set's default", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
