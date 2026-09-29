@@ -6,6 +6,7 @@ import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.core.cbom.CbomDto;
 import com.otilm.api.model.core.certificate.CertificateDto;
 import com.otilm.api.model.core.connector.v2.ConnectorDto;
+import com.otilm.api.model.core.cryptoasset.CryptographicAssetDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDto;
 import com.otilm.api.model.core.secret.SecretDto;
 import com.otilm.api.model.core.signing.signingrecord.SigningRecordListDto;
@@ -34,7 +35,8 @@ class AttributeProjectableTest {
                 .of(Named.of("certificates", CertificateDto::new), Named.of("keys", KeyItemDto::new),
                         Named.of("discoveries", DiscoveryListDto::new), Named.of("connectors", ConnectorDto::new),
                         Named.of("secrets", SecretDto::new), Named.of("cboms", CbomDto::new),
-                        Named.of("signingRecords", SigningRecordListDto::new));
+                        Named.of("signingRecords", SigningRecordListDto::new),
+                        Named.of("cryptographicAssets", CryptographicAssetDto::new));
     }
 
     @ParameterizedTest

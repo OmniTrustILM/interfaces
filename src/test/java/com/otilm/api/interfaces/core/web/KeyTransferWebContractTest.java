@@ -90,21 +90,22 @@ class KeyTransferWebContractTest {
     }
 
     /**
-     * Retry safety is per entry because entries succeed and fail on their own: a repeated request has to be able to
-     * return what already succeeded and retry only what did not, which one identifier for the whole batch cannot
-     * express.
+     * Retry safety comes from the entry's own content, its {@code entryReference}, rather than a caller-minted
+     * identifier: repeating the same body is worked out again per entry and reports what it finds, so nothing needs
+     * inventing, tracking or fanning out from the request onto its entries.
      */
     @Test
-    void retrySafetyIsPerImportedEntry() throws Exception {
-        Field entryIdentifier = CertificateImportEntryDto.class.getDeclaredField("importId");
+    void retrySafetyComesFromTheEntrysOwnContent() throws Exception {
+        Field entryReference = CertificateImportEntryDto.class.getDeclaredField("entryReference");
 
-        assertTrue(isRequiredBySchema(entryIdentifier), "each imported entry must carry its own import identifier");
+        assertTrue(isRequiredBySchema(entryReference), "an entry's own content must be enough to identify it");
         assertFalse(
-                Arrays
-                        .stream(CertificateImportRequestDto.class.getDeclaredFields())
+                Stream
+                        .concat(Arrays.stream(CertificateImportRequestDto.class.getDeclaredFields()),
+                                Arrays.stream(CertificateImportEntryDto.class.getDeclaredFields()))
                         .filter(field -> !Modifier.isStatic(field.getModifiers()))
                         .anyMatch(field -> field.getName().toLowerCase(Locale.ROOT).contains("importid")),
-                "an identifier for the whole request would have to be fanned out to the entries anyway");
+                "neither the request nor its entries may carry a caller-minted import identifier");
     }
 
     /**
