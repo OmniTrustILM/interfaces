@@ -62,6 +62,18 @@ public class CertificateImportRequestDto extends UploadRequestDto {
         return isDistinct(CertificateImportEntryDto::getEntryReference);
     }
 
+    /**
+     * Two entries sharing an identifier would make one of them look like a replay of the other.
+     *
+     * @return whether each entry carries an identifier of its own
+     */
+    @JsonIgnore
+    @Schema(hidden = true)
+    @AssertTrue(message = "entries must not share an importId")
+    public boolean isEachImportIdentifiedOnce() {
+        return isDistinct(CertificateImportEntryDto::getImportId);
+    }
+
     private boolean isDistinct(Function<CertificateImportEntryDto, String> value) {
         if (entries == null) {
             return true;
