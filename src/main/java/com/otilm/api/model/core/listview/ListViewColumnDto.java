@@ -1,7 +1,6 @@
 package com.otilm.api.model.core.listview;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.otilm.api.model.common.validation.NullableNotBlank;
 import com.otilm.api.model.core.search.FilterFieldSource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -35,12 +34,11 @@ public class ListViewColumnDto {
             + "`GET /v2/connectors/search`.", requiredMode = Schema.RequiredMode.REQUIRED)
     private String fieldIdentifier;
 
-    @NullableNotBlank(message = "Label cannot be blank if provided")
     @Size(max = 255)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Schema(description = "Heading to show instead of the field's catalogue label. Absent means the column uses the "
-            + "catalogue label, so a field that is later relabelled follows along; setting this pins the heading for "
-            + "this view only. A blank heading is rejected rather than pinned.",
+    @Schema(description = "Heading to show instead of the field's catalogue label, for this view only. Absent or "
+            + "null means the column uses the catalogue label, so a field that is later relabelled follows along. An "
+            + "empty or whitespace-only string is preserved as given and shows no visible heading.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String label;
 }
