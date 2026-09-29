@@ -10,10 +10,12 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "An inventory asset whose own verdict was carried over into another asset's: the key a "
-        + "certificate certifies, or the weakest algorithm a protocol's cipher suites name. The uuid is the one recorded "
-        + "when the verdict was decided; visible says whether the reader may read that asset's detail now, and name "
-        + "and type are read from it as currently stored")
+@Schema(description = "An inventory asset whose stored verdict was carried over into another asset's: the key a "
+        + "certificate certifies or the algorithm it is signed with, whichever is weaker, or the weakest algorithm a "
+        + "protocol's cipher suites name. The uuid is the one recorded when the verdict was decided; visible says "
+        + "whether the reader may read that asset's detail now. name and type are read from it as currently stored, "
+        + "and are absent when visible is false; type is also absent for an asset declaring no CycloneDX asset type, "
+        + "and name for one with no name to serve")
 public class PqcReferencedAssetDto {
 
     @Schema(description = "UUID of the referenced inventory asset, as recorded when the verdict was decided",
@@ -30,7 +32,6 @@ public class PqcReferencedAssetDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 
-    @Schema(description = "Type of the referenced asset; absent when visible is false, or when the asset is "
-            + "stored with a type CycloneDX has no value for", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Type of the referenced asset", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CryptographicAssetType type;
 }

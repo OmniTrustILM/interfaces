@@ -10,11 +10,16 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "One rule of the PQC rule set as the explanation walked it. verdict is present on decided, "
+        + "resolved and failed steps; evaluatedFields is absent on a notReached step; referencedAsset is present on a "
+        + "resolved step only")
 public class PqcExplanationStepDto {
 
-    @Schema(description = "The rule this step reports on. A stable identifier, not display text. "
-            + "On the hybrid rule a decided step carries the emitted id naming the deciding component "
-            + "(PQC-HYBRID-…); otherwise the step carries PQC-HYBRID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The rule this step reports on. A stable identifier, not display text. Every rule is listed "
+            + "under a fixed id, the name-based and family rules included. The one exception is the hybrid rule, "
+            + "whose id is composed during evaluation: it is listed as PQC-HYBRID on a step it does not decide, and "
+            + "as PQC-HYBRID- followed by the deciding family's rule id on the step it decides",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private String ruleId;
 
     @Schema(description = "What the rule checks, in a few words for display beside the rule id, such as \"Certified "
@@ -25,19 +30,18 @@ public class PqcExplanationStepDto {
     @Schema(description = "What the rule did for this asset", requiredMode = Schema.RequiredMode.REQUIRED)
     private PqcExplanationStepOutcome outcome;
 
-    @Schema(description = "The verdict the rule yields; present on decided and resolved steps",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "The verdict the rule yields", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PqcVerdict verdict;
 
     @Schema(description = "Why the rule did what it did, in plain words", requiredMode = Schema.RequiredMode.REQUIRED)
     private String message;
 
-    @Schema(description = "Values of the asset properties this rule read and, on a resolved step, the reference "
-            + "it decided by; absent on a step that was not reached. Values are strings, numbers, booleans or lists of strings, never nested objects",
+    @Schema(description = "Values of the asset properties this rule read and, on a resolved step, the reference it "
+            + "decided by. Values are strings, numbers, booleans or lists of strings, never nested objects",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, Object> evaluatedFields;
 
-    @Schema(description = "On a resolved step, the inventory asset whose own verdict this rule carried over",
+    @Schema(description = "The inventory asset whose stored verdict this rule carried over",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PqcReferencedAssetDto referencedAsset;
 }

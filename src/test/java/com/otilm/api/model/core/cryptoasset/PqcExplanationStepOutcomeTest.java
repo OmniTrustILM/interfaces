@@ -19,6 +19,7 @@ class PqcExplanationStepOutcomeTest {
                 .assertEquals(PqcExplanationStepOutcome.NOT_REACHED,
                         PqcExplanationStepOutcome.findByCode("notReached"));
         Assertions.assertEquals(PqcExplanationStepOutcome.RESOLVED, PqcExplanationStepOutcome.findByCode("resolved"));
+        Assertions.assertEquals(PqcExplanationStepOutcome.FAILED, PqcExplanationStepOutcome.findByCode("failed"));
     }
 
     @Test

@@ -14,6 +14,10 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "A PQC verdict recomputed from the asset as stored, rule by rule; nothing is written back. "
+        + "storedVerdict, storedRuleId and storedEvaluatedAt are absent when the asset has not been evaluated yet. When "
+        + "the rule set cannot evaluate the asset, verdict is unknown, ruleId is EVALUATION-FAILED, inputs is empty and "
+        + "steps holds one failed step")
 public class CryptographicAssetPqcExplanationDto {
 
     @Schema(description = "UUID of the inventory asset the explanation is for",
@@ -32,26 +36,27 @@ public class CryptographicAssetPqcExplanationDto {
     private String reason;
 
     @Schema(description = "Values of the asset properties the rules read, as derived from the stored asset. A property "
-            + "the asset does not have is omitted; key material and internal deduplication keys are never served."
-            + " Values are strings, numbers, booleans or lists of strings, never nested objects. Reference properties are served as the bom-ref strings the "
-            + "producing document recorded, under one key whichever CycloneDX version spelt them",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            + "the asset does not have is omitted; key material and internal deduplication keys are never served. "
+            + "Values are strings, numbers, booleans or lists of strings, never nested objects. Reference properties "
+            + "are served as the bom-ref strings the producing document recorded, under one key whichever CycloneDX "
+            + "version spelt them", requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> inputs;
 
     @Schema(description = "Every rule the evaluation consults for an asset of this type, in evaluation order; "
             + "rules that apply only to other asset types are not listed. Evaluation is first-match-wins: the "
             + "rules before the deciding one are notMatched, the deciding one is decided or resolved, and the rules "
-            + "after it are notReached", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "after it are notReached. The deciding step's ruleId equals the explanation's ruleId",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private List<PqcExplanationStepDto> steps;
 
     @Schema(description = "True when the verdict and rule stored on the asset equal the recomputed ones. False when "
-            + "the asset has not been evaluated yet, or its stored verdict predates a change to the asset or to an "
-            + "asset it refers to; the stored verdict is served until the next scheduled re-evaluation replaces it",
+            + "the asset has not been evaluated yet, or when something its stored verdict was decided from has "
+            + "changed since: the asset itself, the verdict of an asset it refers to, or the platform's rules after "
+            + "an upgrade. The stored verdict is served until the asset is next re-evaluated",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean matchesStored;
 
-    @Schema(description = "The verdict stored on the asset; absent when the asset has not been evaluated yet",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "The verdict stored on the asset", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PqcVerdict storedVerdict;
 
     @Schema(description = "The rule that decided the stored verdict; absent when the asset has not been evaluated yet",

@@ -112,11 +112,13 @@ public interface CryptographicAssetController extends AuthProtectedController {
                     + "returns every rule the evaluation walked, in order, with what each rule did and the properties "
                     + "it read. Nothing is written back: GET /v1/cryptoAssets/{uuid} keeps serving the stored "
                     + "verdict, and matchesStored says whether the two agree. The rule set is fixed by the platform "
-                    + "and cannot be configured. Stored verdicts are re-checked hourly by the CryptoAssetPqcSweepTask "
-                    + "scheduled job, which re-evaluates every asset whose properties, or whose referenced assets' "
-                    + "properties, changed since its last evaluation. There is no per-asset re-run of the stored "
-                    + "verdict: calling this operation re-runs the evaluation on demand and shows what the next "
-                    + "scheduled re-evaluation will store.")
+                    + "and cannot be configured. Stored verdicts are re-evaluated by the CryptoAssetPqcSweepTask "
+                    + "scheduled job, hourly by default and not while the job is disabled in the Scheduler. It "
+                    + "re-evaluates an asset whose recorded properties changed, whose referenced assets' verdicts "
+                    + "changed, or whose rules changed with a platform upgrade; an asset the rule set could not "
+                    + "evaluate keeps that verdict until one of those changes. There is no per-asset re-run of the "
+                    + "stored verdict: calling this operation re-runs the evaluation on demand and shows what the next "
+                    + "re-evaluation will store.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "PQC verdict explanation retrieved"),
             @ApiResponse(responseCode = "404", description = "Cryptographic asset not found",

@@ -53,7 +53,7 @@ class CryptographicAssetPqcExplanationContractTest {
         CryptographicAssetPqcExplanationDto explanation = sampleExplanation();
         explanation.setMatchesStored(true);
         explanation.setStoredVerdict(PqcVerdict.NOT_READY);
-        explanation.setStoredRuleId("CERT-SUBJECT-KEY");
+        explanation.setStoredRuleId("CERT-SIGNATURE-ALGORITHM");
         explanation.setStoredEvaluatedAt(EXPLAINED_AT.minusHours(1));
 
         String json = mapper.writeValueAsString(explanation);
@@ -118,27 +118,76 @@ class CryptographicAssetPqcExplanationContractTest {
         assertEquals(KEY_UUID.toString(), mapper.readTree(json).get("referencedAsset").get("uuid").asText());
     }
 
-    private static CryptographicAssetPqcExplanationDto sampleExplanation() {
-        PqcExplanationStepDto notMatched = step("PROTOCOL-CIPHER-SUITE", "Cipher suites",
-                PqcExplanationStepOutcome.NOT_MATCHED, "The asset is not a protocol");
-        notMatched.setEvaluatedFields(Map.of("assetType", "certificate"));
+    /** The one shape an asset the rule set cannot evaluate is explained by. */
+    @Test
+    void anAssetTheRuleSetCannotEvaluateIsExplainedByOneFailedStep() throws Exception {
+        PqcExplanationStepDto failed = step("EVALUATION-FAILED", "Evaluation", PqcExplanationStepOutcome.FAILED,
+                "The rule set could not be evaluated against this asset's recorded properties");
+        failed.setVerdict(PqcVerdict.UNKNOWN);
+        CryptographicAssetPqcExplanationDto explanation = new CryptographicAssetPqcExplanationDto();
+        explanation.setUuid(ASSET_UUID);
+        explanation.setVerdict(PqcVerdict.UNKNOWN);
+        explanation.setRuleId("EVALUATION-FAILED");
+        explanation.setReason(failed.getMessage());
+        explanation.setInputs(Map.of());
+        explanation.setSteps(List.of(failed));
+        explanation.setExplainedAt(EXPLAINED_AT);
 
-        PqcExplanationStepDto resolved = step("CERT-SUBJECT-KEY", "Certified key", PqcExplanationStepOutcome.RESOLVED,
-                "The certified key is not PQC ready");
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(explanation));
+
+        assertEquals("failed", json.get("steps").get(0).get("outcome").asText());
+        assertEquals("unknown", json.get("steps").get(0).get("verdict").asText());
+        assertTrue(json.get("inputs").isEmpty());
+    }
+
+    /**
+     * swagger-core puts an enum-typed property's description on the enum's shared component when the enum declares
+     * none, so one field's conditional wording ended up describing the enum everywhere it is used. Each enum carries
+     * its own, and it is what the component says whichever DTO is read.
+     */
+    @Test
+    void anEnumComponentKeepsItsOwnDescriptionWhateverFieldUsesIt() {
+        for (Class<?> dto : List
+                .of(CryptographicAssetDto.class, CryptographicAssetPqcExplanationDto.class, PqcExplanationStepDto.class,
+                        PqcReferencedAssetDto.class)) {
+            Map<String, Schema<?>> schemas = readAll(dto);
+            assertComponentDescription(schemas, CryptographicAssetType.class, dto);
+            assertComponentDescription(schemas, PqcVerdict.class, dto);
+            assertComponentDescription(schemas, PqcExplanationStepOutcome.class, dto);
+        }
+    }
+
+    private static void assertComponentDescription(Map<String, Schema<?>> schemas, Class<?> enumType, Class<?> dto) {
+        Schema<?> component = schemas.get(enumType.getSimpleName());
+        if (component != null) {
+            assertEquals(enumType.getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class).description(),
+                    component.getDescription(), enumType.getSimpleName() + " as read through " + dto.getSimpleName());
+        }
+    }
+
+    private static CryptographicAssetPqcExplanationDto sampleExplanation() {
+        PqcExplanationStepDto notMatched = step("CERT-SUBJECT-KEY", "Certified key",
+                PqcExplanationStepOutcome.NOT_MATCHED, "The signature algorithm is weaker than the certified key");
+        notMatched.setEvaluatedFields(Map.of("assetType", "certificate", "subjectPublicKeyRef", "key-rsa"));
+
+        PqcExplanationStepDto resolved = step("CERT-SIGNATURE-ALGORITHM", "Signature algorithm",
+                PqcExplanationStepOutcome.RESOLVED, "The certificate is signed with a weaker algorithm");
         resolved.setVerdict(PqcVerdict.NOT_READY);
-        resolved.setEvaluatedFields(Map.of("assetType", "certificate"));
+        resolved.setEvaluatedFields(Map.of("assetType", "certificate", "signatureAlgorithmRef", "alg-sig"));
         resolved.setReferencedAsset(referencedKey());
 
-        PqcExplanationStepDto notReached = step("CERT-NO-KEY-RECORDED", "No certified key",
-                PqcExplanationStepOutcome.NOT_REACHED, "An earlier rule decided");
+        PqcExplanationStepDto notReached = step("CERT-REFERENCE-UNRESOLVED", "Unresolved certificate reference",
+                PqcExplanationStepOutcome.NOT_REACHED, "Not evaluated: an earlier rule decided");
+        PqcExplanationStepDto catchAll = step("CERT-NO-KEY-RECORDED", "No certified key recorded",
+                PqcExplanationStepOutcome.NOT_REACHED, "Not evaluated: an earlier rule decided");
 
         CryptographicAssetPqcExplanationDto explanation = new CryptographicAssetPqcExplanationDto();
         explanation.setUuid(ASSET_UUID);
         explanation.setVerdict(PqcVerdict.NOT_READY);
-        explanation.setRuleId("CERT-SUBJECT-KEY");
-        explanation.setReason("The certified key is not PQC ready");
+        explanation.setRuleId("CERT-SIGNATURE-ALGORITHM");
+        explanation.setReason("The certificate is signed with a weaker algorithm");
         explanation.setInputs(Map.of("assetType", "certificate"));
-        explanation.setSteps(List.of(notMatched, resolved, notReached));
+        explanation.setSteps(List.of(notMatched, resolved, notReached, catchAll));
         explanation.setExplainedAt(EXPLAINED_AT);
         return explanation;
     }
