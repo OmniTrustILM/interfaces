@@ -12,19 +12,25 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "An inventory asset whose own verdict was carried over into another asset's: the key a "
         + "certificate certifies, or the weakest algorithm a protocol's cipher suites name. The uuid is the one recorded "
-        + "when the verdict was decided; name and type are read from that asset as currently stored, and are absent "
-        + "when it is no longer in the inventory or not visible to the reader")
+        + "when the verdict was decided; visible says whether the reader may read that asset's detail now, and name "
+        + "and type are read from it as currently stored")
 public class PqcReferencedAssetDto {
 
     @Schema(description = "UUID of the referenced inventory asset, as recorded when the verdict was decided",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID uuid;
 
+    @Schema(description = "True when the referenced asset is still in the inventory and the reader may read its "
+            + "detail; false when it has been removed or the reader's role does not grant detail access to it. When "
+            + "false, name and type are absent", requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean visible;
+
     @Schema(description = "Display name of the referenced asset, so a link can be labelled without a second read; "
-            + "absent when the asset is not visible to the reader", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "absent when visible is false, or when the asset has no name to serve",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 
-    @Schema(description = "Type of the referenced asset; absent when the asset is not visible to the reader",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Type of the referenced asset; absent when visible is false, or when the asset is "
+            + "stored with a type CycloneDX has no value for", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CryptographicAssetType type;
 }

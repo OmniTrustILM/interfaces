@@ -64,6 +64,7 @@ class CryptographicAssetPqcExplanationContractTest {
         assertEquals("resolved", steps.get(1).get("outcome").asText());
         assertEquals(KEY_UUID.toString(), steps.get(1).get("referencedAsset").get("uuid").asText());
         assertEquals("ml-kem", steps.get(1).get("referencedAsset").get("name").asText());
+        assertTrue(steps.get(1).get("referencedAsset").get("visible").asBoolean());
         assertEquals("notReached", steps.get(2).get("outcome").asText());
     }
 
@@ -94,9 +95,10 @@ class CryptographicAssetPqcExplanationContractTest {
         JsonNode json = mapper.readTree(mapper.writeValueAsString(hidden));
 
         assertEquals(KEY_UUID.toString(), json.get("uuid").asText());
+        assertFalse(json.get("visible").asBoolean(), "a referenced asset out of sight says so");
         assertFalse(json.has("name"), "a referenced asset the reader cannot see omits its name, not null");
         assertFalse(json.has("type"), "a referenced asset the reader cannot see omits its type, not null");
-        assertEquals(List.of("uuid"), requiredOf(PqcReferencedAssetDto.class));
+        assertEquals(List.of("uuid", "visible"), requiredOf(PqcReferencedAssetDto.class).stream().sorted().toList());
     }
 
     @Test
@@ -144,6 +146,7 @@ class CryptographicAssetPqcExplanationContractTest {
     private static PqcReferencedAssetDto referencedKey() {
         PqcReferencedAssetDto key = new PqcReferencedAssetDto();
         key.setUuid(KEY_UUID);
+        key.setVisible(true);
         key.setName("ml-kem");
         key.setType(CryptographicAssetType.RELATED_CRYPTO_MATERIAL);
         return key;

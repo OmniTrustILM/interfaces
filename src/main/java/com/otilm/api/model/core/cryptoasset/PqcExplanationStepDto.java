@@ -12,8 +12,9 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PqcExplanationStepDto {
 
-    @Schema(description = "The rule this step reports on. A stable identifier, not display text",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The rule this step reports on. A stable identifier, not display text. "
+            + "On the hybrid rule a decided step carries the emitted id naming the deciding component "
+            + "(PQC-HYBRID-…); otherwise the step carries PQC-HYBRID", requiredMode = Schema.RequiredMode.REQUIRED)
     private String ruleId;
 
     @Schema(description = "What the rule checks, in a few words for display beside the rule id, such as \"Certified "
@@ -31,8 +32,8 @@ public class PqcExplanationStepDto {
     @Schema(description = "Why the rule did what it did, in plain words", requiredMode = Schema.RequiredMode.REQUIRED)
     private String message;
 
-    @Schema(description = "Values of the asset properties this rule read, a subset of the explanation's inputs; "
-            + "absent on a step that was not reached. Values are strings, numbers, booleans or lists of strings, never nested objects",
+    @Schema(description = "Values of the asset properties this rule read and, on a resolved step, the reference "
+            + "it decided by; absent on a step that was not reached. Values are strings, numbers, booleans or lists of strings, never nested objects",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, Object> evaluatedFields;
 

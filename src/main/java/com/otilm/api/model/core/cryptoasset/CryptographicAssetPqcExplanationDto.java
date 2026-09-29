@@ -33,11 +33,13 @@ public class CryptographicAssetPqcExplanationDto {
 
     @Schema(description = "Values of the asset properties the rules read, as derived from the stored asset. A property "
             + "the asset does not have is omitted; key material and internal deduplication keys are never served."
-            + " Values are strings, numbers, booleans or lists of strings, never nested objects",
+            + " Values are strings, numbers, booleans or lists of strings, never nested objects. Reference properties are served as the bom-ref strings the "
+            + "producing document recorded, under one key whichever CycloneDX version spelt them",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> inputs;
 
-    @Schema(description = "Every rule the evaluation walked, in evaluation order. Evaluation is first-match-wins: the "
+    @Schema(description = "Every rule the evaluation consults for an asset of this type, in evaluation order; "
+            + "rules that apply only to other asset types are not listed. Evaluation is first-match-wins: the "
             + "rules before the deciding one are notMatched, the deciding one is decided or resolved, and the rules "
             + "after it are notReached", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<PqcExplanationStepDto> steps;

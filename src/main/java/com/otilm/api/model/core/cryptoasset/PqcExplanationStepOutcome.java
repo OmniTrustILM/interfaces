@@ -20,8 +20,8 @@ public enum PqcExplanationStepOutcome implements IPlatformEnum {
     DECIDED(Codes.DECIDED, "Decided", "The rule's condition held and its verdict is the asset's"),
     NOT_REACHED(Codes.NOT_REACHED, "Not reached", "An earlier rule decided, so this rule was not evaluated"),
     RESOLVED(Codes.RESOLVED, "Resolved",
-            "The rule's condition held and the verdict was carried over from an asset or component the asset refers "
-                    + "to");
+            "The rule's condition held and the verdict was carried over from another inventory asset the asset "
+                    + "refers to");
 
     public static class Codes {
         public static final String NOT_MATCHED = "notMatched";
