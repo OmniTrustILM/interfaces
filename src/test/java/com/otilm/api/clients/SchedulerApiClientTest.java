@@ -6,13 +6,20 @@ import com.otilm.api.model.scheduler.SchedulerJobDto;
 import com.otilm.api.model.scheduler.SchedulerResponseDto;
 import com.otilm.api.model.scheduler.SchedulerStatus;
 import com.otilm.api.model.scheduler.SchedulerTriggerState;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.Exceptions;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -27,7 +34,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The scheduler list as core reads it: the whole wire shape, the old shape, and the two ways the read can fail. */
+/**
+ * The scheduler list as core reads it: the whole wire shape, the old shape, an answer with no body, and each way the
+ * read is known to fail -- every one of them unchecked, since the caller degrades on any failure.
+ */
 class SchedulerApiClientTest {
 
     private static final String LIST_PATH = "/v1/scheduler/list";
@@ -125,14 +135,77 @@ class SchedulerApiClientTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, cause.getHttpStatus());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {200, 204})
+    void listScheduledJobs_answersNullWhenTheSchedulerSendsNoBody(int status) {
+        mockServer.stubFor(get(urlPathEqualTo(LIST_PATH)).willReturn(aResponse().withStatus(status)));
+
+        assertNull(client.listScheduledJobs());
+    }
+
     @Test
     void listScheduledJobs_givesUpAfterItsTimeout() {
+        Duration timeout = Duration.ofMillis(200);
         mockServer.stubFor(get(urlPathEqualTo(LIST_PATH)).willReturn(aResponse().withFixedDelay(2_000)));
         long started = System.nanoTime();
 
-        assertThrows(IllegalStateException.class, () -> client.listScheduledJobs(Duration.ofMillis(200)));
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> client.listScheduledJobs(timeout));
 
         long elapsedMillis = Duration.ofNanos(System.nanoTime() - started).toMillis();
+        assertTrue(thrown.getMessage().startsWith("Timeout on blocking read"), thrown.getMessage());
+        assertTrue(elapsedMillis >= timeout.toMillis(), "gave up after " + elapsedMillis + " ms, before the timeout");
         assertTrue(elapsedMillis < 1_500, "gave up after " + elapsedMillis + " ms, not at the timeout");
+    }
+
+    /**
+     * An error status without a body carries no status to the caller: the error handler the client shares turns only a
+     * body into an exception, so the exchange ends empty. Distinct from the timeout only by its message.
+     */
+    @ParameterizedTest
+    @ValueSource(ints = {500, 503})
+    void listScheduledJobs_failsUncheckedOnAnErrorStatusWithoutABody(int status) {
+        mockServer.stubFor(get(urlPathEqualTo(LIST_PATH)).willReturn(aResponse().withStatus(status)));
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> client.listScheduledJobs());
+
+        assertTrue(thrown.getMessage().contains("without emitting a response"), thrown.getMessage());
+    }
+
+    @Test
+    void listScheduledJobs_failsUncheckedOnABodyThatIsNotJson() {
+        mockServer
+                .stubFor(get(urlPathEqualTo(LIST_PATH))
+                        .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "text/html")
+                                .withBody("<html>proxy error</html>")));
+
+        assertThrows(WebClientResponseException.class, () -> client.listScheduledJobs());
+    }
+
+    @Test
+    void listScheduledJobs_failsUncheckedOnATriggerStateItDoesNotKnow() {
+        mockServer
+                .stubFor(get(urlPathEqualTo(LIST_PATH))
+                        .willReturn(okJson(LIST_JSON.replace("\"NORMAL\"", "\"WAITING\""))));
+
+        assertThrows(DecodingException.class, () -> client.listScheduledJobs());
+    }
+
+    @Test
+    void listScheduledJobs_failsUncheckedWhenTheSchedulerCannotBeReached() throws IOException {
+        int closedPort;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            closedPort = socket.getLocalPort();
+        }
+        SchedulerApiClient unreachable = new SchedulerApiClient() {
+            @Override
+            protected String getServiceUrl() {
+                return "http://localhost:" + closedPort;
+            }
+        };
+
+        assertThrows(WebClientRequestException.class, () -> unreachable.listScheduledJobs());
     }
 }

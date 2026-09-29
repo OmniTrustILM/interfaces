@@ -92,16 +92,26 @@ public class SchedulerApiClient extends PlatformBaseApiClient {
      *
      * <p>
      * Not wrapped in {@link #processRequest}: this read fails soft in its caller, which decides how loudly, so nothing
-     * is logged here. Failures are unchecked -- {@code WebClientRequestException} when the scheduler cannot be reached,
-     * {@code IllegalStateException} once {@link #LIST_TIMEOUT} passes, and a reactor-wrapped
-     * {@code ConnectionServiceException} on an error status ({@code reactor.core.Exceptions.unwrap} recovers it). An
-     * empty body answers {@code null}.
+     * is logged here. Every failure is unchecked, and a caller degrades on any {@code RuntimeException} rather than on
+     * a list of types. The shapes known today:
+     * <ul>
+     * <li>{@code WebClientRequestException}: the scheduler cannot be reached.</li>
+     * <li>{@code IllegalStateException} with a message starting "Timeout on blocking read": the timeout passed --
+     * {@link #LIST_TIMEOUT} here, the caller's own in {@link #listScheduledJobs(Duration)}.</li>
+     * <li>A reactor-wrapped {@code ConnectionServiceException} carrying the status: an error status with a body
+     * ({@code reactor.core.Exceptions.unwrap} recovers it).</li>
+     * <li>{@code IllegalStateException} with no status, the type the timeout has: an error status with an empty body,
+     * which the error handler this client shares turns into no exception, so the exchange ends empty.</li>
+     * <li>{@code WebClientResponseException}: a success status whose body is not JSON.</li>
+     * <li>{@code DecodingException}: JSON that does not bind, such as a trigger state this artifact does not know.</li>
+     * </ul>
+     * A success status with an empty body, or 204 No Content, answers {@code null}.
      */
     public SchedulerResponseDto listScheduledJobs() {
         return listScheduledJobs(LIST_TIMEOUT);
     }
 
-    /** {@link #listScheduledJobs()} with the caller's own budget. */
+    /** {@link #listScheduledJobs()}, giving up once the caller's own {@code timeout} passes. */
     public SchedulerResponseDto listScheduledJobs(final Duration timeout) {
         // Relative to the client's base URL, which getServiceUrl() supplies; the absolute form the other methods
         // build resolves to the same address.
