@@ -39,25 +39,27 @@ public class ScheduledJobDto {
     @Schema(description = "Execution status of last job triggered task", requiredMode = Schema.RequiredMode.REQUIRED)
     private SchedulerJobExecutionStatus lastExecutionStatus;
 
-    @Schema(description = "State of the job's trigger as the scheduler service last reported it. 'scheduled': the "
-            + "scheduler holds a live trigger. 'paused': the trigger is paused, which is what disabling the job does. "
-            + "'blocked': the trigger waits for a run still in progress. 'error': the scheduler could not fire the "
-            + "trigger and stopped trying. 'complete': the trigger has no fire time left. 'notScheduled': the "
-            + "scheduler holds no trigger for this job, so it will not fire until it is registered again. "
-            + "'unknown': the scheduler could not be read for this response; nextFireTime and previousFireTime "
-            + "are then absent.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "State of the job's trigger as the scheduler service reported it for this response. "
+            + "'scheduled': the scheduler holds a live trigger. 'paused': the trigger is paused, which is what "
+            + "disabling the job does. 'blocked': the trigger waits for a run still in progress. 'error': the "
+            + "scheduler could not fire the trigger and stopped trying. 'complete': the trigger has no fire time "
+            + "left. 'notScheduled': the scheduler holds no trigger for this job -- the normal end of a one-time "
+            + "job once its run has succeeded, since the platform then removes it from the scheduler; any other "
+            + "job will not fire until it is registered again. 'unknown': the scheduler could not be read for "
+            + "this response, or it reported no state for the trigger (a scheduler that predates this field); "
+            + "nextFireTime and previousFireTime are then absent.", requiredMode = Schema.RequiredMode.REQUIRED)
     private ScheduledJobScheduleState scheduleState;
 
-    @Schema(description = "When the scheduler will next fire the job, as the scheduler service reported it -- "
-            + "computed by the scheduler from the trigger's own CRON expression and time zone, not projected "
-            + "from the stored expression. Absent when the schedule state is 'unknown' or 'notScheduled' and when "
-            + "the trigger has no fire time left. A value in the past means the scheduler is not firing.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "When the scheduler will next fire the job: the fire time the scheduler holds for the "
+            + "job's trigger, computed by the scheduler from the trigger's own schedule, not projected from the "
+            + "stored CRON expression. Absent while the schedule state is 'paused', 'notScheduled' or 'unknown', "
+            + "and when the trigger has no further fire time. While the state is 'scheduled', a value in the past "
+            + "means the scheduler is not firing.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant nextFireTime;
 
     @Schema(description = "When the scheduler last fired the job, as the scheduler service reported it. Absent "
             + "when the schedule state is 'unknown' or 'notScheduled' and until the trigger has fired once. A "
-            + "firing newer than both lastExecutionStartTime and lastSkippedAt never reached the platform.",
+            + "firing newer than both lastExecutionStartTime and lastSkippedAt has not reached the platform.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Instant previousFireTime;
 
