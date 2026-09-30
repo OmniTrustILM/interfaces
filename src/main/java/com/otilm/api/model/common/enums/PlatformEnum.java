@@ -76,6 +76,7 @@ import com.otilm.api.model.core.notification.RecipientType;
 import com.otilm.api.model.core.oid.OidCategory;
 import com.otilm.api.model.core.other.ResourceEvent;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
+import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
 import com.otilm.api.model.core.search.FilterConditionOperator;
 import com.otilm.api.model.core.search.FilterFieldSource;
 import com.otilm.api.model.core.search.FilterFieldType;
@@ -175,6 +176,7 @@ public enum PlatformEnum implements IPlatformEnum {
 
     // Scheduler
     SCHEDULER_JOB_EXECUTION_STATUS(SchedulerJobExecutionStatus.class, "Scheduled job execution status"),
+    SCHEDULED_JOB_SCHEDULE_STATE(ScheduledJobScheduleState.class, "Scheduled job schedule state"),
 
     // notifications
     RECIPIENT_TYPE(RecipientType.class, "Recipient type"),
