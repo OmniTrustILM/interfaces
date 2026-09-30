@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
@@ -53,7 +52,7 @@ class EncryptionAlgorithmTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("jcaNames")
-    void jcaName_resolvesEveryProfileAndItsAliases(String name, EncryptionAlgorithm expected) {
+    void jcaName_resolvesProfilesAndCompatibilityAliases(String name, EncryptionAlgorithm expected) {
         // given
         // when
         Optional<EncryptionAlgorithm> selected = EncryptionAlgorithm.lookupByJcaName(name);
@@ -63,7 +62,7 @@ class EncryptionAlgorithmTest {
     }
 
     static Stream<Arguments> jcaNames() {
-        return profiles().flatMap(profile -> {
+        Stream<Arguments> profileNames = profiles().flatMap(profile -> {
             EncryptionAlgorithm algorithm = (EncryptionAlgorithm) profile.get()[0];
             String code = (String) profile.get()[1];
             return Stream
@@ -72,17 +71,10 @@ class EncryptionAlgorithmTest {
                     .distinct()
                     .map(name -> arguments(named(name, name), algorithm));
         });
-    }
-
-    @ParameterizedTest
-    @CsvSource({"RSA,RSA_PKCS1_V1_5", "rsa,RSA_PKCS1_V1_5"})
-    void bareRsaName_resolvesToTheCompatibilityProfile(String name, EncryptionAlgorithm expected) {
-        // given
-        // when
-        Optional<EncryptionAlgorithm> selected = EncryptionAlgorithm.lookupByJcaName(name);
-
-        // then
-        assertEquals(expected, selected.orElseThrow());
+        Stream<Arguments> compatibilityNames = Stream
+                .of("RSA", "rsa")
+                .map(name -> arguments(named(name, name), EncryptionAlgorithm.RSA_PKCS1_V1_5));
+        return Stream.concat(profileNames, compatibilityNames);
     }
 
     @ParameterizedTest
