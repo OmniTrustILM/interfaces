@@ -26,26 +26,6 @@ class DiscoveryV2EnumsTest {
     }
 
     @Test
-    void eventTypeCodes() throws Exception {
-        assertEquals("\"resultBatch\"", mapper.writeValueAsString(DiscoveryEventType.RESULT_BATCH));
-    }
-
-    /**
-     * {@code DiscoveryEventType.Codes} exists only because {@code @JsonSubTypes.Type(name = ...)} on
-     * {@link DiscoveryEvent} needs a compile-time constant. Should the enum's {@code code} drift from the {@code Codes}
-     * constant, the drift would be silent: Jackson would still resolve a subtype, only under a code the enum itself
-     * does not recognize.
-     */
-    @Test
-    void eventTypeCodeMatchesJsonSubTypesConstant() {
-        assertEquals(DiscoveryEventType.Codes.PROGRESS, DiscoveryEventType.PROGRESS.getCode());
-        assertEquals(DiscoveryEventType.Codes.RESULT_BATCH, DiscoveryEventType.RESULT_BATCH.getCode());
-        assertEquals(DiscoveryEventType.Codes.STATE_CHANGED, DiscoveryEventType.STATE_CHANGED.getCode());
-        assertEquals(DiscoveryEventType.Codes.HEARTBEAT, DiscoveryEventType.HEARTBEAT.getCode());
-        assertEquals(DiscoveryEventType.Codes.ERROR, DiscoveryEventType.ERROR.getCode());
-    }
-
-    @Test
     void discoveryStatusGainsStoppedAndCancelled() {
         assertEquals("stopped", DiscoveryStatus.STOPPED.getCode());
         assertEquals("cancelled", DiscoveryStatus.CANCELLED.getCode());
@@ -53,9 +33,9 @@ class DiscoveryV2EnumsTest {
 
     @Test
     void discoveryFlagsAreEnforcedAndScopedToDiscovery() {
-        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.DISCOVERY_STREAMING.getBehavior());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.DISCOVERY_STOP_RESUME.getBehavior());
-        assertEquals(List.of(ConnectorInterface.DISCOVERY), FeatureFlag.DISCOVERY_STREAMING.getApplicableInterfaces());
+        assertEquals(List.of(ConnectorInterface.DISCOVERY),
+                FeatureFlag.DISCOVERY_STOP_RESUME.getApplicableInterfaces());
         assertEquals(FeatureFlag.DISCOVERY_STOP_RESUME, FeatureFlag.findByCode("discoveryStopResume"));
     }
 

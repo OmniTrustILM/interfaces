@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.client.certificate.SearchRequestDto;
 import com.otilm.api.model.core.cbom.CbomDto;
 import com.otilm.api.model.core.certificate.CertificateDto;
+import com.otilm.api.model.core.cryptoasset.CryptographicAssetDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDto;
 import com.otilm.api.model.core.search.AttributeProjectable;
 import com.otilm.api.model.core.search.ConfigurableColumnsDocs;
@@ -69,9 +70,10 @@ class ConfigurableColumnsDocTest {
                     new Endpoint(SecretManagementController.class, "listSecrets"),
                     new Endpoint(CbomController.class, "listCboms"),
                     new Endpoint(SigningRecordController.class, "listSigningRecords"),
-                    new Endpoint(com.otilm.api.interfaces.core.web.v2.ConnectorController.class, "listConnectors"));
+                    new Endpoint(com.otilm.api.interfaces.core.web.v2.ConnectorController.class, "listConnectors"),
+                    new Endpoint(CryptographicAssetController.class, "listCryptographicAssets"));
 
-    /** The field catalogues that feed those listings. All seven declare the operation under the same method name. */
+    /** The field catalogues that feed those listings. Every one declares the operation under the same method name. */
     private static final List<Endpoint> CATALOGUES = LISTINGS
             .stream()
             .map(listing -> new Endpoint(listing.controller(), "getSearchableFieldInformation"))
@@ -96,15 +98,15 @@ class ConfigurableColumnsDocTest {
     private static final List<Class<?>> PROJECTION_CARRIERS = List
             .of(CertificateDto.class, KeyItemDto.class, com.otilm.api.model.core.connector.v2.ConnectorDto.class,
                     SecretDto.class, CbomDto.class, com.otilm.api.model.client.discovery.DiscoveryListDto.class,
-                    SigningRecordListDto.class);
+                    SigningRecordListDto.class, CryptographicAssetDto.class);
 
     /**
      * The carriers whose resource the platform registers no custom, metadata or data attributes against. They implement
-     * the projection like the rest - the contract is one shape for all seven - but showing the shared example on them
+     * the projection like the rest - the contract is one shape for all of them - but showing the shared example on them
      * would document a payload the listing cannot produce, so they carry the description alone.
      */
     private static final List<Class<?>> CARRIERS_WITHOUT_ATTRIBUTE_SOURCES = List
-            .of(CbomDto.class, SigningRecordListDto.class);
+            .of(CbomDto.class, SigningRecordListDto.class, CryptographicAssetDto.class);
 
     /** The form the field catalogue publishes an attribute-sourced identifier under. */
     private static final Pattern ATTRIBUTE_IDENTIFIER = Pattern.compile("^[^|]+\\|[A-Z]+$");
