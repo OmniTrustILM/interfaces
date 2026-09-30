@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.otilm.api.interfaces.core.web.CbomController;
 import com.otilm.api.interfaces.core.web.CryptographicAssetController;
 import com.otilm.api.interfaces.core.web.StatisticsController;
 import com.otilm.api.model.client.dashboard.CryptographicAssetStatisticsDto;
@@ -11,6 +12,7 @@ import com.otilm.api.model.client.dashboard.CryptographicAssetSyncCompletenessDt
 import com.otilm.api.model.common.enums.IPlatformEnum;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
+import com.otilm.api.model.core.cbom.CbomContributedAssetDto;
 import com.otilm.api.model.core.cbom.CbomDto;
 import com.otilm.api.model.core.cbom.CbomSyncSkipDto;
 import com.otilm.api.model.core.cbom.CbomSyncSkipState;
@@ -44,10 +46,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * (getters and renames included) with their schema text (description, title, name, example, examples, defaultValue,
  * pattern, allowableValues) at class, field, getter and parameter level; operation names, operationIds, class and
  * method mapping paths, response descriptions with their content schemas and example objects, parameter annotations
- * with their nested schemas, and tags of the inventory controller and the statistics operation; the three inventory
- * enums and the CRYPTO_ASSET resource entry as served by the enums API. Fixtures prove each dimension fails on a
- * violation instead of passing silently. What no static sweep can reach — the searchable-fields catalogue core
- * populates at runtime — is guarded core-side; the operation's own prose states the keys are never offered.
+ * with their nested schemas, and tags of the inventory controller, the statistics operation and the CBOM-scoped asset
+ * listing; the three inventory enums and the CRYPTO_ASSET resource entry as served by the enums API. Fixtures prove
+ * each dimension fails on a violation instead of passing silently. What no static sweep can reach — the
+ * searchable-fields catalogue core populates at runtime — is guarded core-side; the operation's own prose states the
+ * keys are never offered.
  */
 class CryptographicAssetIdentityAbsenceContractTest {
 
@@ -64,7 +67,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
                     CryptographicAssetEvidenceDto.class, CryptographicAssetOidDto.class,
                     CryptographicAssetPqcExplanationDto.class, PqcExplanationStepDto.class, PqcReferencedAssetDto.class,
                     CryptographicAssetStatisticsDto.class, CryptographicAssetSyncCompletenessDto.class, CbomDto.class,
-                    CbomSyncSkipDto.class);
+                    CbomSyncSkipDto.class, CbomContributedAssetDto.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -88,6 +91,12 @@ class CryptographicAssetIdentityAbsenceContractTest {
         }
         for (Method method : StatisticsController.class.getDeclaredMethods()) {
             if (method.getName().equals("getCryptographicAssetStatistics")) {
+                sweepOperation(method, problems);
+            }
+        }
+        sweepTag(CbomController.class, problems);
+        for (Method method : CbomController.class.getDeclaredMethods()) {
+            if (method.getName().equals("listCbomAssets")) {
                 sweepOperation(method, problems);
             }
         }
