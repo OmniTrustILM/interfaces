@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import javax.crypto.Cipher;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -22,6 +23,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,7 +63,7 @@ class EncryptionAlgorithmTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("jcaNames")
-    void jcaName_resolvesProfilesAndCompatibilityAliases(String name, EncryptionAlgorithm expected) {
+    void jcaName_resolvesExplicitPkcs1Aliases(String name, EncryptionAlgorithm expected) {
         // given
         // when
         Optional<EncryptionAlgorithm> selected = EncryptionAlgorithm.lookupByJcaName(name);
@@ -71,28 +73,11 @@ class EncryptionAlgorithmTest {
     }
 
     static Stream<Arguments> jcaNames() {
-        Stream<Arguments> profileNames = profiles()
-                .filter(profile -> profile.get()[0] == EncryptionAlgorithm.RSA_PKCS1_V1_5)
-                .flatMap(profile -> {
-                    EncryptionAlgorithm algorithm = (EncryptionAlgorithm) profile.get()[0];
-                    String code = (String) profile.get()[1];
-                    return jcaAliases(code).map(name -> arguments(named(name, name), algorithm));
-                });
-        Stream<Arguments> compatibilityNames = Stream
-                .of("RSA", "rsa")
-                .map(name -> arguments(named(name, name), EncryptionAlgorithm.RSA_PKCS1_V1_5));
-        return Stream.concat(profileNames, compatibilityNames);
-    }
-
-    @ParameterizedTest
-    @MethodSource("oaepNames")
-    void jcaName_returnsEmptyForOaepWithoutParameters(String name) {
-        // given
-        // when
-        Optional<EncryptionAlgorithm> selected = EncryptionAlgorithm.lookupByJcaName(name);
-
-        // then
-        assertTrue(selected.isEmpty());
+        return profiles().filter(profile -> profile.get()[0] == EncryptionAlgorithm.RSA_PKCS1_V1_5).flatMap(profile -> {
+            EncryptionAlgorithm algorithm = (EncryptionAlgorithm) profile.get()[0];
+            String code = (String) profile.get()[1];
+            return jcaAliases(code).map(name -> arguments(named(name, name), algorithm));
+        });
     }
 
     static Stream<String> oaepNames() {
@@ -123,6 +108,40 @@ class EncryptionAlgorithmTest {
 
         // then
         assertEquals(defaultMgfDigest, mgf.getDigestAlgorithm());
+        assertTrue(selected.isEmpty());
+    }
+
+    @Test
+    void jcaName_doesNotMisclassifyBouncyCastleBareRsaAsPkcs1() throws Exception {
+        // given
+        String ambiguousName = "RSA";
+        String rawRsaName = "RSA/ECB/NoPadding";
+        byte[] plaintext = {1};
+        BouncyCastleProvider provider = new BouncyCastleProvider();
+        KeyPair keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        Cipher bareRsa = Cipher.getInstance(ambiguousName, provider);
+        Cipher rawRsa = Cipher.getInstance(rawRsaName, provider);
+        bareRsa.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
+        rawRsa.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
+        byte[] expectedRawCiphertext = rawRsa.doFinal(plaintext);
+        byte[] actualCiphertext = bareRsa.doFinal(plaintext);
+
+        // when
+        Optional<EncryptionAlgorithm> selected = EncryptionAlgorithm.lookupByJcaName(bareRsa.getAlgorithm());
+
+        // then
+        assertArrayEquals(expectedRawCiphertext, actualCiphertext);
+        assertTrue(selected.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"RSA", "rsa"})
+    void jcaName_rejectsBareRsaWithNullOaepParameters(String name) {
+        // given
+        // when
+        Optional<EncryptionAlgorithm> selected = EncryptionAlgorithm.lookupByJcaName(name, null);
+
+        // then
         assertTrue(selected.isEmpty());
     }
 
@@ -248,7 +267,10 @@ class EncryptionAlgorithmTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
+    @MethodSource("oaepNames")
     @ValueSource(strings = {
+            "RSA",
+            "rsa",
             "AES/GCM/NoPadding",
             "RSA/ECB/OAEPPadding",
             "RSA/ECB/NoPadding",

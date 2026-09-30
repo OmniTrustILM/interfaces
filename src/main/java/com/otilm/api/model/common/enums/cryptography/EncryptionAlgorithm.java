@@ -72,8 +72,9 @@ public enum EncryptionAlgorithm implements IPlatformEnum {
     }
 
     /**
-     * Resolves PKCS1 v1.5 names, including the legacy NONE mode and bare RSA compatibility alias. OAEP names alone do
-     * not identify the MGF digest or label, so they require the parameter-aware overload.
+     * Resolves explicit PKCS1 v1.5 names, including the legacy NONE mode. Bare RSA leaves padding to the provider and
+     * cannot identify a profile. OAEP names alone do not identify the MGF digest or label, so they require the
+     * parameter-aware overload.
      */
     public static Optional<EncryptionAlgorithm> lookupByJcaName(String cipherAlgorithm) {
         return lookupByJcaName(cipherAlgorithm, null);
@@ -86,9 +87,6 @@ public enum EncryptionAlgorithm implements IPlatformEnum {
     public static Optional<EncryptionAlgorithm> lookupByJcaName(String cipherAlgorithm, OAEPParameterSpec parameters) {
         if (cipherAlgorithm == null) {
             return Optional.empty();
-        }
-        if ("RSA".equalsIgnoreCase(cipherAlgorithm)) {
-            return parameters == null ? Optional.of(RSA_PKCS1_V1_5) : Optional.empty();
         }
         String normalized = normalizeJcaName(cipherAlgorithm);
         return Arrays
