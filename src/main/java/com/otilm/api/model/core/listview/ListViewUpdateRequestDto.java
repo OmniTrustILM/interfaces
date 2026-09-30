@@ -29,7 +29,10 @@ public class ListViewUpdateRequestDto {
 
     @NotEmpty
     @Valid
-    @Schema(description = "Columns of the view, in display order", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Columns of the view, in display order. A column whose field the resource no longer defines, "
+            + "such as a deleted attribute, or can no longer show as a column is accepted only when editing a view "
+            + "that already holds it; a new view may name only fields the resource defines and can show.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private List<@NotNull ListViewColumnDto> columns;
 
     @Schema(description = "Whether this view applies when the listing is opened. At most one view per user and "
@@ -39,7 +42,8 @@ public class ListViewUpdateRequestDto {
 
     @Valid
     @Schema(description = "Filters the view applies. Absent or empty means the view applies no filter of its own and "
-            + "shows the whole inventory.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "shows the whole inventory. A filter on a field the resource no longer defines is accepted only when "
+            + "editing a view that already filters on that field.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<@NotNull SearchFilterRequestDto> filters;
 
     @Valid

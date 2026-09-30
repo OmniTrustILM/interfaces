@@ -21,7 +21,7 @@ public class DiscoveryInitiateResponseDto {
 
     // Excluded from toString: opaque, no logging value, up to 64 KB.
     @Schema(description = "Opaque run handle the stateless connector resolves its run state from. Core replays it "
-            + "on status, results, stream, stop, resume and cancel, and never renders it. Serialized size is capped "
+            + "on status, results, stop, resume and cancel, and never renders it. Serialized size is capped "
             + "at 64 KB; over the cap Core fails the run.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;

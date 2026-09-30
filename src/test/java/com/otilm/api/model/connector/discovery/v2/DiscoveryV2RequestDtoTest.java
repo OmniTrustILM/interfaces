@@ -256,17 +256,4 @@ class DiscoveryV2RequestDtoTest {
         assertFalse(str.contains("super-secret-target-password"),
                 "toString must not leak run-level attribute values, which can carry target credentials: " + str);
     }
-
-    @Test
-    void streamRequestRoundTripsCursor() throws Exception {
-        DiscoveryStreamRequestDto dto = new DiscoveryStreamRequestDto();
-        dto.setRunId(UUID.fromString("44444444-4444-4444-4444-444444444444"));
-        dto.setAfterSequence(42L);
-
-        String json = mapper.writeValueAsString(dto);
-        assertTrue(json.contains("\"afterSequence\":42"));
-
-        DiscoveryStreamRequestDto back = mapper.readValue(json, DiscoveryStreamRequestDto.class);
-        assertEquals(42L, back.getAfterSequence());
-    }
 }

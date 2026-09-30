@@ -33,10 +33,6 @@ import org.springframework.http.ResponseEntity;
  * MQ-based implementation of the v2 Discovery API client.
  *
  * <p>
- * No {@code stream} method exists here: NDJSON streaming has no MQ representation (a request/response proxy hop cannot
- * carry a chunked stream). Core selects the REST client when it needs streaming; see {@link DiscoverySyncApiClient}.
- *
- * <p>
  * Every call passes an explicit {@code Duration} sized by {@link DiscoveryMqTimeouts} — this client never invokes a
  * {@link ProxyClient} overload that falls back to the proxy's default timeout, since a discovery drain can legitimately
  * take far longer than a status poll.

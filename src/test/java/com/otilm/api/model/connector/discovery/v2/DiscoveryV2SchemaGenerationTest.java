@@ -34,9 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Generates the OpenAPI schema and asserts each union base carries a {@code discriminator} stanza with a
  * {@code mapping}, and that the discriminator property appears in every {@code oneOf} subschema — the condition client
  * generators require, and the reason the discriminator sits inside the payload rather than on its container (see
- * {@link DiscoveredItemPayloadInterface} and {@link DiscoveryEventInterface}). Generation goes through swagger-core's
- * {@code ModelConverters}, the resolver springdoc uses at runtime, because this module has no OpenAPI build plugin to
- * invoke.
+ * {@link DiscoveredItemPayloadInterface}). Generation goes through swagger-core's {@code ModelConverters}, the resolver
+ * springdoc uses at runtime, because this module has no OpenAPI build plugin to invoke.
  */
 class DiscoveryV2SchemaGenerationTest {
 
@@ -61,33 +60,6 @@ class DiscoveryV2SchemaGenerationTest {
         assertSubschemaDeclaresProperty(schemas, "DiscoveredKeyDto", "resource");
     }
 
-    @Test
-    void discoveryEventSchemaCarriesADiscriminatorWithMapping() {
-        Map<String, Schema> schemas = openApi31Schemas(DiscoveryEvent.class);
-
-        Schema<?> base = schemas.get("DiscoveryEvent");
-        assertNotNull(base, "expected a generated schema named DiscoveryEvent; found " + schemas.keySet());
-
-        Discriminator discriminator = base.getDiscriminator();
-        assertNotNull(discriminator, "DiscoveryEvent must carry a discriminator stanza");
-        assertEquals("type", discriminator.getPropertyName());
-        assertEquals(
-                Map
-                        .of("progress", "#/components/schemas/DiscoveryProgressEvent", "resultBatch",
-                                "#/components/schemas/DiscoveryResultBatchEvent", "stateChanged",
-                                "#/components/schemas/DiscoveryStateChangedEvent", "heartbeat",
-                                "#/components/schemas/DiscoveryHeartbeatEvent", "error",
-                                "#/components/schemas/DiscoveryErrorEvent"),
-                discriminator.getMapping(),
-                "discriminator.mapping must name all five concrete event schemas by their wire codes");
-
-        assertSubschemaDeclaresProperty(schemas, "DiscoveryProgressEvent", "type");
-        assertSubschemaDeclaresProperty(schemas, "DiscoveryResultBatchEvent", "type");
-        assertSubschemaDeclaresProperty(schemas, "DiscoveryStateChangedEvent", "type");
-        assertSubschemaDeclaresProperty(schemas, "DiscoveryHeartbeatEvent", "type");
-        assertSubschemaDeclaresProperty(schemas, "DiscoveryErrorEvent", "type");
-    }
-
     /** A client generates against the fields that tell one payload from another; a composed subschema carries none. */
     @Test
     void thePayloadSubschemasPublishTheirOwnFields() {
@@ -100,9 +72,9 @@ class DiscoveryV2SchemaGenerationTest {
     }
 
     /**
-     * These two unions publish no properties of their own, so the discriminator reaches a client through
-     * {@code required} plus each arm's own declaration. That is the shape swagger-core resolves them to, not a rule
-     * every union in the module follows: {@code CryptographyKeySchemaTest} pins union parents that do carry properties.
+     * The union publishes no properties of its own, so the discriminator reaches a client through {@code required} plus
+     * each arm's own declaration. That is the shape swagger-core resolves them to, not a rule every union in the module
+     * follows: {@code CryptographyKeySchemaTest} pins union parents that do carry properties.
      */
     @Test
     void thePayloadUnionRequiresTheDiscriminatorWithoutPublishingItAsItsOwnProperty() {
@@ -110,14 +82,6 @@ class DiscoveryV2SchemaGenerationTest {
 
         assertEquals(List.of("resource"), union.getRequired());
         assertNull(union.getProperties(), "DiscoveredItemPayload must publish no properties of its own");
-    }
-
-    @Test
-    void theEventUnionRequiresTheDiscriminatorWithoutPublishingItAsItsOwnProperty() {
-        Schema<?> union = openApi31Schemas(DiscoveryEvent.class).get("DiscoveryEvent");
-
-        assertEquals(List.of("type"), union.getRequired());
-        assertNull(union.getProperties(), "DiscoveryEvent must publish no properties of its own");
     }
 
     /**
@@ -138,7 +102,7 @@ class DiscoveryV2SchemaGenerationTest {
      * assembled document keeps one definition per name and whichever entry wins is what SDK generators consume.
      *
      * <p>
-     * Two ways that broke here. A self-referential {@code byResource} made the event path emit a
+     * Two ways that broke here. A self-referential {@code byResource} made swagger-core emit a
      * {@code DiscoveryProgressDto} with {@code byResource} silently missing, and a {@code description} on a
      * {@code $ref} field was hoisted onto the referenced component, overwriting its own — OpenAPI 3.0 cannot carry a
      * sibling description, so swagger-core pushes it down. Both would have shipped a wrong contract to Go and Python
@@ -157,7 +121,6 @@ class DiscoveryV2SchemaGenerationTest {
                 "DiscoveryResourceProgressDto must describe itself at class level, or every reached copy is null too "
                         + "and this guard compares null against null");
         String leafOwnDescription = leaf.getDescription();
-        Map<String, Schema> viaEvent = ModelConverters.getInstance().readAll(DiscoveryEvent.class);
         Map<String, Schema> viaStatus = ModelConverters.getInstance().readAll(DiscoveryStatusResponseDto.class);
         Map<String, Schema> viaDetail = ModelConverters.getInstance().readAll(DiscoveryDetailDto.class);
 
@@ -175,25 +138,14 @@ class DiscoveryV2SchemaGenerationTest {
         assertEquals(leafOwnDescription, leafViaDetail.getDescription(),
                 "the leaf must keep its own description on the run-detail path");
 
-        // If the event path emits the run-level component at all, it must be the whole thing.
-        Schema<?> progressViaEvent = viaEvent.get("DiscoveryProgressDto");
-        if (progressViaEvent != null) {
-            assertTrue(resolvesProperty(progressViaEvent, "byResource", viaEvent),
-                    "DiscoveryProgressDto reached through DiscoveryEvent must not drop byResource");
-        }
-
         assertTrue(resolvesProperty(viaStatus.get("DiscoveryProgressDto"), "byResource", viaStatus),
                 "DiscoveryProgressDto must carry byResource on the status path");
 
-        Schema<?> leafViaEvent = viaEvent.get("DiscoveryResourceProgressDto");
         Schema<?> leafViaStatus = viaStatus.get("DiscoveryResourceProgressDto");
-        assertNotNull(leafViaEvent, "the per-resource leaf component must be emitted on the event path");
         assertNotNull(leafViaStatus, "the per-resource leaf component must be emitted on the status path");
-        assertEquals(leafViaStatus.getDescription(), leafViaEvent.getDescription(),
-                "the leaf component's description must not depend on which endpoint reached it");
-        assertEquals(leafViaStatus.getProperties().keySet(), leafViaEvent.getProperties().keySet(),
+        assertEquals(leafViaStatus.getProperties().keySet(), leafViaDetail.getProperties().keySet(),
                 "the leaf component's properties must not depend on which endpoint reached it");
-        assertEquals(leafOwnDescription, leafViaEvent.getDescription(),
+        assertEquals(leafOwnDescription, leafViaStatus.getDescription(),
                 "the leaf must keep its own description, not one hoisted from a referencing field");
     }
 
@@ -212,7 +164,6 @@ class DiscoveryV2SchemaGenerationTest {
                 DiscoveredCertificateDto.class,
                 DiscoveredKeyDto.class,
                 DiscoveredItemDto.class,
-                DiscoveryEvent.class,
                 DiscoverySupportedResourceDto.class,
                 DiscoveryItemDto.class,
                 DiscoveryDetailDto.class,

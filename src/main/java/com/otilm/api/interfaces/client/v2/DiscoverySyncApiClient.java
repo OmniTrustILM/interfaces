@@ -46,11 +46,6 @@ import org.springframework.http.ResponseEntity;
  * {@code IllegalStateException}, which is unchecked and so outside the declared throws. Making that uniform means
  * retyping {@code BaseApiClient.processRequest}'s functional parameter, which is public API every connector compiles
  * against, so it is stated here instead.
- *
- * <p>
- * No {@code stream} method exists here or on the REST client — the contract's
- * {@code POST /v2/discoveryProvider/discoveries/stream} has no client yet. Streaming can only ever be REST: a held-open
- * NDJSON response cannot traverse the AMQP proxy tunnel, which carries one message per call.
  */
 public interface DiscoverySyncApiClient {
 
