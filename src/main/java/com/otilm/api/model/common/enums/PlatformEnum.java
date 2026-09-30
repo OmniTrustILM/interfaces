@@ -58,6 +58,7 @@ import com.otilm.api.model.core.connector.AuthType;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import com.otilm.api.model.core.connector.FunctionGroupCode;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
+import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.cryptography.key.KeyState;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
@@ -216,6 +217,7 @@ public enum PlatformEnum implements IPlatformEnum {
     CBOM_SYNC_SKIP_STATE(CbomSyncSkipState.class, "CBOM sync skip state"),
     CRYPTOGRAPHIC_ASSET_TYPE(CryptographicAssetType.class, "Cryptographic asset type"),
     PQC_VERDICT(PqcVerdict.class, "PQC readiness verdict"),
+    PQC_EXPLANATION_STEP_OUTCOME(PqcExplanationStepOutcome.class, "PQC explanation step outcome"),
 
     ;
 

@@ -9,10 +9,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 /**
- * Post-quantum readiness verdict of a cryptographic asset, computed by the platform rule set. The rule-set version that
- * produced a verdict travels with the asset detail, so a verdict is always attributable to the rules that made it.
+ * Post-quantum readiness verdict of a cryptographic asset, computed by the platform rule set. The rule that produced a
+ * verdict travels with the asset detail, so a verdict is always attributable to the rule that made it.
  */
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true, description = "Post-quantum readiness verdict computed by the platform rule set")
 public enum PqcVerdict implements IPlatformEnum {
 
     READY(Codes.READY, "PQC ready", "The asset withstands a cryptographically relevant quantum computer"),

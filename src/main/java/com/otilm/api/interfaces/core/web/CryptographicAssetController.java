@@ -7,6 +7,7 @@ import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.PaginationResponseDto;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetDetailDto;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetDto;
+import com.otilm.api.model.core.cryptoasset.CryptographicAssetPqcExplanationDto;
 import com.otilm.api.model.core.search.ConfigurableColumnsDocs;
 import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * write operation to expose. Listing and the searchable-fields sibling are gated by {@code ResourceAction.LIST} and the
  * detail by {@code ResourceAction.DETAIL} on {@code Resource.CRYPTO_ASSET} — the action set proposed on interfaces#874
  * (the resource itself is ratified); the inventory dashboard on the statistics API deliberately shares the same LIST
- * action.
+ * action. The PQC explanation is gated by the same DETAIL action as the detail it explains.
  *
  * <p>
  * Error responses deliberately use the legacy {@link ErrorMessageDto} model to match the other core web controllers;
@@ -104,4 +105,25 @@ public interface CryptographicAssetController extends AuthProtectedController {
                     description = "Cryptographic asset searchable field information retrieved")})
     @GetMapping(path = "/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
+
+    @Operation(operationId = "getCryptographicAssetPqcExplanation",
+            summary = "Explain a cryptographic asset's PQC verdict",
+            description = "Recomputes the post-quantum readiness verdict of the asset from its stored properties and "
+                    + "returns every rule the evaluation walked, in order, with what each rule did and the properties "
+                    + "it read. Nothing is written back: GET /v1/cryptoAssets/{uuid} keeps serving the stored "
+                    + "verdict, and matchesStored says whether the two agree. The rule set is fixed by the platform "
+                    + "and cannot be configured. Stored verdicts are re-evaluated by the CryptoAssetPqcSweepTask "
+                    + "scheduled job, hourly by default and not while the job is disabled in the Scheduler. It "
+                    + "re-evaluates an asset whose recorded properties changed, whose referenced assets' verdicts "
+                    + "changed, or whose rules changed with a platform upgrade; an asset the rule set could not "
+                    + "evaluate keeps that verdict until one of those changes. There is no per-asset re-run of the "
+                    + "stored verdict: calling this operation re-runs the evaluation on demand and shows what the next "
+                    + "re-evaluation will store.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "PQC verdict explanation retrieved"),
+            @ApiResponse(responseCode = "404", description = "Cryptographic asset not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/{uuid}/pqcExplanation", produces = {MediaType.APPLICATION_JSON_VALUE})
+    CryptographicAssetPqcExplanationDto getCryptographicAssetPqcExplanation(
+            @Parameter(description = "Cryptographic asset UUID") @PathVariable UUID uuid) throws NotFoundException;
 }

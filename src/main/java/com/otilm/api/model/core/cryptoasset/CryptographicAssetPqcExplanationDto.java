@@ -1,0 +1,73 @@
+package com.otilm.api.model.core.cryptoasset;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import lombok.Data;
+
+/**
+ * A PQC verdict recomputed from the asset as stored, rule by rule. The explanation is never written back: the stored
+ * verdict stays what the asset detail serves, and {@code matchesStored} says whether the two agree.
+ */
+@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "A PQC verdict recomputed from the asset as stored, rule by rule; nothing is written back. "
+        + "storedVerdict, storedRuleId and storedEvaluatedAt are absent when the asset has not been evaluated yet, and "
+        + "storedRuleId also for a stored verdict no rule decided. When "
+        + "the rule set cannot evaluate the asset, verdict is unknown, ruleId is EVALUATION-FAILED, inputs is empty and "
+        + "steps holds one failed step")
+public class CryptographicAssetPqcExplanationDto {
+
+    @Schema(description = "UUID of the inventory asset the explanation is for",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private UUID uuid;
+
+    @Schema(description = "Post-quantum readiness verdict recomputed from the asset as stored",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private PqcVerdict verdict;
+
+    @Schema(description = "The rule that decided the recomputed verdict", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String ruleId;
+
+    @Schema(description = "The deciding rule's finding, in the words a stored verdict carries",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String reason;
+
+    @Schema(description = "Values of the asset properties the rules read, as derived from the stored asset. A property "
+            + "the asset does not have is omitted; key material and internal deduplication keys are never served. "
+            + "Values are strings, numbers, booleans or lists of strings, never nested objects. Reference properties "
+            + "are served as the bom-ref strings the producing document recorded, under one key whichever CycloneDX "
+            + "version spelt them", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Object> inputs;
+
+    @Schema(description = "Every rule the evaluation consults for an asset of this type, in evaluation order; "
+            + "rules that apply only to other asset types are not listed. Evaluation is first-match-wins: the "
+            + "rules before the deciding one are notMatched, the deciding one is decided or resolved, and the rules "
+            + "after it are notReached. The deciding step's ruleId equals the explanation's ruleId",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<PqcExplanationStepDto> steps;
+
+    @Schema(description = "True when the verdict and rule stored on the asset equal the recomputed ones. False when "
+            + "the asset has not been evaluated yet, or when something its stored verdict was decided from has "
+            + "changed since: the asset itself, the verdict of an asset it refers to, or the platform's rules after "
+            + "an upgrade. The stored verdict is served until the asset is next re-evaluated",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean matchesStored;
+
+    @Schema(description = "The verdict stored on the asset", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private PqcVerdict storedVerdict;
+
+    @Schema(description = "The rule that decided the stored verdict; absent when the asset has not been evaluated "
+            + "yet, or when no rule decided it", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String storedRuleId;
+
+    @Schema(description = "When the stored verdict was last evaluated; absent when the asset has not been evaluated "
+            + "yet", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private OffsetDateTime storedEvaluatedAt;
+
+    @Schema(description = "When this explanation was computed", requiredMode = Schema.RequiredMode.REQUIRED)
+    private OffsetDateTime explainedAt;
+}
