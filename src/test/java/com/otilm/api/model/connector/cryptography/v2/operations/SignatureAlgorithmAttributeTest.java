@@ -13,6 +13,7 @@ import com.otilm.api.model.common.attribute.v3.content.ObjectAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,24 @@ class SignatureAlgorithmAttributeTest {
     }
 
     @Test
+    void selectedAlgorithm_rejectsTheReservedUuidAndNameOnDifferentAttributes() {
+        // given
+        String providerName = "providerSignatureAlgorithm";
+        SignatureAlgorithm expected = SignatureAlgorithm.SHA256_WITH_RSA;
+        RequestAttributeV3 selection = SignatureAlgorithmAttribute.request(expected);
+        selection.setName(providerName);
+        RequestAttributeV3 unrelated = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA384_WITH_RSA);
+        unrelated.setUuid(UUID.randomUUID());
+        List<RequestAttribute> attributes = List.of(unrelated, selection);
+
+        // when
+        Executable read = () -> SignatureAlgorithmAttribute.selectedAlgorithm(attributes);
+
+        // then
+        assertThrows(ValidationException.class, read);
+    }
+
+    @Test
     void selectedAlgorithm_skipsANullElement() {
         // given
         List<RequestAttribute> attributes = Arrays
@@ -77,6 +96,7 @@ class SignatureAlgorithmAttributeTest {
     @MethodSource("selectionsOfNoPlatformAlgorithm")
     void selectedAlgorithm_refusesASelectionOfNoPlatformAlgorithm(List<RequestAttribute> attributes,
             String expectedMessage) {
+        // given
         // when
         Executable read = () -> SignatureAlgorithmAttribute.selectedAlgorithm(attributes);
 
@@ -85,10 +105,25 @@ class SignatureAlgorithmAttributeTest {
     }
 
     static Stream<Arguments> selectionsOfNoPlatformAlgorithm() {
-        String noSelection = "Signature attributes must select one value of signatureAlgorithm.";
+        String noSelection = "Signature attributes must select one value of the attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869'.";
+        RequestAttributeV3 wrongUuid = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        wrongUuid.setUuid(UUID.randomUUID());
+        RequestAttributeV3 alias = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA384_WITH_RSA);
+        alias.setName("providerSignatureAlgorithm");
+        RequestAttributeV3 missingContent = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        missingContent.setContent(null);
+        RequestAttributeV3 nullContentItem = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        nullContentItem.setContent(Collections.singletonList(null));
         return Stream
                 .of(arguments(named("no attributes", null), noSelection),
                         arguments(named("no selection", List.of(otherAttribute())), noSelection),
+                        arguments(named("missing content", List.of(missingContent)), noSelection),
+                        arguments(named("empty content", List.of(selection())), noSelection),
+                        arguments(named("null content item", List.of(nullContentItem)), noSelection),
+                        arguments(named("canonical name with wrong UUID", List.of(wrongUuid)), noSelection),
+                        arguments(named("duplicate UUID under another name", List
+                                .of(SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA), alias)),
+                                "Signature attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must be supplied once."),
                         arguments(
                                 named("a code outside the enum",
                                         List.of(selection(new StringAttributeContentV3("SHA1withRSA")))),
@@ -98,7 +133,7 @@ class SignatureAlgorithmAttributeTest {
                                         List
                                                 .of(selection(new ObjectAttributeContentV3(
                                                         new HashMap<>(Map.of("code", "SHA256withRSA")))))),
-                                "Signature attribute signatureAlgorithm must carry a string value."),
+                                "Signature attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must carry a string value."),
                         arguments(named("two values",
                                 List
                                         .of(selection(new StringAttributeContentV3("SHA256withRSA"),
@@ -109,11 +144,11 @@ class SignatureAlgorithmAttributeTest {
                                         .of(SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA),
                                                 SignatureAlgorithmAttribute
                                                         .request(SignatureAlgorithm.SHA384_WITH_RSA))),
-                                "Signature attribute signatureAlgorithm must be supplied once."),
+                                "Signature attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must be supplied once."),
                         arguments(named("an empty value", List.of(selection(new StringAttributeContentV3()))),
                                 noSelection),
                         arguments(named("a v2 attribute", List.of(v2Selection())),
-                                "Signature attribute signatureAlgorithm must be a v3 attribute."));
+                                "Signature attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must be a v3 attribute."));
     }
 
     private static RequestAttribute selection(BaseAttributeContentV3<?>... values) {

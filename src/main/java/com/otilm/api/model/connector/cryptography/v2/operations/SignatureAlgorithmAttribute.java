@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The sign attribute through which a cryptography provider v2 lets the caller choose the signature algorithm. Its name
- * and values are part of the contract, so a caller that must name the algorithm before the signature exists reads it
- * from the selection.
+ * The sign attribute through which a cryptography provider v2 lets the caller choose the signature algorithm. Its UUID,
+ * name and values are part of the contract, so a caller that must name the algorithm before the signature exists reads
+ * it from the selection.
  */
 public final class SignatureAlgorithmAttribute {
 
@@ -52,8 +52,8 @@ public final class SignatureAlgorithmAttribute {
     }
 
     /**
-     * The signature attributes must select exactly one platform signature algorithm, through a single v3
-     * {@code signatureAlgorithm} attribute.
+     * The signature attributes must select exactly one platform signature algorithm, through a single v3 attribute with
+     * {@link #ATTRIBUTE_UUID} and {@link #NAME}. No other attribute may use either reserved identifier.
      *
      * @throws ValidationException when the signature attributes break that rule
      */
@@ -62,33 +62,41 @@ public final class SignatureAlgorithmAttribute {
                 ? List.of()
                 : signatureAttributes
                         .stream()
-                        .filter(attribute -> attribute != null && NAME.equals(attribute.getName()))
+                        .filter(attribute -> attribute != null
+                                && (ATTRIBUTE_UUID.equals(attribute.getUuid()) || NAME.equals(attribute.getName())))
                         .toList();
         if (selections.size() > 1) {
-            throw new ValidationException(
-                    ValidationError.create("Signature attribute {} must be supplied once.", NAME));
+            throw new ValidationException(ValidationError
+                    .create("Signature attribute with name '{}' and UUID '{}' must be supplied once.", NAME,
+                            ATTRIBUTE_UUID));
         }
         if (selections.isEmpty()) {
             throw noSelection();
         }
+        if (!ATTRIBUTE_UUID.equals(selections.get(0).getUuid()) || !NAME.equals(selections.get(0).getName())) {
+            throw noSelection();
+        }
         if (!(selections.get(0) instanceof RequestAttributeV3 selection)) {
-            throw new ValidationException(
-                    ValidationError.create("Signature attribute {} must be a v3 attribute.", NAME));
+            throw new ValidationException(ValidationError
+                    .create("Signature attribute with name '{}' and UUID '{}' must be a v3 attribute.", NAME,
+                            ATTRIBUTE_UUID));
         }
         List<BaseAttributeContentV3<?>> values = selection.getContent();
         if (values == null || values.size() != 1 || values.get(0) == null || values.get(0).getData() == null) {
             throw noSelection();
         }
         if (!(values.get(0) instanceof StringAttributeContentV3 value)) {
-            throw new ValidationException(
-                    ValidationError.create("Signature attribute {} must carry a string value.", NAME));
+            throw new ValidationException(ValidationError
+                    .create("Signature attribute with name '{}' and UUID '{}' must carry a string value.", NAME,
+                            ATTRIBUTE_UUID));
         }
         return SignatureAlgorithm.findByCode(value.getData());
     }
 
     private static ValidationException noSelection() {
-        return new ValidationException(
-                ValidationError.create("Signature attributes must select one value of {}.", NAME));
+        return new ValidationException(ValidationError
+                .create("Signature attributes must select one value of the attribute with name '{}' and UUID '{}'.",
+                        NAME, ATTRIBUTE_UUID));
     }
 
     private static StringAttributeContentV3 content(SignatureAlgorithm algorithm) {

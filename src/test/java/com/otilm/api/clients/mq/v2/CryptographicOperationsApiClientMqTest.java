@@ -2,6 +2,7 @@ package com.otilm.api.clients.mq.v2;
 
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
@@ -12,6 +13,7 @@ import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.EncryptionAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.ResponseEntity;
 
@@ -85,7 +88,10 @@ class CryptographicOperationsApiClientMqTest {
     void attributeOperation_delegatesPostAndReturnsAttributes(AttributeOperation operation) throws ConnectorException {
         // given
         Object request = attributeRequest(operation);
-        BaseAttribute attribute = validMetadataAttribute();
+        boolean cipher = operation == AttributeOperation.ENCRYPT || operation == AttributeOperation.DECRYPT;
+        BaseAttribute attribute = cipher
+                ? EncryptionAlgorithmAttribute.definition(List.of(EncryptionAlgorithm.RSA_PKCS1_V1_5))
+                : validMetadataAttribute();
         proxyClient.respondWith(new BaseAttribute[]{attribute});
 
         // when
@@ -105,6 +111,19 @@ class CryptographicOperationsApiClientMqTest {
 
         // when
         Executable call = () -> invokeAttributeOperation(operation, request);
+
+        // then
+        assertValidationFailure(call);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = AttributeOperation.class, names = {"ENCRYPT", "DECRYPT"})
+    void cipherAttributes_rejectAResponseWithoutTheRequiredAlgorithm(AttributeOperation operation) {
+        // given
+        proxyClient.respondWith(new BaseAttribute[]{validMetadataAttribute()});
+
+        // when
+        Executable call = () -> invokeAttributeOperation(operation, keyScopedRequest());
 
         // then
         assertValidationFailure(call);
