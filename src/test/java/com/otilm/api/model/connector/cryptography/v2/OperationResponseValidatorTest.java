@@ -42,6 +42,7 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -764,6 +765,25 @@ class OperationResponseValidatorTest {
 
         // then
         assertValid(result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false,false", "true,true", "false,true"})
+    void validateCipherAttributeList_rejectsSchemasThatAllowUnlistedAlgorithms(boolean list, boolean extensibleList) {
+        // given
+        DataAttributeV3 definition = encryptionDefinition();
+        definition.getProperties().setList(list);
+        definition.getProperties().setExtensibleList(extensibleList);
+        List<BaseAttribute> schema = List.of(definition);
+        String expectedMessage = "The attribute with name 'encryptionAlgorithm' and UUID '"
+                + EncryptionAlgorithmAttribute.ATTRIBUTE_UUID
+                + "' must be a required, single-select, non-extensible list";
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCipherAttributeList(schema);
+
+        // then
+        assertInvalid(result, expectedMessage);
     }
 
     @Test

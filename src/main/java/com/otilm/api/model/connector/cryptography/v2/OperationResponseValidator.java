@@ -138,7 +138,7 @@ public final class OperationResponseValidator extends ResponseChecks {
                 && option.getData() instanceof String code && SignatureAlgorithm.lookupByCode(code).isPresent();
     }
 
-    /** Encrypt/decrypt schemas must publish encryptionAlgorithm as a required choice of known algorithm codes. */
+    /** Encrypt/decrypt schemas must publish encryptionAlgorithm as a required closed list of known algorithm codes. */
     public OperationValidationResult validateCipherAttributeList(List<BaseAttribute> response) {
         OperationValidationResult validationResult = validateAttributeList(response);
         if (!validationResult.isValid()) {
@@ -163,8 +163,10 @@ public final class OperationResponseValidator extends ResponseChecks {
             throw new IllegalArgumentException("Cipher attributes must declare exactly one v3 " + identity);
         }
         DataAttributeProperties properties = definition.getProperties();
-        if (properties == null || !properties.isRequired() || properties.isMultiSelect()) {
-            throw new IllegalArgumentException("The " + identity + " must be required and single-select");
+        if (properties == null || !properties.isRequired() || properties.isMultiSelect() || !properties.isList()
+                || properties.isExtensibleList()) {
+            throw new IllegalArgumentException(
+                    "The " + identity + " must be a required, single-select, non-extensible list");
         }
         List<? extends AttributeContent> options = definition.getContent();
         if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
