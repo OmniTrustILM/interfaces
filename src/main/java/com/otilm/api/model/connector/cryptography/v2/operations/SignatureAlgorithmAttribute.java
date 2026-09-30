@@ -4,6 +4,7 @@ import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
+import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
@@ -76,7 +77,8 @@ public final class SignatureAlgorithmAttribute {
         if (!ATTRIBUTE_UUID.equals(selections.get(0).getUuid()) || !NAME.equals(selections.get(0).getName())) {
             throw noSelection();
         }
-        if (!(selections.get(0) instanceof RequestAttributeV3 selection)) {
+        if (!(selections.get(0) instanceof RequestAttributeV3 selection)
+                || selection.getVersion() != AttributeVersion.V3) {
             throw new ValidationException(ValidationError
                     .create("Signature attribute with name '{}' and UUID '{}' must be a v3 attribute.", NAME,
                             ATTRIBUTE_UUID));
@@ -85,7 +87,9 @@ public final class SignatureAlgorithmAttribute {
         if (values == null || values.size() != 1 || values.get(0) == null || values.get(0).getData() == null) {
             throw noSelection();
         }
-        if (!(values.get(0) instanceof StringAttributeContentV3 value)) {
+        if (!(values.get(0) instanceof StringAttributeContentV3 value)
+                || selection.getContentType() != AttributeContentType.STRING
+                || value.getContentType() != AttributeContentType.STRING) {
             throw new ValidationException(ValidationError
                     .create("Signature attribute with name '{}' and UUID '{}' must carry a string value.", NAME,
                             ATTRIBUTE_UUID));

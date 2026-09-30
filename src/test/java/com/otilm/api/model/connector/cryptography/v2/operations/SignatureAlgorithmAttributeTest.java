@@ -5,6 +5,7 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.attribute.RequestAttributeV2;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
+import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
@@ -25,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,6 +61,60 @@ class SignatureAlgorithmAttributeTest {
 
         // then
         assertEquals(algorithm, selected);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = AttributeVersion.class, names = "V3", mode = EnumSource.Mode.EXCLUDE)
+    void selectedAlgorithm_rejectsAMissingOrIncorrectVersion(AttributeVersion version) {
+        // given
+        RequestAttributeV3 selection = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        selection.setVersion(version);
+        List<RequestAttribute> attributes = List.of(selection);
+        String expectedMessage = "Signature attribute with name 'signatureAlgorithm' and UUID '"
+                + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "' must be a v3 attribute.";
+
+        // when
+        Executable read = () -> SignatureAlgorithmAttribute.selectedAlgorithm(attributes);
+
+        // then
+        assertEquals(expectedMessage, assertThrows(ValidationException.class, read).getMessage());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = AttributeContentType.class, names = "STRING", mode = EnumSource.Mode.EXCLUDE)
+    void selectedAlgorithm_rejectsAMissingOrIncorrectEnvelopeContentType(AttributeContentType contentType) {
+        // given
+        RequestAttributeV3 selection = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        selection.setContentType(contentType);
+        List<RequestAttribute> attributes = List.of(selection);
+        String expectedMessage = "Signature attribute with name 'signatureAlgorithm' and UUID '"
+                + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "' must carry a string value.";
+
+        // when
+        Executable read = () -> SignatureAlgorithmAttribute.selectedAlgorithm(attributes);
+
+        // then
+        assertEquals(expectedMessage, assertThrows(ValidationException.class, read).getMessage());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = AttributeContentType.class, names = "STRING", mode = EnumSource.Mode.EXCLUDE)
+    void selectedAlgorithm_rejectsAMissingOrIncorrectItemContentType(AttributeContentType contentType) {
+        // given
+        RequestAttributeV3 selection = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        selection.getContent().get(0).setContentType(contentType);
+        List<RequestAttribute> attributes = List.of(selection);
+        String expectedMessage = "Signature attribute with name 'signatureAlgorithm' and UUID '"
+                + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "' must carry a string value.";
+
+        // when
+        Executable read = () -> SignatureAlgorithmAttribute.selectedAlgorithm(attributes);
+
+        // then
+        assertEquals(expectedMessage, assertThrows(ValidationException.class, read).getMessage());
     }
 
     @Test
