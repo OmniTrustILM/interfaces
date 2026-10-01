@@ -10,65 +10,60 @@ import com.otilm.api.model.common.attribute.common.properties.DataAttributePrope
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
-import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
+import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * The sign attribute through which a cryptography provider v2 lets the caller choose the signature algorithm. Its UUID,
- * name and values are part of the contract, so a caller that must name the algorithm before the signature exists reads
- * it from the selection.
- */
-public final class SignatureAlgorithmAttribute {
+/** Reserved v2 encryption/decryption selector. Its UUID, name and algorithm codes are shared across connectors. */
+public final class EncryptionAlgorithmAttribute {
+    public static final String NAME = "encryptionAlgorithm";
+    public static final UUID ATTRIBUTE_UUID = UUID.fromString("5e364467-fa95-4253-907b-0c73cdfb2be7");
 
-    public static final String NAME = "signatureAlgorithm";
-    public static final UUID ATTRIBUTE_UUID = UUID.fromString("9180267f-c82f-4b7b-8160-d2363d813869");
-
-    private SignatureAlgorithmAttribute() {
+    private EncryptionAlgorithmAttribute() {
     }
 
-    /** The definition a provider publishes from {@code /sign/attributes}, offering the algorithms the key supports. */
-    public static DataAttributeV3 definition(Collection<SignatureAlgorithm> supported) {
+    /** A key-scoped encrypt/decrypt schema offers only the profiles that the key and backend support. */
+    public static DataAttributeV3 definition(Collection<EncryptionAlgorithm> supported) {
+        Objects.requireNonNull(supported, "supported must not be null");
         DataAttributeProperties properties = new DataAttributeProperties();
-        properties.setLabel("Signature Algorithm");
+        properties.setLabel("Encryption Algorithm");
         properties.setRequired(true);
         properties.setVisible(true);
         properties.setList(true);
         properties.setMultiSelect(false);
         properties.setReadOnly(false);
-
-        DataAttributeV3 attribute = new DataAttributeV3();
-        attribute.setUuid(ATTRIBUTE_UUID.toString());
-        attribute.setName(NAME);
-        attribute.setDescription("Signature algorithm the signature is produced with");
-        attribute.setContentType(AttributeContentType.STRING);
-        attribute.setProperties(properties);
-        attribute.setContent(supported.stream().map(SignatureAlgorithmAttribute::content).toList());
-        return attribute;
+        DataAttributeV3 definition = new DataAttributeV3();
+        definition.setUuid(ATTRIBUTE_UUID.toString());
+        definition.setName(NAME);
+        definition.setDescription("Encryption algorithm used to encrypt or decrypt the data");
+        definition.setContentType(AttributeContentType.STRING);
+        definition.setProperties(properties);
+        definition.setContent(supported.stream().map(EncryptionAlgorithmAttribute::content).toList());
+        return definition;
     }
 
-    public static RequestAttributeV3 request(SignatureAlgorithm algorithm) {
+    public static RequestAttributeV3 request(EncryptionAlgorithm algorithm) {
+        Objects.requireNonNull(algorithm, "algorithm must not be null");
         return new RequestAttributeV3(ATTRIBUTE_UUID, NAME, AttributeContentType.STRING, List.of(content(algorithm)));
     }
 
     /**
-     * The signature attributes must select exactly one platform signature algorithm, through a single v3 attribute with
-     * {@link #ATTRIBUTE_UUID} and {@link #NAME}. No other attribute may use either reserved identifier.
-     *
-     * @throws ValidationException when the signature attributes break that rule
+     * Reads exactly one v3 string selection with {@link #ATTRIBUTE_UUID} and {@link #NAME}. No other attribute may use
+     * either reserved identifier.
      */
-    public static SignatureAlgorithm selectedAlgorithm(List<? extends RequestAttribute> signatureAttributes) {
-        List<? extends RequestAttribute> selections = signatureAttributes == null
+    public static EncryptionAlgorithm selectedAlgorithm(List<? extends RequestAttribute> cipherAttributes) {
+        List<? extends RequestAttribute> selections = cipherAttributes == null
                 ? List.of()
-                : signatureAttributes
+                : cipherAttributes
                         .stream()
                         .filter(attribute -> attribute != null
                                 && (ATTRIBUTE_UUID.equals(attribute.getUuid()) || NAME.equals(attribute.getName())))
                         .toList();
         if (selections.size() > 1) {
             throw new ValidationException(ValidationError
-                    .create("Signature attribute with name '{}' and UUID '{}' must be supplied once.", NAME,
+                    .create("Cipher attribute with name '{}' and UUID '{}' must be supplied once.", NAME,
                             ATTRIBUTE_UUID));
         }
         if (selections.isEmpty()) {
@@ -80,7 +75,7 @@ public final class SignatureAlgorithmAttribute {
         if (!(selections.get(0) instanceof RequestAttributeV3 selection)
                 || selection.getVersion() != AttributeVersion.V3) {
             throw new ValidationException(ValidationError
-                    .create("Signature attribute with name '{}' and UUID '{}' must be a v3 attribute.", NAME,
+                    .create("Cipher attribute with name '{}' and UUID '{}' must be a v3 attribute.", NAME,
                             ATTRIBUTE_UUID));
         }
         List<BaseAttributeContentV3<?>> values = selection.getContent();
@@ -91,19 +86,20 @@ public final class SignatureAlgorithmAttribute {
                 || selection.getContentType() != AttributeContentType.STRING
                 || value.getContentType() != AttributeContentType.STRING) {
             throw new ValidationException(ValidationError
-                    .create("Signature attribute with name '{}' and UUID '{}' must carry a string value.", NAME,
+                    .create("Cipher attribute with name '{}' and UUID '{}' must carry a string value.", NAME,
                             ATTRIBUTE_UUID));
         }
-        return SignatureAlgorithm.findByCode(value.getData());
+        return EncryptionAlgorithm.findByCode(value.getData());
     }
 
     private static ValidationException noSelection() {
         return new ValidationException(ValidationError
-                .create("Signature attributes must select one value of the attribute with name '{}' and UUID '{}'.",
-                        NAME, ATTRIBUTE_UUID));
+                .create("Cipher attributes must select one value of the attribute with name '{}' and UUID '{}'.", NAME,
+                        ATTRIBUTE_UUID));
     }
 
-    private static StringAttributeContentV3 content(SignatureAlgorithm algorithm) {
+    private static StringAttributeContentV3 content(EncryptionAlgorithm algorithm) {
+        Objects.requireNonNull(algorithm, "algorithm must not be null");
         return new StringAttributeContentV3(algorithm.getLabel(), algorithm.getCode());
     }
 }

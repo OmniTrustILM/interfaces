@@ -70,7 +70,7 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listEncryptAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateCipherAttributeList(response), connector);
         return response;
     }
 
@@ -96,7 +96,7 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listDecryptAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateCipherAttributeList(response), connector);
         return response;
     }
 

@@ -8,6 +8,7 @@ import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
+import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
@@ -25,6 +26,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.PublicKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.EncryptionAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
@@ -34,11 +36,13 @@ import java.security.KeyPairGenerator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -606,28 +610,35 @@ class OperationResponseValidatorTest {
     }
 
     @Test
-    void validateSignAttributeList_findsTheSignatureAlgorithmAfterOtherAttributes() {
+    void validateSignAttributeList_rejectsTheReservedUuidAndNameOnDifferentAttributes() {
         // given
+        String providerName = "signatureScheme";
         DataAttributeV3 other = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
-        other.setName("signatureScheme");
-        List<BaseAttribute> schema = List
-                .of(other, SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+        other.setUuid(UUID.randomUUID().toString());
+        DataAttributeV3 definition = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        definition.setName(providerName);
+        List<BaseAttribute> schema = List.of(other, definition);
 
         // when
         OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
 
         // then
-        assertValid(result);
+        assertInvalid(result);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("signatureAlgorithmOffersOfAnotherAttributeKind")
     void validateSignAttributeList_rejectsAnOfferThatIsNotAV3DataAttribute(BaseAttribute definition) {
+        // given
+        List<BaseAttribute> schema = List.of(definition);
+
         // when
-        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
 
         // then
-        assertInvalid(result, "Sign attributes must declare signatureAlgorithm as a v3 data attribute");
+        assertInvalid(result,
+                "Sign attributes must declare exactly one v3 attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869'");
     }
 
     @ParameterizedTest(name = "{0}")
@@ -637,20 +648,40 @@ class OperationResponseValidatorTest {
         OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
 
         // then
-        assertInvalid(result, "signatureAlgorithm must be a required single-select attribute");
+        assertInvalid(result,
+                "The attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must be required and single-select");
     }
 
     @Test
     void validateSignAttributeList_rejectsASchemaWithoutTheSignatureAlgorithm() {
         // given
         DataAttributeV3 unrelated = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
-        unrelated.setName("signatureScheme");
+        unrelated.setUuid(UUID.randomUUID().toString());
 
         // when
         OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(unrelated));
 
         // then
-        assertInvalid(result, "Sign attributes must declare signatureAlgorithm as a v3 data attribute");
+        assertInvalid(result,
+                "Sign attributes must declare exactly one v3 attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869'");
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsDuplicateUuidsWithDifferentNames() {
+        // given
+        String aliasName = "signatureScheme";
+        DataAttributeV3 definition = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        DataAttributeV3 alias = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        alias.setName(aliasName);
+        List<BaseAttribute> schema = List.of(definition, alias);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "Sign attributes must declare exactly one v3 attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869'");
     }
 
     @ParameterizedTest(name = "{0}")
@@ -660,7 +691,8 @@ class OperationResponseValidatorTest {
         OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
 
         // then
-        assertInvalid(result, "signatureAlgorithm must offer at least one value, and only signature algorithm codes");
+        assertInvalid(result,
+                "The attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must offer at least one value, and only signature algorithm codes");
     }
 
     @Test
@@ -708,6 +740,7 @@ class OperationResponseValidatorTest {
     static Stream<Named<BaseAttribute>> signatureAlgorithmOffersOfAnotherAttributeKind() {
         InfoAttributeV3 info = new InfoAttributeV3();
         info.setName(SignatureAlgorithmAttribute.NAME);
+        info.setUuid(SignatureAlgorithmAttribute.ATTRIBUTE_UUID.toString());
         DataAttributeV3 offer = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
         DataAttributeV2 v2Offer = new DataAttributeV2();
         v2Offer.setUuid(offer.getUuid());
@@ -716,6 +749,115 @@ class OperationResponseValidatorTest {
         v2Offer.setProperties(offer.getProperties());
         v2Offer.setContent(List.of(new StringAttributeContentV2(SignatureAlgorithm.SHA256_WITH_RSA.getCode())));
         return Stream.of(named("an info attribute", info), named("a v2 data attribute", v2Offer));
+    }
+
+    @Test
+    void validateCipherAttributeList_acceptsTheRequiredAlgorithmAlongsideOtherAttributes() {
+        // given
+        DataAttributeV3 definition = encryptionDefinition();
+        DataAttributeV3 other = encryptionDefinition();
+        other.setName("providerOption");
+        other.setUuid(UUID.randomUUID().toString());
+        List<BaseAttribute> schema = List.of(other, definition);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCipherAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false,false", "true,true", "false,true"})
+    void validateCipherAttributeList_rejectsSchemasThatAllowUnlistedAlgorithms(boolean list, boolean extensibleList) {
+        // given
+        DataAttributeV3 definition = encryptionDefinition();
+        definition.getProperties().setList(list);
+        definition.getProperties().setExtensibleList(extensibleList);
+        List<BaseAttribute> schema = List.of(definition);
+        String expectedMessage = "The attribute with name 'encryptionAlgorithm' and UUID '"
+                + EncryptionAlgorithmAttribute.ATTRIBUTE_UUID
+                + "' must be a required, single-select, non-extensible list";
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCipherAttributeList(schema);
+
+        // then
+        assertInvalid(result, expectedMessage);
+    }
+
+    @Test
+    void validateCipherAttributeList_rejectsTheReservedUuidAndNameOnDifferentAttributes() {
+        // given
+        String providerName = "providerAlgorithm";
+        DataAttributeV3 definition = encryptionDefinition();
+        definition.setName(providerName);
+        DataAttributeV3 sameNameDifferentUuid = encryptionDefinition();
+        sameNameDifferentUuid.setUuid(UUID.randomUUID().toString());
+        List<BaseAttribute> schema = List.of(sameNameDifferentUuid, definition);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCipherAttributeList(schema);
+
+        // then
+        assertInvalid(result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidEncryptionSchemas")
+    void validateCipherAttributeList_rejectsSchemasOutsideTheEncryptionContract(List<BaseAttribute> schema) {
+        // given
+        // when
+        OperationValidationResult result = VALIDATOR.validateCipherAttributeList(schema);
+
+        // then
+        assertInvalid(result);
+    }
+
+    static Stream<Named<List<BaseAttribute>>> invalidEncryptionSchemas() {
+        DataAttributeV3 optional = encryptionDefinition();
+        optional.getProperties().setRequired(false);
+        DataAttributeV3 multiSelect = encryptionDefinition();
+        multiSelect.getProperties().setMultiSelect(true);
+        DataAttributeV3 noProperties = encryptionDefinition();
+        noProperties.setProperties(null);
+        DataAttributeV3 unknownAlgorithm = encryptionDefinition();
+        unknownAlgorithm.setContent(List.of(new StringAttributeContentV3("AES/GCM/NoPadding")));
+        DataAttributeV3 noContent = encryptionDefinition();
+        noContent.setContent(null);
+        DataAttributeV3 emptyContent = EncryptionAlgorithmAttribute.definition(List.of());
+        DataAttributeV3 wrongType = encryptionDefinition();
+        wrongType.setContentType(AttributeContentType.INTEGER);
+        DataAttributeV3 nullOption = encryptionDefinition();
+        nullOption.setContent(Collections.singletonList(null));
+        DataAttributeV3 emptyOption = encryptionDefinition();
+        emptyOption.setContent(List.of(new StringAttributeContentV3()));
+        DataAttributeV3 wrongUuid = encryptionDefinition();
+        wrongUuid.setUuid(UUID.randomUUID().toString());
+        DataAttributeV3 wrongName = encryptionDefinition();
+        wrongName.setName("otherSelector");
+        DataAttributeV2 oldEnvelope = new DataAttributeV2();
+        oldEnvelope.setName(EncryptionAlgorithmAttribute.NAME);
+        oldEnvelope.setUuid(EncryptionAlgorithmAttribute.ATTRIBUTE_UUID.toString());
+        oldEnvelope.setContentType(AttributeContentType.STRING);
+        oldEnvelope.setProperties(encryptionDefinition().getProperties());
+        oldEnvelope.setContent(List.of(new StringAttributeContentV2(EncryptionAlgorithm.RSA_PKCS1_V1_5.getCode())));
+        return Stream
+                .of(named("null schema", null), named("empty schema", List.of()),
+                        named("null definition", Collections.singletonList(null)), named("optional", List.of(optional)),
+                        named("multi-select", List.of(multiSelect)), named("no properties", List.of(noProperties)),
+                        named("unknown algorithm", List.of(unknownAlgorithm)), named("no content", List.of(noContent)),
+                        named("empty content", List.of(emptyContent)), named("wrong content type", List.of(wrongType)),
+                        named("null option", List.of(nullOption)), named("empty option", List.of(emptyOption)),
+                        named("wrong UUID", List.of(wrongUuid)),
+                        named("duplicate definition", List.of(encryptionDefinition(), encryptionDefinition())),
+                        named("aliased UUID", List.of(encryptionDefinition(), wrongName)),
+                        named("v2 envelope", List.of(oldEnvelope)));
+    }
+
+    private static DataAttributeV3 encryptionDefinition() {
+        return EncryptionAlgorithmAttribute
+                .definition(List.of(EncryptionAlgorithm.RSA_PKCS1_V1_5, EncryptionAlgorithm.RSA_OAEP_SHA256));
     }
 
     static Stream<Named<CreateKeyCase>> validCreateKeyResponses() {

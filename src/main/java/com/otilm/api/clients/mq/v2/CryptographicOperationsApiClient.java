@@ -57,7 +57,7 @@ public class CryptographicOperationsApiClient implements CryptographicOperations
             throws ConnectorException {
         List<BaseAttribute> response = sendAttributes(connector, ENCRYPT_ATTRIBUTES_PATH, request,
                 "listEncryptAttributes");
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateCipherAttributeList(response), connector);
         return response;
     }
 
@@ -74,7 +74,7 @@ public class CryptographicOperationsApiClient implements CryptographicOperations
             throws ConnectorException {
         List<BaseAttribute> response = sendAttributes(connector, DECRYPT_ATTRIBUTES_PATH, request,
                 "listDecryptAttributes");
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateCipherAttributeList(response), connector);
         return response;
     }
 
