@@ -203,4 +203,19 @@ class ListViewColumnDtoTest {
         assertNull(dto.getStatus());
         assertNull(dto.getRebind());
     }
+
+    @Test
+    void tellsAnEmptyBindingApartFromAnAbsentOne() throws Exception {
+        // given — bound while the definition was already gone, which never resolves again
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department|STRING", null);
+        dto.setAttributeDefinitionUuids(List.of());
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+        var back = mapper.readValue(json, ListViewColumnDto.class);
+
+        // then
+        assertTrue(json.contains("\"attributeDefinitionUuids\":[]"));
+        assertEquals(List.of(), back.getAttributeDefinitionUuids());
+    }
 }

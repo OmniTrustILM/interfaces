@@ -25,10 +25,12 @@ public class ListViewFilterDto extends SearchFilterRequestDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ArraySchema(schema = @Schema(format = "uuid", example = "6f1d2c1e-6c3a-4c5e-9f0a-2b7d8e9f0a1b"),
             arraySchema = @Schema(accessMode = Schema.AccessMode.READ_ONLY,
-                    requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = """
+                    requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                    description = """
                             Attribute definitions the filter is bound to, set by the server when the filter is \
-                            added or rebound. Absent for a property filter. Empty for an attribute filter whose \
-                            definition was already gone when the binding was recorded. A value sent in a request is \
+                            added or rebound. Absent for a property filter. Only definitions of the \
+                            view's resource count. Empty for an attribute filter whose definition was already gone when \
+                            stored views were first bound. A value sent in a request is \
                             ignored."""))
     private List<UUID> attributeDefinitionUuids;
 
@@ -45,9 +47,11 @@ public class ListViewFilterDto extends SearchFilterRequestDto {
             defaultValue = "false", description = """
                     Set to true to bind an attribute filter the view already holds to the attribute definitions now \
                     behind its identifier, which is how a client accepts a `replaced` filter. The filter is then \
-                    held to the catalogue as a newly added one. Absent or false keeps the binding of a filter the \
-                    view already holds unchanged; any other filter is bound to the current definitions. Has no \
-                    effect on a property filter, and is not stored.""")
+                    held to the catalogue as a newly added one. Absent or false carries a filter the view already \
+                    holds over: while it still resolves it follows the definitions currently behind its \
+                    identifier, and once it no longer does it keeps the binding it had, so a replacement never \
+                    takes it over. Any other filter is bound to the current definitions. Has no effect on a \
+                    property filter, and is not stored.""")
     private Boolean rebind;
 
     public ListViewFilterDto(FilterFieldSource fieldSource, String fieldIdentifier, FilterConditionOperator condition,

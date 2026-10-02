@@ -32,8 +32,8 @@ public class ListViewUpdateRequestDto {
             Columns of the view, in display order. A column whose field the resource no longer defines, such as a \
             deleted attribute, or can no longer show as a column is accepted only when editing a view that already \
             holds it; a new view may name only fields the resource defines and can show. A column the view already \
-            holds keeps the attribute definitions it is bound to unless it is sent with `rebind`.""",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            holds is never bound to a replacement definition unless it is sent with `rebind`; see the column's \
+            `rebind` for how its binding is carried over.""", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<@NotNull ListViewColumnDto> columns;
 
     @Schema(description = "Whether this view applies when the listing is opened. At most one view per user and "
@@ -45,8 +45,9 @@ public class ListViewUpdateRequestDto {
     @Schema(description = """
             Filters the view applies. Absent or empty means the view applies no filter of its own and shows the \
             whole inventory. A filter on a field the resource no longer defines is accepted only when editing a view \
-            that already holds that exact filter, which then keeps the attribute definitions it is bound to unless it \
-            is sent with `rebind`.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            that already holds that exact filter. A filter the view already holds is never bound to a replacement \
+            definition unless it is sent with `rebind`; see the filter's `rebind` for how its binding is carried \
+            over.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<@NotNull ListViewFilterDto> filters;
 
     @Valid

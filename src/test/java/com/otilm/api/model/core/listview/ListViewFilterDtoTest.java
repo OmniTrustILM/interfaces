@@ -102,4 +102,19 @@ class ListViewFilterDtoTest {
         // then
         assertEquals(3, violations.size());
     }
+
+    @Test
+    void tellsAnEmptyBindingApartFromAnAbsentOne() throws Exception {
+        // given — bound while the definition was already gone, which never resolves again
+        var dto = new ListViewFilterDto(FilterFieldSource.CUSTOM, "team|STRING", FilterConditionOperator.EMPTY, null);
+        dto.setAttributeDefinitionUuids(List.of());
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+        var back = mapper.readValue(json, ListViewFilterDto.class);
+
+        // then
+        assertTrue(json.contains("\"attributeDefinitionUuids\":[]"));
+        assertEquals(List.of(), back.getAttributeDefinitionUuids());
+    }
 }
