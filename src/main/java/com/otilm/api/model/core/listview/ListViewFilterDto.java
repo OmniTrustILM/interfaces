@@ -46,8 +46,8 @@ public class ListViewFilterDto extends SearchFilterRequestDto {
     @Schema(accessMode = Schema.AccessMode.WRITE_ONLY, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             defaultValue = "false", description = """
                     Set to true to bind an attribute filter the view already holds to the attribute definitions now \
-                    behind its identifier, which is how a client accepts a `replaced` filter. The filter is then \
-                    held to the catalogue as a newly added one. Absent or false carries a filter the view already \
+                    behind its identifier, which is how a client accepts a `replaced` filter. Absent or false \
+                    carries a filter the view already \
                     holds over: while it still resolves it follows the definitions currently behind its \
                     identifier, and once it no longer does it keeps the binding it had, so a replacement never \
                     takes it over. Any other filter is bound to the current definitions. Any filter sent with \
