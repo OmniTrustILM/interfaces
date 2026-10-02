@@ -1,6 +1,7 @@
 package com.otilm.api.model.core.listview;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.certificate.SearchFilterRequestDto;
 import com.otilm.api.model.core.search.FilterConditionOperator;
 import com.otilm.api.model.core.search.FilterFieldSource;
@@ -43,6 +44,7 @@ public class ListViewFilterDto extends SearchFilterRequestDto {
     private ListViewFieldStatus status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(accessMode = Schema.AccessMode.WRITE_ONLY, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             defaultValue = "false", description = """
                     Set to true to bind an attribute filter the view already holds to the attribute definitions now \

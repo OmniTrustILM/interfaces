@@ -51,6 +51,32 @@ class ListViewFilterDtoTest {
     }
 
     @Test
+    void readsTheRebindFlagFromAClient() throws Exception {
+        // when
+        var dto = mapper
+                .readValue(
+                        """
+                                {"fieldSource":"custom","fieldIdentifier":"team|STRING","condition":"EQUALS","value":"pki","rebind":true}""",
+                        ListViewFilterDto.class);
+
+        // then
+        assertEquals(Boolean.TRUE, dto.getRebind());
+    }
+
+    @Test
+    void neverWritesTheRebindFlagBackOut() throws Exception {
+        // given
+        var dto = new ListViewFilterDto(FilterFieldSource.CUSTOM, "team|STRING", FilterConditionOperator.EQUALS, "pki");
+        dto.setRebind(true);
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+
+        // then
+        assertFalse(json.contains("rebind"), json);
+    }
+
+    @Test
     void omitsTheBindingTheStatusAndTheRebindFlagWhenNoneIsSet() throws Exception {
         // when
         var json = mapper

@@ -193,6 +193,19 @@ class ListViewColumnDtoTest {
     }
 
     @Test
+    void neverWritesTheRebindFlagBackOut() throws Exception {
+        // given
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department|STRING", null);
+        dto.setRebind(true);
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+
+        // then
+        assertFalse(json.contains("rebind"), json);
+    }
+
+    @Test
     void readsAColumnWrittenBeforeBindingExistedAsUnbound() throws Exception {
         // when
         var dto = mapper.readValue("""
