@@ -1,6 +1,5 @@
 package com.otilm.api.model.core.listview;
 
-import com.otilm.api.model.client.certificate.SearchFilterRequestDto;
 import com.otilm.api.model.client.certificate.SearchSortRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -29,9 +28,11 @@ public class ListViewUpdateRequestDto {
 
     @NotEmpty
     @Valid
-    @Schema(description = "Columns of the view, in display order. A column whose field the resource no longer defines, "
-            + "such as a deleted attribute, or can no longer show as a column is accepted only when editing a view "
-            + "that already holds it; a new view may name only fields the resource defines and can show.",
+    @Schema(description = """
+            Columns of the view, in display order. A column whose field the resource no longer defines, such as a \
+            deleted attribute, or can no longer show as a column is accepted only when editing a view that already \
+            holds it; a new view may name only fields the resource defines and can show. A column the view already \
+            holds keeps the attribute definitions it is bound to unless it is sent with `rebind`.""",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<@NotNull ListViewColumnDto> columns;
 
@@ -41,10 +42,12 @@ public class ListViewUpdateRequestDto {
     private boolean defaultView;
 
     @Valid
-    @Schema(description = "Filters the view applies. Absent or empty means the view applies no filter of its own and "
-            + "shows the whole inventory. A filter on a field the resource no longer defines is accepted only when "
-            + "editing a view that already filters on that field.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<@NotNull SearchFilterRequestDto> filters;
+    @Schema(description = """
+            Filters the view applies. Absent or empty means the view applies no filter of its own and shows the \
+            whole inventory. A filter on a field the resource no longer defines is accepted only when editing a view \
+            that already holds that exact filter, which then keeps the attribute definitions it is bound to unless it \
+            is sent with `rebind`.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<@NotNull ListViewFilterDto> filters;
 
     @Valid
     @Schema(description = "Ordering the view applies. Absent means the view falls back to the endpoint's own default "

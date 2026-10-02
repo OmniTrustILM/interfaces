@@ -2,7 +2,6 @@ package com.otilm.api.model.core.listview;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otilm.api.model.client.certificate.SearchFilterRequestDto;
 import com.otilm.api.model.client.certificate.SearchSortRequestDto;
 import com.otilm.api.model.core.search.FilterConditionOperator;
 import com.otilm.api.model.core.search.FilterFieldSource;
@@ -104,7 +103,7 @@ class ListViewUpdateRequestDtoTest {
         var dto = new ListViewUpdateRequestDto();
         dto.setName("Expiry watch");
         dto.setColumns(List.of(new ListViewColumnDto(FilterFieldSource.PROPERTY, "commonName", null)));
-        dto.setFilters(List.of(new SearchFilterRequestDto()));
+        dto.setFilters(List.of(new ListViewFilterDto()));
 
         // when
         var violations = VALIDATOR.validate(dto);
@@ -122,7 +121,7 @@ class ListViewUpdateRequestDtoTest {
         dto.setColumns(List.of(new ListViewColumnDto(FilterFieldSource.PROPERTY, "commonName", null)));
         dto
                 .setFilters(List
-                        .of(new SearchFilterRequestDto(FilterFieldSource.PROPERTY, "commonName",
+                        .of(new ListViewFilterDto(FilterFieldSource.PROPERTY, "commonName",
                                 FilterConditionOperator.EMPTY, null)));
 
         // then
