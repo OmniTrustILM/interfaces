@@ -50,8 +50,9 @@ public class ListViewFilterDto extends SearchFilterRequestDto {
                     held to the catalogue as a newly added one. Absent or false carries a filter the view already \
                     holds over: while it still resolves it follows the definitions currently behind its \
                     identifier, and once it no longer does it keeps the binding it had, so a replacement never \
-                    takes it over. Any other filter is bound to the current definitions. Has no effect on a \
-                    property filter, and is not stored.""")
+                    takes it over. Any other filter is bound to the current definitions. Any filter sent with \
+                    rebind is held to the catalogue as a newly added one, property filters included, but only an \
+                    attribute filter has a binding to change. The flag is not stored.""")
     private Boolean rebind;
 
     public ListViewFilterDto(FilterFieldSource fieldSource, String fieldIdentifier, FilterConditionOperator condition,

@@ -76,8 +76,9 @@ public class ListViewColumnDto {
                     held to the catalogue as a newly added one. Absent or false carries a column the view already \
                     holds over: while it still resolves it follows the definitions currently behind its \
                     identifier, and once it no longer does it keeps the binding it had, so a replacement never \
-                    takes it over. Any other column is bound to the current definitions. Has no effect on a \
-                    property column, and is not stored.""")
+                    takes it over. Any other column is bound to the current definitions. Any column sent with \
+                    rebind is held to the catalogue as a newly added one, property columns included, but only an \
+                    attribute column has a binding to change. The flag is not stored.""")
     private Boolean rebind;
 
     public ListViewColumnDto(FilterFieldSource fieldSource, String fieldIdentifier, String label) {

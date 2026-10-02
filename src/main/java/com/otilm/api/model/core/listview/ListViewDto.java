@@ -50,7 +50,8 @@ public class ListViewDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = """
             Ordering the view applies. Absent means the endpoint's own default ordering, which is also what a stored \
-            ordering reads back as once the listing cannot order by it or it names a column that is not \
-            `available`.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            ordering reads back as once the listing cannot order by its field, or once that field is an attribute \
+            no longer backed by the definitions the ordering was bound to when it was saved.""",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private SearchSortRequestDto sort;
 }
