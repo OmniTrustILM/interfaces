@@ -1,6 +1,5 @@
 package com.otilm.api.model.core.listview;
 
-import com.otilm.api.model.client.certificate.SearchSortRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -51,7 +50,10 @@ public class ListViewUpdateRequestDto {
     private List<@NotNull ListViewFilterDto> filters;
 
     @Valid
-    @Schema(description = "Ordering the view applies. Absent means the view falls back to the endpoint's own default "
-            + "ordering.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SearchSortRequestDto sort;
+    @Schema(description = """
+            Ordering the view applies. Absent means the view falls back to the endpoint's own default ordering. An \
+            ordering the view already holds is never bound to a replacement definition unless it is sent with \
+            `rebind`; see the ordering's `rebind` for how its binding is carried over.""",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ListViewSortRequestDto sort;
 }

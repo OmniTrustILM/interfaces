@@ -15,7 +15,7 @@ public enum ListViewFieldStatus implements IPlatformEnum {
     AVAILABLE("available", "Available",
             "The field is in the catalogue and, for an attribute, is still backed by a definition the column or filter was bound to"),
     UNAVAILABLE("unavailable", "Unavailable",
-            "The catalogue has no field under this identifier for the caller, for example because the attribute was deleted"),
+            "The column or filter cannot be used as stored: the catalogue has no field under this identifier for the caller, for example because the attribute was deleted; no current definition backs the attribute; or the listing can no longer use the entry, as with a column it cannot display or a filter whose condition the field no longer accepts"),
     REPLACED("replaced", "Replaced",
             "The catalogue has a field under this identifier, but it is backed only by attribute definitions other than the ones the column or filter was bound to, so it is not the field the view was saved with");
 

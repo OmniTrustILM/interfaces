@@ -2,7 +2,6 @@ package com.otilm.api.model.core.listview;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otilm.api.model.client.certificate.SearchSortRequestDto;
 import com.otilm.api.model.core.search.FilterConditionOperator;
 import com.otilm.api.model.core.search.FilterFieldSource;
 import com.otilm.api.model.core.search.SortDirection;
@@ -53,7 +52,7 @@ class ListViewUpdateRequestDtoTest {
                 .setColumns(List
                         .of(new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", null),
                                 new ListViewColumnDto(FilterFieldSource.PROPERTY, "commonName", null)));
-        dto.setSort(new SearchSortRequestDto(FilterFieldSource.PROPERTY, "notAfter", SortDirection.ASC));
+        dto.setSort(new ListViewSortRequestDto(FilterFieldSource.PROPERTY, "notAfter", SortDirection.ASC));
 
         // when
         var back = mapper.readValue(mapper.writeValueAsString(dto), ListViewUpdateRequestDto.class);
