@@ -53,7 +53,9 @@ public class ListViewUpdateRequestDto {
     @Schema(description = """
             Ordering the view applies. Absent means the view falls back to the endpoint's own default ordering. An \
             ordering the view already holds is never bound to a replacement definition unless it is sent with \
-            `rebind`; see the ordering's `rebind` for how its binding is carried over.""",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            `rebind`; see the ordering's `rebind` for how its binding is carried over. Unlike a column or a filter, \
+            an ordering is refused once the listing no longer offers its field or can no longer order by it, even \
+            one the view already holds, so a client drops an ordering the view no longer returns rather than \
+            sending it back.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ListViewSortRequestDto sort;
 }

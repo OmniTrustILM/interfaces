@@ -25,11 +25,12 @@ public class ListViewSortRequestDto extends SearchSortRequestDto {
             defaultValue = "false", description = """
                     Set to true when the user chose this ordering now, to bind an attribute ordering to the \
                     attribute definitions currently behind its identifier. Absent or false carries an ordering \
-                    sent exactly as the view stores it - same field and direction - over: while it still resolves \
-                    it follows the definitions currently behind its identifier, and once it no longer does it keeps \
-                    the binding it had, so a replacement never takes it over and the view reads back without it. \
-                    Any other ordering is bound to the current definitions. Only an attribute ordering has a \
-                    binding to change. The flag is not stored.""")
+                    sent exactly as the view stores it - same field and direction - over, provided the listing \
+                    still offers its field and can order by it: while it still resolves it follows the definitions \
+                    currently behind its identifier, and once it no longer does, because the attribute was \
+                    replaced, it keeps the binding it had, so the replacement never takes it over and the view \
+                    reads back without it. Any other ordering is bound to the current definitions. Only an \
+                    attribute ordering has a binding to change. The flag is not stored.""")
     private Boolean rebind;
 
     public ListViewSortRequestDto(FilterFieldSource fieldSource, String fieldIdentifier, SortDirection direction) {
