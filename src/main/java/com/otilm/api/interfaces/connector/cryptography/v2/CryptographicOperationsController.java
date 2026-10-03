@@ -69,7 +69,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             @ApiResponse(responseCode = "200", description = "Data encrypted"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or the encryptionAlgorithm selection names an algorithm "
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/encrypt", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -94,7 +95,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             @ApiResponse(responseCode = "200", description = "Data decrypted"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or the encryptionAlgorithm selection names an algorithm "
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/decrypt", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -182,7 +184,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             @ApiResponse(responseCode = "200", description = "Signatures verified"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or a supplied verification parameter is not "
+                            + "supported by the connector or key (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/verify", consumes = MediaType.APPLICATION_JSON_VALUE,
