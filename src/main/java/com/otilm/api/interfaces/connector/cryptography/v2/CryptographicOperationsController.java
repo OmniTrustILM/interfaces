@@ -52,7 +52,9 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     // ---- Cipher ----
 
     @Operation(summary = "List encryption attributes",
-            description = "Returns the encryption parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the encryption parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema includes encryptionAlgorithm, a data attribute offering the encryption algorithms the key supports. "
+                    + "It must offer at least one value, and every offered value must be a code from the EncryptionAlgorithm enum.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Encryption attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -78,7 +80,9 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     EncryptDataResponseV2Dto encryptData(@RequestBody @Valid CipherDataRequestV2Dto request);
 
     @Operation(summary = "List decryption attributes",
-            description = "Returns the decryption parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the decryption parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema includes encryptionAlgorithm, a data attribute offering the encryption algorithms the key supports. "
+                    + "It must offer at least one value, and every offered value must be a code from the EncryptionAlgorithm enum.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Decryption attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -107,7 +111,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
 
     @Operation(summary = "List signing attributes",
             description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context. "
-                    + "The schema includes signatureAlgorithm, a v3 data attribute offering the signature algorithms the key supports.")
+                    + "The schema includes signatureAlgorithm, a data attribute offering the signature algorithms the key supports. "
+                    + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
