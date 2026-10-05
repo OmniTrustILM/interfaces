@@ -1,7 +1,5 @@
 package com.otilm.api.model.core.listview;
 
-import com.otilm.api.model.client.certificate.SearchFilterRequestDto;
-import com.otilm.api.model.client.certificate.SearchSortRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -29,7 +27,12 @@ public class ListViewUpdateRequestDto {
 
     @NotEmpty
     @Valid
-    @Schema(description = "Columns of the view, in display order", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = """
+            Columns of the view, in display order. A column whose field the resource no longer defines, such as a \
+            deleted attribute, or can no longer show as a column is accepted only when editing a view that already \
+            holds it; a new view may name only fields the resource defines and can show. A column the view already \
+            holds is never bound to a replacement definition unless it is sent with `rebind`; see the column's \
+            `rebind` for how its binding is carried over.""", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<@NotNull ListViewColumnDto> columns;
 
     @Schema(description = "Whether this view applies when the listing is opened. At most one view per user and "
@@ -38,12 +41,21 @@ public class ListViewUpdateRequestDto {
     private boolean defaultView;
 
     @Valid
-    @Schema(description = "Filters the view applies. Absent or empty means the view applies no filter of its own and "
-            + "shows the whole inventory.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<@NotNull SearchFilterRequestDto> filters;
+    @Schema(description = """
+            Filters the view applies. Absent or empty means the view applies no filter of its own and shows the \
+            whole inventory. A filter on a field the resource no longer defines is accepted only when editing a view \
+            that already holds that exact filter. A filter the view already holds is never bound to a replacement \
+            definition unless it is sent with `rebind`; see the filter's `rebind` for how its binding is carried \
+            over.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<@NotNull ListViewFilterDto> filters;
 
     @Valid
-    @Schema(description = "Ordering the view applies. Absent means the view falls back to the endpoint's own default "
-            + "ordering.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SearchSortRequestDto sort;
+    @Schema(description = """
+            Ordering the view applies. Absent means the view falls back to the endpoint's own default ordering. An \
+            ordering the view already holds is never bound to a replacement definition unless it is sent with \
+            `rebind`; see the ordering's `rebind` for how its binding is carried over. Unlike a column or a filter, \
+            an ordering is refused once the listing no longer offers its field or can no longer order by it, even \
+            one the view already holds, so a client drops an ordering the view no longer returns rather than \
+            sending it back.""", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ListViewSortRequestDto sort;
 }

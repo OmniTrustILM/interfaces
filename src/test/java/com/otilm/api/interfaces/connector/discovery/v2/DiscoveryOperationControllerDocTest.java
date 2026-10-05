@@ -2,7 +2,6 @@ package com.otilm.api.interfaces.connector.discovery.v2;
 
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
-import com.otilm.api.model.connector.discovery.v2.DiscoveryEvent;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryV2ScopedRequestDto;
@@ -40,7 +39,7 @@ class DiscoveryOperationControllerDocTest {
     @Test
     void everyOperationIsDocumented() {
         Method[] methods = DiscoveryOperationController.class.getDeclaredMethods();
-        assertTrue(methods.length >= 7, "expected at least 7 endpoints, found " + methods.length);
+        assertTrue(methods.length >= 6, "expected at least 6 endpoints, found " + methods.length);
 
         for (Method m : methods) {
             Operation op = m.getAnnotation(Operation.class);
@@ -94,7 +93,7 @@ class DiscoveryOperationControllerDocTest {
 
     @Test
     void everyLifecycleOperationDocumentsNotTracked404() {
-        List<String> lifecycleOps = List.of("status", "results", "stream", "stop", "resume", "cancel");
+        List<String> lifecycleOps = List.of("status", "results", "stop", "resume", "cancel");
         for (Method m : DiscoveryOperationController.class.getDeclaredMethods()) {
             if (!lifecycleOps.contains(m.getName())) {
                 continue;
@@ -117,37 +116,6 @@ class DiscoveryOperationControllerDocTest {
         assertNotNull(responses, "missing @ApiResponses on resume");
         boolean has410 = Arrays.stream(responses.value()).anyMatch(r -> r.responseCode().equals("410"));
         assertTrue(has410, "expected a documented 410 (checkpoint lost) on resume");
-    }
-
-    /**
-     * Without an explicit {@code content}, springdoc unwraps the method's return type ({@code Flux<DiscoveryEvent>})
-     * into a plain array schema, which tells a codegen client to parse the response body as a single JSON array — the
-     * opposite of the NDJSON contract (one event object per line) the operation's own description promises. This is the
-     * same argument {@link #every4xxOr5xxResponseDeclaresProblemDetailContent()} makes for error responses, extended to
-     * stream's 200.
-     */
-    @Test
-    void streamOperationDeclares200AsNdjsonOfDiscoveryEvent() {
-        Method stream = Arrays
-                .stream(DiscoveryOperationController.class.getDeclaredMethods())
-                .filter(m -> m.getName().equals("stream"))
-                .findFirst()
-                .orElseThrow();
-        ApiResponses responses = stream.getAnnotation(ApiResponses.class);
-        assertNotNull(responses, "missing @ApiResponses on stream");
-        ApiResponse ok = Arrays
-                .stream(responses.value())
-                .filter(r -> r.responseCode().equals("200"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("expected a documented 200 on stream"));
-
-        boolean declaresNdjsonOfDiscoveryEvent = Arrays
-                .stream(ok.content())
-                .anyMatch(c -> c.mediaType().equals(MediaType.APPLICATION_NDJSON_VALUE)
-                        && c.schema().implementation() == DiscoveryEvent.class);
-        assertTrue(declaresNdjsonOfDiscoveryEvent,
-                "stream's 200 must declare application/x-ndjson content of DiscoveryEvent, or springdoc "
-                        + "unwraps the Flux<DiscoveryEvent> return type into a JSON array schema instead");
     }
 
     /**
@@ -196,7 +164,7 @@ class DiscoveryOperationControllerDocTest {
             assertTrue(has422, "expected a documented 422 on " + m.getName());
             covered.add(m.getName());
         }
-        assertEquals(Set.of("initiate", "status", "results", "stream", "stop", "resume", "cancel"), Set.copyOf(covered),
+        assertEquals(Set.of("initiate", "status", "results", "stop", "resume", "cancel"), Set.copyOf(covered),
                 "the scoped base is replayed by exactly these operations");
     }
 

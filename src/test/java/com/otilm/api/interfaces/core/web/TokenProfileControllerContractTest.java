@@ -1,19 +1,23 @@
 package com.otilm.api.interfaces.core.web;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import io.swagger.v3.oas.annotations.enums.Explode;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -88,6 +92,22 @@ class TokenProfileControllerContractTest {
                 keyRequestTypes.getGenericReturnType());
         assertEquals(List.class, returnType.getRawType());
         assertArrayEquals(new Class<?>[]{KeyRequestType.class}, returnType.getActualTypeArguments());
+    }
+
+    @Test
+    void listTokenProfilesTakesARepeatableImportableFilter() throws NoSuchMethodException {
+        // given
+        Method list = TokenProfileController.class.getMethod("listTokenProfiles", Optional.class, List.class);
+
+        // when
+        RequestParam param = list.getParameters()[1].getAnnotation(RequestParam.class);
+        io.swagger.v3.oas.annotations.Parameter doc = list.getParameters()[1]
+                .getAnnotation(io.swagger.v3.oas.annotations.Parameter.class);
+
+        // then
+        assertEquals("importable", param.name());
+        assertFalse(param.required());
+        assertEquals(Explode.TRUE, doc.explode());
     }
 
     private static void assertControllerBasePath(RequestMapping mapping) {

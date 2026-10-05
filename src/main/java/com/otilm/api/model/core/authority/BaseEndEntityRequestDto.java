@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.authority;
 
+import com.otilm.api.model.core.logging.Sensitive;
 import com.otilm.api.model.core.raprofile.RaProfileDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -19,6 +20,7 @@ public class BaseEndEntityRequestDto {
     @Schema(description = "End Entity extension data")
     protected List<EndEntityExtendedInfoDto> extensionData;
 
+    @Sensitive
     @Schema(description = "End Entity password", requiredMode = Schema.RequiredMode.REQUIRED)
     protected String password;
 

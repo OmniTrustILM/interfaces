@@ -5,9 +5,11 @@ import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
 import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
+import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
+import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -81,6 +83,14 @@ class PlatformEnumTest {
     }
 
     @Test
+    void pqcExplanationStepOutcomeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(PqcExplanationStepOutcome.class);
+        assertNotNull(entry);
+        assertEquals(PqcExplanationStepOutcome.class, entry.getEnumClass());
+        assertEquals("PqcExplanationStepOutcome", entry.getCode());
+    }
+
+    @Test
     void cbomAssetSyncStateIsRegistered() {
         PlatformEnum entry = PlatformEnum.findByClass(CbomAssetSyncState.class);
         assertNotNull(entry);
@@ -94,5 +104,13 @@ class PlatformEnumTest {
         assertNotNull(entry);
         assertEquals(CbomSyncSkipState.class, entry.getEnumClass());
         assertEquals("CbomSyncSkipState", entry.getCode());
+    }
+
+    @Test
+    void scheduledJobScheduleStateIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(ScheduledJobScheduleState.class);
+        assertEquals(PlatformEnum.SCHEDULED_JOB_SCHEDULE_STATE, entry);
+        assertEquals(ScheduledJobScheduleState.class, entry.getEnumClass());
+        assertEquals("ScheduledJobScheduleState", entry.getCode());
     }
 }

@@ -29,7 +29,7 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiscoveredItemDto {
 
-    @Schema(description = "Dense per-run item sequence (1, 2, 3, ... with no holes); the drain/stream cursor "
+    @Schema(description = "Dense per-run item sequence (1, 2, 3, ... with no holes); the drain cursor "
             + "value after which the next batch starts", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
     @NotNull(message = "sequence is required")
     @Min(value = 1, message = "sequence must be positive")

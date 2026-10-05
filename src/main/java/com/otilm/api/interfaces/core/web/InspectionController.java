@@ -43,7 +43,7 @@ public interface InspectionController extends AuthProtectedController {
                     platform understands is accepted, so a caller uploads once and then decides: PKCS#12 in any composition, a PEM bundle of certificates with at most one private
                     key, a standalone PKCS#8 key, plain or encrypted, an OpenSSL traditional PEM key, an OpenSSH private key, a
                     single certificate as PEM or DER, and PKCS#7. The container is recognised by its content, not by its file
-                    name. JKS and JCEKS are refused with a message that says to convert them.
+                    name. JKS and JCEKS stores are read too.
 
                     Nothing here has to be carried into a later operation. Each entry is reported with a reference derived from
                     the entry's own content, so an operation given that reference acts on that content whichever file it
@@ -55,8 +55,8 @@ public interface InspectionController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "Token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
-                    description = "Unprocessable Entity, including a file no supported container format explains and a "
-                            + "file the supplied passphrase does not open",
+                    description = "Unprocessable Entity, including a file no supported container format explains, a "
+                            + "file the supplied passphrase does not open, and a file beyond the platform's limits",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

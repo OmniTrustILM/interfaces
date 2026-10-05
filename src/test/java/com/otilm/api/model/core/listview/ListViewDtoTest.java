@@ -1,7 +1,6 @@
 package com.otilm.api.model.core.listview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otilm.api.model.client.certificate.SearchFilterRequestDto;
 import com.otilm.api.model.client.certificate.SearchSortRequestDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.search.FilterConditionOperator;
@@ -55,8 +54,8 @@ class ListViewDtoTest {
         dto.setColumns(List.of(new ListViewColumnDto(FilterFieldSource.PROPERTY, "name", null)));
         dto
                 .setFilters(List
-                        .of(new SearchFilterRequestDto(FilterFieldSource.PROPERTY, "state",
-                                FilterConditionOperator.EQUALS, "active")));
+                        .of(new ListViewFilterDto(FilterFieldSource.PROPERTY, "state", FilterConditionOperator.EQUALS,
+                                "active")));
         dto.setSort(new SearchSortRequestDto(FilterFieldSource.PROPERTY, "creationTime", SortDirection.DESC));
 
         // when

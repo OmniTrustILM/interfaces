@@ -94,9 +94,6 @@ public enum FeatureFlag implements IPlatformEnum {
     CERTIFICATE_IDENTITY_OVERRIDE("certificateIdentityOverride", "Certificate Identity Override",
             "Applies an authoritative platform-supplied identity to a forwarded CSR per the CA technology (EJBCA End Entity override; CRMF raVerified), without the platform stripping or re-signing the CSR",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
-    DISCOVERY_STREAMING("discoveryStreaming", "Discovery Streaming",
-            "Supports streaming discovery events over a held-open NDJSON response; when absent the platform polls for status and drains results instead. Reached by direct HTTP only — this call never traverses the platform proxy. A connector reachable only through the proxy MUST NOT advertise this flag and should push discovery events over the proxy's AMQP discovery.event binding instead, letting the platform fall back to polling and draining",
-            FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.DISCOVERY)),
     DISCOVERY_STOP_RESUME("discoveryStopResume", "Discovery Stop and Resume",
             "Supports pausing a running discovery with a resumable checkpoint and resuming it later",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.DISCOVERY));

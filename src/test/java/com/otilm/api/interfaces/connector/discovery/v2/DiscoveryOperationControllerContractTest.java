@@ -1,6 +1,5 @@
 package com.otilm.api.interfaces.connector.discovery.v2;
 
-import com.otilm.api.model.connector.discovery.v2.DiscoveryStreamRequestDto;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.lang.reflect.Method;
@@ -8,27 +7,24 @@ import java.util.Arrays;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Pins the wire shape of {@link DiscoveryOperationController} — base path, per-method path, the documented 2xx code
- * matching the actual (or default) {@code @ResponseStatus}, and the NDJSON media type on {@code stream} — against
- * annotation values rather than prose. A typo in a mapping path, or {@code @ApiResponse(responseCode = "202")} paired
- * with a contradicting {@code @ResponseStatus}, fails a build instead of shipping a document the implementation
- * contradicts.
+ * Pins the wire shape of {@link DiscoveryOperationController} — base path, per-method path, and the documented 2xx code
+ * matching the actual (or default) {@code @ResponseStatus} — against annotation values rather than prose. A typo in a
+ * mapping path, or {@code @ApiResponse(responseCode = "202")} paired with a contradicting {@code @ResponseStatus},
+ * fails a build instead of shipping a document the implementation contradicts.
  */
 class DiscoveryOperationControllerContractTest {
 
     private static final Map<String, String> EXPECTED_PATHS = Map
-            .of("initiate", "/initiate", "status", "/status", "results", "/results", "stream", "/stream", "stop",
-                    "/stop", "resume", "/resume", "cancel", "/cancel");
+            .of("initiate", "/initiate", "status", "/status", "results", "/results", "stop", "/stop", "resume",
+                    "/resume", "cancel", "/cancel");
 
     @Test
     void basePathMatchesDesign() {
@@ -65,13 +61,5 @@ class DiscoveryOperationControllerContractTest {
             assertEquals(Integer.parseInt(documented2xx), actualStatus, "documented 2xx (" + documented2xx
                     + ") does not match actual @ResponseStatus/default on " + m.getName());
         }
-    }
-
-    @Test
-    void streamProducesNdjson() throws NoSuchMethodException {
-        Method stream = DiscoveryOperationController.class.getDeclaredMethod("stream", DiscoveryStreamRequestDto.class);
-        PostMapping pm = stream.getAnnotation(PostMapping.class);
-        assertArrayEquals(new String[]{MediaType.APPLICATION_NDJSON_VALUE}, pm.produces(),
-                "stream must produce exactly application/x-ndjson");
     }
 }

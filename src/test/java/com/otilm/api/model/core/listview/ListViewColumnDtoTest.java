@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.core.search.FilterFieldSource;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.Validator;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 
@@ -66,13 +68,72 @@ class ListViewColumnDtoTest {
     }
 
     @Test
-    void rejectsABlankHeading() {
-        // given — a whitespace-only heading would pin a blank column title instead of falling back to the catalogue
-        var violations = VALIDATOR.validate(new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   "));
+    void acceptsAnEmptyHeading() {
+        // given — a column carrying only an icon is headed by nothing, which is a choice and not an absent override
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "");
+
+        // when
+        var violations = VALIDATOR.validate(dto);
 
         // then
-        assertEquals(1, violations.size());
-        assertEquals("label", violations.iterator().next().getPropertyPath().toString());
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void roundTripsAnEmptyHeading() throws Exception {
+        // given
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "");
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+
+        // then
+        assertTrue(json.contains("\"label\":\"\""));
+        assertEquals("", mapper.readValue(json, ListViewColumnDto.class).getLabel());
+    }
+
+    @Test
+    void preservesAWhitespaceOnlyHeading() throws Exception {
+        // given
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department", "   ");
+
+        // when
+        var violations = VALIDATOR.validate(dto);
+        var back = mapper.readValue(mapper.writeValueAsString(dto), ListViewColumnDto.class);
+
+        // then
+        assertTrue(violations.isEmpty());
+        assertEquals("   ", back.getLabel());
+    }
+
+    @Test
+    void readsAnEmptyLabelFromAClientAsAPinnedBlankHeading() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department","label":""}""", ListViewColumnDto.class);
+
+        // then
+        assertEquals("", dto.getLabel());
+    }
+
+    @Test
+    void readsAnOmittedLabelFromAClientAsFollowingTheCatalogue() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department"}""", ListViewColumnDto.class);
+
+        // then
+        assertNull(dto.getLabel());
+    }
+
+    @Test
+    void readsAnExplicitNullLabelFromAClientAsFollowingTheCatalogue() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department","label":null}""", ListViewColumnDto.class);
+
+        // then
+        assertNull(dto.getLabel());
     }
 
     @Test
@@ -85,5 +146,89 @@ class ListViewColumnDtoTest {
         assertFalse(plain.equals(renamed));
         assertEquals(plain.getFieldIdentifier(), renamed.getFieldIdentifier());
         assertEquals(plain.getFieldSource(), renamed.getFieldSource());
+    }
+
+    @Test
+    void omitsTheBindingTheStatusAndTheRebindFlagWhenNoneIsSet() throws Exception {
+        // given — a property column binds to no attribute definition and a request carries no status
+        var dto = new ListViewColumnDto(FilterFieldSource.PROPERTY, "commonName", null);
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+
+        // then
+        assertFalse(json.contains("attributeDefinitionUuids"));
+        assertFalse(json.contains("status"));
+        assertFalse(json.contains("rebind"));
+    }
+
+    @Test
+    void roundTripsTheBindingAndTheStatusOfAnAttributeColumn() throws Exception {
+        // given
+        var definition = UUID.fromString("6f1d2c1e-6c3a-4c5e-9f0a-2b7d8e9f0a1b");
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department|STRING", null);
+        dto.setAttributeDefinitionUuids(List.of(definition));
+        dto.setStatus(ListViewFieldStatus.REPLACED);
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+        var back = mapper.readValue(json, ListViewColumnDto.class);
+
+        // then
+        assertTrue(json.contains("\"status\":\"replaced\""));
+        assertEquals(List.of(definition), back.getAttributeDefinitionUuids());
+        assertEquals(ListViewFieldStatus.REPLACED, back.getStatus());
+    }
+
+    @Test
+    void readsTheRebindFlagFromAClient() throws Exception {
+        // when
+        var dto = mapper
+                .readValue("""
+                        {"fieldSource":"custom","fieldIdentifier":"department|STRING","rebind":true}""",
+                        ListViewColumnDto.class);
+
+        // then
+        assertEquals(Boolean.TRUE, dto.getRebind());
+    }
+
+    @Test
+    void neverWritesTheRebindFlagBackOut() throws Exception {
+        // given
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department|STRING", null);
+        dto.setRebind(true);
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+
+        // then
+        assertFalse(json.contains("rebind"), json);
+    }
+
+    @Test
+    void readsAColumnWrittenBeforeBindingExistedAsUnbound() throws Exception {
+        // when
+        var dto = mapper.readValue("""
+                {"fieldSource":"custom","fieldIdentifier":"department|STRING"}""", ListViewColumnDto.class);
+
+        // then
+        assertNull(dto.getAttributeDefinitionUuids());
+        assertNull(dto.getStatus());
+        assertNull(dto.getRebind());
+    }
+
+    @Test
+    void tellsAnEmptyBindingApartFromAnAbsentOne() throws Exception {
+        // given — bound while the definition was already gone, which never resolves again
+        var dto = new ListViewColumnDto(FilterFieldSource.CUSTOM, "department|STRING", null);
+        dto.setAttributeDefinitionUuids(List.of());
+
+        // when
+        var json = mapper.writeValueAsString(dto);
+        var back = mapper.readValue(json, ListViewColumnDto.class);
+
+        // then
+        assertTrue(json.contains("\"attributeDefinitionUuids\":[]"));
+        assertEquals(List.of(), back.getAttributeDefinitionUuids());
     }
 }

@@ -24,6 +24,7 @@ public enum KeyAlgorithm implements IPlatformEnum {
     DILITHIUM("CRYSTALS-Dilithium", "CRYSTALS-Dilithium", "Post-quantum lattice-based signature scheme"),
     @Deprecated
     SPHINCSPLUS("SPHINCS+", "SPHINCS+", "Post-quantum stateless hash-based signature scheme"),
+    AES("AES", "AES", "Advanced Encryption Standard", false),
     UNKNOWN("Unknown", "Unknown", "Key algorithm not recognized", false);
 
     private static final KeyAlgorithm[] VALUES;
@@ -51,9 +52,9 @@ public enum KeyAlgorithm implements IPlatformEnum {
     }
 
     /**
-     * Whether this algorithm produces a key pair rather than a single secret key. Every algorithm named here does, so
-     * this reads {@code true} for all of them except {@link #UNKNOWN}; it exists so a rule pairing a key type with an
-     * algorithm stays correct when a secret-key algorithm is added.
+     * Whether this algorithm produces a key pair rather than a single secret key: {@code false} for a secret-key
+     * algorithm such as {@link #AES}, and for {@link #UNKNOWN}. It exists so a rule pairing a key type with an
+     * algorithm stays correct as the algorithms it recognizes grow.
      *
      * @return whether the algorithm is used for key pairs
      */

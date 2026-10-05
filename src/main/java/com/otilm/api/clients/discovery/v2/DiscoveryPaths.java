@@ -9,10 +9,6 @@ import com.otilm.api.model.core.auth.Resource;
  * <p>
  * The REST and MQ clients address the same connector contract, so a route that differs between them is a defect no test
  * in either suite would catch. Both import these constants rather than declaring their own.
- *
- * <p>
- * Streaming ({@code POST /v2/discoveryProvider/discoveries/stream}) is deliberately absent: no client implements it
- * yet. See {@link com.otilm.api.interfaces.client.v2.DiscoverySyncApiClient}.
  */
 @SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public final class DiscoveryPaths {

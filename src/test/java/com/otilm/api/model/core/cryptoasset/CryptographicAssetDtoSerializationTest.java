@@ -28,7 +28,6 @@ class CryptographicAssetDtoSerializationTest {
         detail.setOccurrenceCount(5L);
 
         CryptographicAssetVerdictDto verdict = new CryptographicAssetVerdictDto();
-        verdict.setRuleSetVersion(1);
         verdict.setRuleId("pqc-symmetric-key-floor");
         verdict.setReason("Symmetric key length below the post-quantum floor");
         verdict.setEvaluatedFields(Map.of("parameterSet", "128"));
@@ -83,7 +82,7 @@ class CryptographicAssetDtoSerializationTest {
         Assertions.assertEquals(2, json.get("sourceCbomCount").asInt());
         Assertions.assertEquals(5, json.get("occurrenceCount").asLong());
         Assertions.assertFalse(json.get("quarantined").asBoolean());
-        Assertions.assertEquals(1, json.get("verdict").get("ruleSetVersion").asInt());
+        Assertions.assertFalse(json.get("verdict").has("ruleSetVersion"), "the verdict carries no rule-set version");
         Assertions.assertEquals("pqc-symmetric-key-floor", json.get("verdict").get("ruleId").asText());
         Assertions.assertEquals("AES", json.get("normalizedFields").get("algorithmFamily").asText());
         Assertions.assertEquals("ae", json.get("electedPayload").get("primitive").asText());
@@ -111,9 +110,22 @@ class CryptographicAssetDtoSerializationTest {
     }
 
     @Test
+    void aSourceWithoutLocationsStillSerializesItsZeroOccurrenceCount() throws Exception {
+        CryptographicAssetSourceDto source = new CryptographicAssetSourceDto();
+        source.setCbomUuid(UUID.fromString("00000000-0000-4000-8000-000000002299"));
+        source.setSerialNumber("urn:uuid:11111111-2222-3333-4444-555555555555");
+        source.setVersion(1);
+        source.setEvidence(List.of());
+
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(source));
+
+        Assertions.assertTrue(json.has("occurrenceCount"), "a zero occurrence count is served, not omitted");
+        Assertions.assertEquals(0, json.get("occurrenceCount").asLong());
+    }
+
+    @Test
     void absentOptionalMembersAreOmittedFromJson() throws Exception {
         CryptographicAssetVerdictDto verdict = new CryptographicAssetVerdictDto();
-        verdict.setRuleSetVersion(2);
         verdict.setDecidedAt(OffsetDateTime.of(2026, 8, 1, 12, 0, 0, 0, ZoneOffset.UTC));
         verdict.setEvaluatedAt(OffsetDateTime.of(2026, 8, 1, 12, 0, 0, 0, ZoneOffset.UTC));
         JsonNode json = mapper.readTree(mapper.writeValueAsString(verdict));

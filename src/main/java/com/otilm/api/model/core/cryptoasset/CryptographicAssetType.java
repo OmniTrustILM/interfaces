@@ -14,7 +14,9 @@ import java.util.Arrays;
  * the stored tier for components that declare none of the four; it is never served as an asset's {@code type}, and an
  * asset stored with it is served without one. The verdict's {@code evaluatedFields} records it as stored.
  */
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true,
+        description = "Type of an asset in the cryptographic asset inventory: the CycloneDX cryptoProperties.assetType "
+                + "vocabulary. An asset that declares none of these types is served with no type")
 public enum CryptographicAssetType implements IPlatformEnum {
 
     ALGORITHM(Codes.ALGORITHM, "Algorithm"),

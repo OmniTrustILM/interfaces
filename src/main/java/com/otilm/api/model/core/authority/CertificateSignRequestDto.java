@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.authority;
 
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class CertificateSignRequestDto {
 
     @Schema(description = "End Entity password", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Sensitive
     private String password;
 
     @Schema(description = "Certificate sign request (PKCS#10) encoded as Base64 string",
