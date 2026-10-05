@@ -123,13 +123,15 @@ public final class OperationResponseValidator extends ResponseChecks {
                 + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
         List<BaseAttribute> declarations = schema
                 .stream()
-                .filter(attribute -> SignatureAlgorithmAttribute.ATTRIBUTE_UUID.toString().equals(attribute.getUuid())
+                .filter(attribute -> SignatureAlgorithmAttribute.ATTRIBUTE_UUID
+                        .toString()
+                        .equalsIgnoreCase(attribute.getUuid())
                         || SignatureAlgorithmAttribute.NAME.equals(attribute.getName()))
                 .toList();
         if (declarations.size() != 1 || !(declarations.get(0) instanceof DataAttributeV3 definition)
                 || definition.getVersion() != AttributeVersion.V3.getVersion()
                 || definition.getSchemaVersion() != AttributeVersion.V3
-                || !SignatureAlgorithmAttribute.ATTRIBUTE_UUID.toString().equals(definition.getUuid())
+                || !SignatureAlgorithmAttribute.ATTRIBUTE_UUID.toString().equalsIgnoreCase(definition.getUuid())
                 || !SignatureAlgorithmAttribute.NAME.equals(definition.getName())) {
             throw new IllegalArgumentException(operation + " attributes must declare exactly one v3 " + identity);
         }
@@ -166,13 +168,15 @@ public final class OperationResponseValidator extends ResponseChecks {
                 + EncryptionAlgorithmAttribute.ATTRIBUTE_UUID + "'";
         List<BaseAttribute> declarations = schema
                 .stream()
-                .filter(attribute -> EncryptionAlgorithmAttribute.ATTRIBUTE_UUID.toString().equals(attribute.getUuid())
+                .filter(attribute -> EncryptionAlgorithmAttribute.ATTRIBUTE_UUID
+                        .toString()
+                        .equalsIgnoreCase(attribute.getUuid())
                         || EncryptionAlgorithmAttribute.NAME.equals(attribute.getName()))
                 .toList();
         if (declarations.size() != 1 || !(declarations.get(0) instanceof DataAttributeV3 definition)
                 || definition.getVersion() != AttributeVersion.V3.getVersion()
                 || definition.getSchemaVersion() != AttributeVersion.V3
-                || !EncryptionAlgorithmAttribute.ATTRIBUTE_UUID.toString().equals(definition.getUuid())
+                || !EncryptionAlgorithmAttribute.ATTRIBUTE_UUID.toString().equalsIgnoreCase(definition.getUuid())
                 || !EncryptionAlgorithmAttribute.NAME.equals(definition.getName())) {
             throw new IllegalArgumentException("Cipher attributes must declare exactly one v3 " + identity);
         }
