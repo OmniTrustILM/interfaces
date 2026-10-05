@@ -217,11 +217,12 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
     public RandomDataResponseV2Dto randomData(ApiClientConnectorInfo connector, RandomDataRequestV2Dto body)
             throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        RandomDataResponseV2Dto response = processRequest(r -> requireBody(r
+        ResponseEntity<RandomDataResponseV2Dto> entity = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + RANDOM_PATH)
                 .bodyValue(body)
                 .retrieve()
                 .toEntity(RandomDataResponseV2Dto.class), "randomData"), request, connector);
+        RandomDataResponseV2Dto response = synchronousBody(entity, connector);
         requireValid(responseValidator.validateRandom(body, response), connector);
         return response;
     }

@@ -549,6 +549,25 @@ class CryptographicOperationsApiClientTest {
                         .withRequestBody(WireMock.matchingJsonPath("$.length", WireMock.equalTo("1"))));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "PARTIAL_CONTENT"})
+    void randomData_rejectsUnexpectedSuccessStatusWithValidBody(HttpStatus status) {
+        // given
+        String validBody = """
+                {"data":"AQ=="}
+                """;
+        stubJsonResponse(RANDOM_PATH, status, validBody);
+        String expectedMessage = "Connector returned HTTP " + status.value() + "; expected HTTP 200";
+
+        // when
+        Executable call = () -> client.randomData(connector, randomRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals(expectedMessage, exception.getMessage());
+        assertSame(connector, exception.getConnector());
+    }
+
     @Test
     void randomData_rejectsInvalidResponse() {
         // given
