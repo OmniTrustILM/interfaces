@@ -8,6 +8,7 @@ import com.otilm.api.clients.cryptography.v2.CryptographicOperationsApiClient;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ConnectorServerException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
@@ -58,6 +59,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Named.named;
 
+/**
+ * Checks HTTP request binding and connector response contracts for cryptographic operations.
+ */
 class CryptographicOperationsApiClientTest {
 
     private static final String BASE_PATH = "/v2/cryptographyProvider/operations";
@@ -179,7 +183,13 @@ class CryptographicOperationsApiClientTest {
     void attributeOperation_postsRequestAndReturnsAttributes(AttributeOperation operation) throws ConnectorException {
         // given
         boolean cipher = operation == AttributeOperation.ENCRYPT || operation == AttributeOperation.DECRYPT;
-        String response = cipher ? CIPHER_ATTRIBUTE_LIST_JSON : VALID_ATTRIBUTE_LIST_JSON;
+        boolean verification = operation == AttributeOperation.VERIFY;
+        String response = cipher
+                ? CIPHER_ATTRIBUTE_LIST_JSON
+                : verification ? SIGN_ATTRIBUTE_LIST_JSON : VALID_ATTRIBUTE_LIST_JSON;
+        String expectedName = cipher
+                ? EncryptionAlgorithmAttribute.NAME
+                : verification ? SignatureAlgorithmAttribute.NAME : "operationAttribute";
         stubJsonResponse(operation.path(), HttpStatus.OK, response);
 
         // when
@@ -187,7 +197,7 @@ class CryptographicOperationsApiClientTest {
 
         // then
         assertEquals(1, result.size());
-        assertEquals(cipher ? EncryptionAlgorithmAttribute.NAME : "operationAttribute", result.get(0).getName());
+        assertEquals(expectedName, result.get(0).getName());
         verifyAttributeRequest(operation);
     }
 
@@ -217,13 +227,14 @@ class CryptographicOperationsApiClientTest {
         verifyAttributeRequest(AttributeOperation.SIGN);
     }
 
-    @Test
-    void listSignAttributes_rejectsASchemaWithoutTheSignatureAlgorithm() {
+    @ParameterizedTest
+    @EnumSource(value = AttributeOperation.class, names = {"SIGN", "VERIFY"})
+    void signatureAttributes_rejectASchemaWithoutTheSignatureAlgorithm(AttributeOperation operation) {
         // given
-        stubJsonResponse(AttributeOperation.SIGN.path(), HttpStatus.OK, VALID_ATTRIBUTE_LIST_JSON);
+        stubJsonResponse(operation.path(), HttpStatus.OK, VALID_ATTRIBUTE_LIST_JSON);
 
         // when
-        Executable call = () -> invokeAttributeOperation(AttributeOperation.SIGN);
+        Executable call = () -> invokeAttributeOperation(operation);
 
         // then
         assertValidationFailure(call);
@@ -257,6 +268,25 @@ class CryptographicOperationsApiClientTest {
 
         // then
         assertValidationFailure(call);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "PARTIAL_CONTENT"})
+    void encryptData_rejectsUnexpectedSuccessStatusWithValidBody(HttpStatus status) {
+        // given
+        String validBody = """
+                {"encryptedData":[{"data":"AQ==","identifier":"item-1"}]}
+                """;
+        stubJsonResponse(ENCRYPT_PATH, status, validBody);
+        String expectedMessage = "Connector returned HTTP " + status.value() + "; expected HTTP 200";
+
+        // when
+        Executable call = () -> client.encryptData(connector, cipherRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals(expectedMessage, exception.getMessage());
+        assertSame(connector, exception.getConnector());
     }
 
     @Test
@@ -302,6 +332,25 @@ class CryptographicOperationsApiClientTest {
 
         // then
         assertValidationFailure(call);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "PARTIAL_CONTENT"})
+    void decryptData_rejectsUnexpectedSuccessStatusWithValidBody(HttpStatus status) {
+        // given
+        String validBody = """
+                {"decryptedData":[{"data":"AQ==","identifier":"item-1"}]}
+                """;
+        stubJsonResponse(DECRYPT_PATH, status, validBody);
+        String expectedMessage = "Connector returned HTTP " + status.value() + "; expected HTTP 200";
+
+        // when
+        Executable call = () -> client.decryptData(connector, cipherRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals(expectedMessage, exception.getMessage());
+        assertSame(connector, exception.getConnector());
     }
 
     @Test
@@ -445,6 +494,25 @@ class CryptographicOperationsApiClientTest {
 
         // then
         assertValidationFailure(call);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "PARTIAL_CONTENT"})
+    void verifyData_rejectsUnexpectedSuccessStatusWithValidBody(HttpStatus status) {
+        // given
+        String validBody = """
+                {"verifications":[{"result":true,"identifier":"item-1"}]}
+                """;
+        stubJsonResponse(VERIFY_PATH, status, validBody);
+        String expectedMessage = "Connector returned HTTP " + status.value() + "; expected HTTP 200";
+
+        // when
+        Executable call = () -> client.verifyData(connector, verifyRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals(expectedMessage, exception.getMessage());
+        assertSame(connector, exception.getConnector());
     }
 
     @Test
@@ -635,9 +703,14 @@ class CryptographicOperationsApiClientTest {
         return request;
     }
 
+    /**
+     * Builds a verification request with a valid algorithm selection and matching identifiers.
+     */
     private static VerifyDataRequestV2Dto verifyRequest() {
         VerifyDataRequestV2Dto request = withValidKeyScope(new VerifyDataRequestV2Dto());
-        request.setSignatureAttributes(List.of());
+        request
+                .setSignatureAttributes(
+                        List.of(SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA)));
         request.setData(List.of(new SignatureDataV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
         request.setSignatures(List.of(new SignatureDataV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
         return request;

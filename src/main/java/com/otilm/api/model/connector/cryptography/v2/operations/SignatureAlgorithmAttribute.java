@@ -16,9 +16,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The sign attribute through which a cryptography provider v2 lets the caller choose the signature algorithm. Its UUID,
- * name and values are part of the contract, so a caller that must name the algorithm before the signature exists reads
- * it from the selection.
+ * The signature algorithm attribute through which a cryptography provider v2 lets the caller choose the signature
+ * algorithm. Its UUID, name and values are part of the contract.
  */
 public final class SignatureAlgorithmAttribute {
 
@@ -28,7 +27,10 @@ public final class SignatureAlgorithmAttribute {
     private SignatureAlgorithmAttribute() {
     }
 
-    /** The definition a provider publishes from {@code /sign/attributes}, offering the algorithms the key supports. */
+    /**
+     * The definition a provider publishes from {@code /sign/attributes} or {@code /verify/attributes}, offering the
+     * algorithms the key supports for that operation.
+     */
     public static DataAttributeV3 definition(Collection<SignatureAlgorithm> supported) {
         DataAttributeProperties properties = new DataAttributeProperties();
         properties.setLabel("Signature Algorithm");
@@ -41,7 +43,7 @@ public final class SignatureAlgorithmAttribute {
         DataAttributeV3 attribute = new DataAttributeV3();
         attribute.setUuid(ATTRIBUTE_UUID.toString());
         attribute.setName(NAME);
-        attribute.setDescription("Signature algorithm the signature is produced with");
+        attribute.setDescription("Signature algorithm used to sign or verify the data");
         attribute.setContentType(AttributeContentType.STRING);
         attribute.setProperties(properties);
         attribute.setContent(supported.stream().map(SignatureAlgorithmAttribute::content).toList());

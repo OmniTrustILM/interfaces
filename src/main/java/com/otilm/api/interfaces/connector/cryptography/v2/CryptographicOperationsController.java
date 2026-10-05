@@ -172,7 +172,10 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     // ---- Verify ----
 
     @Operation(summary = "List verification attributes",
-            description = "Returns the verification parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the verification parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema includes signatureAlgorithm, a data attribute with a required, single-select, "
+                    + "non-extensible list offering the signature algorithms the key supports for verification. "
+                    + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Verification attributes retrieved"),
             @ApiResponse(responseCode = "422",

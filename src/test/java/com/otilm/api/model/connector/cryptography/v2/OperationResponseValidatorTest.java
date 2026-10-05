@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,11 +64,52 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
 
+/**
+ * Validates connector response contracts for key and cryptographic operations.
+ */
 class OperationResponseValidatorTest {
 
     @AutoClose
     private static final ValidatorFixture VALIDATORS = new ValidatorFixture();
     private static final OperationResponseValidator VALIDATOR = new OperationResponseValidator(VALIDATORS.validator());
+
+    @Test
+    void validateSynchronousResponseStatus_acceptsHttp200() {
+        // given
+        ResponseEntity<Void> response = ResponseEntity.ok().build();
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSynchronousResponseStatus(response);
+
+        // then
+        assertValid(result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "NO_CONTENT", "PARTIAL_CONTENT"})
+    void validateSynchronousResponseStatus_rejectsOtherSuccessStatuses(HttpStatus status) {
+        // given
+        ResponseEntity<Void> response = ResponseEntity.status(status).build();
+        String expectedMessage = "Connector returned HTTP " + status.value() + "; expected HTTP 200";
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSynchronousResponseStatus(response);
+
+        // then
+        assertInvalid(result, expectedMessage);
+    }
+
+    @Test
+    void validateSynchronousResponseStatus_rejectsMissingResponse() {
+        // given
+        ResponseEntity<Void> response = null;
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSynchronousResponseStatus(response);
+
+        // then
+        assertInvalid(result, "Connector returned no response");
+    }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validCreateKeyResponses")
@@ -610,6 +652,75 @@ class OperationResponseValidatorTest {
     }
 
     @Test
+    void validateVerifyAttributeList_acceptsASchemaThatOffersTheSignatureAlgorithm() {
+        // given
+        List<BaseAttribute> schema = List
+                .of(SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateVerifyAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource({
+            "signatureAlgorithmOffersOfTheWrongShape",
+            "malformedSignatureAlgorithmOffers",
+            "signatureAlgorithmOffersOfAnotherAttributeKind"})
+    void validateVerifyAttributeList_rejectsInvalidAlgorithmDefinitions(BaseAttribute definition) {
+        // given
+        List<BaseAttribute> schema = List.of(definition);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateVerifyAttributeList(schema);
+
+        // then
+        assertInvalid(result);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("verificationSchemasWithoutOneAlgorithm")
+    void validateVerifyAttributeList_rejectsMissingOrDuplicateAlgorithmDeclarations(List<BaseAttribute> schema) {
+        // given
+        String expectedMessage = "Verify attributes must declare exactly one v3 attribute with name '"
+                + SignatureAlgorithmAttribute.NAME + "' and UUID '" + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateVerifyAttributeList(schema);
+
+        // then
+        assertInvalid(result, expectedMessage);
+    }
+
+    @Test
+    void validateVerifyAttributeList_rejectsNullSchemaElements() {
+        // given
+        List<BaseAttribute> schema = Collections.singletonList(null);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateVerifyAttributeList(schema);
+
+        // then
+        assertInvalid(result);
+    }
+
+    /**
+     * Supplies missing or ambiguous reserved declarations while preserving otherwise valid attributes.
+     */
+    static Stream<Named<List<BaseAttribute>>> verificationSchemasWithoutOneAlgorithm() {
+        DataAttributeV3 definition = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        DataAttributeV3 unrelated = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        unrelated.setName("providerAlgorithm");
+        unrelated.setUuid(UUID.randomUUID().toString());
+        return Stream
+                .of(named("empty schema", List.of()), named("unrelated attribute", List.of(unrelated)),
+                        named("duplicate algorithm", List.of(definition, definition)));
+    }
+
+    @Test
     void validateSignAttributeList_rejectsTheReservedUuidAndNameOnDifferentAttributes() {
         // given
         String providerName = "signatureScheme";
@@ -643,13 +754,17 @@ class OperationResponseValidatorTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("signatureAlgorithmOffersOfTheWrongShape")
-    void validateSignAttributeList_rejectsAnOfferThatIsNotARequiredSingleSelect(DataAttributeV3 definition) {
+    void validateSignAttributeList_rejectsAnOfferThatIsNotARequiredSingleSelectNonExtensibleList(
+            DataAttributeV3 definition) {
+        // given
+        List<BaseAttribute> schema = List.of(definition);
+
         // when
-        OperationValidationResult result = VALIDATOR.validateSignAttributeList(List.of(definition));
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
 
         // then
         assertInvalid(result,
-                "The attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must be required and single-select");
+                "The attribute with name 'signatureAlgorithm' and UUID '9180267f-c82f-4b7b-8160-d2363d813869' must be a required, single-select, non-extensible list");
     }
 
     @Test
@@ -723,6 +838,9 @@ class OperationResponseValidatorTest {
                         named("a null option", nullOption), named("an option without data", optionWithoutData));
     }
 
+    /**
+     * Supplies schemas that violate individual algorithm selection constraints.
+     */
     static Stream<Named<DataAttributeV3>> signatureAlgorithmOffersOfTheWrongShape() {
         DataAttributeV3 optional = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
         optional.getProperties().setRequired(false);
@@ -732,9 +850,17 @@ class OperationResponseValidatorTest {
         DataAttributeV3 noProperties = SignatureAlgorithmAttribute
                 .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
         noProperties.setProperties(null);
+        boolean listSelection = false;
+        DataAttributeV3 notAList = SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        notAList.getProperties().setList(listSelection);
+        boolean customChoicesAllowed = true;
+        DataAttributeV3 extensibleList = SignatureAlgorithmAttribute
+                .definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA));
+        extensibleList.getProperties().setExtensibleList(customChoicesAllowed);
         return Stream
                 .of(named("optional", optional), named("multi-select", multiSelect),
-                        named("no properties", noProperties));
+                        named("no properties", noProperties), named("not a list", notAList),
+                        named("extensible list", extensibleList));
     }
 
     static Stream<Named<BaseAttribute>> signatureAlgorithmOffersOfAnotherAttributeKind() {

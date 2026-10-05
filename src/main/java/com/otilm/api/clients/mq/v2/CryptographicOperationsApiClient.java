@@ -123,7 +123,7 @@ public class CryptographicOperationsApiClient implements CryptographicOperations
             throws ConnectorException {
         List<BaseAttribute> response = sendAttributes(connector, VERIFY_ATTRIBUTES_PATH, request,
                 "listVerifyAttributes");
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateVerifyAttributeList(response), connector);
         return response;
     }
 

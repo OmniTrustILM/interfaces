@@ -54,6 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
 
+/**
+ * Checks MQ request routing and connector response contracts for cryptographic operations.
+ */
 class CryptographicOperationsApiClientMqTest {
 
     private static final String BASE_PATH = "/v2/cryptographyProvider/operations";
@@ -91,7 +94,9 @@ class CryptographicOperationsApiClientMqTest {
         boolean cipher = operation == AttributeOperation.ENCRYPT || operation == AttributeOperation.DECRYPT;
         BaseAttribute attribute = cipher
                 ? EncryptionAlgorithmAttribute.definition(List.of(EncryptionAlgorithm.RSA_PKCS1_V1_5))
-                : validMetadataAttribute();
+                : operation == AttributeOperation.VERIFY
+                        ? SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA))
+                        : validMetadataAttribute();
         proxyClient.respondWith(new BaseAttribute[]{attribute});
 
         // when
@@ -144,13 +149,15 @@ class CryptographicOperationsApiClientMqTest {
         assertPlainInvocation(AttributeOperation.SIGN.path(), request, BaseAttribute[].class);
     }
 
-    @Test
-    void listSignAttributes_rejectsASchemaWithoutTheSignatureAlgorithm() {
+    @ParameterizedTest
+    @EnumSource(value = AttributeOperation.class, names = {"SIGN", "VERIFY"})
+    void signatureAttributes_rejectASchemaWithoutTheSignatureAlgorithm(AttributeOperation operation) {
         // given
+        Object request = attributeRequest(operation);
         proxyClient.respondWith(new BaseAttribute[]{validMetadataAttribute()});
 
         // when
-        Executable call = () -> client.listSignAttributes(connector, keyScopedRequest());
+        Executable call = () -> invokeAttributeOperation(operation, request);
 
         // then
         assertValidationFailure(call);
@@ -514,9 +521,14 @@ class CryptographicOperationsApiClientMqTest {
         return request;
     }
 
+    /**
+     * Builds a verification request with a valid algorithm selection and matching identifiers.
+     */
     private static VerifyDataRequestV2Dto verifyRequest() {
         VerifyDataRequestV2Dto request = withValidKeyScope(new VerifyDataRequestV2Dto());
-        request.setSignatureAttributes(List.of());
+        request
+                .setSignatureAttributes(
+                        List.of(SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA)));
         request.setData(List.of(new SignatureDataV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
         request.setSignatures(List.of(new SignatureDataV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
         return request;

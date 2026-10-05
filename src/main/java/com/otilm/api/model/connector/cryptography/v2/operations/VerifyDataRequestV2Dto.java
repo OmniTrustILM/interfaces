@@ -20,7 +20,7 @@ import lombok.ToString;
 
 /**
  * Body for {@code POST /v2/cryptographyProvider/operations/verify}. Signed data and signatures are correlated by
- * identifier.
+ * identifier. The batch selects one signature algorithm through the reserved signatureAlgorithm attribute.
  */
 @Getter
 @Setter
@@ -28,8 +28,10 @@ import lombok.ToString;
 @Schema(name = "VerifyDataRequestV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public class VerifyDataRequestV2Dto extends KeyScopedRequestV2Dto {
 
-    @Schema(description = "Signature attributes", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "signatureAttributes is required (may be empty list, but must be present)")
+    @Schema(description = "Batch-wide signature settings. Must select exactly one signatureAlgorithm value from "
+            + "the algorithms offered by the verification attribute schema.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "signatureAttributes is required")
     private List<@NotNull(
             message = "signatureAttributes must not contain null items") RequestAttribute> signatureAttributes;
 

@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -93,20 +94,31 @@ public final class OperationResponseValidator extends ResponseChecks {
         return validateBeanConstraints(response);
     }
 
+    public OperationValidationResult validateSynchronousResponseStatus(ResponseEntity<?> response) {
+        return validate(() -> requireResponseStatus(response, HttpStatus.OK));
+    }
+
     public OperationValidationResult validateAttributeList(List<BaseAttribute> response) {
         return validateResponseElements(response, "attribute");
     }
 
-    /** A caller names the signature algorithm from the selection before it signs, so the schema must offer it. */
     public OperationValidationResult validateSignAttributeList(List<BaseAttribute> response) {
+        return validateSignatureAttributeList(response, "Sign");
+    }
+
+    public OperationValidationResult validateVerifyAttributeList(List<BaseAttribute> response) {
+        return validateSignatureAttributeList(response, "Verify");
+    }
+
+    private OperationValidationResult validateSignatureAttributeList(List<BaseAttribute> response, String operation) {
         OperationValidationResult validationResult = validateAttributeList(response);
         if (!validationResult.isValid()) {
             return validationResult;
         }
-        return validate(() -> requireSignatureAlgorithmOffered(response));
+        return validate(() -> requireSignatureAlgorithmOffered(response, operation));
     }
 
-    private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema) {
+    private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema, String operation) {
         String identity = "attribute with name '" + SignatureAlgorithmAttribute.NAME + "' and UUID '"
                 + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
         List<BaseAttribute> declarations = schema
@@ -119,11 +131,13 @@ public final class OperationResponseValidator extends ResponseChecks {
                 || definition.getSchemaVersion() != AttributeVersion.V3
                 || !SignatureAlgorithmAttribute.ATTRIBUTE_UUID.toString().equals(definition.getUuid())
                 || !SignatureAlgorithmAttribute.NAME.equals(definition.getName())) {
-            throw new IllegalArgumentException("Sign attributes must declare exactly one v3 " + identity);
+            throw new IllegalArgumentException(operation + " attributes must declare exactly one v3 " + identity);
         }
         DataAttributeProperties properties = definition.getProperties();
-        if (properties == null || !properties.isRequired() || properties.isMultiSelect()) {
-            throw new IllegalArgumentException("The " + identity + " must be required and single-select");
+        if (properties == null || !properties.isRequired() || properties.isMultiSelect() || !properties.isList()
+                || properties.isExtensibleList()) {
+            throw new IllegalArgumentException(
+                    "The " + identity + " must be a required, single-select, non-extensible list");
         }
         List<? extends AttributeContent> options = definition.getContent();
         if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
