@@ -40,7 +40,7 @@ public class UpdateUserRequestDto {
     @Schema(description = "List of Custom Attributes")
     private List<RequestAttribute> customAttributes;
 
-    @Schema(description = "List of Custom Attributes set for the user certificate. Applied whether the certificate is newly uploaded or already present in the inventory (matched by UUID or fingerprint). The submitted set replaces the certificate's current custom attribute content, so an attribute left out of the request is cleared. Requires permission to update the certificate.",
+    @Schema(description = "List of Custom Attributes set for the user certificate. Applied whether the certificate is newly uploaded or already present in the inventory (matched by UUID or fingerprint). Omitting the field, or sending an empty list, leaves the certificate's existing custom attributes unchanged. A non-empty list replaces them, so an attribute missing from that list is cleared. Requires permission to update the certificate.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> certificateCustomAttributes;
 
