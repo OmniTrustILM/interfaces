@@ -89,10 +89,17 @@ class ConfigurableColumnsDocTest {
      * than through {@code FilterField}. It therefore carries neither the ordering-and-columns wording nor the
      * catalogue-flags wording. Naming it here is what keeps the guard able to notice the next second listing, which may
      * well not be exempt.
+     *
+     * <p>
+     * The assets one CBOM contributed take {@code sort} and {@code columns} as the inventory listing does, and their
+     * description points to that listing and its catalogue, which carry this wording; under the CBOM controller the
+     * shared wording would name the CBOM catalogue. {@code CbomContributedAssetsContractTest} holds the pointer and
+     * checks the request example as {@link #everyListingCarriesAWorkedRequestExample} would.
      */
     private static final List<Endpoint> OUTSIDE_THE_CONTRACT = List
             .of(new Endpoint(CbomController.class, "listSyncSkips"),
-                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"));
+                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"),
+                    new Endpoint(CbomController.class, "listCbomAssets"));
 
     /** The listing objects that carry the projected attribute values. */
     private static final List<Class<?>> PROJECTION_CARRIERS = List
@@ -235,9 +242,10 @@ class ConfigurableColumnsDocTest {
     /**
      * An attribute-sourced field is published under {@code name|CONTENT_TYPE}, because a name alone is ambiguous when
      * one attribute name is registered against two content types - and a column addressed by the bare name therefore
-     * matches nothing. A property field is published under its own identifier and carries no suffix.
+     * matches nothing. A property field is published under its own identifier and carries no suffix. Package-private so
+     * a listing documented by reference can hold its example to the same rule.
      */
-    private static void assertIdentifierMatchesItsSource(String context, String fieldSource, String fieldIdentifier) {
+    static void assertIdentifierMatchesItsSource(String context, String fieldSource, String fieldIdentifier) {
         if ("property".equals(fieldSource)) {
             assertFalse(fieldIdentifier.contains("|"),
                     context + " suffixes the property identifier " + fieldIdentifier + " with a content type");
