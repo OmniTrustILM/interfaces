@@ -9,6 +9,7 @@ import com.otilm.api.model.client.certificate.SearchRequestDto;
 import com.otilm.api.model.common.BulkActionMessageDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.PaginationResponseDto;
+import com.otilm.api.model.core.cbom.CbomContributedAssetDto;
 import com.otilm.api.model.core.cbom.CbomDetailDto;
 import com.otilm.api.model.core.cbom.CbomDto;
 import com.otilm.api.model.core.cbom.CbomSyncSkipDto;
@@ -186,6 +187,46 @@ public interface CbomController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/syncSkips/{uuid}/retry", produces = {MediaType.APPLICATION_JSON_VALUE})
     CbomSyncSkipDto retrySyncSkip(@Parameter(description = "Sync skip record UUID") @PathVariable UUID uuid)
+            throws NotFoundException;
+
+    @Operation(operationId = "listCbomCryptographicAssets",
+            summary = "List the cryptographic assets a CBOM contributed to the inventory", description = """
+                    One page of the inventory assets this CBOM record contributed. Each row is the inventory row, with \
+                    the asset's totals across all CBOMs, plus the `bomRefs` that link it to this document's \
+                    components. The list follows the record's `assetSyncState` and empties once a later version of \
+                    the document has synced its assets. `filters`, `sort` and `columns` take the fields of \
+                    `GET /v1/cryptoAssets/search` and behave as on `POST /v1/cryptoAssets`.""")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The cryptographic assets this CBOM contributed"),
+            @ApiResponse(responseCode = "404", description = "CBOM not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+    @PostMapping(path = "/{uuid}/assets", consumes = {MediaType.APPLICATION_JSON_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    PaginationResponseDto<CbomContributedAssetDto> listCbomAssets(
+            @Parameter(description = "CBOM entry UUID") @PathVariable UUID uuid,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = SearchRequestDto.class),
+                            examples = {
+                                    @ExampleObject(name = "Assets whose name contains aes, by readiness, with columns",
+                                            value = """
+                                                    {
+                                                      "pageNumber": 1,
+                                                      "itemsPerPage": 50,
+                                                      "filters": [
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_NAME",
+                                                         "condition": "CONTAINS", "value": ["aes"]}
+                                                      ],
+                                                      "sort": {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_PQC_VERDICT", "direction": "asc"},
+                                                      "columns": [
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_NAME"},
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_TYPE"},
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_PQC_VERDICT"},
+                                                        {"fieldSource": "property", "fieldIdentifier": "CBOM_ASSET_SOURCE_COUNT"}
+                                                      ]
+                                                    }""")})) @Valid @RequestBody SearchRequestDto request)
             throws NotFoundException;
 
     @Operation(operationId = "getCbomSearchableFields", summary = "Get Cbom searchable fields information",
