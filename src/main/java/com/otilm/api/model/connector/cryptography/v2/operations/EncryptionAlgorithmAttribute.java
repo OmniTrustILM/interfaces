@@ -11,13 +11,16 @@ import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
+import com.otilm.api.model.connector.cryptography.v2.PlatformReservedAttribute;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Reserved v2 encryption/decryption selector. Its UUID, name and algorithm codes are shared across connectors. */
-public final class EncryptionAlgorithmAttribute {
+/**
+ * Reserved v2 encryption/decryption selector. Its UUID, name and algorithm codes are shared across connectors.
+ */
+public final class EncryptionAlgorithmAttribute implements PlatformReservedAttribute {
     public static final String NAME = "encryptionAlgorithm";
     public static final UUID ATTRIBUTE_UUID = UUID.fromString("5e364467-fa95-4253-907b-0c73cdfb2be7");
 

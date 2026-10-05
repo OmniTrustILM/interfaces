@@ -11,6 +11,7 @@ import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
+import com.otilm.api.model.connector.cryptography.v2.PlatformReservedAttribute;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +20,7 @@ import java.util.UUID;
  * The signature algorithm attribute through which a cryptography provider v2 lets the caller choose the signature
  * algorithm. Its UUID, name and values are part of the contract.
  */
-public final class SignatureAlgorithmAttribute {
+public final class SignatureAlgorithmAttribute implements PlatformReservedAttribute {
 
     public static final String NAME = "signatureAlgorithm";
     public static final UUID ATTRIBUTE_UUID = UUID.fromString("9180267f-c82f-4b7b-8160-d2363d813869");
