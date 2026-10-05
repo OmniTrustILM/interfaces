@@ -92,23 +92,14 @@ class CbomContributedAssetsContractTest {
     }
 
     /**
-     * The scope and the ordering are contract: a client pages the list and Core implements both, so the sentences stay
-     * until the behaviour changes. The shared ordering-and-columns wording speaks of this resource's searchable-fields
-     * operation, which under the CBOM group would read as the CBOM one, so the description names the inventory's.
+     * Filters, ordering and columns are documented on the inventory listing and its catalogue, not here, so the
+     * description has to say where.
      */
     @Test
-    void theDescriptionStatesTheScopeTheRefsAndTheOrdering() {
+    void theDescriptionPointsToTheInventoryListingAndItsCatalogue() {
         Operation op = listCbomAssets().getAnnotation(Operation.class);
         assertNotNull(op, "missing @Operation");
         assertFalse(op.summary().isBlank());
-        assertTrue(op.description().contains("bomRefs"), "the description must name the refs member");
-        assertTrue(op.description().contains("version"), "the description must say the list is scoped to one version");
-        assertTrue(op.description().contains("not this document's"),
-                "the description must say the row's counts are the inventory asset's totals");
-        assertTrue(op.description().contains("what has been stored for the record so far"),
-                "the description must say the list follows what the ingest has stored");
-        String defaultOrder = "When no sort is supplied, rows are ordered by name ascending, then UUID ascending";
-        assertTrue(op.description().contains(defaultOrder), "the description must document the default ordering");
         assertTrue(op.description().contains("`GET /v1/cryptoAssets/search`"),
                 "the description must name the catalogue its filters, ordering and columns come from");
         assertTrue(op.description().contains("`POST /v1/cryptoAssets`"),

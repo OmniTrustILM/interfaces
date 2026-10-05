@@ -190,28 +190,12 @@ public interface CbomController extends AuthProtectedController {
             throws NotFoundException;
 
     @Operation(operationId = "listCbomCryptographicAssets",
-            summary = "List the cryptographic assets a CBOM contributed to the inventory",
-            description = """
-                    One page of the inventory assets this CBOM record contributed, in the shape of the cryptographic asset \
-                    inventory listing: each row is the deduplicated inventory asset, and `bomRefs` names the bom-ref values \
-                    of this document's components that were folded into it, so a component of the document can be mapped \
-                    to its inventory record. `sourceCbomCount` and `occurrenceCount` on a row are the inventory asset's \
-                    totals across every CBOM that contributed it, not this document's. The list is scoped to the record \
-                    the UUID names, so another version of the same serial number lists its own contributions. It holds \
-                    what has been stored for the record so far: nothing before its assets are first ingested, part of \
-                    them while an ingest is in progress or after one failed part-way, as the record's `assetSyncState` \
-                    shows, and nothing once a later version superseded it and that version's assets were ingested. The \
-                    caller needs detail access to the CBOM and list access to cryptographic assets, and an asset the \
-                    caller may not list is left out.
-
-                    `filters`, `sort` and `columns` take the fields the cryptographic asset searchable-fields operation, \
-                    `GET /v1/cryptoAssets/search`, publishes, and behave exactly as on the inventory listing, \
-                    `POST /v1/cryptoAssets`; wherever the paragraphs that follow speak of the searchable-fields operation \
-                    of this resource, they mean that one. When no sort is supplied, rows are ordered by name ascending, \
-                    then UUID ascending, the name ordered on being the name the listing serves.
-
-                    """
-                    + ConfigurableColumnsDocs.SORT_AND_COLUMNS + ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION)
+            summary = "List the cryptographic assets a CBOM contributed to the inventory", description = """
+                    One page of the inventory assets this CBOM record contributed. Each row is the inventory row, with \
+                    the asset's totals across all CBOMs, plus the `bomRefs` that link it to this document's \
+                    components. The list follows the record's `assetSyncState` and empties once a later version of \
+                    the document has synced its assets. `filters`, `sort` and `columns` take the fields of \
+                    `GET /v1/cryptoAssets/search` and behave as on `POST /v1/cryptoAssets`.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The cryptographic assets this CBOM contributed"),
             @ApiResponse(responseCode = "404", description = "CBOM not found",

@@ -71,18 +71,12 @@ class ConfigurableColumnsDocTest {
                     new Endpoint(CbomController.class, "listCboms"),
                     new Endpoint(SigningRecordController.class, "listSigningRecords"),
                     new Endpoint(com.otilm.api.interfaces.core.web.v2.ConnectorController.class, "listConnectors"),
-                    new Endpoint(CryptographicAssetController.class, "listCryptographicAssets"),
-                    new Endpoint(CbomController.class, "listCbomAssets"));
+                    new Endpoint(CryptographicAssetController.class, "listCryptographicAssets"));
 
-    /**
-     * The field catalogues on those listings' controllers, each once. Every one declares the operation under the same
-     * method name. The assets one CBOM contributed are filtered, ordered and projected by the cryptographic asset
-     * catalogue, which the inventory listing already brings in.
-     */
+    /** The field catalogues that feed those listings. Every one declares the operation under the same method name. */
     private static final List<Endpoint> CATALOGUES = LISTINGS
             .stream()
             .map(listing -> new Endpoint(listing.controller(), "getSearchableFieldInformation"))
-            .distinct()
             .toList();
 
     /**
@@ -95,15 +89,18 @@ class ConfigurableColumnsDocTest {
      * than through {@code FilterField}. It therefore carries neither the ordering-and-columns wording nor the
      * catalogue-flags wording. Naming it here is what keeps the guard able to notice the next second listing, which may
      * well not be exempt.
+     *
+     * <p>
+     * The assets one CBOM contributed take {@code sort} and {@code columns} as the inventory listing does, and their
+     * description points to that listing and its catalogue, which carry this wording; under the CBOM controller the
+     * shared wording would name the CBOM catalogue. {@code CbomContributedAssetsContractTest} holds the pointer.
      */
     private static final List<Endpoint> OUTSIDE_THE_CONTRACT = List
             .of(new Endpoint(CbomController.class, "listSyncSkips"),
-                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"));
+                    new Endpoint(CbomController.class, "getSyncSkipSearchableFields"),
+                    new Endpoint(CbomController.class, "listCbomAssets"));
 
-    /**
-     * The listing objects that carry the projected attribute values. A row of the assets one CBOM contributed is an
-     * inventory row and inherits the member from it, so the inventory's carrier stands for both.
-     */
+    /** The listing objects that carry the projected attribute values. */
     private static final List<Class<?>> PROJECTION_CARRIERS = List
             .of(CertificateDto.class, KeyItemDto.class, com.otilm.api.model.core.connector.v2.ConnectorDto.class,
                     SecretDto.class, CbomDto.class, com.otilm.api.model.client.discovery.DiscoveryListDto.class,
