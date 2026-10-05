@@ -11,6 +11,7 @@ import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.search.AttributeProjectable;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.models.media.Schema;
 import jakarta.validation.Valid;
 import java.lang.reflect.Method;
@@ -28,8 +29,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertLanguageNeutral;
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertNoJargon;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,6 +112,39 @@ class CbomContributedAssetsContractTest {
         assertLanguageNeutral("listCbomAssets", op.description());
     }
 
+    /**
+     * The description says {@code sort} and {@code columns} apply here, so the worked example shows both, and it must
+     * be a request a client can send rather than text that reaches the document as a string. Its columns follow the
+     * addressing rule {@code ConfigurableColumnsDocTest} holds the other listings to.
+     */
+    @Test
+    void theRequestExampleIsASearchRequestShowingSortAndColumns() {
+        ExampleObject[] examples = Arrays
+                .stream(listCbomAssets().getParameters()[1]
+                        .getAnnotation(io.swagger.v3.oas.annotations.parameters.RequestBody.class)
+                        .content())
+                .flatMap(content -> Arrays.stream(content.examples()))
+                .toArray(ExampleObject[]::new);
+        assertTrue(examples.length > 0, "the listing declares no request example");
+        for (ExampleObject example : examples) {
+            JsonNode body = assertDoesNotThrow(() -> mapper.readTree(example.value()),
+                    "the request example is not valid JSON, so it reaches the document as a string");
+            assertTrue(body.has("sort"), "the request example does not show sort");
+            assertTrue(body.has("columns"), "the request example does not show columns");
+            for (JsonNode column : body.get("columns")) {
+                assertTrue(column.has("fieldSource") && column.has("fieldIdentifier"),
+                        "the request example addresses a column without both halves of its address");
+                ConfigurableColumnsDocTest
+                        .assertIdentifierMatchesItsSource("the request example", column.get("fieldSource").asText(),
+                                column.get("fieldIdentifier").asText());
+            }
+            SearchRequestDto request = assertDoesNotThrow(() -> mapper.treeToValue(body, SearchRequestDto.class),
+                    "the request example is not a search request");
+            assertNotNull(request.getSort(), "the request example's sort does not bind");
+            assertFalse(request.getColumns().isEmpty(), "the request example names no column");
+        }
+    }
+
     @Test
     void anEmptyRefListIsSentRatherThanOmitted() throws Exception {
         CbomContributedAssetDto row = new CbomContributedAssetDto();
@@ -137,6 +173,8 @@ class CbomContributedAssetsContractTest {
 
         assertEquals(List.of("crypto/algorithm/aes@first", "crypto/algorithm/aes@second"), back.getBomRefs());
         assertEquals(row, back);
+        back.setName("aes-128");
+        assertNotEquals(row, back, "rows that differ only in an inherited member must not be equal");
     }
 
     private static List<String> requiredOf(Class<?> type) {

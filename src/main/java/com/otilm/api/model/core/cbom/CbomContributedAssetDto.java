@@ -18,11 +18,9 @@ import lombok.EqualsAndHashCode;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CbomContributedAssetDto extends CryptographicAssetDto {
 
-    @Schema(description = "The bom-ref values of this document's components that were folded into this asset, in "
-            + "document order. Navigation data only. A component links to no asset when its bom-ref is not a string "
-            + "or is defined more than once in the document; when the value cannot be stored, because it has no "
-            + "valid text encoding, contains a NUL character or is longer than 1024 characters; or when it comes "
-            + "after the first 256 values kept per asset and document. Empty when no component of this document "
-            + "could be linked.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The bom-ref values of this document's components folded into this asset, in document "
+            + "order, at most 256. A value that is empty, not a string, not well-formed Unicode, contains NUL or is "
+            + "longer than 1024 characters is left out, and the asset is still listed. A document that repeats a "
+            + "bom-ref is not synced.", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> bomRefs = new ArrayList<>();
 }

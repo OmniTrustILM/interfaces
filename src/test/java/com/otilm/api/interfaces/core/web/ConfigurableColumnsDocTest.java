@@ -93,7 +93,8 @@ class ConfigurableColumnsDocTest {
      * <p>
      * The assets one CBOM contributed take {@code sort} and {@code columns} as the inventory listing does, and their
      * description points to that listing and its catalogue, which carry this wording; under the CBOM controller the
-     * shared wording would name the CBOM catalogue. {@code CbomContributedAssetsContractTest} holds the pointer.
+     * shared wording would name the CBOM catalogue. {@code CbomContributedAssetsContractTest} holds the pointer and
+     * checks the request example as {@link #everyListingCarriesAWorkedRequestExample} would.
      */
     private static final List<Endpoint> OUTSIDE_THE_CONTRACT = List
             .of(new Endpoint(CbomController.class, "listSyncSkips"),
@@ -241,9 +242,10 @@ class ConfigurableColumnsDocTest {
     /**
      * An attribute-sourced field is published under {@code name|CONTENT_TYPE}, because a name alone is ambiguous when
      * one attribute name is registered against two content types - and a column addressed by the bare name therefore
-     * matches nothing. A property field is published under its own identifier and carries no suffix.
+     * matches nothing. A property field is published under its own identifier and carries no suffix. Package-private so
+     * a listing documented by reference can hold its example to the same rule.
      */
-    private static void assertIdentifierMatchesItsSource(String context, String fieldSource, String fieldIdentifier) {
+    static void assertIdentifierMatchesItsSource(String context, String fieldSource, String fieldIdentifier) {
         if ("property".equals(fieldSource)) {
             assertFalse(fieldIdentifier.contains("|"),
                     context + " suffixes the property identifier " + fieldIdentifier + " with a content type");

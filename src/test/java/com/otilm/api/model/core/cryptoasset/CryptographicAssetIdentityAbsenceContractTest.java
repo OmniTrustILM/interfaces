@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,12 +46,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * artifact, so this is where the guarantee holds or fails. Swept surfaces: declared fields and Jackson wire properties
  * (getters and renames included) with their schema text (description, title, name, example, examples, defaultValue,
  * pattern, allowableValues) at class, field, getter and parameter level; operation names, operationIds, class and
- * method mapping paths, response descriptions with their content schemas and example objects, parameter annotations
- * with their nested schemas, and tags of the inventory controller, the statistics operation and the CBOM-scoped asset
- * listing; the three inventory enums and the CRYPTO_ASSET resource entry as served by the enums API. Fixtures prove
- * each dimension fails on a violation instead of passing silently. What no static sweep can reach — the
- * searchable-fields catalogue core populates at runtime — is guarded core-side; the operation's own prose states the
- * keys are never offered.
+ * method mapping paths, request bodies and response descriptions with their content schemas and example objects,
+ * parameter annotations with their nested schemas, and tags of the inventory controller, the statistics operation and
+ * the CBOM-scoped asset listing; the three inventory enums and the CRYPTO_ASSET resource entry as served by the enums
+ * API. Fixtures prove each dimension fails on a violation instead of passing silently. What no static sweep can reach —
+ * the searchable-fields catalogue core populates at runtime — is guarded core-side; the operation's own prose states
+ * the keys are never offered.
  */
 class CryptographicAssetIdentityAbsenceContractTest {
 
@@ -157,8 +158,11 @@ class CryptographicAssetIdentityAbsenceContractTest {
         }
         sweepTag(ViolatingControllerFixture.class, problems);
         List<String> expected = List
-                .of("operationId", "find mapping path", "example object", "parameter example",
-                        "parameter nested schema", "content schema", "class mapping path");
+                .of("operationId", "find mapping path", "response example object", "parameter example",
+                        "parameter nested schema", "response content schema", "class mapping path",
+                        "search request body description", "request body content schema",
+                        "request body example object name", "request body example object value",
+                        "submit request body description");
         for (String fragment : expected) {
             assertTrue(problems.stream().anyMatch(p -> p.contains(fragment)),
                     "operation sweep missed: " + fragment + "\n" + String.join("\n", problems));
@@ -247,18 +251,10 @@ class CryptographicAssetIdentityAbsenceContractTest {
             String location = method.getName() + " " + response.responseCode() + " response";
             reportBannedTokens(location + " description", response.description(), problems);
             for (Content content : response.content()) {
-                reportBannedTokens(location + " content mediaType", content.mediaType(), problems);
-                sweepSchema(location + " content schema", content.schema(), problems);
-                sweepSchema(location + " content array schema", content.array().schema(), problems);
-                for (ExampleObject example : content.examples()) {
-                    String exampleLocation = location + " example object";
-                    reportBannedTokens(exampleLocation + " name", example.name(), problems);
-                    reportBannedTokens(exampleLocation + " summary", example.summary(), problems);
-                    reportBannedTokens(exampleLocation + " description", example.description(), problems);
-                    reportBannedTokens(exampleLocation + " value", example.value(), problems);
-                }
+                sweepContent(location, content, problems);
             }
         }
+        sweepRequestBody(method.getName(), method.getAnnotation(RequestBody.class), problems);
 
         for (Parameter parameter : method.getParameters()) {
             // Fully qualified deliberately: java.lang.reflect.Parameter is already imported for the reflected method
@@ -286,6 +282,31 @@ class CryptographicAssetIdentityAbsenceContractTest {
             if (schema != null) {
                 sweepSchema(method.getName() + " parameter schema", schema, problems);
             }
+            sweepRequestBody(method.getName(), parameter.getAnnotation(RequestBody.class), problems);
+        }
+    }
+
+    private static void sweepRequestBody(String methodName, RequestBody requestBody, List<String> problems) {
+        if (requestBody == null) {
+            return;
+        }
+        String location = methodName + " request body";
+        reportBannedTokens(location + " description", requestBody.description(), problems);
+        for (Content content : requestBody.content()) {
+            sweepContent(location, content, problems);
+        }
+    }
+
+    private static void sweepContent(String location, Content content, List<String> problems) {
+        reportBannedTokens(location + " content mediaType", content.mediaType(), problems);
+        sweepSchema(location + " content schema", content.schema(), problems);
+        sweepSchema(location + " content array schema", content.array().schema(), problems);
+        for (ExampleObject example : content.examples()) {
+            String exampleLocation = location + " example object";
+            reportBannedTokens(exampleLocation + " name", example.name(), problems);
+            reportBannedTokens(exampleLocation + " summary", example.summary(), problems);
+            reportBannedTokens(exampleLocation + " description", example.description(), problems);
+            reportBannedTokens(exampleLocation + " value", example.value(), problems);
         }
     }
 
@@ -371,5 +392,15 @@ class CryptographicAssetIdentityAbsenceContractTest {
         @GetMapping(path = "/byIdentity")
         String find(@io.swagger.v3.oas.annotations.Parameter(description = "clean", example = "an identity example",
                 schema = @Schema(description = "an identity schema")) String query);
+
+        @Operation(summary = "clean summary", description = "clean description")
+        @PostMapping(path = "/search")
+        String search(@RequestBody(description = "a body keyed by identity",
+                content = @Content(schema = @Schema(description = "an identity body schema"), examples = {
+                        @ExampleObject(name = "by fingerprint", value = "{\"filter\":\"identity\"}")})) String body);
+
+        @RequestBody(description = "a body named by its fingerprint")
+        @PostMapping(path = "/submit")
+        String submit(String body);
     }
 }
