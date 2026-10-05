@@ -28,8 +28,9 @@ import lombok.ToString;
 @Schema(name = "VerifyDataRequestV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public class VerifyDataRequestV2Dto extends KeyScopedRequestV2Dto {
 
-    @Schema(description = "Batch-wide signature settings. Must select exactly one signatureAlgorithm value from "
-            + "the algorithms offered by the verification attribute schema.",
+    @Schema(description = "Batch-wide signature settings. Must include exactly one v3 string attribute named "
+            + "signatureAlgorithm with UUID 9180267f-c82f-4b7b-8160-d2363d813869, selecting exactly one "
+            + "signature algorithm code offered by the verification attribute schema.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "signatureAttributes is required")
     private List<@NotNull(

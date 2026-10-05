@@ -17,7 +17,7 @@ import java.util.Optional;
 @Schema(enumAsRef = true,
         description = "Encryption algorithm code. RSA OAEP profiles use MGF1 with the same hash "
                 + "as OAEP and an empty label. PKCS1 v1.5 and OAEP with SHA-1 are compatibility choices. "
-                + "A provider offers only the profiles supported by the addressed key and its backend. ")
+                + "A provider offers only the profiles supported by the addressed key and its backend.")
 public enum EncryptionAlgorithm implements IPlatformEnum {
     RSA_PKCS1_V1_5("RSA/ECB/PKCS1Padding", "RSAES-PKCS1-v1_5", "RSA PKCS1 v1.5 encryption for compatibility"),
     RSA_OAEP_SHA1("RSA/ECB/OAEPWithSHA-1AndMGF1Padding", "RSAES-OAEP with SHA-1",
