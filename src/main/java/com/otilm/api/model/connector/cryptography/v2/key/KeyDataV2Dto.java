@@ -49,8 +49,8 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
     @NotNull(message = "key algorithm is required")
     private KeyAlgorithm algorithm;
 
-    @Schema(description = "Bit length of the key", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
-    @NotNull(message = "key length is required")
+    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
     @Min(value = 1, message = "key length must be positive")
     private Integer length;
 
@@ -61,6 +61,24 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
 
     protected KeyDataV2Dto(KeyTypeV2 type) {
         this.type = type;
+    }
+
+    /**
+     * Requires a length only for algorithms with a defined conventional key length.
+     *
+     * @return whether the length is present when required by the algorithm
+     */
+    @JsonIgnore
+    @Schema(hidden = true)
+    @AssertTrue(message = "key length is required for RSA, ECDSA, and AES")
+    public boolean isLengthPresentWhenRequired() {
+        if (algorithm == null || length != null) {
+            return true;
+        }
+        return switch (algorithm) {
+            case RSA, ECDSA, AES -> false;
+            default -> true;
+        };
     }
 
     /**

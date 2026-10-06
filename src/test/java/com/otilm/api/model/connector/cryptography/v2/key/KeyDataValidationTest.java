@@ -20,7 +20,6 @@ import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyGenerationParameters;
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyPairGenerator;
@@ -34,6 +33,7 @@ import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadataAttribute;
@@ -41,6 +41,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPublicKeyData;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyData;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,6 +72,97 @@ class KeyDataValidationTest {
         return Stream
                 .of(named("secret key", validSecretKeyData()), named("private key", validPrivateKeyData()),
                         named("public key", validPublicKeyData()));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = KeyAlgorithm.class,
+            names = {"FALCON", "MLDSA", "SLHDSA", "MLKEM", "DILITHIUM", "SPHINCSPLUS", "UNKNOWN"})
+    void validate_hasNoViolations_forOptionalLengthOmitted(KeyAlgorithm algorithm) {
+        // given
+        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
+        keyData.setAlgorithm(algorithm);
+        keyData.setLength(null);
+
+        // when
+        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertTrue(violations.isEmpty());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = KeyAlgorithm.class,
+            names = {"FALCON", "MLDSA", "SLHDSA", "MLKEM", "DILITHIUM", "SPHINCSPLUS", "UNKNOWN"})
+    void validate_hasNoViolations_forPositiveOptionalLength(KeyAlgorithm algorithm) {
+        // given
+        int positiveLength = 256;
+        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
+        keyData.setAlgorithm(algorithm);
+        keyData.setLength(positiveLength);
+
+        // when
+        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertTrue(violations.isEmpty());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidOptionalLengths")
+    void validate_rejectsNonPositiveOptionalLength(InvalidKeyData invalidKeyData) {
+        // given
+        KeyDataV2Dto keyData = invalidKeyData.keyData();
+
+        // when
+        Set<ConstraintViolation<KeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertHasViolation(violations, invalidKeyData.path(), invalidKeyData.message());
+    }
+
+    static Stream<Named<InvalidKeyData>> invalidOptionalLengths() {
+        int zeroLength = 0;
+        int negativeLength = -1;
+        return Arrays
+                .stream(KeyAlgorithm.values())
+                .filter(algorithm -> algorithm != KeyAlgorithm.RSA && algorithm != KeyAlgorithm.ECDSA
+                        && algorithm != KeyAlgorithm.AES)
+                .flatMap(algorithm -> Stream.of(zeroLength, negativeLength).map(length -> {
+                    PrivateKeyDataV2Dto keyData = validPrivateKeyData();
+                    keyData.setAlgorithm(algorithm);
+                    keyData.setLength(length);
+                    return named(algorithm + " length " + length,
+                            new InvalidKeyData(keyData, "length", "key length must be positive"));
+                }));
+    }
+
+    @Test
+    void validate_rejectsMissingEcLength() {
+        // given
+        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
+        keyData.setAlgorithm(KeyAlgorithm.ECDSA);
+        keyData.setLength(null);
+
+        // when
+        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertHasViolation(violations, "lengthPresentWhenRequired", "key length is required for RSA, ECDSA, and AES");
+    }
+
+    @Test
+    void validate_reportsOnlyMissingAlgorithm_whenAlgorithmAndLengthAbsent() {
+        // given
+        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
+        keyData.setAlgorithm(null);
+        keyData.setLength(null);
+
+        // when
+        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
+
+        // then
+        assertEquals(1, violations.size());
+        assertHasViolation(violations, "algorithm", "key algorithm is required");
     }
 
     @ParameterizedTest(name = "{0}")
@@ -104,7 +196,8 @@ class KeyDataValidationTest {
                             .of(named(role + " missing algorithm",
                                     new InvalidKeyData(missingAlgorithm, "algorithm", "key algorithm is required")),
                                     named(role + " missing length",
-                                            new InvalidKeyData(missingLength, "length", "key length is required")),
+                                            new InvalidKeyData(missingLength, "lengthPresentWhenRequired",
+                                                    "key length is required for RSA, ECDSA, and AES")),
                                     named(role + " zero length",
                                             new InvalidKeyData(zeroLength, "length", "key length must be positive")),
                                     named(role + " negative length", new InvalidKeyData(negativeLength, "length",
@@ -178,16 +271,12 @@ class KeyDataValidationTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("supportedPqcAlgorithms")
-    void validate_hasNoViolations_forSupportedPqcSpki(PqcAlgorithm algorithm) throws Exception {
+    void validate_hasNoViolations_forSupportedPqcSpkiWithoutLength(PqcAlgorithm algorithm) throws Exception {
         // given
         byte[] pqcSpki = generateSpki(algorithm.generatorName());
-        int reportedLength = SubjectPublicKeyInfo
-                .getInstance(ASN1Primitive.fromByteArray(pqcSpki))
-                .getPublicKeyData()
-                .getBytes().length * Byte.SIZE;
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(algorithm.declaredAlgorithm());
-        keyData.setLength(reportedLength);
+        keyData.setLength(null);
         keyData.setPublicKeySpki(pqcSpki);
 
         // when

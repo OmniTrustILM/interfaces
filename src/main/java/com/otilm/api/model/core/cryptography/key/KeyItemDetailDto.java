@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Public key-item detail, preserving an absent provider length as null.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -40,8 +43,9 @@ public class KeyItemDetailDto extends NameAndUuidDto {
     @Sensitive
     private String keyData;
 
-    @Schema(description = "Key Length", requiredMode = Schema.RequiredMode.REQUIRED)
-    private int length;
+    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true, minimum = "1")
+    private Integer length;
 
     @Schema(description = "Metadata for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataResponseDto> metadata;
@@ -66,6 +70,30 @@ public class KeyItemDetailDto extends NameAndUuidDto {
             + "raised afterwards; it can only be lowered to false.", requiredMode = Schema.RequiredMode.REQUIRED,
             defaultValue = "false")
     private boolean exportable;
+
+    /**
+     * Retains the constructor accepting a primitive length for existing callers.
+     *
+     * @param keyReferenceUuid connector key identity
+     * @param type key kind
+     * @param keyAlgorithm key algorithm
+     * @param format material encoding
+     * @param keyData public material
+     * @param length key length in bits
+     * @param metadata descriptive metadata
+     * @param usage permitted operations
+     * @param enabled whether operations are enabled
+     * @param state lifecycle state
+     * @param reason compromise reason
+     * @param complianceStatus compliance outcome
+     * @param exportable whether private material may be exported
+     */
+    public KeyItemDetailDto(String keyReferenceUuid, KeyType type, KeyAlgorithm keyAlgorithm, KeyFormat format,
+            String keyData, int length, List<MetadataResponseDto> metadata, List<KeyUsage> usage, boolean enabled,
+            KeyState state, KeyCompromiseReason reason, ComplianceStatus complianceStatus, boolean exportable) {
+        this(keyReferenceUuid, type, keyAlgorithm, format, keyData, Integer.valueOf(length), metadata, usage, enabled,
+                state, reason, complianceStatus, exportable);
+    }
 
     /**
      * The signature this class carried before {@code exportable} was added, so a caller that constructs it positionally

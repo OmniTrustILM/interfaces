@@ -89,7 +89,8 @@ class CryptographyKeySchemaTest {
             assertTrue(resolvesRequiredProperty(schemas.get(subtype), "type", schemas), subtype + " requires type");
             assertTrue(resolvesRequiredProperty(schemas.get(subtype), "algorithm", schemas),
                     subtype + " requires algorithm");
-            assertTrue(resolvesRequiredProperty(schemas.get(subtype), "length", schemas), subtype + " requires length");
+            assertFalse(resolvesRequiredProperty(schemas.get(subtype), "length", schemas),
+                    subtype + " must allow omission of length for PQC and Unknown");
             assertEquals(Boolean.FALSE, schemas.get(subtype).getAdditionalProperties(),
                     subtype + " must publish additionalProperties=false");
         }
