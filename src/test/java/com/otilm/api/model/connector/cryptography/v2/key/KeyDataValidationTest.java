@@ -107,19 +107,6 @@ class KeyDataValidationTest {
         assertTrue(violations.isEmpty());
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("invalidOptionalLengths")
-    void validate_rejectsNonPositiveOptionalLength(InvalidKeyData invalidKeyData) {
-        // given
-        KeyDataV2Dto keyData = invalidKeyData.keyData();
-
-        // when
-        Set<ConstraintViolation<KeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
-
-        // then
-        assertHasViolation(violations, invalidKeyData.path(), invalidKeyData.message());
-    }
-
     static Stream<Named<InvalidKeyData>> invalidOptionalLengths() {
         int zeroLength = 0;
         int negativeLength = -1;
@@ -166,8 +153,8 @@ class KeyDataValidationTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("invalidRequiredKeyFields")
-    void validate_hasExpectedViolation_forInvalidRequiredKeyField(InvalidKeyData invalidKeyData) {
+    @MethodSource({"invalidRequiredKeyFields", "invalidOptionalLengths"})
+    void validate_hasExpectedViolation_forInvalidKeyField(InvalidKeyData invalidKeyData) {
         // given
         KeyDataV2Dto keyData = invalidKeyData.keyData();
 

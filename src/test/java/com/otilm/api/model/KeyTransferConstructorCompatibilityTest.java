@@ -2,16 +2,9 @@ package com.otilm.api.model;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
-import com.otilm.api.model.client.cryptography.key.KeyCompromiseReason;
 import com.otilm.api.model.client.cryptography.key.KeyRequestDto;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
-import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
-import com.otilm.api.model.common.enums.cryptography.KeyFormat;
-import com.otilm.api.model.common.enums.cryptography.KeyType;
 import com.otilm.api.model.connector.cryptography.enums.TokenInstanceStatus;
-import com.otilm.api.model.core.compliance.ComplianceStatus;
-import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
-import com.otilm.api.model.core.cryptography.key.KeyState;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceDetailDto;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceStatusDetailDto;
@@ -57,20 +50,6 @@ class KeyTransferConstructorCompatibilityTest {
         assertEquals("token", profile.getTokenInstanceName());
         assertEquals(List.of(KeyUsage.SIGN), profile.getUsages());
         assertNull(profile.getKeyTransfer(), "key transfer is unreported rather than reported as unavailable");
-    }
-
-    @Test
-    void aKeyItemBuiltWithoutTheExportableFlagIsNotExportable() {
-        // given
-        // when
-        KeyItemDetailDto item = new KeyItemDetailDto("key-reference", KeyType.PRIVATE_KEY, KeyAlgorithm.RSA,
-                KeyFormat.PRKI, "key-data", 2048, List.<MetadataResponseDto>of(), List.of(KeyUsage.SIGN), true,
-                KeyState.ACTIVE, KeyCompromiseReason.UNAUTHORIZED_DISCLOSURE, ComplianceStatus.NOT_CHECKED);
-
-        // then
-        assertEquals(2048, item.getLength());
-        assertEquals(KeyState.ACTIVE, item.getState());
-        assertFalse(item.isExportable(), "a key item is not exportable unless it is said to be");
     }
 
     @Test

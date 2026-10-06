@@ -71,38 +71,4 @@ public class KeyItemDetailDto extends NameAndUuidDto {
             defaultValue = "false")
     private boolean exportable;
 
-    /**
-     * Retains the constructor accepting a primitive length for existing callers.
-     *
-     * @param keyReferenceUuid connector key identity
-     * @param type key kind
-     * @param keyAlgorithm key algorithm
-     * @param format material encoding
-     * @param keyData public material
-     * @param length key length in bits
-     * @param metadata descriptive metadata
-     * @param usage permitted operations
-     * @param enabled whether operations are enabled
-     * @param state lifecycle state
-     * @param reason compromise reason
-     * @param complianceStatus compliance outcome
-     * @param exportable whether private material may be exported
-     */
-    public KeyItemDetailDto(String keyReferenceUuid, KeyType type, KeyAlgorithm keyAlgorithm, KeyFormat format,
-            String keyData, int length, List<MetadataResponseDto> metadata, List<KeyUsage> usage, boolean enabled,
-            KeyState state, KeyCompromiseReason reason, ComplianceStatus complianceStatus, boolean exportable) {
-        this(keyReferenceUuid, type, keyAlgorithm, format, keyData, Integer.valueOf(length), metadata, usage, enabled,
-                state, reason, complianceStatus, exportable);
-    }
-
-    /**
-     * The signature this class carried before {@code exportable} was added, so a caller that constructs it positionally
-     * still compiles. A key item is not exportable unless it is said to be.
-     */
-    public KeyItemDetailDto(String keyReferenceUuid, KeyType type, KeyAlgorithm keyAlgorithm, KeyFormat format,
-            String keyData, int length, List<MetadataResponseDto> metadata, List<KeyUsage> usage, boolean enabled,
-            KeyState state, KeyCompromiseReason reason, ComplianceStatus complianceStatus) {
-        this(keyReferenceUuid, type, keyAlgorithm, format, keyData, length, metadata, usage, enabled, state, reason,
-                complianceStatus, false);
-    }
 }
