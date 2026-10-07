@@ -7,6 +7,7 @@ import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.BooleanAttributeContentV3;
+import com.otilm.api.model.connector.cryptography.v2.PlatformReservedAttribute;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ import java.util.UUID;
  * not publish it in its import schema.
  * </p>
  */
-public final class KeyExportableAttribute {
+public final class KeyExportableAttribute implements PlatformReservedAttribute {
 
     /** Reserved attribute name. Connectors must publish the attribute under exactly this name. */
     public static final String NAME = "keyExportable";

@@ -2,10 +2,12 @@ package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
+import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
+import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
@@ -16,6 +18,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2D
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.EncryptionAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
@@ -32,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -90,44 +94,109 @@ public final class OperationResponseValidator extends ResponseChecks {
         return validateBeanConstraints(response);
     }
 
+    public OperationValidationResult validateSynchronousResponseStatus(ResponseEntity<?> response) {
+        return validate(() -> requireResponseStatus(response, HttpStatus.OK));
+    }
+
     public OperationValidationResult validateAttributeList(List<BaseAttribute> response) {
         return validateResponseElements(response, "attribute");
     }
 
-    /** A caller names the signature algorithm from the selection before it signs, so the schema must offer it. */
     public OperationValidationResult validateSignAttributeList(List<BaseAttribute> response) {
-        OperationValidationResult elements = validateAttributeList(response);
-        if (!elements.isValid()) {
-            return elements;
-        }
-        return validate(() -> requireSignatureAlgorithmOffered(response));
+        return validateSignatureAttributeList(response, "Sign");
     }
 
-    private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema) {
-        DataAttributeV3 definition = schema
+    public OperationValidationResult validateVerifyAttributeList(List<BaseAttribute> response) {
+        return validateSignatureAttributeList(response, "Verify");
+    }
+
+    private OperationValidationResult validateSignatureAttributeList(List<BaseAttribute> response, String operation) {
+        OperationValidationResult validationResult = validateAttributeList(response);
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+        return validate(() -> requireSignatureAlgorithmOffered(response, operation));
+    }
+
+    private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema, String operation) {
+        String identity = "attribute with name '" + SignatureAlgorithmAttribute.NAME + "' and UUID '"
+                + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
+        List<BaseAttribute> declarations = schema
                 .stream()
-                .filter(attribute -> SignatureAlgorithmAttribute.NAME.equals(attribute.getName()))
-                .filter(DataAttributeV3.class::isInstance)
-                .map(DataAttributeV3.class::cast)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Sign attributes must declare "
-                        + SignatureAlgorithmAttribute.NAME + " as a v3 data attribute"));
+                .filter(attribute -> SignatureAlgorithmAttribute.ATTRIBUTE_UUID
+                        .toString()
+                        .equalsIgnoreCase(attribute.getUuid())
+                        || SignatureAlgorithmAttribute.NAME.equals(attribute.getName()))
+                .toList();
+        if (declarations.size() != 1 || !(declarations.get(0) instanceof DataAttributeV3 definition)
+                || definition.getVersion() != AttributeVersion.V3.getVersion()
+                || definition.getSchemaVersion() != AttributeVersion.V3
+                || !SignatureAlgorithmAttribute.ATTRIBUTE_UUID.toString().equalsIgnoreCase(definition.getUuid())
+                || !SignatureAlgorithmAttribute.NAME.equals(definition.getName())) {
+            throw new IllegalArgumentException(operation + " attributes must declare exactly one v3 " + identity);
+        }
         DataAttributeProperties properties = definition.getProperties();
-        if (properties == null || !properties.isRequired() || properties.isMultiSelect()) {
+        if (properties == null || !properties.isRequired() || properties.isMultiSelect() || !properties.isList()
+                || properties.isExtensibleList()) {
             throw new IllegalArgumentException(
-                    SignatureAlgorithmAttribute.NAME + " must be a required single-select attribute");
+                    "The " + identity + " must be a required, single-select, non-extensible list");
         }
         List<? extends AttributeContent> options = definition.getContent();
         if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
                 || !options.stream().allMatch(OperationResponseValidator::isSignatureAlgorithmCode)) {
-            throw new IllegalArgumentException(SignatureAlgorithmAttribute.NAME
-                    + " must offer at least one value, and only signature algorithm codes");
+            throw new IllegalArgumentException(
+                    "The " + identity + " must offer at least one value, and only signature algorithm codes");
         }
     }
 
     private static boolean isSignatureAlgorithmCode(AttributeContent option) {
-        return option != null && option.getData() instanceof String code
-                && SignatureAlgorithm.lookupByCode(code).isPresent();
+        return option != null && option.getContentType() == AttributeContentType.STRING
+                && option.getData() instanceof String code && SignatureAlgorithm.lookupByCode(code).isPresent();
+    }
+
+    /** Encrypt/decrypt schemas must publish encryptionAlgorithm as a required closed list of known algorithm codes. */
+    public OperationValidationResult validateCipherAttributeList(List<BaseAttribute> response) {
+        OperationValidationResult validationResult = validateAttributeList(response);
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+        return validate(() -> requireEncryptionAlgorithmOffered(response));
+    }
+
+    private static void requireEncryptionAlgorithmOffered(List<BaseAttribute> schema) {
+        String identity = "attribute with name '" + EncryptionAlgorithmAttribute.NAME + "' and UUID '"
+                + EncryptionAlgorithmAttribute.ATTRIBUTE_UUID + "'";
+        List<BaseAttribute> declarations = schema
+                .stream()
+                .filter(attribute -> EncryptionAlgorithmAttribute.ATTRIBUTE_UUID
+                        .toString()
+                        .equalsIgnoreCase(attribute.getUuid())
+                        || EncryptionAlgorithmAttribute.NAME.equals(attribute.getName()))
+                .toList();
+        if (declarations.size() != 1 || !(declarations.get(0) instanceof DataAttributeV3 definition)
+                || definition.getVersion() != AttributeVersion.V3.getVersion()
+                || definition.getSchemaVersion() != AttributeVersion.V3
+                || !EncryptionAlgorithmAttribute.ATTRIBUTE_UUID.toString().equalsIgnoreCase(definition.getUuid())
+                || !EncryptionAlgorithmAttribute.NAME.equals(definition.getName())) {
+            throw new IllegalArgumentException("Cipher attributes must declare exactly one v3 " + identity);
+        }
+        DataAttributeProperties properties = definition.getProperties();
+        if (properties == null || !properties.isRequired() || properties.isMultiSelect() || !properties.isList()
+                || properties.isExtensibleList()) {
+            throw new IllegalArgumentException(
+                    "The " + identity + " must be a required, single-select, non-extensible list");
+        }
+        List<? extends AttributeContent> options = definition.getContent();
+        if (definition.getContentType() != AttributeContentType.STRING || options == null || options.isEmpty()
+                || !options.stream().allMatch(OperationResponseValidator::isEncryptionAlgorithmCode)) {
+            throw new IllegalArgumentException(
+                    "The " + identity + " must offer at least one value, and only encryption algorithm codes");
+        }
+    }
+
+    private static boolean isEncryptionAlgorithmCode(AttributeContent option) {
+        return option != null && option.getContentType() == AttributeContentType.STRING
+                && option.getData() instanceof String code && EncryptionAlgorithm.lookupByCode(code).isPresent();
     }
 
     public OperationValidationResult validateKeyUsageList(List<KeyUsage> response) {

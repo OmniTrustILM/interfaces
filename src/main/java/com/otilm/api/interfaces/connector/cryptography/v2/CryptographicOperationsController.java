@@ -52,7 +52,12 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     // ---- Cipher ----
 
     @Operation(summary = "List encryption attributes",
-            description = "Returns the encryption parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the encryption parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema must include exactly one v3 string data attribute named encryptionAlgorithm with UUID "
+                    + "5e364467-fa95-4253-907b-0c73cdfb2be7, as a required, single-select, non-extensible list. "
+                    + "It must offer at least one EncryptionAlgorithm code supported by the key and backend. "
+                    + "The codes and profile parameters are documented on CipherDataRequestV2Dto.cipherAttributes. "
+                    + "RSA OAEP profiles use MGF1 with the same hash as OAEP and an empty label.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Encryption attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -64,12 +69,17 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listEncryptAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
-    @Operation(summary = "Encrypt data", description = "Encrypt data with the given key (always synchronous)")
+    @Operation(summary = "Encrypt data", description = "Encrypt data with the given key (always synchronous). "
+            + "cipherAttributes must include exactly one v3 string attribute named encryptionAlgorithm with UUID "
+            + "5e364467-fa95-4253-907b-0c73cdfb2be7, selecting exactly one code from the required, single-select, "
+            + "non-extensible list offered by /encrypt/attributes. RSA OAEP profiles use MGF1 with the same hash "
+            + "as OAEP and an empty label.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data encrypted"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or the encryptionAlgorithm selection names an algorithm "
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/encrypt", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -77,7 +87,12 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     EncryptDataResponseV2Dto encryptData(@RequestBody @Valid CipherDataRequestV2Dto request);
 
     @Operation(summary = "List decryption attributes",
-            description = "Returns the decryption parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the decryption parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema must include exactly one v3 string data attribute named encryptionAlgorithm with UUID "
+                    + "5e364467-fa95-4253-907b-0c73cdfb2be7, as a required, single-select, non-extensible list. "
+                    + "It must offer at least one EncryptionAlgorithm code supported by the key and backend. "
+                    + "The codes and profile parameters are documented on CipherDataRequestV2Dto.cipherAttributes. "
+                    + "RSA OAEP profiles use MGF1 with the same hash as OAEP and an empty label.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Decryption attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -89,12 +104,17 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listDecryptAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
-    @Operation(summary = "Decrypt data", description = "Decrypt data with the given key (always synchronous)")
+    @Operation(summary = "Decrypt data", description = "Decrypt data with the given key (always synchronous). "
+            + "cipherAttributes must include exactly one v3 string attribute named encryptionAlgorithm with UUID "
+            + "5e364467-fa95-4253-907b-0c73cdfb2be7, selecting exactly one code from the required, single-select, "
+            + "non-extensible list offered by /decrypt/attributes. RSA OAEP profiles use MGF1 with the same hash "
+            + "as OAEP and an empty label.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data decrypted"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or the encryptionAlgorithm selection names an algorithm "
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/decrypt", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -105,7 +125,10 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
 
     @Operation(summary = "List signing attributes",
             description = "Returns the signing parameter schema supported by the connector for the supplied token, profile and key context. "
-                    + "The schema includes signatureAlgorithm, a v3 data attribute offering the signature algorithms the key supports.")
+                    + "The schema must include exactly one v3 string data attribute named signatureAlgorithm with UUID "
+                    + "9180267f-c82f-4b7b-8160-d2363d813869, as a required, single-select, non-extensible list "
+                    + "offering the signature algorithms the key supports for signing. "
+                    + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -118,7 +141,10 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     List<BaseAttribute> listSignAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
     @Operation(summary = "Sign data",
-            description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202).")
+            description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202). "
+                    + "signatureAttributes must include exactly one v3 string attribute named signatureAlgorithm with UUID "
+                    + "9180267f-c82f-4b7b-8160-d2363d813869, selecting exactly one code from the required, single-select, "
+                    + "non-extensible list offered by /sign/attributes.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed synchronously"),
             @ApiResponse(responseCode = "202",
@@ -165,7 +191,11 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     // ---- Verify ----
 
     @Operation(summary = "List verification attributes",
-            description = "Returns the verification parameter schema supported by the connector for the supplied token, profile and key context")
+            description = "Returns the verification parameter schema supported by the connector for the supplied token, profile and key context. "
+                    + "The schema must include exactly one v3 string data attribute named signatureAlgorithm with UUID "
+                    + "9180267f-c82f-4b7b-8160-d2363d813869, as a required, single-select, non-extensible list "
+                    + "offering the signature algorithms the key supports for verification. "
+                    + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Verification attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -177,12 +207,16 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listVerifyAttributes(@RequestBody @Valid KeyScopedRequestV2Dto request);
 
-    @Operation(summary = "Verify data", description = "Verify signatures with the given key (always synchronous)")
+    @Operation(summary = "Verify data", description = "Verify signatures with the given key (always synchronous). "
+            + "signatureAttributes must include exactly one v3 string attribute named signatureAlgorithm with UUID "
+            + "9180267f-c82f-4b7b-8160-d2363d813869, selecting exactly one code from the required, single-select, "
+            + "non-extensible list offered by /verify/attributes.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signatures verified"),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
+                            + "(errorCode VALIDATION_FAILED), or a supplied verification parameter is not "
+                            + "supported by the connector or key (errorCode PARAMETER_UNSUPPORTED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/verify", consumes = MediaType.APPLICATION_JSON_VALUE,
