@@ -77,7 +77,7 @@ public interface ConnectorController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "New Connector created",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
 
@@ -88,7 +88,7 @@ public interface ConnectorController extends AuthProtectedController {
     @Operation(summary = "Edit a Connector")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Connector updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", consumes = {"application/json"}, produces = {"application/json"})
@@ -105,7 +105,7 @@ public interface ConnectorController extends AuthProtectedController {
     @Operation(summary = "Connect to a Connector")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Connector connected"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/connect", consumes = {"application/json"}, produces = {"application/json"})
@@ -115,7 +115,7 @@ public interface ConnectorController extends AuthProtectedController {
     @Operation(summary = "Reconnect to a Connector")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reconnect to a Connector"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}/reconnect", produces = {"application/json"})
@@ -181,7 +181,7 @@ public interface ConnectorController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Connectors")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Connectors deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})
@@ -195,7 +195,7 @@ public interface ConnectorController extends AuthProtectedController {
     @Operation(summary = "Force Delete multiple Connectors")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Connectors deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/force", produces = {"application/json"})
