@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.otilm</groupId>
         <artifactId>dependencies</artifactId>
-        <version>1.4.3-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>interfaces</artifactId>
@@ -131,24 +131,20 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- this dependency is included to avoid warning -->
-        <!-- Compilation warning: "unknown enum constant When.MAYBE" -->
-        <!-- Caused by @Nullable annotations -->
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
             <version>1.5.9</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-common</artifactId>
-            <version>2.9.1</version>
+            <version>3.1.0</version>
         </dependency>
     </dependencies>
 
