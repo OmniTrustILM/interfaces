@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @Schema(enumAsRef = true)
 public enum ErrorCode {
-    VALIDATION_FAILED(ProblemTypeCategory.COMMON, null, "Validation failed", HttpStatus.UNPROCESSABLE_ENTITY, false),
+    VALIDATION_FAILED(ProblemTypeCategory.COMMON, null, "Validation failed", HttpStatus.UNPROCESSABLE_CONTENT, false),
     RESOURCE_NOT_FOUND(ProblemTypeCategory.COMMON, null, "Resource not found", HttpStatus.NOT_FOUND, false),
     RESOURCE_ALREADY_EXISTS(ProblemTypeCategory.COMMON, null, "Resource already exists", HttpStatus.CONFLICT, false),
     REQUEST_TIMEOUT(ProblemTypeCategory.COMMON, null, "Request timeout", HttpStatus.REQUEST_TIMEOUT, true),
@@ -30,9 +30,9 @@ public enum ErrorCode {
     CREDENTIAL_INVALID(ProblemTypeCategory.CONNECTOR, null, "Credentials invalid for upstream system",
             HttpStatus.UNAUTHORIZED, false),
     POLICY_VIOLATION(ProblemTypeCategory.CONNECTOR, null, "Policy violation at upstream system",
-            HttpStatus.UNPROCESSABLE_ENTITY, false),
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
     OPERATION_PAST_POINT_OF_NO_RETURN(ProblemTypeCategory.CONNECTOR, null,
-            "Cancel refused — operation past point of no return", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Cancel refused — operation past point of no return", HttpStatus.UNPROCESSABLE_CONTENT, false),
     OPERATION_NOT_TRACKED(ProblemTypeCategory.CONNECTOR, null, "Async operation no longer tracked by connector",
             HttpStatus.NOT_FOUND, false),
     // Distinct from RESOURCE_NOT_FOUND: Core handles this internally — it refreshes its
@@ -43,35 +43,35 @@ public enum ErrorCode {
 
     // Document handling — raised by the content-signing formatting contract.
     DOCUMENT_MALFORMED(ProblemTypeCategory.CONNECTOR, null, "Document cannot be parsed as the declared format",
-            HttpStatus.UNPROCESSABLE_ENTITY, false),
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
     DOCUMENT_TOO_LARGE(ProblemTypeCategory.CONNECTOR, null, "Document exceeds the size the connector accepts",
-            HttpStatus.PAYLOAD_TOO_LARGE, false),
+            HttpStatus.CONTENT_TOO_LARGE, false),
     SIGNATURE_NOT_FOUND(ProblemTypeCategory.CONNECTOR, null, "Document contains no signature this operation can act on",
-            HttpStatus.UNPROCESSABLE_ENTITY, false),
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
     PARAMETER_UNSUPPORTED(ProblemTypeCategory.CONNECTOR, null,
             "Requested parameter or signature family is not supported by this connector",
-            HttpStatus.UNPROCESSABLE_ENTITY, false),
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
 
     // Replayed-context divergence. Distinct from VALIDATION_FAILED: the body is well formed, so no field
     // rule is what failed. It says the platform's own state moved between a compute step and the embed
     // step that replays its context, which is a condition an operator can alert on. It stays 422 because
     // the connector cannot complete the operation as asked.
     CONTEXT_MISMATCH(ProblemTypeCategory.CONNECTOR, null, "Request contradicts the context it replays",
-            HttpStatus.UNPROCESSABLE_ENTITY, false),
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
 
     // CONNECTOR + AUTHORITY — interface-specific
     CSR_MALFORMED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY, "CSR malformed",
-            HttpStatus.UNPROCESSABLE_ENTITY, false),
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
     REVOCATION_NOT_ALLOWED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY,
-            "Revocation not allowed by upstream CA", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Revocation not allowed by upstream CA", HttpStatus.UNPROCESSABLE_CONTENT, false),
     REGISTRATION_NOT_FOUND(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY,
-            "Pre-registration reference not tracked by upstream CA", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Pre-registration reference not tracked by upstream CA", HttpStatus.UNPROCESSABLE_CONTENT, false),
     RENEWAL_SOURCE_NOT_FOUND(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY,
             "Source certificate for renewal not found at upstream CA", HttpStatus.NOT_FOUND, false),
     CSR_SUBJECT_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY,
-            "CSR subject does not match the pre-registration", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "CSR subject does not match the pre-registration", HttpStatus.UNPROCESSABLE_CONTENT, false),
     CERTIFICATE_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.AUTHORITY,
-            "Certificate belongs to a different authority than requested", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Certificate belongs to a different authority than requested", HttpStatus.UNPROCESSABLE_CONTENT, false),
 
     // CONNECTOR + DISCOVERY — interface-specific
     CHECKPOINT_LOST(ProblemTypeCategory.CONNECTOR, ConnectorInterface.DISCOVERY,
@@ -79,17 +79,18 @@ public enum ErrorCode {
 
     // CONNECTOR + CRYPTOGRAPHY — interface-specific
     KEY_TYPE_NOT_IMPORTABLE(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Key type or algorithm cannot be imported into this token", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Key type or algorithm cannot be imported into this token", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_TYPE_NOT_EXPORTABLE(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Key type or algorithm cannot be exported from this token", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Key type or algorithm cannot be exported from this token", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_MATERIAL_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Key material does not match the declared key type or algorithm", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Key material does not match the declared key type or algorithm", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_DECRYPTION_FAILED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Key material could not be decrypted with the supplied passphrase", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Key material could not be decrypted with the supplied passphrase", HttpStatus.UNPROCESSABLE_CONTENT,
+            false),
     EXPORTABLE_NOT_SUPPORTED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Token cannot hold a key that stays exportable", HttpStatus.UNPROCESSABLE_ENTITY, false),
+            "Token cannot hold a key that stays exportable", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_NOT_EXPORTABLE(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Key was not created or imported as exportable", HttpStatus.UNPROCESSABLE_ENTITY, false);
+            "Key was not created or imported as exportable", HttpStatus.UNPROCESSABLE_CONTENT, false);
 
     private final ProblemTypeCategory category;
 

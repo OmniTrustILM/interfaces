@@ -300,7 +300,7 @@ class DiscoveryApiClientMqTest {
     @Test
     void cancel_notTrackedCodeOnANon404_isNotSwallowedAsSuccess() {
         ProblemDetailExtended problem = new ProblemDetailExtended();
-        problem.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        problem.setStatus(HttpStatus.UNPROCESSABLE_CONTENT.value());
         problem.setErrorCode(ErrorCode.REGISTRATION_NOT_FOUND);
         proxyClient.failure = new ConnectorProblemException(problem);
 
@@ -319,13 +319,13 @@ class DiscoveryApiClientMqTest {
      */
     @Test
     void cancel_relayedNon404IsThrownRatherThanReturned() {
-        proxyClient.syncResponse = ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+        proxyClient.syncResponse = ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).build();
 
         ConnectorClientException ex = Assertions
                 .assertThrows(ConnectorClientException.class,
                         () -> client.cancel(connector, new DiscoveryRunRequestDto()));
 
-        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getHttpStatus());
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ex.getHttpStatus());
         Assertions.assertEquals(connector, ex.getConnector());
     }
 

@@ -1,7 +1,7 @@
 package com.otilm.api.model.core.scep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * According to the RFC 8894 <a href="https://www.rfc-editor.org/rfc/rfc8894.html#name-messagetype">messageType</a> It

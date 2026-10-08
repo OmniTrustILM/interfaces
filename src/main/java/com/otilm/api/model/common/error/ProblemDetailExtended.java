@@ -7,9 +7,9 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 @Data
 @ToString(callSuper = true)
@@ -25,7 +25,7 @@ public class ProblemDetailExtended extends ProblemDetail {
     }
 
     @Schema(description = "Short human-readable summary of the problem type",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "Validation failed")
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "Validation failed", nullable = true)
     @Override
     @Nullable
     public String getTitle() {
@@ -40,7 +40,8 @@ public class ProblemDetailExtended extends ProblemDetail {
     }
 
     @Schema(description = "Human-readable explanation specific to this occurrence",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "One or more fields failed validation.")
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "One or more fields failed validation.",
+            nullable = true)
     @Override
     @Nullable
     public String getDetail() {
@@ -49,7 +50,7 @@ public class ProblemDetailExtended extends ProblemDetail {
 
     @Schema(description = "URI reference identifying the occurrence (e.g., request path or operation ID).",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, format = "uri",
-            example = "https://api.example.org/foo/bar/123")
+            example = "https://api.example.org/foo/bar/123", nullable = true)
     @Override
     @Nullable
     public URI getInstance() {
@@ -57,7 +58,7 @@ public class ProblemDetailExtended extends ProblemDetail {
     }
 
     @Schema(description = "Generic map of properties that are not known ahead of time",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     @Override
     @Nullable
     @SuppressWarnings("java:S2638") // it is intended to be nullable as is in parent class

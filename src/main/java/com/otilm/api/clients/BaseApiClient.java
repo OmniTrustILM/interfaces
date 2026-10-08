@@ -643,7 +643,7 @@ public abstract class BaseApiClient {
      * The status the connector actually answered with, for a failure raised while decoding its response. It must not be
      * invented: Core's {@code ExceptionHandlingAdvice} renders it verbatim as an "Original response code ..." suffix on
      * the operator-facing error, and a read-limit breach is typically hit on a {@code 200}, so a synthesized
-     * {@code 413 PAYLOAD_TOO_LARGE} would assert a status that never existed and point operators at a request-size
+     * {@code 413 CONTENT_TOO_LARGE} would assert a status that never existed and point operators at a request-size
      * problem rather than at this client's own read cap.
      *
      * <p>
@@ -735,7 +735,7 @@ public abstract class BaseApiClient {
      * success.
      */
     private static Mono<ClientResponse> handleLegacyErrorResponse(ClientResponse clientResponse) {
-        if (clientResponse.statusCode().isSameCodeAs(HttpStatus.UNPROCESSABLE_ENTITY)) {
+        if (clientResponse.statusCode().isSameCodeAs(HttpStatus.UNPROCESSABLE_CONTENT)) {
             return clientResponse
                     .bodyToMono(ERROR_LIST_TYPE_REF)
                     .defaultIfEmpty(List.of("Connector returned 422 with an empty body"))

@@ -475,7 +475,6 @@ class BaseApiClientTest {
                                         .toEntity(String.class)
                                         .block(), null, connector));
 
-        // The stub answered 200; that is what must be reported, and it must NOT be PAYLOAD_TOO_LARGE.
         Assertions.assertEquals(HttpStatus.OK, ex.getHttpStatus());
         Assertions.assertEquals(connector, ex.getConnector());
     }
