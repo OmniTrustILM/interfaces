@@ -2,16 +2,30 @@ package com.otilm.api.clients;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import java.util.List;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.util.ClassUtils;
 
 /**
  * The JSON codecs every outbound {@code WebClient} this artifact builds is configured with.
  */
 public final class ApiClientCodecs {
+
+    /**
+     * The modules Spring's {@code Jackson2ObjectMapperBuilder} registers when present, in its order. The wire depends
+     * only on which of these a consumer has on its classpath.
+     */
+    private static final List<String> WELL_KNOWN_MODULES = List
+            .of("com.fasterxml.jackson.datatype.jdk8.Jdk8Module",
+                    "com.fasterxml.jackson.module.paramnames.ParameterNamesModule",
+                    "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule",
+                    "com.fasterxml.jackson.module.kotlin.KotlinModule");
 
     /**
      * The two disabled features are wire contract: a connector adding a field must not break deserialization, and a
@@ -21,7 +35,7 @@ public final class ApiClientCodecs {
             .builder()
             .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .findAndAddModules()
+            .addModules(wellKnownModulesOnTheClasspath())
             .build();
 
     private ApiClientCodecs() {
@@ -29,6 +43,15 @@ public final class ApiClientCodecs {
 
     static ObjectMapper objectMapper() {
         return OBJECT_MAPPER;
+    }
+
+    private static List<Module> wellKnownModulesOnTheClasspath() {
+        ClassLoader loader = ApiClientCodecs.class.getClassLoader();
+        return WELL_KNOWN_MODULES
+                .stream()
+                .filter(name -> ClassUtils.isPresent(name, loader))
+                .map(name -> (Module) BeanUtils.instantiateClass(ClassUtils.resolveClassName(name, loader)))
+                .toList();
     }
 
     /**
