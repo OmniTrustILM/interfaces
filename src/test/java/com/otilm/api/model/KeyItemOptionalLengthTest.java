@@ -9,14 +9,18 @@ import com.otilm.api.model.core.compliance.ComplianceStatus;
 import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDto;
 import com.otilm.api.model.core.cryptography.key.KeyState;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.models.media.Schema;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schemas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class KeyItemOptionalLengthTest {
@@ -30,12 +34,14 @@ class KeyItemOptionalLengthTest {
 
         // when
         JsonNode json = new ObjectMapper().valueToTree(response);
-        Schema schema = responseType.getDeclaredField("length").getAnnotation(Schema.class);
+        Schema<?> published = openApi31Schemas(responseType).get(responseType.getSimpleName());
+        Schema<?> length = (Schema<?>) published.getProperties().get("length");
 
         // then
         assertTrue(json.path("length").isNull() || json.path("length").isMissingNode());
-        assertEquals(Schema.RequiredMode.NOT_REQUIRED, schema.requiredMode());
-        assertTrue(schema.nullable());
+        assertFalse(published.getRequired().contains("length"));
+        assertEquals(Set.of("integer", "null"), length.getTypes());
+        assertEquals(BigDecimal.ONE, length.getMinimum());
     }
 
     @Test

@@ -17,7 +17,6 @@ import jakarta.validation.Validator;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -104,7 +103,8 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
 
     /**
      * Validates that an export describes the key the platform holds a record of: the algorithm must match, a secret
-     * key's length must match, and a key pair's public key must be the one on record, byte for byte.
+     * key's length must match whenever both state one, and a key pair's public key must be the one on record, byte for
+     * byte.
      *
      * @param expected the descriptor of the key the platform holds, built from its own record
      * @param response the connector's export response, already validated with {@link #validateExportKey}
@@ -132,7 +132,7 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
             throw new IllegalArgumentException("Connector exported a key with algorithm " + actual.getAlgorithm()
                     + "; expected " + expected.getAlgorithm());
         }
-        if (!(expected instanceof PublicKeyDataV2Dto) && !Objects.equals(expected.getLength(), actual.getLength())) {
+        if (!(expected instanceof PublicKeyDataV2Dto) && lengthsDisagree(expected.getLength(), actual.getLength())) {
             throw new IllegalArgumentException(
                     "Connector exported a key of length " + actual.getLength() + "; expected " + expected.getLength());
         }
@@ -141,6 +141,10 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
             throw new IllegalArgumentException(
                     "Connector exported a public key that differs from the platform's record");
         }
+    }
+
+    private static boolean lengthsDisagree(Integer expected, Integer actual) {
+        return expected != null && actual != null && !expected.equals(actual);
     }
 
     private OperationValidationResult validateKeyTypeDeclarations(List<? extends TransferableKeyTypeV2Dto> response,
