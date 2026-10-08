@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.List;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.KotlinDetector;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -19,6 +20,8 @@ import org.springframework.util.ClassUtils;
  */
 public final class ApiClientCodecs {
 
+    private static final String KOTLIN_MODULE = "com.fasterxml.jackson.module.kotlin.KotlinModule";
+
     /**
      * The modules Spring's {@code Jackson2ObjectMapperBuilder} registers when present, in its order. The wire depends
      * only on which of these a consumer has on its classpath.
@@ -26,8 +29,7 @@ public final class ApiClientCodecs {
     private static final List<String> WELL_KNOWN_MODULES = List
             .of("com.fasterxml.jackson.datatype.jdk8.Jdk8Module",
                     "com.fasterxml.jackson.module.paramnames.ParameterNamesModule",
-                    "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule",
-                    "com.fasterxml.jackson.module.kotlin.KotlinModule");
+                    "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", KOTLIN_MODULE);
 
     /**
      * Configured as Spring's {@code Jackson2ObjectMapperBuilder} configured it, which is the wire contract: unknown
@@ -53,9 +55,14 @@ public final class ApiClientCodecs {
         ClassLoader loader = ApiClientCodecs.class.getClassLoader();
         return WELL_KNOWN_MODULES
                 .stream()
-                .filter(name -> ClassUtils.isPresent(name, loader))
+                .filter(name -> isRegistrable(name, loader))
                 .map(name -> (Module) BeanUtils.instantiateClass(ClassUtils.resolveClassName(name, loader)))
                 .toList();
+    }
+
+    /** Spring's builder takes the Kotlin module only with the Kotlin runtime, which a consumer can exclude. */
+    private static boolean isRegistrable(String name, ClassLoader loader) {
+        return ClassUtils.isPresent(name, loader) && (!KOTLIN_MODULE.equals(name) || KotlinDetector.isKotlinPresent());
     }
 
     /**
