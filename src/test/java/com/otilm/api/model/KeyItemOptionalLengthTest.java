@@ -19,9 +19,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Verifies nullable key lengths in public responses and all-argument constructors.
- */
 class KeyItemOptionalLengthTest {
 
     @ParameterizedTest
