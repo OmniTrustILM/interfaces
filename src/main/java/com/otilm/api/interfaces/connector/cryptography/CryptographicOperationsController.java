@@ -48,7 +48,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     @Operation(summary = "Encrypt data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data encrypted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{keyUuid}/encrypt", consumes = {"application/json"}, produces = {"application/json"})
@@ -62,7 +62,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     @Operation(summary = "Decrypt data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data decrypted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{keyUuid}/decrypt", consumes = {"application/json"}, produces = {"application/json"})
@@ -80,7 +80,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     @Operation(summary = "Sign data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data signed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{keyUuid}/sign", consumes = {"application/json"}, produces = {"application/json"})
@@ -94,7 +94,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     @Operation(summary = "Verify data using a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data decrypted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{keyUuid}/verify", consumes = {"application/json"}, produces = {"application/json"})
@@ -121,7 +121,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     @Operation(summary = "Validate random generator Attributes")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/random/attributes/validate", consumes = {"application/json"}, produces = {"application/json"})
@@ -136,7 +136,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
     @Operation(summary = "Generate random data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Random data generated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/random", consumes = {"application/json"}, produces = {"application/json"})

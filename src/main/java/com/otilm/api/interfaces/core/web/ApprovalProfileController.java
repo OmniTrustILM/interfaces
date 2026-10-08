@@ -69,7 +69,7 @@ public interface ApprovalProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "204", description = "Approval profile deleted"),
             @ApiResponse(responseCode = "404", description = "Approval profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/{uuid}", produces = {"application/json"})
@@ -83,7 +83,7 @@ public interface ApprovalProfileController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
             @ApiResponse(responseCode = "404", description = "Approval profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
@@ -96,7 +96,7 @@ public interface ApprovalProfileController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
             @ApiResponse(responseCode = "404", description = "Approval profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", consumes = {"application/json"}, produces = {"application/json"})
@@ -113,7 +113,7 @@ public interface ApprovalProfileController extends AuthProtectedController {
             summary = "Associate Approval Profile to specified resource object")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Resource object association successful"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PatchMapping(path = "/{uuid}/associations/{resource}/{associationObjectUuid}")
