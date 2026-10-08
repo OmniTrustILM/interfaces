@@ -1,5 +1,7 @@
 package com.otilm.api.clients;
 
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.StreamWriteFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +11,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.springframework.http.ProblemDetail;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,6 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class WireGolden {
 
     private static final Path ROOT = Path.of("src/test/resources/wire");
+
+    private static final String RECORD_PROPERTY = "wire.golden.write";
+
+    /** A feature line of {@link #fingerprint}; group 1 is the feature's key, such as {@code ser INDENT_OUTPUT}. */
+    private static final Pattern FEATURE = Pattern.compile("((?:mapper|ser|de|read|write) \\w+)=(?:true|false)");
 
     private WireGolden() {
     }
@@ -35,23 +48,61 @@ final class WireGolden {
         for (DeserializationFeature feature : DeserializationFeature.values()) {
             lines.add("de " + feature + "=" + mapper.getDeserializationConfig().isEnabled(feature));
         }
+        for (StreamReadFeature feature : StreamReadFeature.values()) {
+            lines.add("read " + feature + "=" + mapper.getFactory().isEnabled(feature));
+        }
+        for (StreamWriteFeature feature : StreamWriteFeature.values()) {
+            lines.add("write " + feature + "=" + mapper.getFactory().isEnabled(feature));
+        }
         lines.add("inclusion " + config.getDefaultPropertyInclusion());
+        lines.add("visibility " + config.getDefaultVisibilityChecker());
+        Class<?> problemDetailMixIn = mapper.findMixInClassFor(ProblemDetail.class);
+        lines.add("mixIns " + mapper.mixInCount());
+        lines.add("mixIn ProblemDetail " + (problemDetailMixIn == null ? "none" : problemDetailMixIn.getName()));
         lines.add("dateFormat " + config.getDateFormat().getClass().getName());
+        lines.add("epoch " + config.getDateFormat().format(new Date(0)));
         lines.add("timeZone " + config.getTimeZone().getID());
         lines.add("naming " + config.getPropertyNamingStrategy());
         return String.join("\n", lines) + "\n";
     }
 
-    /** Boot 4 moved its Jackson 2 modules to another package, and a module's id is its class name. */
+    /** A module's id is an artifact name or a class name; stripping the package survives a relocation. */
     private static String simpleName(Object moduleId) {
         String id = String.valueOf(moduleId);
         return id.substring(id.lastIndexOf('.') + 1);
     }
 
+    /**
+     * Jackson minors add feature constants, so a feature the golden has not recorded is left out and only a recorded
+     * setting that changed fails. Recording takes the new ones in.
+     */
+    static void assertFingerprintMatches(String name, ObjectMapper mapper) throws IOException {
+        String actual = fingerprint(mapper);
+        if (!Boolean.getBoolean(RECORD_PROPERTY)) {
+            Set<String> recorded = Files
+                    .readString(ROOT.resolve(name))
+                    .lines()
+                    .map(FEATURE::matcher)
+                    .filter(Matcher::matches)
+                    .map(feature -> feature.group(1))
+                    .collect(Collectors.toSet());
+            actual = actual
+                    .lines()
+                    .filter(line -> isRecorded(line, recorded))
+                    .collect(Collectors.joining("\n", "", "\n"));
+        }
+        assertMatches(name, actual);
+    }
+
+    private static boolean isRecorded(String line, Set<String> recordedFeatures) {
+        Matcher feature = FEATURE.matcher(line);
+        return !feature.matches() || recordedFeatures.contains(feature.group(1));
+    }
+
     /** Recording mode, -Dwire.golden.write=true, is for the 3.5 line only. */
     static void assertMatches(String name, String actual) throws IOException {
         Path golden = ROOT.resolve(name);
-        if (Boolean.getBoolean("wire.golden.write")) {
+        if (Boolean.getBoolean(RECORD_PROPERTY)) {
             Files.createDirectories(golden.getParent());
             Files.writeString(golden, actual);
         }

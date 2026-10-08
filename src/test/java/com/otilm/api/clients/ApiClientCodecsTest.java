@@ -1,11 +1,14 @@
 package com.otilm.api.clients;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.codec.Decoder;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -114,6 +117,17 @@ class ApiClientCodecsTest {
                 .assertEquals(ClientTuning.DEFAULT_MAX_IN_MEMORY,
                         jsonDecoder(platform.messageReaders()).getMaxInMemorySize(),
                         "building the connector strategies must not rewrite the platform's read cap");
+    }
+
+    @Test
+    void problemDetailWritesItsExtensionMembersAtTheTopLevel() {
+        ProblemDetail problem = ProblemDetail.forStatus(422);
+        problem.setProperty("causes", List.of(Map.of("field", "name")));
+
+        JsonNode json = ApiClientCodecs.objectMapper().valueToTree(problem);
+
+        Assertions.assertEquals("name", json.path("causes").path(0).path("field").asText(), "top-level causes");
+        Assertions.assertFalse(json.has("properties"), "the properties map is flattened into the document");
     }
 
     private static ClientTuning tuningWithReadCap(final int readCap) {

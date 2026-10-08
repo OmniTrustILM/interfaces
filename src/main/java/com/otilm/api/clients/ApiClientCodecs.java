@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.List;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.converter.json.ProblemDetailJacksonMixin;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -28,14 +30,16 @@ public final class ApiClientCodecs {
                     "com.fasterxml.jackson.module.kotlin.KotlinModule");
 
     /**
-     * The two disabled features are wire contract: a connector adding a field must not break deserialization, and a
-     * {@code @JsonView}-annotated DTO must not silently drop properties from a request.
+     * Configured as Spring's {@code Jackson2ObjectMapperBuilder} configured it, which is the wire contract: unknown
+     * properties do not fail, an active {@code @JsonView} writes only view-annotated properties, and a
+     * {@code ProblemDetail} carries its extension members at the top level.
      */
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper
             .builder()
             .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .addModules(wellKnownModulesOnTheClasspath())
+            .addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class)
             .build();
 
     private ApiClientCodecs() {
