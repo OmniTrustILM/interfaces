@@ -130,7 +130,7 @@ public interface ClientOperationController extends AuthProtectedController {
             description = "Validate a candidate set of issuance attributes against this RA profile's schema before submitting an issuance request. Returns 422 with a list of error messages when the attributes are not acceptable.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/attributes/issue/validate", consumes = {"application/json"}, produces = {"application/json"})
@@ -154,7 +154,7 @@ public interface ClientOperationController extends AuthProtectedController {
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Issuance request accepted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/certificates/{certificateUuid}/issue", consumes = {"application/json"},
@@ -175,7 +175,7 @@ public interface ClientOperationController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "Issuance request accepted"),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "500", description = "Internal Server Error",
@@ -194,7 +194,7 @@ public interface ClientOperationController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "Renewal request accepted"),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/certificates/{certificateUuid}/renew", consumes = {"application/json"},
@@ -218,7 +218,7 @@ public interface ClientOperationController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "Rekey request accepted"),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "500", description = "Internal Server Error",
@@ -246,7 +246,7 @@ public interface ClientOperationController extends AuthProtectedController {
             description = "Validate a candidate set of revocation attributes against this RA profile's schema before submitting a revocation request.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/attributes/revoke/validate", consumes = {"application/json"}, produces = {"application/json"})
@@ -290,7 +290,7 @@ public interface ClientOperationController extends AuthProtectedController {
                     description = "Revoke request accepted and queued — observe the certificate state for the outcome."),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content", content = @Content(
                     array = @ArraySchema(schema = @Schema(implementation = String.class)),
                     examples = {
                             @ExampleObject(
@@ -321,7 +321,7 @@ public interface ClientOperationController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "409", description = "Conflict",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content", content = @Content(
                     array = @ArraySchema(schema = @Schema(implementation = String.class)),
                     examples = {
                             @ExampleObject(
@@ -345,7 +345,7 @@ public interface ClientOperationController extends AuthProtectedController {
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Revocation confirmed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Certificate is not in PENDING_REVOKE state\"]")}))})
     @PostMapping(path = "/certificates/{certificateUuid}/revoke/confirm")
@@ -367,7 +367,7 @@ public interface ClientOperationController extends AuthProtectedController {
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cancellation completed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity", content = @Content(
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content", content = @Content(
                     array = @ArraySchema(schema = @Schema(implementation = String.class)),
                     examples = {
                             @ExampleObject(

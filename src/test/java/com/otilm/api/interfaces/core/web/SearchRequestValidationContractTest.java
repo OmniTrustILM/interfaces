@@ -62,7 +62,7 @@ class SearchRequestValidationContractTest {
                 boolean takesSearchBody = Arrays
                         .stream(method.getParameters())
                         .anyMatch(SearchRequestValidationContractTest::isSearchRequestBody);
-                if (takesSearchBody && !documentsUnprocessableEntity(method)) {
+                if (takesSearchBody && !documentsUnprocessableContent(method)) {
                     undocumented.add(controller.getSimpleName() + "." + method.getName());
                 }
             }
@@ -73,7 +73,7 @@ class SearchRequestValidationContractTest {
                         + undocumented);
     }
 
-    private static boolean documentsUnprocessableEntity(Method method) {
+    private static boolean documentsUnprocessableContent(Method method) {
         ApiResponses responses = method.getAnnotation(ApiResponses.class);
         return responses != null
                 && Arrays.stream(responses.value()).anyMatch(response -> "422".equals(response.responseCode()));

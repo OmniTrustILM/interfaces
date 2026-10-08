@@ -112,7 +112,7 @@ public interface CmpProfileController extends AuthProtectedController {
     @Operation(summary = "Force delete multiple CMP Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "CMP Profiles forced to delete"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/delete/force", produces = {"application/json"})
