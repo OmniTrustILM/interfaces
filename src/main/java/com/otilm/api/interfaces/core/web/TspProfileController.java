@@ -51,7 +51,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "listTspProfiles", summary = "List of available TSP Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "TSP Profiles retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE},
@@ -69,7 +69,7 @@ public interface TspProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "201", description = "New TSP Profile added"),
             @ApiResponse(responseCode = "409", description = "Already Exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -82,7 +82,7 @@ public interface TspProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "TSP Profile updated"),
             @ApiResponse(responseCode = "409", description = "Already Exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -101,7 +101,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "bulkDeleteTspProfiles", summary = "Delete multiple TSP Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "TSP Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -121,7 +121,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "bulkEnableTspProfiles", summary = "Enable multiple TSP Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "TSP Profiles enabled"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PatchMapping(path = "/enable", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -142,7 +142,7 @@ public interface TspProfileController extends AuthProtectedController {
     @Operation(operationId = "bulkDisableTspProfiles", summary = "Disable multiple TSP Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "TSP Profiles disabled"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE},

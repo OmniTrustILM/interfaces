@@ -46,7 +46,7 @@ public interface CbomController extends AuthProtectedController {
             description = ConfigurableColumnsDocs.SORT_AND_COLUMNS + ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of available CBOMs"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -106,7 +106,7 @@ public interface CbomController extends AuthProtectedController {
     @Operation(summary = "Delete multiple CBOM entries")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "CBOM entries deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -140,7 +140,7 @@ public interface CbomController extends AuthProtectedController {
                     rows have a fixed shape: no field is offered as a column, and `columns` is accepted and ignored.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of the entries the sync could not store"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/syncSkips", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -200,7 +200,7 @@ public interface CbomController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "The cryptographic assets this CBOM contributed"),
             @ApiResponse(responseCode = "404", description = "CBOM not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{uuid}/assets", consumes = {MediaType.APPLICATION_JSON_VALUE},

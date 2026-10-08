@@ -72,7 +72,7 @@ public interface VaultInstanceController extends AuthProtectedController {
     @Operation(summary = "List Vault instances")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of Vault instances retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE})

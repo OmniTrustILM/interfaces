@@ -85,7 +85,7 @@ public interface TokenInstanceController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
 
             @ApiResponse(responseCode = "201", description = "Token Instance Created Successfully"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Token Instance, Connector or Credential not found",
@@ -103,7 +103,7 @@ public interface TokenInstanceController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
 
             @ApiResponse(responseCode = "200", description = "Token Instance Updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Token Instance not found",

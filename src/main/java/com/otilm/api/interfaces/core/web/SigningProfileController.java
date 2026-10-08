@@ -77,7 +77,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "listSigningProfiles", summary = "List of available Signing Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Signing Profiles retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE},
@@ -103,7 +103,7 @@ public interface SigningProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "201", description = "New Signing Profile added"),
             @ApiResponse(responseCode = "409", description = "Already Exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -125,7 +125,7 @@ public interface SigningProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "Signing Profile updated"),
             @ApiResponse(responseCode = "409", description = "Already Exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -144,7 +144,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "bulkDeleteSigningProfiles", summary = "Delete multiple Signing Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Signing Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -164,7 +164,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "bulkEnableSigningProfiles", summary = "Enable multiple Signing Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Signing Profiles enabled"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PatchMapping(path = "/enable", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -185,7 +185,7 @@ public interface SigningProfileController extends AuthProtectedController {
     @Operation(operationId = "bulkDisableSigningProfiles", summary = "Disable multiple Signing Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Signing Profiles disabled"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PatchMapping(path = "/disable", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -280,7 +280,7 @@ public interface SigningProfileController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "404", description = "Signature Formatting Provider not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/signatureFormattingConnectors/{connectorUuid}/contentSigningFormattingAttributes",
@@ -308,7 +308,7 @@ public interface SigningProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "Signing Records retrieved"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{uuid}/signingRecords", produces = {MediaType.APPLICATION_JSON_VALUE},
