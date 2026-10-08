@@ -134,7 +134,7 @@ class KeyDataValidationTest {
         Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
 
         // then
-        assertHasViolation(violations, "lengthPresentWhenRequired", "key length is required for RSA, ECDSA, and AES");
+        assertHasViolation(violations, "length", "key length is required for RSA, ECDSA, and AES");
     }
 
     @Test
@@ -183,7 +183,7 @@ class KeyDataValidationTest {
                             .of(named(role + " missing algorithm",
                                     new InvalidKeyData(missingAlgorithm, "algorithm", "key algorithm is required")),
                                     named(role + " missing length",
-                                            new InvalidKeyData(missingLength, "lengthPresentWhenRequired",
+                                            new InvalidKeyData(missingLength, "length",
                                                     "key length is required for RSA, ECDSA, and AES")),
                                     named(role + " zero length",
                                             new InvalidKeyData(zeroLength, "length", "key length must be positive")),

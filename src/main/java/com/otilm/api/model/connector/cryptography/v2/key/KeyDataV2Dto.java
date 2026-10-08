@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
+import com.otilm.api.model.connector.cryptography.v2.key.validation.LengthWhenSizedByLength;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
@@ -38,6 +39,7 @@ import lombok.ToString;
         @JsonSubTypes.Type(value = PublicKeyDataV2Dto.class, name = "Public"),
         @JsonSubTypes.Type(value = PrivateKeyDataV2Dto.class, name = "Private")})
 @Schema(implementation = KeyDataV2Dto.OpenApiView.class)
+@LengthWhenSizedByLength
 public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyDataV2Dto, PrivateKeyDataV2Dto {
 
     @Schema(description = "Type of the key", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -61,24 +63,6 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
 
     protected KeyDataV2Dto(KeyTypeV2 type) {
         this.type = type;
-    }
-
-    /**
-     * Requires a length only for algorithms with a defined conventional key length.
-     *
-     * @return whether the length is present when required by the algorithm
-     */
-    @JsonIgnore
-    @Schema(hidden = true)
-    @AssertTrue(message = "key length is required for RSA, ECDSA, and AES")
-    public boolean isLengthPresentWhenRequired() {
-        if (algorithm == null || length != null) {
-            return true;
-        }
-        return switch (algorithm) {
-            case RSA, ECDSA, AES -> false;
-            default -> true;
-        };
     }
 
     /**
