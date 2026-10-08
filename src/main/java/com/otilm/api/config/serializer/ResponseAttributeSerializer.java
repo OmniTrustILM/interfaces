@@ -26,7 +26,7 @@ public class ResponseAttributeSerializer extends StdSerializer<List<BaseAttribut
     @Override
     public void serialize(List<BaseAttributeContentV2<?>> response, JsonGenerator gen, SerializerProvider provider)
             throws IOException {
-        ResponseAttributeV2 responseAttribute = (ResponseAttributeV2) gen.getCurrentValue();
+        ResponseAttributeV2 responseAttribute = (ResponseAttributeV2) gen.currentValue();
         if (response == null) {
             gen.writeNull();
             return;

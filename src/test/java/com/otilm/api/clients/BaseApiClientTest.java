@@ -40,6 +40,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -510,6 +511,35 @@ class BaseApiClientTest {
         Assertions
                 .assertEquals(ErrorCode.UPSTREAM_ERROR, ex.getProblemDetail().getErrorCode(),
                         "the problem document must survive a status outside Spring's HttpStatus enum");
+    }
+
+    /** A connector sends per-field validation causes as top-level members, which only the properties map keeps. */
+    @Test
+    void problemDocumentKeepsItsExtensionMembers() {
+        mockServer
+                .stubFor(get(urlEqualTo("/problem-with-causes"))
+                        .willReturn(aResponse()
+                                .withStatus(422)
+                                .withHeader("Content-Type", "application/problem+json")
+                                .withBody("{\"status\":422,\"errorCode\":\"VALIDATION_FAILED\","
+                                        + "\"causes\":[{\"field\":\"name\"}]}")));
+        TestConnectorInfo connector = new TestConnectorInfo("http://localhost:" + mockServer.port(), AuthType.NONE,
+                List.of());
+
+        ConnectorProblemException ex = Assertions
+                .assertThrows(ConnectorProblemException.class,
+                        () -> BaseApiClient
+                                .processRequest(
+                                        r -> r
+                                                .uri("http://localhost:" + mockServer.port() + "/problem-with-causes")
+                                                .retrieve()
+                                                .toBodilessEntity()
+                                                .block(),
+                                        client.prepareRequest(HttpMethod.GET, connector, false), connector));
+
+        Assertions
+                .assertEquals(Map.of("causes", List.of(Map.of("field", "name"))), ex.getProblemDetail().getProperties(),
+                        "an extension member must reach ProblemDetail.getProperties()");
     }
 
     @Test
