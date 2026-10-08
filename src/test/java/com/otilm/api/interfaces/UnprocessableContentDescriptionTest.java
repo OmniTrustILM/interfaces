@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/** Every documented 422 uses RFC 9110's reason phrase, "Unprocessable Content", which replaced RFC 4918's. */
+/**
+ * Main sources name status 422 by RFC 9110's reason phrase, "Unprocessable Content", which replaced RFC 4918's
+ * "Unprocessable Entity".
+ */
 class UnprocessableContentDescriptionTest {
 
     private static final Path MAIN_SOURCES = Path.of("src/main/java");
@@ -19,7 +22,7 @@ class UnprocessableContentDescriptionTest {
     private static final Pattern RFC_4918_PHRASE = Pattern.compile("Unprocessable Entity", Pattern.CASE_INSENSITIVE);
 
     @Test
-    void every422IsDescribedWithTheRfc9110ReasonPhrase() throws IOException {
+    void mainSourcesNameThe422WithItsRfc9110ReasonPhrase() throws IOException {
         try (Stream<Path> tree = Files.walk(MAIN_SOURCES)) {
             List<Path> spellingTheOldPhrase = tree
                     .filter(path -> path.toString().endsWith(".java"))
