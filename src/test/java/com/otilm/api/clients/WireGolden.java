@@ -41,7 +41,8 @@ final class WireGolden {
     static String fingerprint(ObjectMapper mapper) {
         SerializationConfig config = mapper.getSerializationConfig();
         List<String> lines = new ArrayList<>();
-        mapper.getRegisteredModuleIds().stream().map(id -> "module " + simpleName(id)).sorted().forEach(lines::add);
+        // Registration order decides which module's serializer wins on a type two modules handle.
+        mapper.getRegisteredModuleIds().stream().map(id -> "module " + simpleName(id)).forEach(lines::add);
         for (MapperFeature feature : MapperFeature.values()) {
             lines.add("mapper " + feature + "=" + config.isEnabled(feature));
         }

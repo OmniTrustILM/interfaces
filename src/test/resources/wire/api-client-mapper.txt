@@ -1,3 +1,5 @@
+module Jdk8Module
+module jackson-module-parameter-names
 module jackson-datatype-jsr310
 mapper USE_ANNOTATIONS=true
 mapper USE_GETTERS_AS_SETTERS=true
