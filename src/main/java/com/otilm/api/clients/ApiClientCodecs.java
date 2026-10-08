@@ -1,17 +1,28 @@
 package com.otilm.api.clients;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * The JSON codecs every outbound {@code WebClient} this artifact builds is configured with.
  */
 public final class ApiClientCodecs {
 
-    private static final ObjectMapper OBJECT_MAPPER = Jackson2ObjectMapperBuilder.json().build();
+    /**
+     * The two disabled features are wire contract: a connector adding a field must not break deserialization, and a
+     * {@code @JsonView}-annotated DTO must not silently drop properties from a request.
+     */
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper
+            .builder()
+            .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .findAndAddModules()
+            .build();
 
     private ApiClientCodecs() {
     }
