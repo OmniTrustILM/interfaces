@@ -1,0 +1,14 @@
+<!-- Maven 3.10 sends a server's credentials only to origins declared for its id. Maven itself
+     declares central for repo.maven.apache.org, so the Central Portal origin is declared here. -->
+<settings>
+  <servers>
+    <server>
+      <id>central</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
+      <repositoryOrigins>
+        <repositoryOrigin>https://central.sonatype.com</repositoryOrigin>
+      </repositoryOrigins>
+    </server>
+  </servers>
+</settings>
