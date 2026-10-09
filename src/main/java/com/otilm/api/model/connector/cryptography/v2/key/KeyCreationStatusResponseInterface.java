@@ -1,5 +1,6 @@
 package com.otilm.api.model.connector.cryptography.v2.key;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
@@ -16,13 +17,14 @@ import java.io.Serializable;
                 @DiscriminatorMapping(value = KeyRequestType.Codes.KEY_PAIR,
                         schema = KeyPairOperationStatusResponseV2Dto.class)},
         oneOf = {SecretKeyOperationStatusResponseV2Dto.class, KeyPairOperationStatusResponseV2Dto.class})
+@JsonPropertyOrder({"status", "reason", "result", "keyRequestType"})
 public interface KeyCreationStatusResponseInterface extends Serializable {
-
-    KeyRequestType getKeyRequestType();
 
     OperationStatus getStatus();
 
     String getReason();
 
     KeyCreationResponseV2Dto getResult();
+
+    KeyRequestType getKeyRequestType();
 }

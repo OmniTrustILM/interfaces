@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.cryptography.v2.key;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
@@ -101,6 +102,7 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
                     @DiscriminatorMapping(value = "Public", schema = PublicKeyDataV2Dto.class),
                     @DiscriminatorMapping(value = "Private", schema = PrivateKeyDataV2Dto.class)},
             oneOf = {SecretKeyDataV2Dto.class, PublicKeyDataV2Dto.class, PrivateKeyDataV2Dto.class})
+    @JsonPropertyOrder({"type", "algorithm", "length", "metadata"})
     interface OpenApiView {
 
         KeyTypeV2 getType();
