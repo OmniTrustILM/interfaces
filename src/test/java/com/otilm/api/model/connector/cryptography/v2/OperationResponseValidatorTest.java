@@ -1367,6 +1367,27 @@ class OperationResponseValidatorTest {
         assertInvalid(result, "Connector exported a key of length 256; expected 3072");
     }
 
+    @ParameterizedTest(name = "recorded {0}, reported {1}")
+    @CsvSource({",256", "256,"})
+    void validateExportedKeyDescriptor_acceptsASecretLengthStatedOnOneSideOnly(Integer recordedLength,
+            Integer reportedLength) {
+        // given
+        SecretKeyDataV2Dto expected = validSecretKeyData();
+        expected.setAlgorithm(KeyAlgorithm.UNKNOWN);
+        expected.setLength(recordedLength);
+        SecretKeyDataV2Dto reported = validSecretKeyData();
+        reported.setAlgorithm(KeyAlgorithm.UNKNOWN);
+        reported.setLength(reportedLength);
+        ExportKeyResponseV2Dto response = validExportKeyResponse();
+        response.setKeyData(reported);
+
+        // when
+        OperationValidationResult result = VALIDATOR.keyTransfer().validateExportedKeyDescriptor(expected, response);
+
+        // then
+        assertValid(result);
+    }
+
     @Test
     void validateExportedKeyDescriptor_rejectsAPublicKeyOtherThanTheRecord() throws Exception {
         // given

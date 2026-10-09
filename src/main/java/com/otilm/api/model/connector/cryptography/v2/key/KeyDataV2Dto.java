@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
+import com.otilm.api.model.connector.cryptography.v2.key.validation.LengthWhenSizedByLength;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
@@ -38,6 +39,7 @@ import lombok.ToString;
         @JsonSubTypes.Type(value = PublicKeyDataV2Dto.class, name = "Public"),
         @JsonSubTypes.Type(value = PrivateKeyDataV2Dto.class, name = "Private")})
 @Schema(implementation = KeyDataV2Dto.OpenApiView.class)
+@LengthWhenSizedByLength
 public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyDataV2Dto, PrivateKeyDataV2Dto {
 
     @Schema(description = "Type of the key", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -49,8 +51,8 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
     @NotNull(message = "key algorithm is required")
     private KeyAlgorithm algorithm;
 
-    @Schema(description = "Bit length of the key", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
-    @NotNull(message = "key length is required")
+    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
     @Min(value = 1, message = "key length must be positive")
     private Integer length;
 
