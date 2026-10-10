@@ -10,9 +10,10 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "One rule of the PQC rule set as the explanation walked it. verdict is present on decided, "
-        + "resolved and failed steps; evaluatedFields is absent on a notReached step; referencedAsset is present on a "
-        + "resolved step only")
+@Schema(description = "One rule of the PQC rule set as the explanation evaluated it. verdict is present on matched, "
+        + "decided, resolved and failed steps and absent on a notMatched one; evaluatedFields is present on every "
+        + "evaluated step; referencedAsset is present on a resolved step, and on a matched step whose rule carried "
+        + "another asset's verdict")
 public class PqcExplanationStepDto {
 
     @Schema(description = "The rule this step reports on. A stable identifier, not display text. Every rule is listed "

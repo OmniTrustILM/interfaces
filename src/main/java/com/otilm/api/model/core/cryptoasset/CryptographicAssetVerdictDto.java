@@ -8,9 +8,9 @@ import lombok.Data;
 
 /**
  * Provenance of an asset's PQC verdict. The verdict value itself is the {@code pqcVerdict} carried on the asset row;
- * this block records which rule decided it, when, and from what, so a verdict can be re-examined. Evaluation is
- * first-match-wins, so the deciding rule is singular. A re-evaluation that leaves the verdict unchanged advances
- * {@code evaluatedAt} but not {@code decidedAt}.
+ * this block records which rule decided it, when, and from what, so a verdict can be re-examined. Every applicable rule
+ * is evaluated and the rule order selects one, so the deciding rule is singular. A re-evaluation that leaves the
+ * verdict unchanged advances {@code evaluatedAt} but not {@code decidedAt}.
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
