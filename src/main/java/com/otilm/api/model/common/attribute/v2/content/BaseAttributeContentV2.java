@@ -1,6 +1,7 @@
 package com.otilm.api.model.common.attribute.v2.content;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.otilm.api.model.client.attribute.BaseAttributeContentDtoV2;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
@@ -16,6 +17,8 @@ import lombok.Setter;
 @Setter
 @Schema(implementation = BaseAttributeContentDtoV2.class)
 @JsonDeserialize
+// Keeps the JSON in Jackson's default order. The order AttributeContent declares is for its schema.
+@JsonPropertyOrder
 public class BaseAttributeContentV2<T extends Serializable> extends AttributeContent
         implements
             BaseAttributeContentDtoV2 {
