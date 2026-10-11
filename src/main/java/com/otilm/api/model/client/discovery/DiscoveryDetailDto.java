@@ -112,8 +112,8 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
      */
     @Schema(description = "How many distinct advisory messages this run collected, as counted by the run messages "
             + "listing. Repeated problems are aggregated, so this counts kinds of problem rather than occurrences. "
-            + "A non-zero count does not imply the run failed. Always 0 for runs against a v1 Discovery Provider.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            + "A non-zero count does not imply the run failed. For a run against a v1 Discovery Provider it is 0 "
+            + "unless the run's metadata could not be stored.", requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
 
     /** The drain cursor: the highest item sequence received from the Provider. */
