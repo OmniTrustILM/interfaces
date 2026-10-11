@@ -14,6 +14,7 @@ import java.io.Serializable;
 
 )
 @JsonDeserialize(using = AttributeContentDeserializer.class)
+// Orders the schema and the JSON of an ObjectWriter for AttributeContent, which Core uses for stored attribute content.
 @JsonPropertyOrder({"reference", "data", "contentType"})
 public abstract class AttributeContent implements Serializable {
 

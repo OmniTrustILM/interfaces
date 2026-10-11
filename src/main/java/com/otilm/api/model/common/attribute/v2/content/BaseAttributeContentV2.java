@@ -17,7 +17,8 @@ import lombok.Setter;
 @Setter
 @Schema(implementation = BaseAttributeContentDtoV2.class)
 @JsonDeserialize
-// Keeps the JSON in Jackson's default order. The order AttributeContent declares is for its schema.
+// Keeps the JSON in Jackson's default order. An ObjectWriter for AttributeContent uses the order
+// AttributeContent declares for its schema.
 @JsonPropertyOrder
 public class BaseAttributeContentV2<T extends Serializable> extends AttributeContent
         implements
