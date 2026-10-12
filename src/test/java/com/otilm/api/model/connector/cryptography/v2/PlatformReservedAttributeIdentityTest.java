@@ -3,7 +3,6 @@ package com.otilm.api.model.connector.cryptography.v2;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,10 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 
+import static com.otilm.api.testsupport.ClassScanTestSupport.classesIn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,7 +28,7 @@ class PlatformReservedAttributeIdentityTest {
 
     @BeforeAll
     static void discoverPackageClasses() throws IOException, ClassNotFoundException {
-        packageClasses = scanPackage();
+        packageClasses = classesIn(PlatformReservedAttribute.class.getPackageName());
     }
 
     @Test
@@ -77,28 +74,6 @@ class PlatformReservedAttributeIdentityTest {
         // then
         assertDistinct(identities, "NAME");
         identities.forEach((type, name) -> assertFalse(name.isBlank(), type.getName() + ".NAME must not be blank"));
-    }
-
-    /**
-     * Scans classpath directories and jars without requiring Spring components or initializing definitions. Discovery
-     * and class loading failures propagate instead of silently reducing the checked identities.
-     */
-    private static List<Class<?>> scanPackage() throws IOException, ClassNotFoundException {
-        ClassLoader loader = PlatformReservedAttribute.class.getClassLoader();
-        String pattern = "classpath*:" + PlatformReservedAttribute.class.getPackageName().replace('.', '/')
-                + "/**/*.class";
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
-        CachingMetadataReaderFactory metadata = new CachingMetadataReaderFactory(resolver);
-        List<Class<?>> classes = new ArrayList<>();
-        for (Resource resource : resolver.getResources(pattern)) {
-            String name = metadata.getMetadataReader(resource).getClassMetadata().getClassName();
-            classes.add(Class.forName(name, false, loader));
-        }
-        return classes
-                .stream()
-                .distinct()
-                .sorted((first, second) -> first.getName().compareTo(second.getName()))
-                .toList();
     }
 
     /**
