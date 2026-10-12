@@ -2,7 +2,9 @@ package com.otilm.api.model.client.discovery;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.client.connector.v2.ConnectorInterface;
+import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The listing's own wire shape. It carries the connector interface for the same reason the detail does — a client
- * reading a page of runs can tell which generation each one is driven by without opening it.
+ * reading a page of runs can tell which generation each one is driven by without opening it. It carries the item total
+ * and the resources for the same reason: a run that found only keys must not read as a run that found nothing.
  */
 class DiscoveryListDtoTest {
 
@@ -35,6 +38,29 @@ class DiscoveryListDtoTest {
         assertTrue(json.contains("\"connectorInterface\""), json);
         assertEquals(iface.getUuid(), back.getConnectorInterface().getUuid());
         assertEquals("v2", back.getConnectorInterface().getVersion());
+    }
+
+    @Test
+    void carriesTheItemTotalAndTheResourcesAsWireCodes() throws Exception {
+        DiscoveryListDto dto = new DiscoveryListDto();
+        dto.setName("keys-scan");
+        dto.setTotalItemsDiscovered(52);
+        dto.setResources(List.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY));
+
+        String json = mapper.writeValueAsString(dto);
+        DiscoveryListDto back = mapper.readValue(json, DiscoveryListDto.class);
+
+        assertTrue(json.contains("\"totalItemsDiscovered\":52"), json);
+        assertTrue(json.contains("\"resources\":[\"certificates\",\"keys\"]"), json);
+        assertEquals(52, back.getTotalItemsDiscovered());
+        assertEquals(List.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY), back.getResources());
+    }
+
+    @Test
+    void sendsAZeroItemTotalRatherThanLeavingItOut() throws Exception {
+        String json = mapper.writeValueAsString(new DiscoveryListDto());
+
+        assertTrue(json.contains("\"totalItemsDiscovered\":0"), json);
     }
 
     @Test
