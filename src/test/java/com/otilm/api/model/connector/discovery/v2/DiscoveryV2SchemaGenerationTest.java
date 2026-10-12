@@ -167,6 +167,7 @@ class DiscoveryV2SchemaGenerationTest {
                 DiscoverySupportedResourceDto.class,
                 DiscoveryItemDto.class,
                 DiscoveryDetailDto.class,
+                DiscoveryListDto.class,
                 DiscoveryRunRequestDto.class,
                 DiscoveryInitiateRequestDto.class}) {
             Schema<?> resource = ModelConverters.getInstance().readAll(discoveryRoot).get("Resource");
@@ -262,7 +263,8 @@ class DiscoveryV2SchemaGenerationTest {
                         // description of its own: any prose reaching that component is a change to it, which
                         // discoveryDoesNotRewriteThePlatformWideResourceComponent refuses. This row is the other
                         // half — that the description exists at all.
-                        new Field(DiscoveryRunRequestDto.class, "DiscoveryRunRequestDto", "resources"))) {
+                        new Field(DiscoveryRunRequestDto.class, "DiscoveryRunRequestDto", "resources"),
+                        new Field(DiscoveryListDto.class, "DiscoveryListDto", "resources"))) {
             Schema<?> root = ModelConverters.getInstance().readAll(field.root()).get(field.schemaName());
             assertNotNull(root, "expected a generated schema for " + field.schemaName());
             Schema<?> property = (Schema<?>) root.getProperties().get(field.property());
@@ -397,6 +399,13 @@ class DiscoveryV2SchemaGenerationTest {
         assertRequired(DiscoveryItemDto.class, "payload", false);
         assertRequired(DiscoveryItemDto.class, "resource", true);
         assertRequired(DiscoveryItemDto.class, "uniqueRef", true);
+    }
+
+    /** Every run has both, so a generated client must not read either as optional. */
+    @Test
+    void theListRequiresTheItemTotalAndTheResources() {
+        assertRequired(DiscoveryListDto.class, "totalItemsDiscovered", true);
+        assertRequired(DiscoveryListDto.class, "resources", true);
     }
 
     private static void assertRequired(Class<?> type, String property, boolean expected) {

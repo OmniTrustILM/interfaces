@@ -3,10 +3,12 @@ package com.otilm.api.model.client.discovery;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
+import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.search.AttributeProjectable;
 import com.otilm.api.model.core.search.FilterFieldSource;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -34,6 +36,18 @@ public class DiscoveryListDto extends NameAndUuidDto implements AttributeProject
 
     @Schema(description = "Number of certificates that are discovered", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
+
+    // A primitive, so it is always emitted: every run has a total, 0 before anything arrives.
+    @Schema(description = "Number of items discovered, across all resource types",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private long totalItemsDiscovered;
+
+    // arraySchema, for the reason DiscoveryDetailDto gives: a description on the items would land on the shared
+    // Resource component.
+    @ArraySchema(arraySchema = @Schema(description = "Resource types the discovery targets",
+            requiredMode = Schema.RequiredMode.REQUIRED))
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Resource> resources;
 
     @Schema(description = "UUID of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorUuid;
