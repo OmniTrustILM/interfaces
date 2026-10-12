@@ -12,8 +12,8 @@ import java.util.Arrays;
  * What one rule of the PQC rule set did while a verdict was explained. Every rule listed for the asset's type is
  * evaluated: a step is {@link #MATCHED} or {@link #NOT_MATCHED}, and exactly one matched step -- the one the rule order
  * selects -- is {@link #DECIDED} or {@link #RESOLVED} instead. An asset the rule set cannot evaluate is explained by a
- * single {@link #FAILED} step. {@link #NOT_REACHED} is no longer emitted: it belonged to first-match-wins evaluation
- * and is kept so a client that still names it keeps parsing.
+ * single {@link #FAILED} step. {@link #NOT_REACHED} is never emitted; it is kept so a client that still names it keeps
+ * parsing.
  */
 @Schema(enumAsRef = true, description = "What one rule of the PQC rule set did while the verdict was explained")
 public enum PqcExplanationStepOutcome implements IPlatformEnum {
@@ -21,9 +21,7 @@ public enum PqcExplanationStepOutcome implements IPlatformEnum {
     NOT_MATCHED(Codes.NOT_MATCHED, "Not matched", "The rule's condition did not hold for the asset"),
     MATCHED(Codes.MATCHED, "Matched", "The rule's condition held, and a rule ranked ahead of it decided"),
     DECIDED(Codes.DECIDED, "Decided", "The rule's condition held and its verdict is the asset's"),
-    NOT_REACHED(Codes.NOT_REACHED, "Not reached",
-            "No longer emitted: every listed rule is evaluated. An earlier rule set used it for a rule it did not "
-                    + "evaluate because an earlier rule had decided"),
+    NOT_REACHED(Codes.NOT_REACHED, "Not reached", "No longer emitted: every listed rule is evaluated"),
     RESOLVED(Codes.RESOLVED, "Resolved",
             "The rule's condition held and the verdict is the one stored on another inventory asset the asset refers "
                     + "to"),

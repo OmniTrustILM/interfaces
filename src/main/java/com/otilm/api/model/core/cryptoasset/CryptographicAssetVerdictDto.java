@@ -25,8 +25,7 @@ public class CryptographicAssetVerdictDto {
     private String reason;
 
     @Schema(description = "Values of the asset fields the deciding rule evaluated, recorded at decision time "
-            + "and as stored, so assetType may be unroutable for an asset served with no type."
-            + " Values are strings, numbers, booleans or lists of strings, never nested objects",
+            + "and as stored. Values are strings, numbers, booleans or lists of strings, never nested objects",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, Object> evaluatedFields;
 
