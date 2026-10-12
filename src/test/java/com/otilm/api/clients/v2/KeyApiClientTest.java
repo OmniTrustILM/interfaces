@@ -30,6 +30,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusRespon
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.core.connector.ConnectorDto;
@@ -61,6 +63,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -82,6 +85,7 @@ class KeyApiClientTest {
     private static final String IMPORT_STATUS_PATH = IMPORT_PATH + "/status";
     private static final String IMPORT_CANCEL_PATH = IMPORT_PATH + "/cancel";
     private static final String IMPORT_RESULT_PATH = IMPORT_PATH + "/result";
+    private static final String LIST_PATH = BASE_PATH + "/list";
     private static final String ATTRIBUTE_NAME = "createKeyAttribute";
     private static final String METADATA_NAME = "provider handle";
     private static final String KEY_CREATION_ID = "key-creation-1";
@@ -107,6 +111,17 @@ class KeyApiClientTest {
               "version": 2,
               "properties": {},
               "content": ["provider-key-1"]
+            }
+            """;
+    private static final String LISTED_HANDLE_JSON = """
+            {
+              "uuid": "00000000-0000-0000-0000-000000000002",
+              "name": "keyId",
+              "type": "meta",
+              "contentType": "string",
+              "version": 3,
+              "properties": {"label": "Key ID", "visible": false},
+              "content": [{"contentType": "string", "data": "0a0b"}]
             }
             """;
     private static final String VALID_TRACKING_REQUEST_JSON = """
@@ -760,6 +775,74 @@ class KeyApiClientTest {
                         {"exportKeyAttributes": []}
                         """, true, true));
         mockServer.verify(request);
+    }
+
+    @Test
+    void listKeyPairs_postsThePageAndReturnsTheKeyPairs() throws ConnectorException {
+        // given
+        stubJsonResponse(LIST_PATH, HttpStatus.OK, listedKeyPairsJson());
+
+        // when
+        ListKeyPairsResponseV2Dto result = client.listKeyPairs(connector, listKeyPairsRequest(10));
+
+        // then
+        assertEquals(2L, result.getTotalItems());
+        assertEquals(2, result.getItems().size());
+        assertEquals("signer", result.getItems().get(0).getLabel());
+        assertNotNull(result.getItems().get(0).getPublicKeyData());
+        assertNull(result.getItems().get(1).getPublicKeyData());
+        RequestPatternBuilder request = tokenProfileRequest(LIST_PATH)
+                .withRequestBody(WireMock.matchingJsonPath("$.offset", WireMock.equalTo("0")))
+                .withRequestBody(WireMock.matchingJsonPath("$.limit", WireMock.equalTo("10")));
+        mockServer.verify(request);
+    }
+
+    @Test
+    void listKeyPairs_rejectsAPageLargerThanTheLimit() {
+        // given
+        stubJsonResponse(LIST_PATH, HttpStatus.OK, listedKeyPairsJson());
+
+        // when
+        Executable call = () -> client.listKeyPairs(connector, listKeyPairsRequest(1));
+
+        // then
+        assertValidationFailure(call);
+    }
+
+    private static ListKeyPairsRequestV2Dto listKeyPairsRequest(int limit) {
+        ListKeyPairsRequestV2Dto request = withValidTokenProfileScope(new ListKeyPairsRequestV2Dto());
+        request.setOffset(0);
+        request.setLimit(limit);
+        return request;
+    }
+
+    private static String listedKeyPairsJson() {
+        return """
+                {
+                  "items": [
+                    {
+                      "keyPairMeta": [%3$s],
+                      "label": "signer",
+                      "privateKeyData": {
+                        "keyMeta": [%1$s],
+                        "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                      },
+                      "publicKeyData": {
+                        "keyMeta": [%1$s],
+                        "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                      }
+                    },
+                    {
+                      "keyPairMeta": [%3$s],
+                      "privateKeyData": {
+                        "keyMeta": [%1$s],
+                        "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                      }
+                    }
+                  ],
+                  "totalItems": 2
+                }
+                """.formatted(VALID_METADATA_JSON, publicKeySpkiBase64(), LISTED_HANDLE_JSON);
     }
 
     private static String exportResponseJson() {

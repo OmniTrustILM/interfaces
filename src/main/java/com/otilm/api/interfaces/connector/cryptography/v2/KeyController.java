@@ -20,6 +20,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dt
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsResponseV2Dto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,6 +50,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Key import is available when {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_IMPORT} is enabled. It
  * reuses the key-creation response shapes because the outcome is the same: a key now exists in the technology and the
  * platform receives its public part and its handle.
+ * </p>
+ *
+ * <p>
+ * Key listing is available when {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. Each
+ * listed key pair has the key-creation response shape. The platform then addresses a key pair the token already held
+ * like one it created.
  * </p>
  *
  * <p>
@@ -365,4 +373,22 @@ public interface KeyController extends AuthProtectedConnectorController {
     @PostMapping(path = "/export", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     ExportKeyResponseV2Dto exportKey(@RequestBody @Valid ExportKeyRequestV2Dto request);
+
+    // ---- Listing ----
+
+    @Operation(summary = "List key pairs", description = """
+            Return one page of the key pairs the token holds, including those created outside the platform.
+
+            - `keyPairMetaFilter` limits the page to the key pairs it names. The platform uses it to read selected
+              entries again.
+            """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Key pairs retrieved"),
+            @ApiResponse(responseCode = "422",
+                    description = "`VALIDATION_FAILED` — the body is readable but breaks a field rule",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+    @PostMapping(path = "/list", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ListKeyPairsResponseV2Dto listKeyPairs(@RequestBody @Valid ListKeyPairsRequestV2Dto request);
 }

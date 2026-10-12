@@ -4,6 +4,7 @@ import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
@@ -15,6 +16,11 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dt
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairMetaMatcher;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyPairV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.UnaddressableKeyV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -33,6 +39,7 @@ import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import jakarta.validation.Validator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -231,6 +238,61 @@ public final class OperationResponseValidator extends ResponseChecks {
 
     public OperationValidationResult validateDestroyKeyStatus(KeyDestructionStatusResponseV2Dto response) {
         return validateBeanConstraints(response);
+    }
+
+    public OperationValidationResult validateListKeyPairs(ListKeyPairsRequestV2Dto request,
+            ListKeyPairsResponseV2Dto response) {
+        return validate(() -> {
+            requireRequest(request, "Key pair listing");
+            validateRequiredBean(response);
+            requireWithinLimit(request, response);
+            requireNameableHandles(response.getItems());
+            requireUnaddressableKeysOnlyWhenUnfiltered(request, response);
+            requireNamedByFilter(request, response.getItems());
+        });
+    }
+
+    private static void requireWithinLimit(ListKeyPairsRequestV2Dto request, ListKeyPairsResponseV2Dto response) {
+        Integer limit = request.getLimit();
+        if (limit == null) {
+            throw new IllegalArgumentException("Key pair listing limit is required");
+        }
+        int returned = response.getItems().size() + unaddressableKeysOf(response).size();
+        if (returned > limit) {
+            throw new IllegalArgumentException(
+                    "Connector returned " + returned + " key pairs; the request allows at most " + limit);
+        }
+    }
+
+    private static void requireNameableHandles(List<ListedKeyPairV2Dto> pairs) {
+        if (!pairs.stream().allMatch(pair -> KeyPairMetaMatcher.isUnambiguous(pair.getKeyPairMeta()))) {
+            throw new IllegalArgumentException("Connector returned a key pair whose keyPairMeta no filter can name");
+        }
+    }
+
+    private static void requireUnaddressableKeysOnlyWhenUnfiltered(ListKeyPairsRequestV2Dto request,
+            ListKeyPairsResponseV2Dto response) {
+        if (request.getKeyPairMetaFilter() != null && !unaddressableKeysOf(response).isEmpty()) {
+            throw new IllegalArgumentException("Connector returned unaddressable keys to a filtered listing");
+        }
+    }
+
+    private static void requireNamedByFilter(ListKeyPairsRequestV2Dto request, List<ListedKeyPairV2Dto> pairs) {
+        List<List<MetadataAttribute>> filter = request.getKeyPairMetaFilter();
+        if (filter != null && !pairs.stream().allMatch(pair -> isNamedBy(filter, pair))) {
+            throw new IllegalArgumentException("Connector returned a key pair the filter does not name");
+        }
+    }
+
+    private static List<UnaddressableKeyV2Dto> unaddressableKeysOf(ListKeyPairsResponseV2Dto response) {
+        return Objects.requireNonNullElse(response.getUnaddressableKeys(), List.of());
+    }
+
+    private static boolean isNamedBy(List<List<MetadataAttribute>> filter, ListedKeyPairV2Dto pair) {
+        return filter
+                .stream()
+                .filter(Objects::nonNull)
+                .anyMatch(handle -> KeyPairMetaMatcher.matches(handle, pair.getKeyPairMeta()));
     }
 
     public OperationValidationResult validateEncrypt(CipherDataRequestV2Dto request,

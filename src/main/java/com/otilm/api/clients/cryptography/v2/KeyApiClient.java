@@ -24,6 +24,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dt
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeyPairsResponseV2Dto;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import org.springframework.http.HttpMethod;
@@ -52,6 +54,7 @@ public class KeyApiClient extends BaseApiClient implements KeySyncApiClient {
     private static final String IMPORT_STATUS_PATH = IMPORT_PATH + "/status";
     private static final String IMPORT_CANCEL_PATH = IMPORT_PATH + "/cancel";
     private static final String IMPORT_RESULT_PATH = IMPORT_PATH + "/result";
+    private static final String LIST_PATH = BASE_PATH + "/list";
     private final OperationResponseValidator responseValidator;
 
     public KeyApiClient(WebClient webClient, TrustManager[] defaultTrustManagers,
@@ -262,5 +265,18 @@ public class KeyApiClient extends BaseApiClient implements KeySyncApiClient {
                 .toEntity(ExportKeyResponseV2Dto.class), "exportKey"), request, connector);
         requireValid(responseValidator.keyTransfer().validateExportKey(body, response), connector);
         return response.getBody();
+    }
+
+    @Override
+    public ListKeyPairsResponseV2Dto listKeyPairs(ApiClientConnectorInfo connector, ListKeyPairsRequestV2Dto body)
+            throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+        ListKeyPairsResponseV2Dto response = processRequest(r -> requireBody(r
+                .uri(connector.getUrl() + LIST_PATH)
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(ListKeyPairsResponseV2Dto.class), "listKeyPairs"), request, connector);
+        requireValid(responseValidator.validateListKeyPairs(body, response), connector);
+        return response;
     }
 }
