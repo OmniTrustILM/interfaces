@@ -1,5 +1,6 @@
 package com.otilm.api.model.client.attribute;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.otilm.api.model.common.attribute.common.constraint.AttributeConstraintType;
 import com.otilm.api.model.common.attribute.common.constraint.DateTimeAttributeConstraint;
 import com.otilm.api.model.common.attribute.common.constraint.JsonSchemaAttributeConstraint;
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
                 RangeAttributeConstraint.class,
                 DateTimeAttributeConstraint.class,
                 JsonSchemaAttributeConstraint.class})
+@JsonPropertyOrder({"description", "errorMessage", "type"})
 public interface BaseAttributeConstraintDto {
     @Schema(description = "Description of the constraint")
     String getDescription();

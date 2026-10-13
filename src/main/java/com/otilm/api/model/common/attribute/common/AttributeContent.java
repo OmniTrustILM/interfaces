@@ -1,5 +1,6 @@
 package com.otilm.api.model.common.attribute.common;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.otilm.api.config.serializer.AttributeContentDeserializer;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
@@ -13,11 +14,13 @@ import java.io.Serializable;
 
 )
 @JsonDeserialize(using = AttributeContentDeserializer.class)
+// Orders the schema and the JSON of an ObjectWriter for AttributeContent, which Core uses for stored attribute content.
+@JsonPropertyOrder({"reference", "data", "contentType"})
 public abstract class AttributeContent implements Serializable {
 
-    public abstract <T> T getData();
-
     public abstract String getReference();
+
+    public abstract <T> T getData();
 
     public abstract AttributeContentType getContentType();
 
