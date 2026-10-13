@@ -1,5 +1,6 @@
 package com.otilm.api.model.common.events.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +16,9 @@ public class CryptoAssetAddedEventData implements EventData {
     @Schema(description = "CBOM whose ingest created the asset", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID cbomUuid;
 
-    @Schema(description = "Cryptographic asset type", requiredMode = Schema.RequiredMode.REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "Cryptographic asset type. Absent when the producer declared no CycloneDX asset type",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CryptographicAssetType assetType;
 
     @Schema(description = "Cryptographic asset name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -24,6 +27,6 @@ public class CryptoAssetAddedEventData implements EventData {
     @Schema(description = "Algorithm family", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String algorithmFamily;
 
-    @Schema(description = "Post-quantum readiness verdict", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Post-quantum readiness verdict", requiredMode = Schema.RequiredMode.REQUIRED)
     private PqcVerdict pqcVerdict;
 }
