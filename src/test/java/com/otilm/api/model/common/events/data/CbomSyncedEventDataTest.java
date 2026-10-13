@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -58,6 +59,7 @@ class CbomSyncedEventDataTest {
 
         assertNull(event.getSource());
         assertEquals(OffsetDateTime.parse("2026-10-13T10:20:30.123456Z"), event.getAssetsSyncedAt());
+        assertFalse(mapper.readTree(mapper.writeValueAsString(event)).has("source"));
     }
 
     @Test

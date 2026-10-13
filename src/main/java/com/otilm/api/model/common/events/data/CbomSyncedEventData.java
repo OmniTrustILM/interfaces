@@ -1,11 +1,13 @@
 package com.otilm.api.model.common.events.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CbomSyncedEventData implements EventData {
 
     @Schema(description = "CBOM UUID", requiredMode = Schema.RequiredMode.REQUIRED)
