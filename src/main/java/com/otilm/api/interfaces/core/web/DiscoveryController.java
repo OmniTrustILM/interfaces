@@ -88,7 +88,7 @@ public interface DiscoveryController extends AuthProtectedController {
             description = ConfigurableColumnsDocs.SORT_AND_COLUMNS + ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of available Discoveries"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/list", produces = {"application/json"})
@@ -197,7 +197,7 @@ public interface DiscoveryController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Discovery Created",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Connector not found",
@@ -244,7 +244,7 @@ public interface DiscoveryController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Discovery Scheduled",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Connector not found",

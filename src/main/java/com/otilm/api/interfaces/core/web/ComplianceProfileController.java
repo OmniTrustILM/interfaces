@@ -57,7 +57,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Get Compliance rules")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance rules retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @GetMapping(path = "/rules", produces = {"application/json"})
@@ -70,7 +70,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Get Compliance groups")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance groups retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @GetMapping(path = "/groups", produces = {"application/json"})
@@ -93,7 +93,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Add Compliance Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Compliance profile added"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
@@ -103,7 +103,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Add rule to a Compliance Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "New rule added to the profile"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(path = "/{uuid}/rules", consumes = {"application/json"}, produces = {"application/json"})
@@ -114,7 +114,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Delete rule from a Compliance Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "New group is added to the profile"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @DeleteMapping(path = "/{uuid}/rules", consumes = {"application/json"}, produces = {"application/json"})
@@ -125,7 +125,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Add group to a Compliance Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "New group is deleted from the profile"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(path = "/{uuid}/groups", consumes = {"application/json"}, produces = {"application/json"})
@@ -137,7 +137,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Delete group from a Compliance Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "New rule is added to the profile"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @DeleteMapping(path = "/{uuid}/groups", consumes = {"application/json"}, produces = {"application/json"})
@@ -161,7 +161,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Compliance Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})
@@ -175,7 +175,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Force delete Compliance Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance Profiles forced to delete"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/force", produces = {"application/json"})
@@ -185,7 +185,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Associate Compliance Profile to RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "RA Profile association successful"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PatchMapping(path = "/{uuid}/raProfiles/associate", consumes = {"application/json"},
@@ -198,7 +198,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @Operation(summary = "Disassociate Compliance Profile to RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "RA Profile disassociation successful"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PatchMapping(path = "/{uuid}/raProfiles/disassociate", consumes = {"application/json"},

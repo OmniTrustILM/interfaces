@@ -57,7 +57,7 @@ public interface NotificationProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "204", description = "Notification profile deleted"),
             @ApiResponse(responseCode = "404", description = "Notification profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/{uuid}", produces = {"application/json"})
@@ -71,7 +71,7 @@ public interface NotificationProfileController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = NotificationProfileDetailDto.class))),
             @ApiResponse(responseCode = "404", description = "Notification profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
@@ -85,7 +85,7 @@ public interface NotificationProfileController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = NotificationProfileDetailDto.class))),
             @ApiResponse(responseCode = "404", description = "Notification profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", consumes = {"application/json"}, produces = {"application/json"})

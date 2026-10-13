@@ -32,7 +32,10 @@ public class SignDataRequestV2Dto extends KeyScopedRequestV2Dto {
     @NotNull(message = "executionMode is required")
     private OperationExecutionMode executionMode;
 
-    @Schema(description = "Signature attributes", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Batch-wide signature settings. Must include exactly one v3 string attribute named "
+            + "signatureAlgorithm with UUID 9180267f-c82f-4b7b-8160-d2363d813869, selecting exactly one "
+            + "signature algorithm code offered by the signing attribute schema.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "signatureAttributes is required")
     private List<@NotNull(
             message = "signatureAttributes must not contain null items") RequestAttribute> signatureAttributes;

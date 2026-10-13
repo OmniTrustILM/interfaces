@@ -65,7 +65,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Authority instance added",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
@@ -75,7 +75,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "Edit Authority instance")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authority instance details updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", consumes = {"application/json"}, produces = {"application/json"})
@@ -115,7 +115,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
             description = "Connector-scoped authority attribute schema for a stateless authority connector, keyed by connector UUID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authority attributes retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/{connectorUuid}/attributes", produces = {"application/json"})
@@ -136,7 +136,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "Validate RA Profile Attributes")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Attribute information validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(path = "/{uuid}/attributes/raProfile/validate", consumes = {"application/json"},
@@ -148,7 +148,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Authority instances")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authority instances deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})
@@ -162,7 +162,7 @@ public interface AuthorityInstanceController extends AuthProtectedController {
     @Operation(summary = "Force delete multiple Authority instances")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authority instances forced to delete"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/force", produces = {"application/json"})

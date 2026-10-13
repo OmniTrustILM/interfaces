@@ -1,6 +1,10 @@
 package com.otilm.api.model.connector.cryptography.v2.operations;
 
+import com.otilm.api.model.client.attribute.RequestAttribute;
+import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.v2.MetadataAttributeV2;
+import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
+import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
@@ -17,6 +21,7 @@ import jakarta.validation.Validator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
@@ -31,6 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
 
+/**
+ * Checks field and batch constraints on connector cryptographic operation DTOs.
+ */
 class CryptographicOperationDtoValidationTest {
 
     @AutoClose
@@ -425,6 +433,55 @@ class CryptographicOperationDtoValidationTest {
     }
 
     @ParameterizedTest(name = "{0}")
+    @MethodSource("verificationAlgorithmSelectionsValidatedByConnector")
+    void verifyRequest_validateLeavesAlgorithmSelectionToConnector(List<RequestAttribute> attributes) {
+        // given
+        VerifyDataRequestV2Dto request = validVerifyRequest();
+        request.setSignatureAttributes(attributes);
+
+        // when
+        Set<ConstraintViolation<VerifyDataRequestV2Dto>> violations = VALIDATOR.validate(request);
+
+        // then
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void verifyRequest_validateRejectsMissingAttributeList() {
+        // given
+        VerifyDataRequestV2Dto request = validVerifyRequest();
+        request.setSignatureAttributes(null);
+
+        // when
+        Set<ConstraintViolation<VerifyDataRequestV2Dto>> violations = VALIDATOR.validate(request);
+
+        // then
+        assertHasViolation(violations, "signatureAttributes", "signatureAttributes is required");
+    }
+
+    /**
+     * Supplies algorithm selections whose semantic validation belongs to the connector.
+     */
+    static Stream<Named<List<RequestAttribute>>> verificationAlgorithmSelectionsValidatedByConnector() {
+        RequestAttribute selection = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        RequestAttributeV3 unknown = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        unknown.setContent(List.of(new StringAttributeContentV3("unknown-algorithm")));
+        RequestAttributeV3 multipleValues = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        multipleValues
+                .setContent(List
+                        .of(new StringAttributeContentV3(SignatureAlgorithm.SHA256_WITH_RSA.getCode()),
+                                new StringAttributeContentV3(SignatureAlgorithm.SHA512_WITH_RSA.getCode())));
+        RequestAttributeV3 unrelated = SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA);
+        unrelated.setName("providerAlgorithm");
+        unrelated.setUuid(UUID.randomUUID());
+        return Stream
+                .of(named("empty attributes", List.of()), named("no reserved attribute", List.of(unrelated)),
+                        named("duplicate selections", List.of(selection, selection)),
+                        named("unknown algorithm", List.of(unknown)),
+                        named("multiple values", List.of(multipleValues)));
+    }
+
+    @ParameterizedTest(name = "{0}")
     @MethodSource("mismatchedVerificationIdentifiers")
     void verifyRequest_validateRejectsMismatchedIdentifierSets(VerifyDataRequestV2Dto request) {
         // given
@@ -595,10 +652,15 @@ class CryptographicOperationDtoValidationTest {
         return response;
     }
 
+    /**
+     * Builds a verification request with a valid algorithm selection and matching identifiers.
+     */
     private static VerifyDataRequestV2Dto validVerifyRequest() {
         String identifier = "item-1";
         VerifyDataRequestV2Dto request = withValidKeyScope(new VerifyDataRequestV2Dto());
-        request.setSignatureAttributes(List.of());
+        request
+                .setSignatureAttributes(
+                        List.of(SignatureAlgorithmAttribute.request(SignatureAlgorithm.SHA256_WITH_RSA)));
         request.setData(List.of(signatureItem(identifier)));
         request.setSignatures(List.of(signatureItem(identifier)));
         return request;

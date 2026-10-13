@@ -29,7 +29,7 @@ public interface VaultController extends AuthProtectedConnectorController {
     @Operation(summary = "Check connection to Vault Instance")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Vault instance connected"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "503", description = "Service Unavailable",

@@ -39,7 +39,7 @@ public interface SignatureFormattingController extends AuthProtectedConnectorCon
     @Operation(summary = "Compute data-to-be-signed bytes", operationId = "formatDtbs")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data-to-be-signed bytes computed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/formatDtbs", consumes = {"application/json"}, produces = {"application/json"})
@@ -48,7 +48,7 @@ public interface SignatureFormattingController extends AuthProtectedConnectorCon
     @Operation(summary = "Assemble final formatted output", operationId = "formatSigningResponse")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Formatted response assembled"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/formatResponse", consumes = {"application/json"}, produces = {"application/json"})

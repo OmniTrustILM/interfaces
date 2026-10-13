@@ -50,7 +50,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(summary = "Validate list of Attributes to issue Certificate")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/issue/attributes/validate", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -71,7 +71,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                             + "specific state — that the platform will return on subsequent calls related "
                             + "to this operation.",
                     content = @Content(schema = @Schema(implementation = CertificateDataResponseDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/issue", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -93,7 +93,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                             + "specific state — that the platform will return on subsequent calls related "
                             + "to this operation.",
                     content = @Content(schema = @Schema(implementation = CertificateDataResponseDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/renew", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -106,7 +106,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(summary = "List of Attributes to revoke Certificate")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Revoke certificate attribute list retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/revoke/attributes", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -116,7 +116,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @Operation(summary = "Validate list of Attributes to revoke certificate")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/revoke/attributes/validate", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -134,7 +134,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     description = "Revocation is asynchronous; the operation will complete asynchronously. The "
                             + "response body is empty for revocation — the platform tracks the operation by "
                             + "transactionId / certificate identity, not by connector-emitted metadata."),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/revoke", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -150,7 +150,7 @@ public interface CertificateController extends AuthProtectedConnectorController 
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "422",
-                    description = "Unprocessable Entity. Certificate is found but not valid according to supplied RA attributes",
+                    description = "Unprocessable Content. Certificate is found but not valid according to supplied RA attributes",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/identify", consumes = {MediaType.APPLICATION_JSON_VALUE},

@@ -70,7 +70,7 @@ A reserved attribute gets a public `ATTRIBUTE_UUID`, its `definition(...)`, a `r
 
 ## Adding a field to a DTO with `@AllArgsConstructor`
 
-Adding a field grows the generated all-args constructor, so any caller in another repository that builds the class positionally stops compiling. Append the field last and declare the previous signature explicitly, delegating to the full constructor with the new field left at its default. `TokenInstanceDetailDto`, `TokenProfileDetailDto`, `KeyItemDetailDto` and `KeyRequestDto` are the pattern, and `KeyTransferConstructorCompatibilityTest` is what holds those signatures in place. Appending last also matters on its own: a field inserted in the middle keeps the arity and silently reorders the parameters, which no compiler reports.
+Adding a field grows the generated all-args constructor, so any caller in another repository that builds the class positionally stops compiling. Append the field last and declare the previous signature explicitly, delegating to the full constructor with the new field left at its default. `TokenInstanceDetailDto`, `TokenProfileDetailDto` and `KeyRequestDto` are the pattern, and `KeyTransferConstructorCompatibilityTest` is what holds those signatures in place. Appending last also matters on its own: a field inserted in the middle keeps the arity and silently reorders the parameters, which no compiler reports.
 
 ## Numeric bounds on DTO fields: `@Min`/`@Max`, not `@Positive`/`@Negative`, beside `@Schema` bounds
 

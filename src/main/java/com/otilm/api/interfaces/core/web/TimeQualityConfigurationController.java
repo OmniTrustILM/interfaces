@@ -52,7 +52,7 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
     @Operation(operationId = "listTimeQualityConfigurations", summary = "List of available Time Quality Configurations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Time Quality Configurations retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/list", produces = {MediaType.APPLICATION_JSON_VALUE},
@@ -73,7 +73,7 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
             @ApiResponse(responseCode = "201", description = "New Time Quality Configuration added"),
             @ApiResponse(responseCode = "409", description = "Already Exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -87,7 +87,7 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
             @ApiResponse(responseCode = "200", description = "Time Quality Configuration updated"),
             @ApiResponse(responseCode = "409", description = "Already Exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @PutMapping(path = "/{uuid}", consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -117,7 +117,7 @@ public interface TimeQualityConfigurationController extends AuthProtectedControl
             summary = "Delete multiple Time Quality Configurations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Time Quality Configurations deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})

@@ -44,7 +44,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "Validate list of Attributes to create a Secret Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/secret/attributes/validate", consumes = {"application/json"}, produces = {"application/json"})
@@ -59,7 +59,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "Create a Secret Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Key created"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/secret", consumes = {"application/json"}, produces = {"application/json"})
@@ -81,7 +81,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "Validate list of Attributes to create a Key Pair")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Attributes validated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/pair/attributes/validate", consumes = {"application/json"}, produces = {"application/json"})
@@ -96,7 +96,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "Create a Key Pair, Public and Private Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Key Pair created"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/pair", consumes = {"application/json"}, produces = {"application/json"})
@@ -109,7 +109,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "List Keys for the Token instance")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Keys listed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(produces = {"application/json"})
@@ -122,7 +122,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "Get details about the Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Key data retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/{keyUuid}", produces = {"application/json"})
@@ -135,7 +135,7 @@ public interface KeyManagementController extends AuthProtectedConnectorControlle
     @Operation(summary = "Destroy a Key")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Key destroyed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/{keyUuid}")

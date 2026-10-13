@@ -67,7 +67,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "RA Profile added",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Authority not found",
@@ -100,7 +100,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Edit RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "RA Profile updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -115,7 +115,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Update validation configuration of RA profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Configuration of validation of RA Profile updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
     @PatchMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/validation",
             consumes = {"application/json"}, produces = {"application/json"})
@@ -128,7 +128,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Configuration of request attributes of RA Profile updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
@@ -184,7 +184,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Delete multiple RA Profiles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "RA Profiles deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -226,7 +226,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Get ACME details for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "ACME details retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -240,7 +240,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Activate ACME for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "ACME activated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -258,7 +258,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Deactivate ACME for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "ACME deactivated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -273,7 +273,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Get SCEP details for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "SCEP details retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -287,7 +287,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Activate SCEP for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "SCEP activated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -305,7 +305,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Deactivate SCEP for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "SCEP deactivated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -326,7 +326,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Get CMP details for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "CMP details retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -340,7 +340,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Activate CMP for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "CMP activated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",
@@ -358,7 +358,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @Operation(summary = "Deactivate CMP for RA Profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "CMP deactivated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "RA Profile not found",

@@ -35,7 +35,7 @@ public interface ComplianceController extends AuthProtectedConnectorController {
     @Operation(summary = "Check resource object compliance")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Compliance check completed"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     ComplianceResponseDto checkCompliance(@Parameter(description = "Connector Kind") @PathVariable String kind,

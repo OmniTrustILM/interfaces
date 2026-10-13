@@ -60,7 +60,7 @@ public interface CredentialController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Credential added",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
@@ -70,7 +70,7 @@ public interface CredentialController extends AuthProtectedController {
     @Operation(summary = "Edit Credential")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Credential updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", consumes = {"application/json"}, produces = {"application/json"})
@@ -81,7 +81,7 @@ public interface CredentialController extends AuthProtectedController {
     @Operation(summary = "Delete Credential")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Credential deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(path = "/{uuid}", produces = {"application/json"})
@@ -106,7 +106,7 @@ public interface CredentialController extends AuthProtectedController {
     @Operation(summary = "Delete multiple Credentials")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Credentials deleted"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @DeleteMapping(produces = {"application/json"})

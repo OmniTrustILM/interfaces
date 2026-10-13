@@ -70,19 +70,23 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listEncryptAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateCipherAttributeList(response), connector);
         return response;
     }
 
+    /**
+     * Encrypts synchronously and requires a 200 response with a valid, correlated result batch.
+     */
     @Override
     public EncryptDataResponseV2Dto encryptData(ApiClientConnectorInfo connector, CipherDataRequestV2Dto body)
             throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        EncryptDataResponseV2Dto response = processRequest(r -> requireBody(r
+        ResponseEntity<EncryptDataResponseV2Dto> entity = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + ENCRYPT_PATH)
                 .bodyValue(body)
                 .retrieve()
                 .toEntity(EncryptDataResponseV2Dto.class), "encryptData"), request, connector);
+        EncryptDataResponseV2Dto response = synchronousBody(entity, connector);
         requireValid(responseValidator.validateEncrypt(body, response), connector);
         return response;
     }
@@ -96,19 +100,23 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listDecryptAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateCipherAttributeList(response), connector);
         return response;
     }
 
+    /**
+     * Decrypts synchronously and requires a 200 response with a valid, correlated result batch.
+     */
     @Override
     public DecryptDataResponseV2Dto decryptData(ApiClientConnectorInfo connector, CipherDataRequestV2Dto body)
             throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        DecryptDataResponseV2Dto response = processRequest(r -> requireBody(r
+        ResponseEntity<DecryptDataResponseV2Dto> entity = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + DECRYPT_PATH)
                 .bodyValue(body)
                 .retrieve()
                 .toEntity(DecryptDataResponseV2Dto.class), "decryptData"), request, connector);
+        DecryptDataResponseV2Dto response = synchronousBody(entity, connector);
         requireValid(responseValidator.validateDecrypt(body, response), connector);
         return response;
     }
@@ -168,7 +176,7 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
                 .bodyValue(body)
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listVerifyAttributes"), request, connector);
-        requireValid(responseValidator.validateAttributeList(response), connector);
+        requireValid(responseValidator.validateVerifyAttributeList(response), connector);
         return response;
     }
 
@@ -176,13 +184,20 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
     public VerifyDataResponseV2Dto verifyData(ApiClientConnectorInfo connector, VerifyDataRequestV2Dto body)
             throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        VerifyDataResponseV2Dto response = processRequest(r -> requireBody(r
+        ResponseEntity<VerifyDataResponseV2Dto> entity = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + VERIFY_PATH)
                 .bodyValue(body)
                 .retrieve()
                 .toEntity(VerifyDataResponseV2Dto.class), "verifyData"), request, connector);
+        VerifyDataResponseV2Dto response = synchronousBody(entity, connector);
         requireValid(responseValidator.validateVerify(body, response), connector);
         return response;
+    }
+
+    private <T> T synchronousBody(ResponseEntity<T> response, ApiClientConnectorInfo connector)
+            throws ConnectorException {
+        requireValid(responseValidator.validateSynchronousResponseStatus(response), connector);
+        return response.getBody();
     }
 
     @Override
@@ -202,11 +217,12 @@ public class CryptographicOperationsApiClient extends BaseApiClient implements C
     public RandomDataResponseV2Dto randomData(ApiClientConnectorInfo connector, RandomDataRequestV2Dto body)
             throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        RandomDataResponseV2Dto response = processRequest(r -> requireBody(r
+        ResponseEntity<RandomDataResponseV2Dto> entity = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + RANDOM_PATH)
                 .bodyValue(body)
                 .retrieve()
                 .toEntity(RandomDataResponseV2Dto.class), "randomData"), request, connector);
+        RandomDataResponseV2Dto response = synchronousBody(entity, connector);
         requireValid(responseValidator.validateRandom(body, response), connector);
         return response;
     }

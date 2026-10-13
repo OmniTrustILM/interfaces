@@ -62,6 +62,19 @@ public enum KeyAlgorithm implements IPlatformEnum {
         return keyPairAlgorithm;
     }
 
+    /**
+     * Whether a key of this algorithm is sized by its length in bits, as an RSA, ECDSA or AES key is, rather than by a
+     * parameter set.
+     *
+     * @return whether the algorithm sizes its keys by length
+     */
+    public boolean isSizedByLength() {
+        return switch (this) {
+            case RSA, ECDSA, AES -> true;
+            case FALCON, MLDSA, SLHDSA, MLKEM, DILITHIUM, SPHINCSPLUS, UNKNOWN -> false;
+        };
+    }
+
     @Override
     @JsonValue
     public String getCode() {

@@ -55,7 +55,7 @@ public interface LocationManagementController extends AuthProtectedController {
     @Operation(summary = "List Locations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Locations retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/locations", produces = {"application/json"})
@@ -71,7 +71,7 @@ public interface LocationManagementController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Location added",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Entity not found",
@@ -94,7 +94,7 @@ public interface LocationManagementController extends AuthProtectedController {
     @Operation(summary = "Edit Location")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Location updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Location not found",

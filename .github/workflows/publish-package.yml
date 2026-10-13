@@ -39,9 +39,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
 
       - id: check-version
         name: Check if version is SNAPSHOT
@@ -71,7 +68,7 @@ jobs:
       - name: Publish to Maven Central (Portal)
         run: |
           set -o pipefail
-          mvn --batch-mode -Pcentral -Dgpg.passphrase="$GPG_PASSPHRASE" \
+          mvn --batch-mode -s .github/central-settings.xml -Pcentral -Dgpg.passphrase="$GPG_PASSPHRASE" \
               source:jar javadoc:jar -f pom.xml deploy | tee mvn.log
 
           # For releases, surface the deploymentId so it's easy to find in the Portal UI.

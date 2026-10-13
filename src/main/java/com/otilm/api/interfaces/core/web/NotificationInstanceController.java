@@ -64,7 +64,7 @@ public interface NotificationInstanceController extends AuthProtectedController 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Notification instance added",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Connector not found",
@@ -76,7 +76,7 @@ public interface NotificationInstanceController extends AuthProtectedController 
     @Operation(summary = "Edit Notification instance")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Notification instance details updated"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Notification instance or connector not found",

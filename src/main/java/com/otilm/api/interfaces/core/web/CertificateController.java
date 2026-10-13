@@ -88,7 +88,7 @@ public interface CertificateController extends AuthProtectedController {
             description = ConfigurableColumnsDocs.SORT_AND_COLUMNS + ConfigurableColumnsDocs.ATTRIBUTE_PROJECTION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of all the certificates"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -238,7 +238,7 @@ public interface CertificateController extends AuthProtectedController {
                             schema = @Schema(type = "string", format = "binary"))),
             @ApiResponse(responseCode = "404", description = "Certificate or its key not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{uuid}/keystore", consumes = MediaType.APPLICATION_JSON_VALUE, produces = KEYSTORE_MEDIA_TYPE)
@@ -310,7 +310,7 @@ public interface CertificateController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
 
             @ApiResponse(responseCode = "200", description = "CSR Generation attributes retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",
@@ -326,7 +326,7 @@ public interface CertificateController extends AuthProtectedController {
     @Operation(summary = "Get Certificate Content")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Certificate content retrieved"),
-            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/content", consumes = {MediaType.APPLICATION_JSON_VALUE},
