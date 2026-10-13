@@ -78,8 +78,10 @@ public enum ResourceEvent implements IPlatformEnum {
     CBOM_SYNCED(Codes.CBOM_SYNCED, "CBOM synced", "Event after a CBOM's cryptographic assets have been ingested",
             Resource.CBOM, CbomSyncedEventData.class, false),
     CRYPTO_ASSET_PQC_NOT_READY(Codes.CRYPTO_ASSET_PQC_NOT_READY, "Cryptographic asset not PQC ready",
-            "Event when evaluation finds a cryptographic asset not PQC ready", Resource.CRYPTO_ASSET,
-            CryptoAssetPqcNotReadyEventData.class, false),
+            "Event when a cryptographic asset first receives a NOT_READY verdict or its last decided verdict "
+                    + "changes to NOT_READY. UNKNOWN preserves the last decided verdict; repeated NOT_READY assessments "
+                    + "do not raise another event",
+            Resource.CRYPTO_ASSET, CryptoAssetPqcNotReadyEventData.class, false),
 
     // Scheduler
     SCHEDULED_JOB_FINISHED(Codes.SCHEDULED_JOB_FINISHED, "Scheduled job finished",
