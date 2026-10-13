@@ -76,8 +76,8 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
 
     // The fields below are the discovery v2 additions. The object-typed ones carry
     // @JsonInclude(NON_NULL) individually so a v1 run's payload keeps its existing shape; a class-level
-    // annotation would have changed every v1 response. runMessageCount is a primitive and always emitted,
-    // 0 for a v1 run. resources and stoppable are always present too, synthesized by Core for v1 runs.
+    // annotation would have changed every v1 response. runMessageCount is a primitive and always emitted.
+    // resources and stoppable are always present too, synthesized by Core for v1 runs.
 
     // The arraySchema indirection is deliberate: a bare @Schema description on a collection member lands
     // on the items schema — a $ref to a shared component — and swagger-core hoists it onto that component
@@ -112,8 +112,8 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
      */
     @Schema(description = "How many distinct advisory messages this run collected, as counted by the run messages "
             + "listing. Repeated problems are aggregated, so this counts kinds of problem rather than occurrences. "
-            + "A non-zero count does not imply the run failed. Always 0 for runs against a v1 Discovery Provider.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            + "A non-zero count does not imply the run failed. For a run against a v1 Discovery Provider it is 0 "
+            + "unless the run's metadata could not be stored.", requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
 
     /** The drain cursor: the highest item sequence received from the Provider. */
