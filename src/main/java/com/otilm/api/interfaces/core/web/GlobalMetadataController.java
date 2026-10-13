@@ -98,7 +98,12 @@ public interface GlobalMetadataController extends AuthProtectedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Connector Metadata promoted to global metadata"),
             @ApiResponse(responseCode = "404", description = "Connector not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Global Metadata with the same name already exists",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "[\"Global metadata named 'discoverySource' already exists\"]")}))})
     @PostMapping(path = "/promote", consumes = {"application/json"}, produces = {"application/json"})
     GlobalMetadataDefinitionDetailDto promoteConnectorMetadata(
             @RequestBody ConnectorMetadataPromotionRequestDto request) throws NotFoundException;
