@@ -20,10 +20,7 @@ import java.util.Set;
 @Schema(implementation = DiscoveredItemPayloadInterface.class)
 public interface DiscoveredItemPayloadDto extends DiscoveredItemPayloadInterface {
 
-    /**
-     * The resources discovery can report: exactly those with a payload subtype registered above. Core and the connector
-     * client read this set rather than keeping copies, so it must stay in step with the registration.
-     */
+    /** The resources discovery can report, one per payload subtype registered above. Keep the two in step. */
     Set<Resource> DISCOVERABLE = Collections
             .unmodifiableSet(EnumSet.of(Resource.CERTIFICATE, Resource.CRYPTOGRAPHIC_KEY));
 }

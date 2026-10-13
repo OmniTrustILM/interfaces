@@ -27,41 +27,33 @@ public class DiscoveryDto {
     @Schema(description = "Discovery Provider UUID", requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectorUuid;
 
-    @Schema(description = "UUID of the DISCOVERY Connector Interface to bind this run to. Required when the "
-            + "Connector exposes more than one; selected automatically when it exposes exactly one. A "
-            + "Connector with no DISCOVERY interface yields a legacy v1 run.",
+    @Schema(description = "Discovery interface of the Connector to run through. Required when the Connector has more "
+            + "than one, selected automatically when it has one; a Connector with none runs a v1 discovery.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private UUID interfaceUuid;
 
-    @Schema(description = "Discovery Kind. Required for a run against a v1 Discovery Provider, whose function group "
-            + "is kind-scoped. A v2 Discovery Provider has no kinds — omit it for a run bound to a DISCOVERY interface.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Discovery kind. Required for a v1 Discovery Provider; omit it for a v2 one, which has no "
+            + "kinds.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String kind;
-    @Schema(description = "List of triggers to be triggered after the discovery is finished, triggers will be evaluated in given order")
+    @Schema(description = "Triggers to evaluate, in this order, when the discovery finishes")
     private List<UUID> triggers;
 
-    // @Size skips null by jakarta semantics, so an omitted field never fires it; only an explicit empty
-    // list does. The connector-dependent rules (a v2 connector requires the field, a v1 connector refuses
-    // it) stay at Core's service boundary, where the connector is known.
+    // @Size skips null, so only an explicit empty list fails here. The rules that depend on the connector live in
+    // Core, where it is known.
     @Size(min = 1, message = "resources must name at least one resource type when supplied")
     @ArraySchema(minItems = 1,
             arraySchema = @Schema(
-                    description = "Resource types this run should discover, as resource wire codes (e.g. "
-                            + "\"certificates\", \"keys\"). Omit only for a run against a v1 connector, which "
-                            + "keeps exactly today's semantics: the run discovers certificates. A v2 connector "
-                            + "requires the field — Core rejects a request that omits it — and a v1 connector "
-                            + "rejects a request that supplies it: discovery has no resource dimension in v1.",
+                    description = "Resource types to discover, as resource codes. Required for a v2 Discovery "
+                            + "Provider; omit it for a v1 one, which discovers certificates and refuses the field.",
                     requiredMode = Schema.RequiredMode.NOT_REQUIRED))
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<@NotNull(message = "resources must not contain a null resource type") Resource> resources;
 
-    @Schema(description = "Per-resource attributes, keyed by resource wire code, collected against the "
-            + "per-resource attribute definitions the connector advertises. Omit for exactly "
-            + "today's v1 semantics: only the run-level attributes above are sent to the "
-            + "connector. A key absent from this map means that resource is discovered with no "
-            + "refinement of its own, not that it is excluded — resources alone decides what a run targets.",
+    @Schema(description = "Per-resource attributes, keyed by resource code, against the definitions the Connector "
+            + "advertises per resource. A resource with no entry is still discovered, unrefined: resources alone "
+            + "decides what the run targets. Omit for a v1 Discovery Provider.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, propertyNames = Resource.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<Resource, List<RequestAttribute>> resourceAttributes;
@@ -76,9 +68,7 @@ public class DiscoveryDto {
                 .append("interfaceUuid", interfaceUuid)
                 .append("kind", kind)
                 .append("resources", resources)
-                // resourceAttributes is deliberately not appended: it multiplies the attribute payload
-                // by the number of targeted resources, and the run-level attributes already above give
-                // a log reader the shape of what was submitted.
+                // resourceAttributes left out: it repeats the attribute payload once per resource.
                 .toString();
     }
 }

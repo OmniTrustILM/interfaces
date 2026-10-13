@@ -16,12 +16,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * A single item produced by a discovery run: one certificate or one cryptographic key found by the connector.
- *
- * <p>
- * {@code resource} is not a field of this container: it is {@code payload}'s own discriminator (see
- * {@link DiscoveredItemPayloadDto}). {@link #getResource()} is a derived, read-only, {@code @JsonIgnore}d convenience
- * that unwraps it.
+ * One item a discovery run produced: a certificate or a cryptographic key. {@code resource} lives on {@code payload} as
+ * its discriminator; {@link #getResource()} only unwraps it.
  */
 @Getter
 @Setter
@@ -29,39 +25,32 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiscoveredItemDto {
 
-    @Schema(description = "Dense per-run item sequence (1, 2, 3, ... with no holes); the drain cursor "
-            + "value after which the next batch starts", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
+    @Schema(description = "Position of the item in the run, counting 1, 2, 3, ... with no gaps. Drain cursors count "
+            + "in it.", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
     @NotNull(message = "sequence is required")
     @Min(value = 1, message = "sequence must be positive")
     private Long sequence;
 
-    @Schema(description = "Connector-side natural key that Core uses to dedupe this item across drains and retries",
+    @Schema(description = "Stable identifier of the item in the run; Core deduplicates items by it",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "uniqueRef is required")
     private String uniqueRef;
 
-    @Schema(description = "Resource-specific payload; its concrete type is selected by resource",
+    @Schema(description = "Resource-specific payload, typed by its resource property",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "payload is required")
     @Valid
     private DiscoveredItemPayloadDto payload;
 
-    // Deliberately not @Valid: MetadataAttribute carries no bean-validation constraints of its
-    // own, and no other List<MetadataAttribute> meta field in this codebase cascades either
-    // (e.g. CertificateSignRequestDtoV3#meta) — payload is the only nested DTO here that needs it.
-    @Schema(description = "Item metadata (platform convention). Where an item was found (e.g. IP and port, "
-            + "file path, HSM slot) belongs here as typed, labeled entries, never in payload.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // Not @Valid: MetadataAttribute declares no constraints to cascade into.
+    @Schema(description = "Item metadata, such as where the item was found (IP and port, file path, HSM slot). "
+            + "Location belongs here, never in payload.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
 
-    @Schema(description = "Timestamp at which the connector discovered this item",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "When the connector discovered the item", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private OffsetDateTime discoveredAt;
 
-    /**
-     * Derived from {@code payload}, null-safe, and excluded from the wire (see class javadoc). Not a field: there is
-     * nothing to set independently of {@code payload}, and a setter would invite the two to disagree.
-     */
+    /** The payload's resource, or null without a payload. Not serialized. */
     @JsonIgnore
     public Resource getResource() {
         return payload != null ? payload.getResource() : null;

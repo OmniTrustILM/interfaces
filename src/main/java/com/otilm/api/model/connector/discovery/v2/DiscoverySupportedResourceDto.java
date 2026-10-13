@@ -10,12 +10,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Describes what a discovery connector supports for a single resource type.
- *
- * <p>
- * {@code ignoreUnknown} is load-bearing here, not boilerplate: connectors built against the earlier contract draft
- * still send the retired {@code capabilities} field, and the tolerance must hold on every transport and mapper, not
- * only on the lenient WebClient codec the REST client happens to use.
+ * One resource type a discovery connector supports. {@code ignoreUnknown} is required: connectors built against an
+ * earlier draft still send the retired {@code capabilities} field, and every mapper must tolerate it.
  */
 @Getter
 @Setter
@@ -24,10 +20,8 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiscoverySupportedResourceDto {
 
-    // No @Schema description on purpose: Resource is a platform-wide schema component, and OpenAPI 3.0 cannot
-    // carry a description beside a $ref — swagger-core hoists a referencing field's description onto the
-    // referenced component, rewriting it for every other API that references Resource
-    // (discoveryDoesNotRewriteThePlatformWideResourceComponent pins this).
+    // No description: it would be hoisted onto the shared Resource component
+    // (pinned by discoveryDoesNotRewriteThePlatformWideResourceComponent).
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "resource is required")
     private Resource resource;

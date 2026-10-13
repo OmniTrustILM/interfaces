@@ -8,29 +8,26 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * What a run has yielded for one resource type — the leaf of the progress model. Item counts only: a failure belongs to
- * the work a connector attempted, not to any one resource, so {@link DiscoveryProgressDto} counts that.
+ * What a run has found for one resource type. Items only; the outcomes of the work are in {@link DiscoveryProgressDto}.
  */
 @Getter
 @Setter
 @ToString
-@Schema(description = "How many items of one resource type have been found, keyed by resource code inside "
-        + "byResource (e.g. \"certificates\", \"keys\"). Every field is optional, but a provider with nothing to "
-        + "report MUST leave the whole object out rather than send an empty one — a client keeping the last "
-        + "progress it was sent cannot tell an empty report from a missing one.")
+@Schema(description = "Items found for one resource type, keyed by resource code in byResource. Every field is "
+        + "optional, but a provider with nothing to report MUST leave the entry out rather than send an empty object.")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiscoveryResourceProgressDto {
 
-    @Schema(description = "How many items of this resource type the provider has found so far; omitted if it "
-            + "cannot count them", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Items found so far. Omitted if the provider cannot count them.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long produced;
 
-    @Schema(description = "Estimated total number of items of this resource type for the whole discovery; "
-            + "omitted if the provider cannot estimate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Estimated total for the whole discovery. Omitted if the provider cannot estimate it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long totalEstimate;
 
-    @Schema(description = "Free-text label for what the provider is doing with this resource type; omitted if "
-            + "it has none", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "What the provider is doing with this resource type, as free text. Omitted if it has "
+            + "none.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String phase;
 }

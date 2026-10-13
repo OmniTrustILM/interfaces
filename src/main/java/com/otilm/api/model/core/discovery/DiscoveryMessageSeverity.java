@@ -9,16 +9,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 /**
- * How much a {@link DiscoveryMessageDto} matters.
- *
- * <p>
- * <b>Deliberately scoped to Discovery.</b> Severity ladders in this platform have never been shared — compliance, audit
- * and connector logging each keep their own — so this vocabulary is shaped by what a Discovery run needs to say and
- * should not quietly become the platform's.
- *
- * <p>
- * <b>Assigned by the platform, never by a Discovery Provider.</b> Every message and its code are the platform's own:
- * what an event means for a run is the platform's judgement, so severity never crosses the connector contract.
+ * How much a {@link DiscoveryMessageDto} matters. Scoped to discovery on purpose, as the platform's other severity
+ * ladders are to theirs, and assigned by the platform, never by a Discovery Provider.
  */
 @Schema(enumAsRef = true)
 public enum DiscoveryMessageSeverity implements IPlatformEnum {
@@ -26,8 +18,7 @@ public enum DiscoveryMessageSeverity implements IPlatformEnum {
     INFO("info", "Info", "Worth recording, but nothing went wrong."),
     WARNING("warning", "Warning",
             "Something was skipped or degraded and the run carried on. The run can still complete."),
-    ERROR("error", "Error", "Something failed outright. Present on runs that ended badly, and on runs that "
-            + "recovered but lost work along the way.");
+    ERROR("error", "Error", "The run failed.");
 
     private static final DiscoveryMessageSeverity[] VALUES;
 

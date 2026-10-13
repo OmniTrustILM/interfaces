@@ -11,7 +11,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Body returned by the discovery v2 /results call: a page of discovered items.
+ * Response of the discovery v2 results call: a page of discovered items.
  */
 @Getter
 @Setter
@@ -19,21 +19,19 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiscoveryResultsResponseDto {
 
-    @Schema(description = "Items discovered after the requested cursor, up to the batch limits. A producer "
-            + "that means \"this page has no items\" MUST send an explicit empty array; omitting the "
-            + "field is rejected rather than read as \"no discoveries\".", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Items after the requested cursor, within the batch limits. A page with no items MUST be "
+            + "an empty array; an omitted field is rejected.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "items is required (send an explicit empty array for a page with no items)")
     private List<@NotNull(message = "items must not contain a null item") @Valid DiscoveredItemDto> items;
 
-    @Schema(description = "Run-wide highest item sequence assigned so far — never page-scoped. Consumers must "
-            + "advance cursors only by item sequences actually received. Item sequences start at 1, so 0 "
-            + "means the run has produced no items yet.", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
+    @Schema(description = "Highest item sequence assigned in the whole run so far, not just this page; 0 means none "
+            + "yet. Advance a cursor only by sequences actually received.", requiredMode = Schema.RequiredMode.REQUIRED,
+            minimum = "0")
     @NotNull(message = "highestSequence is required")
     @PositiveOrZero(message = "highestSequence must not be negative")
     private Long highestSequence;
 
-    @Schema(description = "True when the connector has additional items beyond this page",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Whether more items remain beyond this page", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "more is required")
     private Boolean more;
 }
