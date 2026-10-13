@@ -11,7 +11,8 @@ public enum SchedulerJobExecutionStatus implements IPlatformEnum {
 
     STARTED("started", "Started"),
     SUCCESS("succeeded", "Succeeded"),
-    FAILED("failed", "Failed");
+    FAILED("failed", "Failed"),
+    CANCELLED("cancelled", "Cancelled");
 
     private static final SchedulerJobExecutionStatus[] VALUES;
 

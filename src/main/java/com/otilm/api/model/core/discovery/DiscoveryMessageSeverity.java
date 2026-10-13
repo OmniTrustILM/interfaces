@@ -17,9 +17,8 @@ import java.util.Arrays;
  * should not quietly become the platform's.
  *
  * <p>
- * <b>Assigned by the platform, never by a Discovery Provider.</b> A connector contributes a {@code code} from a closed
- * vocabulary; what that code means for a run is the platform's judgement, so severity never crosses the connector
- * contract.
+ * <b>Assigned by the platform, never by a Discovery Provider.</b> Every message and its code are the platform's own:
+ * what an event means for a run is the platform's judgement, so severity never crosses the connector contract.
  */
 @Schema(enumAsRef = true)
 public enum DiscoveryMessageSeverity implements IPlatformEnum {
