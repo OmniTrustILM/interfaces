@@ -11,8 +11,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Run-level progress: how much of its work the connector has done, and what it has found per resource. Only work gives
- * a completion ratio; the run's total yield is {@code highestSequence}.
+ * Run-level progress: how much of its work the connector has done, and what it has found per resource. Targets give the
+ * completion ratio when they are counted; otherwise one resource's items against its estimate stand in. The run's total
+ * yield is {@code highestSequence}.
  *
  * <p>
  * Every processed target yielded items, was empty or failed, never two of these; the first is the remainder and is not
@@ -34,9 +35,10 @@ import lombok.ToString;
 public class DiscoveryProgressDto {
 
     @Schema(description = "Targets attempted so far, whatever their outcome. A target is a unit of work a person "
-            + "would recognise, such as an address and port, a CA, a CA and template, a mount or a report. Omitted if "
-            + "the provider cannot count its work. A provider whose unit would only be a page of search results omits "
-            + "all target counters and reports byResource instead.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "would recognise, such as an address and port, a CA, a CA and template, a mount or a report. Targets "
+            + "that yielded items are the remainder after targetsEmpty and targetsFailed. Omitted if the provider "
+            + "cannot count its work. A provider whose unit would only be a page of search results omits all target "
+            + "counters and reports byResource and phase instead.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long targetsProcessed;
 
     @Schema(description = "Targets the discovery will attempt in total: exact, or an estimate that may change. Omitted "
@@ -44,16 +46,17 @@ public class DiscoveryProgressDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long targetsTotal;
 
-    @Schema(description = "Targets the provider expected to read and could not, such as access refused, the source "
-            + "unreachable or an unreadable answer. Part of targetsProcessed, never also counted as empty. The "
-            + "discovery does not fail for them, but ends with a warning.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Targets the provider expected to read and could not, such as access refused, a source it "
+            + "was configured to read being unreachable, or an unreadable answer. Part of targetsProcessed, never also "
+            + "counted as empty. The discovery does not fail for them, but a run that otherwise completes ends with a "
+            + "warning.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long targetsFailed;
 
-    @Schema(description = "Targets attempted that held nothing to discover, such as an address with nothing "
-            + "listening or an empty mount, template or report. Part of targetsProcessed, never also counted as "
-            + "failed: an empty target is a normal outcome. Omitted if the provider does not tell empty targets "
-            + "apart.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Targets attempted that held nothing to discover, such as an empty mount, template or "
+            + "report, or a target the provider only guessed at, like an address in a swept range, that does not "
+            + "answer. Part of targetsProcessed, never also counted as failed: an empty target is a normal outcome. "
+            + "Omitted if the provider does not tell empty targets apart.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long targetsEmpty;
 
     @Schema(description = "What the provider is doing, as free text (e.g. \"scanning\"). Omitted if it has none.",

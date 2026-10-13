@@ -31,8 +31,8 @@ public class DiscoveredItemDto {
     @Min(value = 1, message = "sequence must be positive")
     private Long sequence;
 
-    @Schema(description = "Stable identifier of the item in the run; Core deduplicates items by it",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Stable identifier of the item in the run; Core deduplicates items by it across drains and "
+            + "retries", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "uniqueRef is required")
     private String uniqueRef;
 

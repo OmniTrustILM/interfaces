@@ -24,8 +24,8 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoPrivateKeyMaterial
 @Schema(description = "A discovered key: its existence, intrinsic metadata and at most its public part. Private, "
-        + "secret and split key material is never sent, and a " + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES
-        + " key MUST omit publicKey and publicKeyFormat.")
+        + "secret and split key material MUST NOT be sent, and a "
+        + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES + " key MUST omit publicKey and publicKeyFormat.")
 public class DiscoveredKeyDto implements DiscoveredItemPayloadDto {
 
     /**
@@ -50,8 +50,8 @@ public class DiscoveredKeyDto implements DiscoveredItemPayloadDto {
     @Schema(description = "Key length in bits", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer length;
 
-    @Schema(description = "Fingerprint identifying the same key across runs, connectors and certificates",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Intrinsic fingerprint identifying the same key across runs, connectors and certificates, "
+            + "without exposing key material", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
 
     @Schema(description = "Format of publicKey, typically SubjectPublicKeyInfo. Present only with publicKey.",

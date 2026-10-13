@@ -100,7 +100,8 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     /** The drain cursor: the highest item sequence received from the Provider. */
     @Schema(description = "Items received from the Discovery Provider, across all resource types. Usually what the "
             + "items listing returns; larger when an item could not be kept, being malformed or already collected. "
-            + "Absent for a v1 run.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "Absent for a v1 run, and for one whose connector was deleted before any item arrived.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long itemsDiscovered;
 

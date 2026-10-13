@@ -16,9 +16,8 @@ import java.util.Arrays;
 public enum DiscoveryMessageSeverity implements IPlatformEnum {
 
     INFO("info", "Info", "Worth recording, but nothing went wrong."),
-    WARNING("warning", "Warning",
-            "Something was skipped or degraded and the run carried on. The run can still complete."),
-    ERROR("error", "Error", "The run failed.");
+    WARNING("warning", "Warning", "Something was skipped or degraded, or the run ended early without failing."),
+    ERROR("error", "Error", "Something failed outright, such as the run itself.");
 
     private static final DiscoveryMessageSeverity[] VALUES;
 

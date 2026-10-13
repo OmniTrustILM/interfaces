@@ -35,7 +35,7 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
         }
 
         if (value.getType() != null && TYPES_WITHOUT_A_PUBLIC_PART.contains(value.getType())) {
-            // One violation per offending field, each on its own property node.
+            // One violation per offending field, so the caller is pointed at the field at fault.
             if (value.getPublicKey() != null) {
                 context.disableDefaultConstraintViolation();
                 context

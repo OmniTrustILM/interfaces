@@ -45,12 +45,12 @@ public abstract class DiscoveryV2ScopedRequestDto {
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;
 
-    @Schema(description = "Run-level attributes supplied at initiate. Absent when the connector defines none.",
+    @Schema(description = "Run-level attributes supplied at initiate. Empty when the connector defines none.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<RequestAttribute> attributes;
 
-    @Schema(description = "Per-resource attributes, keyed by resource code. Absent when the connector defines none.",
+    @Schema(description = "Per-resource attributes, keyed by resource code. Empty when the connector defines none.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, propertyNames = Resource.class)
     @ToString.Exclude
     private Map<Resource, List<RequestAttribute>> resourceAttributes;

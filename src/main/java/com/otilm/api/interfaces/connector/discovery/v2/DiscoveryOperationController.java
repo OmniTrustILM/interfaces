@@ -43,7 +43,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             description = "Starts a run for the given resource types and attributes. runId comes from Core and is "
                     + "never reused. The connector MUST validate the whole request, including that every resource type "
                     + "is supported, and reject it with 422 rather than narrow the resource set. A repeat with the "
-                    + "same runId and payload MUST be answered with another 202.")
+                    + "same runId and payload MUST be answered idempotently: another 202, without starting a second "
+                    + "run.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
                     description = "Run accepted, with its checkpoint and, optionally, whether it can be stopped"),
@@ -79,7 +80,7 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "full ack. Until it arrives, the connector MUST keep the run's state for at least 24 hours after "
                     + "the run ended; after it, the connector MAY discard everything.\n\n"
                     + "Size a bounded result buffer for Core's polling interval: after an empty drain, the next one "
-                    + "waits out the interval, tens of seconds by default.")
+                    + "waits out the interval, tens of seconds by default and operator-configurable.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Items retrieved; more indicates whether additional items remain beyond this page"),
@@ -95,9 +96,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryResultsResponseDto results(@Valid @RequestBody DiscoveryDrainRequestDto request);
 
     @Operation(summary = "Stop a discovery run",
-            description = "Halts scanning of a running run and returns a checkpoint, which MUST preserve the item "
-                    + "sequence so a resume continues numbering where the run stopped. Items not yet drained stay "
-                    + "drainable while the run is stopped.")
+            description = "Halts scanning of a running run and returns a best-effort checkpoint, which MUST preserve "
+                    + "the item sequence so a resume continues numbering where the run stopped. Items not yet drained "
+                    + "stay drainable while the run is stopped.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Run stopped; checkpoint carries the handle to resume from"),

@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Discovery management: runs, their staged items and messages, the run lifecycle, and three connector-keyed relays.
+ * Discovery management: runs, their staged items and messages, the run lifecycle, and the connector-keyed relays.
  *
  * <p>
  * The relays ({@link #listDiscoveryResources}, {@link #getDiscoveryAttributes},
@@ -149,7 +149,8 @@ public interface DiscoveryController extends AuthProtectedController {
      * order.
      */
     @Operation(summary = "List Discovery Run Messages",
-            description = "Returns one page of the discovery's run messages, oldest first. A repeated problem is one "
+            description = "Returns one page of the discovery's run messages, oldest first and stable across pages. A "
+                    + "repeated problem is one "
                     + "entry with an occurrence count, and messages alone do not mean the run failed.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Discovery run messages retrieved"),
@@ -223,12 +224,13 @@ public interface DiscoveryController extends AuthProtectedController {
             SchedulerException, AttributeException, NotFoundException;
 
     /**
-     * Keyed by connector UUID. Authorization for all three relays is object-level on {@code Resource.CONNECTOR}, never
-     * {@code DISCOVERY}, which has no object access and would skip per-connector ACLs.
+     * Keyed by connector UUID. Authorization for every connector-keyed relay is object-level on
+     * {@code Resource.CONNECTOR}, never {@code DISCOVERY}, which has no object access and would skip per-connector
+     * ACLs.
      */
     @Operation(summary = "Get discoverable resources of a Discovery Provider",
-            description = "Returns the resource types the Connector can discover, asked live. A v1 Connector gets "
-                    + "[\"certificates\"] without being called.")
+            description = "Returns the resource types the Connector can discover, asked live. For a v1 Connector, Core "
+                    + "answers a single certificates entry without calling it.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Discoverable resources retrieved"),
             @ApiResponse(responseCode = "404", description = "Connector not found",
