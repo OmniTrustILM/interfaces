@@ -12,8 +12,7 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
 
     private static final Set<KeyFormat> PRIVATE_KEY_FORMATS = Set.of(KeyFormat.PRKI, KeyFormat.EPRKI);
 
-    // Declared on the constraint annotation, alongside the prose spelling the published contract
-    // uses, so the enforced list and the documented list cannot drift apart.
+    // Declared on the annotation beside its published wording, so the two cannot drift apart.
     private static final Set<KeyType> TYPES_WITHOUT_A_PUBLIC_PART = NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART;
 
     @Override
@@ -36,8 +35,7 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
         }
 
         if (value.getType() != null && TYPES_WITHOUT_A_PUBLIC_PART.contains(value.getType())) {
-            // Emit one violation per offending field, each on its own property node, so a caller
-            // sees precisely which field is at fault instead of always being pointed at publicKey.
+            // One violation per offending field, so the caller is pointed at the field at fault.
             if (value.getPublicKey() != null) {
                 context.disableDefaultConstraintViolation();
                 context

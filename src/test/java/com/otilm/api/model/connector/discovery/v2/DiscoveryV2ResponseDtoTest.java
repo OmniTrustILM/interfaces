@@ -351,6 +351,33 @@ class DiscoveryV2ResponseDtoTest {
                 "yield is counted in items, per resource, and never mixed with the run's work counters");
     }
 
+    @Test
+    void progressCountsEmptyTargetsApartFromFailedOnes() throws Exception {
+        DiscoveryProgressDto dto = new DiscoveryProgressDto();
+        dto.setTargetsProcessed(768L);
+        dto.setTargetsEmpty(717L);
+        dto.setTargetsFailed(3L);
+
+        String json = mapper.writeValueAsString(dto);
+        assertTrue(json.contains("\"targetsEmpty\":717"), json);
+
+        DiscoveryProgressDto back = mapper.readValue(json, DiscoveryProgressDto.class);
+        assertEquals(717L, back.getTargetsEmpty());
+        assertEquals(3L, back.getTargetsFailed(), "a target with nothing on it is not a failed one");
+    }
+
+    /**
+     * The reason target outcomes are separate fields rather than a map keyed by an outcome enum: an unknown field is
+     * skipped, where an unknown enum key fails the whole object, and with it every answer of a newer provider.
+     */
+    @Test
+    void progressFromANewerProviderKeepsWhatThisVersionKnows() throws Exception {
+        DiscoveryProgressDto back = mapper
+                .readValue("{\"targetsProcessed\":5,\"targetsSkipped\":2}", DiscoveryProgressDto.class);
+
+        assertEquals(5L, back.getTargetsProcessed());
+    }
+
     /**
      * {@code updatedAt} dates the report and is set by the platform, so it rides inside the progress object rather than
      * beside it — one write replaces the counters and their timestamp together, and neither can be left behind. A
@@ -406,6 +433,7 @@ class DiscoveryV2ResponseDtoTest {
         assertTrue(json.contains("\"phase\":\"scanning\""));
         assertFalse(json.contains("\"targetsTotal\""));
         assertFalse(json.contains("\"targetsFailed\""));
+        assertFalse(json.contains("\"targetsEmpty\""));
         assertFalse(json.contains("\"byResource\""));
 
         DiscoveryProgressDto back = mapper.readValue(json, DiscoveryProgressDto.class);
@@ -413,6 +441,7 @@ class DiscoveryV2ResponseDtoTest {
         assertEquals("scanning", back.getPhase());
         assertNull(back.getTargetsTotal());
         assertNull(back.getTargetsFailed());
+        assertNull(back.getTargetsEmpty());
         assertNull(back.getByResource());
     }
 

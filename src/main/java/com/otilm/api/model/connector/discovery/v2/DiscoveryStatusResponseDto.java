@@ -11,7 +11,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Body returned by the discovery v2 /status call.
+ * Response of the discovery v2 status call.
  */
 @Getter
 @Setter
@@ -19,7 +19,7 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiscoveryStatusResponseDto {
 
-    @Schema(description = "Current state of the discovery run", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Current state of the run", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "state is required")
     private DiscoveryRunState state;
 
@@ -28,18 +28,16 @@ public class DiscoveryStatusResponseDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     private DiscoveryProgressDto progress;
 
-    @Schema(description = "Run-wide highest item sequence assigned so far, never page-scoped. Consumers advance "
-            + "cursors only by item sequences actually received. Sequences start at 1, so 0 means no items yet.",
-            requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
+    @Schema(description = "Highest item sequence assigned in the run so far; 0 means none yet. Advance a cursor only "
+            + "by sequences actually received.", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
     @NotNull(message = "highestSequence is required")
     @PositiveOrZero(message = "highestSequence must not be negative")
     private Long highestSequence;
 
     // NON_NULL rather than NON_EMPTY on purpose: an empty list is a statement and must reach the wire.
-    @Schema(description = "The connector's metadata about the run as a whole: typed, labelled entries a person "
-            + "reads, e.g. the resolver used or the scan window. Absent: Core keeps what it holds. Present: replaces "
-            + "the previous set entirely; an empty list clears it. Over 64 KB serialized, Core drops it and files a "
-            + "run message; the run goes on. Counts, totals and ratios belong in progress.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Metadata about the run as a whole, for a person to read, such as the scan window or why "
+            + "targets failed. Absent keeps what Core holds, present replaces it, and an empty list clears it. Over "
+            + "64 KB serialized it is dropped with a run message, and the run goes on. Counts that progress has a "
+            + "field for belong there.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> meta;
 }

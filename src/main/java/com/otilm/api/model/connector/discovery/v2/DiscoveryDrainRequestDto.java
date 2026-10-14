@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Body for the discovery v2 /results call: pulls a batch of discovered items produced after the given sequence cursor.
+ * Body of the discovery v2 results call: a page of items after the given sequence.
  */
 @Getter
 @Setter
@@ -17,28 +17,24 @@ import lombok.ToString;
 public class DiscoveryDrainRequestDto extends DiscoveryV2ScopedRequestDto {
 
     /**
-     * Hard cap on {@code maxBytes}: 10 MiB, the largest single response the platform's tunneled transport carries.
-     * Declared once and referenced by {@code maxBytes}'s bean-validation bound, its published schema {@code maximum},
-     * and its prose, so the three cannot disagree.
+     * Cap on {@code maxBytes}: 10 MiB, the largest response the platform's tunneled transport carries. Shared by the
+     * validation bound, the schema maximum and the description.
      */
     public static final long MAX_BYTES_CAP = 10_485_760L;
 
-    @Schema(description = "Cursor: return items with sequence greater than this value. "
-            + "Item sequences are dense per run, so 0 requests items from the start of the run.",
+    @Schema(description = "Return items with a sequence greater than this; 0 starts from the beginning of the run.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "0", defaultValue = "0")
     @PositiveOrZero
     private long afterSequence;
 
-    @Schema(description = "Maximum number of items to return in this batch. The platform's tunneled "
-            + "transport caps a single response at 10 MiB; a connector MUST apply its own bound on "
-            + "the returned page when this is omitted.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
+    @Schema(description = "Maximum number of items to return. When omitted, the connector MUST apply its own bound.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
     @Min(1)
     private Integer maxItems;
 
-    @Schema(description = "Maximum serialized size, in bytes, of the items returned in this batch. The "
-            + "platform's tunneled transport caps a single response at 10 MiB (" + MAX_BYTES_CAP
-            + " bytes); exceeding it is an unrecoverable run failure. A connector MUST apply its own "
-            + "bound when this is omitted.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1",
+    @Schema(description = "Maximum serialized size, in bytes, of the returned items: at most 10 MiB (" + MAX_BYTES_CAP
+            + " bytes), the transport's limit, and a larger response fails the run. When omitted, the connector MUST "
+            + "apply its own bound.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1",
             maximum = "" + MAX_BYTES_CAP)
     @Min(1)
     @Max(value = MAX_BYTES_CAP, message = "maxBytes must not exceed the 10 MiB transport cap")

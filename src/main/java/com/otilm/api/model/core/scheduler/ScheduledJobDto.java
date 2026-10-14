@@ -44,10 +44,11 @@ public class ScheduledJobDto {
             + "disabling the job does. 'blocked': the trigger waits for a run still in progress. 'error': the "
             + "scheduler could not fire the trigger and stopped trying. 'complete': the trigger has no fire time "
             + "left. 'notScheduled': the scheduler holds no trigger for this job -- the normal end of a one-time "
-            + "job once its run has succeeded, since the platform then removes it from the scheduler; any other "
-            + "job will not fire until it is registered again. 'unknown': the scheduler could not be read for "
-            + "this response, or it reported no state for the trigger (a scheduler that predates this field); "
-            + "nextFireTime and previousFireTime are then absent.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "job once its run has succeeded or was cancelled, since the platform then removes it from the "
+            + "scheduler; any other job will not fire until it is registered again. 'unknown': the scheduler could "
+            + "not be read for this response, or it reported no state for the trigger (a scheduler that predates "
+            + "this field); nextFireTime and previousFireTime are then absent.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private ScheduledJobScheduleState scheduleState;
 
     @Schema(description = "When the scheduler will next fire the job: the fire time it holds for the job's trigger, "

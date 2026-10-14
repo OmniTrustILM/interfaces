@@ -21,8 +21,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class DiscoveryDetailDto extends NameAndUuidDto {
 
-    @Schema(description = "Discovery Kind. Absent for a run against a v2 Discovery Provider, which has no kinds.",
-            examples = {"IP-HostName"}, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Discovery kind. Absent for a v2 run, which has none.", examples = {"IP-HostName"},
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String kind;
 
@@ -32,21 +32,21 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private DiscoveryStatus connectorStatus;
 
-    @Schema(description = "Failure/Success Messages", examples = {"Failed due to network connectivity issues"})
+    @Schema(description = "Why the discovery is in its current status",
+            examples = {"Failed due to network connectivity issues"})
     private String message;
 
-    @Schema(description = "Date and time when Discovery started", nullable = true)
+    @Schema(description = "When the discovery started", nullable = true)
     private OffsetDateTime startTime;
 
-    @Schema(description = "Date and time when Discovery finished", nullable = true)
+    @Schema(description = "When the discovery finished", nullable = true)
     private OffsetDateTime endTime;
 
-    @Schema(description = "How many certificates this discovery found and saved.", defaultValue = "0")
+    @Schema(description = "Certificates this discovery found and saved", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
 
-    @Schema(description = "How many certificate items the Discovery Provider reported. Counts items, so a certificate "
-            + "found on several hosts counts once per host; totalCertificatesDiscovered counts it once.",
-            defaultValue = "0")
+    @Schema(description = "Certificate items the Discovery Provider reported: a certificate found on several hosts "
+            + "counts once per host, unlike in totalCertificatesDiscovered.", defaultValue = "0")
     private Integer connectorTotalCertificatesDiscovered;
 
     @Schema(description = "UUID of the Discovery Provider", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -56,9 +56,9 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     private String connectorName;
 
     // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
-    @Schema(description = "The connector interface this run is driven through, and so which generation drives it. "
-            + "Absent for a run against a legacy v1 connector, which declares no connector interface.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @Schema(description = "The connector interface the run is driven through. Absent for a v1 run, and for an ended run "
+            + "whose connector was deleted.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ConnectorInterfaceDto connectorInterface;
 
@@ -74,89 +74,58 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(description = "List of associated triggers", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<TriggerDto> triggers = new ArrayList<>();
 
-    // The fields below are the discovery v2 additions. The object-typed ones carry
-    // @JsonInclude(NON_NULL) individually so a v1 run's payload keeps its existing shape; a class-level
-    // annotation would have changed every v1 response. runMessageCount is a primitive and always emitted.
-    // resources and stoppable are always present too, synthesized by Core for v1 runs.
-
-    // The arraySchema indirection is deliberate: a bare @Schema description on a collection member lands
-    // on the items schema — a $ref to a shared component — and swagger-core hoists it onto that component
-    // for every other API referencing it. arraySchema puts the text on the array.
-    @ArraySchema(arraySchema = @Schema(description = "Resource types this run targets, as resource wire codes (e.g. "
-            + "\"certificates\", \"keys\"). Always present: a run against a v1 connector reports "
-            + "[\"certificates\"], synthesized by Core, so a client never inspects the connector "
-            + "to learn what a run was after.", requiredMode = Schema.RequiredMode.REQUIRED))
+    // Discovery v2 fields. The object-typed ones are NON_NULL one by one, so a v1 run's payload keeps its shape.
+    // arraySchema puts a collection's description on the array, not on the shared item component.
+    @ArraySchema(
+            arraySchema = @Schema(
+                    description = "Resource types the run targets, as resource codes. Always "
+                            + "present; a v1 run reports [\"certificates\"].",
+                    requiredMode = Schema.RequiredMode.REQUIRED))
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Resource> resources;
 
     // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
-    @Schema(description = "Progress counters reported by the connector, with an optional per-resource breakdown. "
-            + "Omitted for a v1 run and when the connector reports no progress. The counters inside are "
-            + "independently optional.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+    @Schema(description = "Progress the Discovery Provider last reported. Omitted for a v1 run and until the "
+            + "provider reports any.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryProgressDto progress;
 
-    /**
-     * A count rather than the log itself. The messages are their own paged resource
-     * ({@code GET /v1/discoveries/{uuid}/messages}), because a client polls this detail while a run is live and a log
-     * bounded only by "large" would ride along on every poll. The count is enough to badge the log without reading it,
-     * and it is what tells a client whether the log is worth opening at all.
-     *
-     * <p>
-     * <b>Relation to {@code message}:</b> {@code message} carries the single summary reason for the run's current
-     * status; the messages this counts accumulate over the run's lifetime instead.
-     *
-     * <p>
-     * Primitive and REQUIRED: a run with nothing to report has none, which is 0 rather than absent.
-     */
-    @Schema(description = "How many distinct advisory messages this run collected, as counted by the run messages "
-            + "listing. Repeated problems are aggregated, so this counts kinds of problem rather than occurrences. "
-            + "A non-zero count does not imply the run failed. For a run against a v1 Discovery Provider it is 0 "
-            + "unless the run's metadata could not be stored.", requiredMode = Schema.RequiredMode.REQUIRED)
+    /** A count, not the log: the messages are paged separately, since this detail is polled while a run is live. */
+    @Schema(description = "Number of entries in the run messages listing. Repeats are aggregated, so it counts kinds "
+            + "of problem, and a non-zero count does not mean the run failed. For a v1 run it is 0 unless the run's "
+            + "metadata could not be stored.", requiredMode = Schema.RequiredMode.REQUIRED)
     private long runMessageCount;
 
     /** The drain cursor: the highest item sequence received from the Provider. */
-    @Schema(description = "How many items this discovery has received from the Discovery Provider, across all "
-            + "resource types. Usually the same as the number the items listing returns, and larger when an item "
-            + "could not be kept — a malformed payload, or one already collected earlier in the run. Whatever the "
-            + "provider has produced but not yet handed over shows in progress, not here. Not set for a discovery "
-            + "run against a v1 Discovery Provider.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Items received from the Discovery Provider, across all resource types. Usually what the "
+            + "items listing returns; larger when an item could not be kept, being malformed or already collected. "
+            + "Absent for a v1 run, and for one whose connector was deleted before any item arrived.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long itemsDiscovered;
 
-    @Schema(description = "How many of the items collected were not already in the inventory when this run staged "
-            + "them. Counted per item rather than per object, so the same certificate found on two hosts counts "
-            + "twice.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Items that were new to the inventory when staged. Counted per item, so a certificate found "
+            + "on two hosts counts twice.", requiredMode = Schema.RequiredMode.REQUIRED)
     private long itemsNewlyDiscovered;
 
     /**
      * Counted from the platform's own rows on every read, in one query with {@code itemsFailed} and
      * {@code itemsNewlyDiscovered}, so the three never disagree.
      */
-    @Schema(description = "How many of the newly discovered items are now in the inventory. Counts only items that "
-            + "were imported cleanly; one the platform could not import is counted by itemsFailed instead. "
-            + "itemsNewlyDiscovered less this and itemsFailed is what the run has still to import.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Newly discovered items imported cleanly. itemsNewlyDiscovered minus this and itemsFailed "
+            + "is what is still to import.", requiredMode = Schema.RequiredMode.REQUIRED)
     private long itemsProcessed;
 
-    @Schema(description = "How many of the newly discovered items the platform could not import, each for a reason "
-            + "recorded against the item in the items listing. A discovery can finish with a non-zero count here — "
-            + "it ends with a warning rather than a failure.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Newly discovered items the platform could not import, each with its reason in the items "
+            + "listing. A discovery with failed items ends with a warning, not a failure.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private long itemsFailed;
 
-    /**
-     * <b>Provenance:</b> declared by the connector at initiate and refreshed on resume; derived by Core from the
-     * interface-level {@code discoveryStopResume} flag when the connector left it undeclared.
-     *
-     * <p>
-     * <b>Presence:</b> synthesized as {@code false} for a run against a v1 connector, which cannot stop.
-     */
-    @Schema(description = "Whether this run can be stopped and later resumed. Always present; false for "
-            + "runs against v1 connectors. This flag says whether the run has the capability; the run "
-            + "status decides which control is currently valid (stop while in progress, resume while "
-            + "stopped). The connector may still refuse a stop at runtime past the point of no return.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    /** Declared by the connector at initiate and resume; from the {@code discoveryStopResume} flag otherwise. */
+    @Schema(description = "Whether the run can be stopped and resumed; false for a v1 run. The status decides which "
+            + "applies now: stop while in progress, resume while stopped. The connector can still refuse a stop past "
+            + "the point of no return.", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean stoppable;
 }

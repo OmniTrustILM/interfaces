@@ -19,7 +19,7 @@ public enum ScheduledJobScheduleState implements IPlatformEnum {
     ERROR("error", "Error", "The scheduler could not fire the trigger and has stopped trying"),
     COMPLETE("complete", "Complete", "The trigger has no fire time left"),
     NOT_SCHEDULED("notScheduled", "Not scheduled",
-            "The scheduler holds no trigger for the job: the normal end of a one-time job whose run has succeeded, "
+            "The scheduler holds no trigger for the job: the normal end of a one-time job whose run succeeded or was cancelled, "
                     + "otherwise a job that will not fire until it is registered again"),
     UNKNOWN("unknown", "Unknown", "The scheduler could not be read, or reported no state for the job's trigger");
 

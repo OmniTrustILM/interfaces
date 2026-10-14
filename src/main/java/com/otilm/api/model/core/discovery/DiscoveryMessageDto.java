@@ -9,22 +9,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * One kind of problem a Discovery run reported, with how often it happened.
- *
- * <p>
- * <b>One entry per distinct problem, not per occurrence.</b> A run against a broken estate can hit the same fault tens
- * of thousands of times, and a log that grew a line each time would bury its own first and most useful entry. What a
- * repeat aggregates onto is on {@code code}; {@code firstSeenAt} keeps pointing at when the problem started, which is
- * usually what an operator is looking for.
- *
- * <p>
- * <b>Curated text only</b>: an entry's text is the platform's, never a connector's own prose. The constraint on
- * {@code message} itself is on that field.
+ * One kind of problem a discovery run recorded, with how often it happened. Repeats aggregate onto one entry, so a
+ * fault hit thousands of times cannot bury the first and most telling entry.
  */
-// No class-level NON_NULL, unlike its siblings: every field here is REQUIRED, so there is no optional field for
-// it to hide and it could only turn a mapping bug that left one unset into a silently absent key.
-@Schema(description = "One kind of problem a Discovery run reported, with how often it happened. Repeats aggregate "
-        + "onto the entry already carrying them rather than adding a new one.")
+// No class-level NON_NULL: every field is required, so it could only hide a mapping bug.
+@Schema(description = "One kind of problem a discovery run recorded and how often it happened. Repeats are counted "
+        + "on the existing entry.")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -32,25 +22,19 @@ import lombok.ToString;
 @ToString
 public class DiscoveryMessageDto {
 
-    /** See {@link DiscoveryMessageSeverity} for why this is the platform's to assign and not a connector's. */
-    // No @Schema description on purpose: DiscoveryMessageSeverity is a schema component of its own, and OpenAPI 3.0
-    // cannot carry a description beside a $ref -- swagger-core would hoist the text onto the shared component.
+    // No description: it would be hoisted onto the shared DiscoveryMessageSeverity component.
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private DiscoveryMessageSeverity severity;
 
-    @Schema(description = "Identifier for the kind of problem, from a closed vocabulary — what an operator or a "
-            + "support engineer matches on. Entries are aggregated by code together with the message text, so "
-            + "several entries in one run may share a code.", maxLength = 64,
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Kind of problem, from a closed vocabulary. Entries aggregate by code and message, so "
+            + "several entries can share a code.", maxLength = 64, requiredMode = Schema.RequiredMode.REQUIRED)
     private String code;
 
-    @Schema(description = "Human-readable description of the problem. Curated text written for a person to read; "
-            + "never a raw exception message, and never text a Discovery Provider authored.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The problem, written by the platform for a person to read; never a raw exception message "
+            + "or text from the Discovery Provider.", requiredMode = Schema.RequiredMode.REQUIRED)
     private String message;
 
-    // Primitive: every message exists because something happened at least once, so a box would invent an absent
-    // state the contract says cannot occur.
+    // Primitive: a message exists only because something happened at least once.
     @Schema(description = "How many times this problem occurred during the run. At least 1.", minimum = "1",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private long occurrences;
@@ -59,11 +43,7 @@ public class DiscoveryMessageDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private OffsetDateTime firstSeenAt;
 
-    /**
-     * Equal to {@code firstSeenAt} for a problem that happened once. Together the two bound the window a fault was
-     * active in, which distinguishes a burst during one phase from a condition that persisted for the whole run.
-     */
-    @Schema(description = "When this problem was most recently seen during the run.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "When this problem was last seen during the run; equal to firstSeenAt if it happened "
+            + "once.", requiredMode = Schema.RequiredMode.REQUIRED)
     private OffsetDateTime lastSeenAt;
 }

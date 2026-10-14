@@ -41,18 +41,16 @@ public class DiscoveryCertificateDto {
     @Schema(description = "Base64 encoded Certificate content", requiredMode = Schema.RequiredMode.REQUIRED)
     private String certificateContent;
 
-    @Schema(description = "Boolean representing if the certificate is newly discovered. True - Certificate is newly discovered"
-            + "false - Certificate was already available in the inventory", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Whether the certificate was new to the inventory when this discovery found it",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean newlyDiscovered;
 
-    @Schema(description = "Whether processing of this row has been attempted; processedError conveys the outcome. "
-            + "False means the platform reached no verdict for the row, which may still carry a reason.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Whether processing of the certificate has been attempted; processedError gives the "
+            + "outcome.", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean processed;
 
-    @Schema(description = "Reason recorded against this row, if any — not only a failure, and not tied to processed. "
-            + "A row that imported cleanly can carry one (a certificate imported without all of its public keys "
-            + "associated, say), and a row that was never attempted carries one while processed stays false.")
+    @Schema(description = "A reason recorded against the certificate, not necessarily a failure: an imported "
+            + "certificate can carry one (its keys not all associated), and so can one never attempted.")
     private String processedError;
 
 }

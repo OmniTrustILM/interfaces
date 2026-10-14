@@ -25,15 +25,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping("/v2/discoveryProvider/discoveries")
 @Tag(name = "Discovery Operations v2",
-        description = "Stateless discovery v2 run lifecycle: initiate a run, poll its status and results, and "
-                + "control it (stop/resume/cancel).\n\n"
-                + "Every call replays the run's identity, resources, handle and attributes, so you need keep "
-                + "no state between calls: rebuild the run from the request, including after a restart. "
-                + "Answer 404 only for a runId you cannot rebuild — it ends the run at once, and a stopped "
-                + "run may be waiting days for its resume.\n\n"
-                + "If you can rebuild the run but no longer hold the items a drain asks for, answer 404 "
-                + "rather than a later page: Core takes the highest sequence you return as its new cursor, so "
-                + "a page served across a gap loses everything in it.")
+        description = "Run lifecycle: initiate a run, poll its status and results, and stop, resume or cancel it.\n\n"
+                + "Every call replays the run's identity, resources, checkpoint and attributes, so store none of "
+                + "them: rebuild the run from the request, also after a restart. Hold only its undrained items, as "
+                + "the drain operation requires. Answer 404 only for a runId you cannot rebuild: it ends the run at "
+                + "once, and a stopped run may wait days for its resume.\n\n"
+                + "If you can rebuild the run but no longer hold the items a drain asks for, answer 404 rather than a "
+                + "later page: Core takes the highest sequence returned as its cursor, so a page served across a gap "
+                + "loses everything in it.")
 public interface DiscoveryOperationController extends AuthProtectedConnectorController {
 
     /** Shared by every body-taking operation: the scoped base makes runId and resources mandatory on all of them. */
@@ -41,16 +40,14 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             + "resources set, or an invalid attribute (errorCode VALIDATION_FAILED)";
 
     @Operation(summary = "Initiate a discovery run",
-            description = "Starts a new discovery run for the given resource types and attributes. runId is "
-                    + "minted by Core and never reused. The connector MUST validate the full payload — "
-                    + "including that every requested resource type is supported — and reject the whole "
-                    + "request with 422 rather than silently narrowing the resource set. Submitting the same "
-                    + "runId again with an identical payload MUST be answered idempotently with another 202.")
+            description = "Starts a run for the given resource types and attributes. runId comes from Core and is "
+                    + "never reused. The connector MUST validate the whole request, including that every resource type "
+                    + "is supported, and reject it with 422 rather than narrow the resource set. A repeat with the "
+                    + "same runId and payload MUST be answered idempotently: another 202, without starting a second "
+                    + "run.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
-                    description = "Run accepted; checkpoint carries the connector's opaque run handle, replayed on every "
-                            + "subsequent lifecycle call, and stoppable, when present, declares whether this run "
-                            + "can be stopped and resumed"),
+                    description = "Run accepted, with its checkpoint and, optionally, whether it can be stopped"),
             @ApiResponse(responseCode = "422",
                     description = "One or more requested resources or attributes are unsupported or invalid (errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
@@ -61,8 +58,7 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryInitiateResponseDto initiate(@Valid @RequestBody DiscoveryInitiateRequestDto request);
 
     @Operation(summary = "Get discovery run status",
-            description = "Returns the run's current state and progress, and the connector's metadata statement about "
-                    + "the run when it has one.")
+            description = "Returns the run's state and progress, and its metadata when the connector has some.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Run status retrieved"),
             @ApiResponse(responseCode = "404",
@@ -77,18 +73,14 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryStatusResponseDto status(@Valid @RequestBody DiscoveryRunRequestDto request);
 
     @Operation(summary = "Drain discovered items",
-            description = "Returns one page of items discovered after afterSequence, bounded by maxItems "
-                    + "and maxBytes. This call doubles as the acknowledgment mechanism: submitting a given "
-                    + "afterSequence is the implicit ack for every item at or below it, and the connector MAY "
-                    + "discard those items once it has answered. Draining is legal at any point during a "
-                    + "live run. A drain with afterSequence equal to highestSequence, made after the run has "
-                    + "reached a terminal state, is the full ack. Until the full ack arrives, the connector "
-                    + "MUST retain terminal-run state for at least 24 hours after the run reached a terminal "
-                    + "state. Once the full ack arrives, the connector MAY discard all state it holds for the "
-                    + "run.\n\n"
-                    + "A connector that bounds its result buffer should size it against Core's polling interval "
-                    + "rather than assume prompt collection: after an empty drain the next one waits out the "
-                    + "interval, which is tens of seconds by default and operator-configurable.")
+            description = "Returns one page of items after afterSequence, within maxItems and maxBytes. Draining is "
+                    + "allowed at any point of a live run.\n\n"
+                    + "A drain acknowledges every item at or below its afterSequence, which the connector MAY then "
+                    + "discard. Once the run is terminal, a drain with afterSequence equal to highestSequence is the "
+                    + "full ack. Until it arrives, the connector MUST keep the run's state for at least 24 hours after "
+                    + "the run ended; after it, the connector MAY discard everything.\n\n"
+                    + "Size a bounded result buffer for Core's polling interval: after an empty drain, the next one "
+                    + "waits out the interval, tens of seconds by default and operator-configurable.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Items retrieved; more indicates whether additional items remain beyond this page"),
@@ -104,11 +96,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryResultsResponseDto results(@Valid @RequestBody DiscoveryDrainRequestDto request);
 
     @Operation(summary = "Stop a discovery run",
-            description = "Halts scanning for an in-progress run. The connector returns a best-effort "
-                    + "checkpoint, which MUST preserve the item sequence "
-                    + "counter, so a subsequent resume continues assigning sequences from where the run left "
-                    + "off. Items already discovered but not yet drained remain drainable via POST /results "
-                    + "while the run is stopped.")
+            description = "Halts scanning of a running run and returns a best-effort checkpoint, which MUST preserve "
+                    + "the item sequence so a resume continues numbering where the run stopped. Items not yet drained "
+                    + "stay drainable while the run is stopped.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Run stopped; checkpoint carries the handle to resume from"),
@@ -117,7 +107,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "Run cannot be stopped: past the point of no return, or the connector cannot checkpoint this run (errorCode OPERATION_PAST_POINT_OF_NO_RETURN); Core's own gate rejects stops for runs whose effective stoppability is false before they reach the connector, so this refusal is the connector's runtime authority. Or the request body is invalid (errorCode VALIDATION_FAILED)",
+                    description = "Stop refused: past the point of no return, or the run cannot be checkpointed "
+                            + "(errorCode OPERATION_PAST_POINT_OF_NO_RETURN); or the request body is invalid "
+                            + "(errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/stop", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -125,19 +117,19 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryStopResponseDto stop(@Valid @RequestBody DiscoveryRunRequestDto request);
 
     @Operation(summary = "Resume a stopped discovery run",
-            description = "Continues a stopped run from the replayed checkpoint. Item "
-                    + "sequences assigned after resuming continue the run's existing sequence space; the "
-                    + "connector never restarts numbering for a resumed run.")
+            description = "Continues a stopped run from the replayed checkpoint. Item sequences continue where the "
+                    + "run stopped; a resumed run never restarts numbering.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
-                    description = "Resume accepted; checkpoint carries the connector's (possibly updated) opaque run handle, "
-                            + "and stoppable, when present, re-declares whether the resumed run can be stopped again"),
+                    description = "Resume accepted, with the possibly updated checkpoint and, optionally, whether the "
+                            + "run can be stopped again"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "410",
-                    description = "The checkpoint needed to resume this run is no longer available (errorCode CHECKPOINT_LOST); distinct from 404, which means the run was never known",
+                    description = "The checkpoint needed to resume is no longer available (errorCode CHECKPOINT_LOST); "
+                            + "404 means the run is not known at all",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
@@ -149,12 +141,12 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
     DiscoveryInitiateResponseDto resume(@Valid @RequestBody DiscoveryRunRequestDto request);
 
     @Operation(summary = "Cancel a discovery run",
-            description = "Terminally aborts the run; the connector discards its job state for this runId "
-                    + "once it has answered.")
+            description = "Ends the run for good; the connector discards its state once it has answered.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Run cancelled"),
             @ApiResponse(responseCode = "404",
-                    description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED); treat as an already-terminal cancellation rather than an error",
+                    description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED); Core treats it "
+                            + "as already cancelled",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",

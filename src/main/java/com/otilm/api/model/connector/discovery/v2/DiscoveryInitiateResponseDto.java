@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Body returned by the discovery v2 /initiate call.
+ * Response of the discovery v2 initiate and resume calls.
  */
 @Getter
 @Setter
@@ -20,16 +20,15 @@ import lombok.ToString;
 public class DiscoveryInitiateResponseDto {
 
     // Excluded from toString: opaque, no logging value, up to 64 KB.
-    @Schema(description = "Opaque run handle the stateless connector resolves its run state from. Core replays it "
-            + "on status, results, stop, resume and cancel, and never renders it. Serialized size is capped "
-            + "at 64 KB; over the cap Core fails the run.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Opaque run handle. Core replays it on status, results, stop, resume and cancel and never "
+            + "shows it. At most 64 KB serialized; a larger one fails the run.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;
 
-    @Schema(description = "Whether this run can be stopped and later resumed. May only narrow the "
-            + "discoveryStopResume feature flag, never widen it: true without the flag is clamped to not-stoppable. "
-            + "Absent: Core gates on the flag alone. Each resume response replaces the value; omitting it there "
-            + "reverts the run to flag-gating. The connector may still refuse a stop past the point of no return.",
+    @Schema(description = "Whether this run can be stopped and resumed. Can only narrow the discoveryStopResume "
+            + "feature flag: true without the flag still means not stoppable, and absent leaves the flag to decide. A "
+            + "resume response replaces the value. A stop can still be refused past the point of no return.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean stoppable;
 }

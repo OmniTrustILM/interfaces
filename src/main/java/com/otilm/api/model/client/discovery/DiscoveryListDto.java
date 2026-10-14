@@ -20,30 +20,29 @@ import lombok.EqualsAndHashCode;
 @Data
 public class DiscoveryListDto extends NameAndUuidDto implements AttributeProjectable {
 
-    @Schema(description = "Discovery Kind. Absent for a run against a v2 Discovery Provider, which has no kinds.",
-            examples = {"IP-HostName"}, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Discovery kind. Absent for a v2 run, which has none.", examples = {"IP-HostName"},
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String kind;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private DiscoveryStatus status;
 
-    @Schema(description = "Date and time when Discovery started", nullable = true)
+    @Schema(description = "When the discovery started", nullable = true)
     private OffsetDateTime startTime;
 
-    @Schema(description = "Date and time when Discovery finished", nullable = true)
+    @Schema(description = "When the discovery finished", nullable = true)
     private OffsetDateTime endTime;
 
-    @Schema(description = "Number of certificates that are discovered", defaultValue = "0")
+    @Schema(description = "Certificates this discovery found and saved", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
 
-    // A primitive, so it is always emitted: every run has a total, 0 before anything arrives.
+    // Primitive, so always emitted: 0 before anything arrives.
     @Schema(description = "Number of items discovered, across all resource types",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private long totalItemsDiscovered;
 
-    // arraySchema, for the reason DiscoveryDetailDto gives: a description on the items would land on the shared
-    // Resource component.
+    // arraySchema: a description on the items would land on the shared Resource component.
     @ArraySchema(arraySchema = @Schema(description = "Resource types the discovery targets",
             requiredMode = Schema.RequiredMode.REQUIRED))
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -56,9 +55,9 @@ public class DiscoveryListDto extends NameAndUuidDto implements AttributeProject
     private String connectorName;
 
     // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
-    @Schema(description = "The connector interface this run is driven through, and so which generation drives it. "
-            + "Absent for a run against a legacy v1 connector, which declares no connector interface.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @Schema(description = "The connector interface the run is driven through. Absent for a v1 run, and for an ended run "
+            + "whose connector was deleted.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ConnectorInterfaceDto connectorInterface;
 

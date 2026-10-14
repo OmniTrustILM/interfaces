@@ -15,8 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Payload for a discovered {@code keys} item. Location (where the key was found) is not a field here — it belongs on
- * the enclosing {@link DiscoveredItemDto}'s {@code meta}.
+ * Payload for a discovered {@code keys} item. Where the key was found belongs in the item's {@code meta}.
  */
 @Getter
 @Setter
@@ -24,36 +23,23 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoPrivateKeyMaterial
-@Schema(description = "A connector reports a key's existence, intrinsic metadata, and at most its public "
-        + "part; private, secret and split key material must never be sent. A "
-        + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES
-        + " report MUST omit publicKey and publicKeyFormat entirely.")
+@Schema(description = "A discovered key: its existence, intrinsic metadata and at most its public part. Private, "
+        + "secret and split key material MUST NOT be sent, and a "
+        + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES + " key MUST omit publicKey and publicKeyFormat.")
 public class DiscoveredKeyDto implements DiscoveredItemPayloadDto {
 
     /**
-     * Fixed to this subtype's own constant and deliberately not settable: it is the discriminator that selects this
-     * shape, so there is nothing to set independently of the shape itself, and a setter would invite the two to
-     * disagree (the same reasoning {@link DiscoveredItemDto} applies to its derived accessor). Jackson resolves an
-     * {@code EXISTING_PROPERTY} discriminator from the wire value before it constructs anything, so no mutator is
-     * needed to deserialize; a wire {@code resource} that contradicts this constant cannot overwrite it. No
-     * {@code @NotNull} here either: with no setter and no other constructor the field can never be null, so the
-     * constraint could never fail — {@code requiredMode} alone publishes it as required.
+     * The discriminator, fixed to this subtype. No setter, so a wire value cannot contradict the shape, and no
+     * {@code @NotNull}, since the field cannot be null; {@code requiredMode} publishes it as required.
      */
     @Setter(AccessLevel.NONE)
-    // No description here on purpose. Resource is a platform-wide schema component, and OpenAPI 3.0
-    // cannot carry a description beside a $ref, so swagger-core hoists a referencing field's
-    // description onto the referenced component — which would give every other API that references
-    // Resource this discovery-specific wording. The discriminator is explained on
-    // DiscoveredItemPayloadInterface instead.
-    // S1170 wants this static because it is final with a constant initializer. It cannot be:
-    // Lombok generates a static getter for a static field, which then no longer implements
-    // DiscoveredItemPayloadInterface.getResource(), so the class does not compile. Verified, not assumed.
+    // No description: swagger-core would hoist it onto the shared Resource component. Not static despite S1170: Lombok
+    // would generate a static getter, which cannot implement DiscoveredItemPayloadInterface.getResource().
     @SuppressWarnings("java:S1170")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final Resource resource = Resource.CRYPTOGRAPHIC_KEY;
 
-    @Schema(description = "Key type: whether this is a public, private, secret, or split key",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Key type: public, private, secret or split", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "type is required")
     private KeyType type;
 
@@ -64,17 +50,16 @@ public class DiscoveredKeyDto implements DiscoveredItemPayloadDto {
     @Schema(description = "Key length in bits", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer length;
 
-    @Schema(description = "Intrinsic key fingerprint; correlates the same key across runs, connectors, "
-            + "and certificates without exposing key material", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Intrinsic fingerprint identifying the same key across runs, connectors and certificates, "
+            + "without exposing key material", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
 
-    @Schema(description = "Format of publicKey when present (typically SubjectPublicKeyInfo); "
-            + "absent when publicKey is absent", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Format of publicKey, typically SubjectPublicKeyInfo. Present only with publicKey.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyFormat publicKeyFormat;
 
-    @Schema(description = "Base64-encoded public key material. Absent for "
-            + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES
-            + " discoveries, where only existence and intrinsic metadata are ever reported",
+    @Schema(description = "Base64-encoded public key. Absent for a "
+            + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES + " key.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKey;
 }
