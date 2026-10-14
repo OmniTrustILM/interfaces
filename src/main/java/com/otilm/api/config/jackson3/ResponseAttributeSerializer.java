@@ -24,6 +24,7 @@ final class ResponseAttributeSerializer extends ValueSerializer<List<BaseAttribu
 
     private static final ObjectMapper CONVERTER = JsonMapper
             .builder()
+            .addModule(new InterfacesJacksonModule())
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();
 

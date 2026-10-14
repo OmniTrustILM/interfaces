@@ -67,6 +67,18 @@ class Jackson3ParityTest {
             ]
             """;
 
+    private static final String CREDENTIAL_WITH_A_SECRET = """
+            {"uuid": "11111111-1111-1111-1111-111111111111", "name": "c", "type": "data", "version": "v2",
+             "contentType": "credential",
+             "content": [{"reference": "r", "data": {"uuid": "22222222-2222-2222-2222-222222222222", "name": "cred",
+               "kind": "Basic", "attributes": [
+                 {"uuid": "33333333-3333-3333-3333-333333333333", "name": "password", "type": "data",
+                  "contentType": "secret", "version": 2,
+                  "content": [{"data": {"secret": "s3cr3t", "protectionLevel": "encrypted"}}]},
+                 {"uuid": "44444444-4444-4444-4444-444444444444", "name": "username", "type": "data",
+                  "contentType": "string", "version": 2, "content": [{"data": "operator"}]}]}}]}
+            """;
+
     record Sample(String name, String json, Class<?> type, Class<?>... parameters) {
 
         @Override
@@ -96,6 +108,8 @@ class Jackson3ParityTest {
                                          "version": "v2", "contentType": "secret",
                                          "content": [{"reference": "r", "data": {"secret": "top", "protectionLevel": "encrypted"}}]}
                                         """,
+                                ResponseAttribute.class),
+                        new Sample("a response attribute holding a credential with a secret", CREDENTIAL_WITH_A_SECRET,
                                 ResponseAttribute.class),
                         new Sample("a response attribute holding strings", """
                                 {"uuid": "11111111-1111-1111-1111-111111111111", "name": "s", "type": "data",
@@ -151,6 +165,14 @@ class Jackson3ParityTest {
                 () -> assertEquals(Jackson2Mvc.tree(expected),
                         Jackson2Mvc.tree(Jackson3Mvc.write(readByJackson2, sample.type(), sample.parameters())),
                         "Jackson 3 wrote different JSON"));
+    }
+
+    @Test
+    void writesACredentialWithoutTheSecretsOfItsAttributes() {
+        String json = Jackson3Mvc
+                .write(Jackson3Mvc.read(CREDENTIAL_WITH_A_SECRET, ResponseAttribute.class), ResponseAttribute.class);
+
+        assertAll(() -> assertFalse(json.contains("s3cr3t"), json), () -> assertTrue(json.contains("operator"), json));
     }
 
     /**
