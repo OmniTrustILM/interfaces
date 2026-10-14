@@ -75,7 +75,10 @@ public enum ResourceEvent implements IPlatformEnum {
                     + "user; the resolved flag in the payload distinguishes the two",
             Resource.COMMENT, List.of(Resource.GROUP), CommentEventData.class, false),
 
-    CBOM_SYNCED(Codes.CBOM_SYNCED, "CBOM synced", "Event after a CBOM's cryptographic assets have been ingested",
+    CBOM_SYNCED(Codes.CBOM_SYNCED, "CBOM synced",
+            "Event after a CBOM's cryptographic assets are ingested for the first time. Raised once per CBOM UUID: "
+                    + "retries and recovery do not raise it again, a superseded document raises none, and a new "
+                    + "document version is a new CBOM with its own event",
             Resource.CBOM, CbomSyncedEventData.class, false),
     CRYPTO_ASSET_PQC_NOT_READY(Codes.CRYPTO_ASSET_PQC_NOT_READY, "Cryptographic asset not PQC ready",
             "Event when a cryptographic asset first receives a NOT_READY verdict or its last decided verdict "

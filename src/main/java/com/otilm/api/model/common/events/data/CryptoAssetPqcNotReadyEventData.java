@@ -34,7 +34,8 @@ public class CryptoAssetPqcNotReadyEventData implements EventData {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String pqcReason;
 
-    @Schema(description = "Verdict before this assessment. Absent when the asset has not been assessed before",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Last decided verdict before this one: READY or NOT_APPLICABLE. An UNKNOWN result is not "
+            + "recorded, so an UNKNOWN in between keeps the earlier decided verdict. Absent when the asset had no decided "
+            + "verdict before", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PqcVerdict previousVerdict;
 }

@@ -65,7 +65,7 @@ class CryptoAssetPqcNotReadyEventDataTest {
     }
 
     @Test
-    void aNullPreviousVerdictIsReadAsTheFirstAssessment() throws Exception {
+    void aNullPreviousVerdictIsReadAsNoEarlierDecidedVerdict() throws Exception {
         String payload = """
                 {
                   "cryptoAssetUuid": "01234567-89ab-cdef-0123-456789abcdef",
