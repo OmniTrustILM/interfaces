@@ -1,5 +1,6 @@
 package com.otilm.api.config.jackson3;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningDto;
@@ -17,7 +18,10 @@ import com.otilm.api.model.core.secret.Passphrase;
 import com.otilm.api.model.core.secret.PassphraseFormatException;
 import com.otilm.api.model.core.secret.UploadedFile;
 import com.otilm.api.model.core.secret.UploadedFileFormatException;
+import com.otilm.api.model.core.settings.authentication.AuthenticationSettingsDto;
+import com.otilm.api.model.core.settings.authentication.AuthenticationSettingsUpdateDto;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
@@ -143,7 +147,13 @@ class Jackson3ParityTest {
                                  "signingOperationAttributes": [{"uuid": "11111111-1111-1111-1111-111111111111",
                                    "name": "a", "version": "v3", "contentType": "string",
                                    "content": [{"contentType": "string", "data": "x"}]}]}
-                                """, SigningSchemeRequestDto.class));
+                                """, SigningSchemeRequestDto.class),
+                        new Sample("authentication settings with an OAuth2 provider", """
+                                {"disableLocalhostUser": true, "oauth2Providers": {"p": {"name": "p"}}}
+                                """, AuthenticationSettingsDto.class),
+                        new Sample("an authentication settings update with an OAuth2 provider", """
+                                {"disableLocalhostUser": true, "oauth2Providers": [{"name": "p"}]}
+                                """, AuthenticationSettingsUpdateDto.class));
     }
 
     @Test
@@ -173,6 +183,21 @@ class Jackson3ParityTest {
                 .write(Jackson3Mvc.read(CREDENTIAL_WITH_A_SECRET, ResponseAttribute.class), ResponseAttribute.class);
 
         assertAll(() -> assertFalse(json.contains("s3cr3t"), json), () -> assertTrue(json.contains("operator"), json));
+    }
+
+    @Test
+    void refusesACredentialAttributeWithoutAContentTypeLikeJackson2() throws IOException {
+        String json = CREDENTIAL_WITH_A_SECRET.replace("\"contentType\": \"secret\", ", "");
+        Object readByJackson2 = Jackson2Mvc.read(json, ResponseAttribute.class);
+        Object readByJackson3 = Jackson3Mvc.read(json, ResponseAttribute.class);
+
+        assertThrows(JsonMappingException.class, () -> Jackson2Mvc.write(readByJackson2, ResponseAttribute.class));
+        StringWriter written = new StringWriter();
+        DatabindException e = assertThrows(DatabindException.class,
+                () -> Jackson3Mvc.MAPPER.writerFor(ResponseAttribute.class).writeValue(written, readByJackson3));
+        assertAll(() -> assertTrue(written.toString().contains("\"content\":["), written.toString()),
+                () -> assertFalse(written.toString().contains("s3cr3t"), written.toString()),
+                () -> assertFalse(e.getMessage().contains("s3cr3t"), e.getMessage()));
     }
 
     /**

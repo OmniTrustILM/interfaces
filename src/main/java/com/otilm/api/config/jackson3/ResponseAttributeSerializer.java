@@ -9,6 +9,7 @@ import com.otilm.api.model.common.attribute.v2.content.CredentialAttributeConten
 import com.otilm.api.model.common.attribute.v2.content.SecretAttributeContentV2;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
@@ -65,7 +66,10 @@ final class ResponseAttributeSerializer extends ValueSerializer<List<BaseAttribu
             return result;
         }
         for (DataAttributeV2 attribute : attributes) {
-            if (attribute.getContentType() == AttributeContentType.SECRET) {
+            AttributeContentType contentType = Objects
+                    .requireNonNull(attribute.getContentType(), () -> "Credential attribute " + attribute.getName()
+                            + " has no contentType, so it could hold a secret");
+            if (contentType == AttributeContentType.SECRET) {
                 List<BaseAttributeContentV2<?>> contents = new ArrayList<>();
                 for (BaseAttributeContentV2<?> content : attribute.getContent()) {
                     SecretAttributeContentV2 secret = CONVERTER.convertValue(content, SecretAttributeContentV2.class);
