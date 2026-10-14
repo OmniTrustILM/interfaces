@@ -112,8 +112,7 @@ class ConfigurableColumnsDocTest {
      * the projection like the rest - the contract is one shape for all of them - but showing the shared example on them
      * would document a payload the listing cannot produce, so they carry the description alone.
      */
-    private static final List<Class<?>> CARRIERS_WITHOUT_ATTRIBUTE_SOURCES = List
-            .of(CbomDto.class, SigningRecordListDto.class, CryptographicAssetDto.class);
+    private static final List<Class<?>> CARRIERS_WITHOUT_ATTRIBUTE_SOURCES = List.of(SigningRecordListDto.class);
 
     /** The form the field catalogue publishes an attribute-sourced identifier under. */
     private static final Pattern ATTRIBUTE_IDENTIFIER = Pattern.compile("^[^|]+\\|[A-Z]+$");

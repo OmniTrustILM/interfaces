@@ -30,12 +30,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Read-only inventory of cryptographic assets aggregated and deduplicated across every stored CBOM document. Assets
- * enter the inventory only through the document sync, so the surface is deliberately list and detail only — there is no
- * write operation to expose. Listing and the searchable-fields sibling are gated by {@code ResourceAction.LIST} and the
- * detail by {@code ResourceAction.DETAIL} on {@code Resource.CRYPTO_ASSET} — the action set proposed on interfaces#874
- * (the resource itself is ratified); the inventory dashboard on the statistics API deliberately shares the same LIST
- * action. The PQC explanation is gated by the same DETAIL action as the detail it explains.
+ * Inventory of cryptographic assets aggregated and deduplicated across every stored CBOM document. Assets enter through
+ * document sync; this controller exposes list and detail, while the generic resource endpoint updates custom attribute
+ * content under {@code ResourceAction.UPDATE}. Listing, searchable fields and the statistics dashboard require
+ * {@code ResourceAction.LIST}; detail and its PQC explanation require {@code ResourceAction.DETAIL} on
+ * {@code Resource.CRYPTO_ASSET}.
  *
  * <p>
  * Error responses deliberately use the legacy {@link ErrorMessageDto} model to match the other core web controllers;

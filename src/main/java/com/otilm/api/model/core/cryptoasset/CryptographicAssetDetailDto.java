@@ -1,7 +1,9 @@
 package com.otilm.api.model.core.cryptoasset;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.otilm.api.model.client.attribute.ResponseAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
@@ -16,6 +18,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CryptographicAssetDetailDto extends CryptographicAssetDto {
+
+    @Schema(description = "Custom attribute content assigned to this asset",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ResponseAttribute> customAttributes = new ArrayList<>();
 
     @Schema(description = "Provenance of the asset's PQC verdict. Absent until the first rule-set evaluation of "
             + "this asset; the row-level pqcVerdict serves unknown until then",
