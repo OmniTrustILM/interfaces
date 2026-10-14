@@ -14,10 +14,8 @@ class PqcExplanationStepOutcomeTest {
         Assertions
                 .assertEquals(PqcExplanationStepOutcome.NOT_MATCHED,
                         PqcExplanationStepOutcome.findByCode("notMatched"));
+        Assertions.assertEquals(PqcExplanationStepOutcome.MATCHED, PqcExplanationStepOutcome.findByCode("matched"));
         Assertions.assertEquals(PqcExplanationStepOutcome.DECIDED, PqcExplanationStepOutcome.findByCode("decided"));
-        Assertions
-                .assertEquals(PqcExplanationStepOutcome.NOT_REACHED,
-                        PqcExplanationStepOutcome.findByCode("notReached"));
         Assertions.assertEquals(PqcExplanationStepOutcome.RESOLVED, PqcExplanationStepOutcome.findByCode("resolved"));
         Assertions.assertEquals(PqcExplanationStepOutcome.FAILED, PqcExplanationStepOutcome.findByCode("failed"));
     }
@@ -25,12 +23,13 @@ class PqcExplanationStepOutcomeTest {
     @Test
     void findByCode_rejectsUnknownCode() {
         Assertions.assertThrows(ValidationException.class, () -> PqcExplanationStepOutcome.findByCode("skipped"));
+        Assertions.assertThrows(ValidationException.class, () -> PqcExplanationStepOutcome.findByCode("notReached"));
     }
 
     @Test
     void serializesToWireCode() throws Exception {
         Assertions.assertEquals("\"notMatched\"", mapper.writeValueAsString(PqcExplanationStepOutcome.NOT_MATCHED));
-        Assertions.assertEquals("\"notReached\"", mapper.writeValueAsString(PqcExplanationStepOutcome.NOT_REACHED));
+        Assertions.assertEquals("\"matched\"", mapper.writeValueAsString(PqcExplanationStepOutcome.MATCHED));
     }
 
     @Test

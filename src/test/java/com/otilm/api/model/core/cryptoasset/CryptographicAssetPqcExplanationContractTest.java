@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * An explanation always carries the recomputed verdict and the rules walked; what was stored is absent for an asset
- * that has not been evaluated yet, and a step that was not reached read nothing and decided nothing.
+ * An explanation always carries the recomputed verdict and every rule evaluated; what was stored is absent for an asset
+ * that has not been evaluated yet, and a step whose rule did not match yields no verdict.
  */
 class CryptographicAssetPqcExplanationContractTest {
 
@@ -62,13 +62,15 @@ class CryptographicAssetPqcExplanationContractTest {
 
         assertEquals(explanation, mapper.readValue(json, CryptographicAssetPqcExplanationDto.class));
         JsonNode steps = mapper.readTree(json).get("steps");
-        assertEquals("notMatched", steps.get(0).get("outcome").asText());
+        assertEquals("matched", steps.get(0).get("outcome").asText());
+        assertEquals("ready", steps.get(0).get("verdict").asText());
+        assertEquals(KEY_UUID.toString(), steps.get(0).get("referencedAsset").get("uuid").asText());
         assertEquals("resolved", steps.get(1).get("outcome").asText());
         assertEquals(SIGNATURE_UUID.toString(), steps.get(1).get("referencedAsset").get("uuid").asText());
         assertEquals("sha256withrsa", steps.get(1).get("referencedAsset").get("name").asText());
         assertEquals("algorithm", steps.get(1).get("referencedAsset").get("type").asText());
         assertTrue(steps.get(1).get("referencedAsset").get("visible").asBoolean());
-        assertEquals("notReached", steps.get(2).get("outcome").asText());
+        assertEquals("notMatched", steps.get(2).get("outcome").asText());
     }
 
     @Test
@@ -82,12 +84,12 @@ class CryptographicAssetPqcExplanationContractTest {
     }
 
     @Test
-    void aStepThatWasNotReachedOmitsWhatItDidNotProduce() throws Exception {
-        JsonNode notReached = mapper.readTree(mapper.writeValueAsString(sampleExplanation())).get("steps").get(2);
+    void aStepThatDidNotMatchOmitsWhatItDidNotProduce() throws Exception {
+        JsonNode notMatched = mapper.readTree(mapper.writeValueAsString(sampleExplanation())).get("steps").get(2);
 
-        assertFalse(notReached.has("verdict"), "a step that was not reached yields no verdict");
-        assertFalse(notReached.has("evaluatedFields"), "a step that was not reached read nothing");
-        assertFalse(notReached.has("referencedAsset"), "a step that was not reached refers to nothing");
+        assertFalse(notMatched.has("verdict"), "a rule that did not match yields no verdict");
+        assertTrue(notMatched.has("evaluatedFields"), "a rule that did not match still shows what it read");
+        assertFalse(notMatched.has("referencedAsset"), "a rule that did not match refers to nothing");
     }
 
     @Test
@@ -169,28 +171,32 @@ class CryptographicAssetPqcExplanationContractTest {
     }
 
     private static CryptographicAssetPqcExplanationDto sampleExplanation() {
-        PqcExplanationStepDto notMatched = step("CERT-SUBJECT-KEY", "Certified key",
-                PqcExplanationStepOutcome.NOT_MATCHED, "The signature algorithm is weaker than the certified key");
-        notMatched.setEvaluatedFields(Map.of("assetType", "certificate", "subjectPublicKeyRef", "key-rsa"));
+        PqcExplanationStepDto matched = step("CERT-SUBJECT-KEY", "Certified key", PqcExplanationStepOutcome.MATCHED,
+                "The certificate is as ready as the key it certifies");
+        matched.setVerdict(PqcVerdict.READY);
+        matched.setEvaluatedFields(Map.of("assetType", "certificate", "subjectPublicKeyRef", "key-rsa"));
+        matched.setReferencedAsset(referencedKey());
 
         PqcExplanationStepDto resolved = step("CERT-SIGNATURE-ALGORITHM", "Signature algorithm",
-                PqcExplanationStepOutcome.RESOLVED, "The certificate is signed with a weaker algorithm");
+                PqcExplanationStepOutcome.RESOLVED, "The certificate is as ready as the algorithm it is signed with");
         resolved.setVerdict(PqcVerdict.NOT_READY);
         resolved.setEvaluatedFields(Map.of("assetType", "certificate", "signatureAlgorithmRef", "alg-sig"));
         resolved.setReferencedAsset(referencedSignatureAlgorithm());
 
-        PqcExplanationStepDto notReached = step("CERT-REFERENCE-UNRESOLVED", "Unresolved certificate reference",
-                PqcExplanationStepOutcome.NOT_REACHED, "Not evaluated: an earlier rule decided");
+        PqcExplanationStepDto notMatched = step("CERT-REFERENCE-UNRESOLVED", "Unresolved certificate reference",
+                PqcExplanationStepOutcome.NOT_MATCHED, "Every recorded reference resolved");
+        notMatched.setEvaluatedFields(Map.of("assetType", "certificate"));
         PqcExplanationStepDto catchAll = step("CERT-NO-KEY-RECORDED", "No certified key recorded",
-                PqcExplanationStepOutcome.NOT_REACHED, "Not evaluated: an earlier rule decided");
+                PqcExplanationStepOutcome.NOT_MATCHED, "A certified key is recorded");
+        catchAll.setEvaluatedFields(Map.of("assetType", "certificate"));
 
         CryptographicAssetPqcExplanationDto explanation = new CryptographicAssetPqcExplanationDto();
         explanation.setUuid(ASSET_UUID);
         explanation.setVerdict(PqcVerdict.NOT_READY);
         explanation.setRuleId("CERT-SIGNATURE-ALGORITHM");
-        explanation.setReason("The certificate is signed with a weaker algorithm");
+        explanation.setReason("The certificate is as ready as the algorithm it is signed with");
         explanation.setInputs(Map.of("assetType", "certificate"));
-        explanation.setSteps(List.of(notMatched, resolved, notReached, catchAll));
+        explanation.setSteps(List.of(matched, resolved, notMatched, catchAll));
         explanation.setExplainedAt(EXPLAINED_AT);
         return explanation;
     }
