@@ -35,8 +35,8 @@ public enum Resource implements IPlatformEnum {
     ACME_ACCOUNT(Codes.ACME_ACCOUNT, "ACME Account"),
     ACME_PROFILE(Codes.ACME_PROFILE, "ACME Profile", true, true),
 
-    CBOM(Codes.CBOM, "CBOM"),
-    CRYPTO_ASSET(Codes.CRYPTO_ASSET, "Cryptographic Asset"),
+    CBOM(Codes.CBOM, "CBOM", false, true),
+    CRYPTO_ASSET(Codes.CRYPTO_ASSET, "Cryptographic Asset", false, true),
 
     // SCEP
     SCEP_PROFILE(Codes.SCEP_PROFILE, "SCEP Profile", true, true),

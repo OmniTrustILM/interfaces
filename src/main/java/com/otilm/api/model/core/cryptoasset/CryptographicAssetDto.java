@@ -55,9 +55,7 @@ public class CryptographicAssetDto implements AttributeProjectable {
     private boolean quarantined;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    // No example: the platform registers no custom, metadata or data attributes against this resource, so the
-    // shared one - which shows custom values - documents a payload this listing cannot produce.
     @Schema(description = AttributeProjectable.ATTRIBUTE_VALUES_DESCRIPTION,
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            example = AttributeProjectable.ATTRIBUTE_VALUES_EXAMPLE, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues;
 }
