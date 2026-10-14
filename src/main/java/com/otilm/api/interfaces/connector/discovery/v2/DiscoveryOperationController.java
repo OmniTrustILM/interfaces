@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping("/v2/discoveryProvider/discoveries")
 @Tag(name = "Discovery Operations v2",
         description = "Run lifecycle: initiate a run, poll its status and results, and stop, resume or cancel it.\n\n"
-                + "Every call replays the run's identity, resources, checkpoint and attributes, so keep no state "
-                + "between calls and rebuild the run from the request, also after a restart. Answer 404 only for a "
-                + "runId you cannot rebuild: it ends the run at once, and a stopped run may wait days for its "
-                + "resume.\n\n"
+                + "Every call replays the run's identity, resources, checkpoint and attributes, so store none of "
+                + "them: rebuild the run from the request, also after a restart. Hold only its undrained items, as "
+                + "the drain operation requires. Answer 404 only for a runId you cannot rebuild: it ends the run at "
+                + "once, and a stopped run may wait days for its resume.\n\n"
                 + "If you can rebuild the run but no longer hold the items a drain asks for, answer 404 rather than a "
                 + "later page: Core takes the highest sequence returned as its cursor, so a page served across a gap "
                 + "loses everything in it.")
