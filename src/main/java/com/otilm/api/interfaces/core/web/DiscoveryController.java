@@ -170,6 +170,8 @@ public interface DiscoveryController extends AuthProtectedController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Connector not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Discovery of that name already exists",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     ResponseEntity<?> createDiscovery(@Valid @RequestBody DiscoveryDto request) throws AlreadyExistException,
@@ -217,6 +219,10 @@ public interface DiscoveryController extends AuthProtectedController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "404", description = "Connector not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "A Discovery or a scheduled job of that name already exists, including a one-time "
+                            + "job that has already run",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/schedule", consumes = {"application/json"}, produces = {"application/json"})
     ResponseEntity<?> scheduleDiscovery(@RequestBody ScheduleDiscoveryDto scheduleDiscoveryDto)
