@@ -16,7 +16,6 @@ import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.util.List;
 import java.util.stream.Stream;
@@ -49,7 +48,6 @@ class TokenApiClientTest {
     private static final String ATTRIBUTES_PATH = BASE_PATH + "/attributes";
     private static final String STATUS_PATH = BASE_PATH + "/status";
     private static final String PROFILE_ATTRIBUTES_PATH = BASE_PATH + "/tokenProfile/attributes";
-    private static final String PROFILE_KEY_USAGES_PATH = BASE_PATH + "/tokenProfile/keyUsages";
     private static final String KEY_REQUEST_TYPES_PATH = BASE_PATH + "/keyRequestTypes";
     private static final String ATTRIBUTE_NAME = "tokenAttribute";
     private static final String TOKEN_STATUS_DETAIL = "Token is available";
@@ -155,22 +153,6 @@ class TokenApiClientTest {
         assertEquals(1, result.size());
         assertEquals(ATTRIBUTE_NAME, result.get(0).getName());
         verifyTokenScopedRequest(PROFILE_ATTRIBUTES_PATH);
-    }
-
-    @Test
-    void listTokenProfileKeyUsages_postsRequestAndReturnsKeyUsages() throws ConnectorException {
-        // given
-        String responseJson = """
-                ["sign","encrypt"]
-                """;
-        stubJsonResponse(PROFILE_KEY_USAGES_PATH, HttpStatus.OK, responseJson);
-
-        // when
-        List<KeyUsage> result = client.listTokenProfileKeyUsages(connector, tokenScopedRequest());
-
-        // then
-        assertEquals(List.of(KeyUsage.SIGN, KeyUsage.ENCRYPT), result);
-        verifyTokenScopedRequest(PROFILE_KEY_USAGES_PATH);
     }
 
     @Test

@@ -29,7 +29,6 @@ import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataReques
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import jakarta.validation.Validator;
 import java.util.HashSet;
 import java.util.List;
@@ -197,10 +196,6 @@ public final class OperationResponseValidator extends ResponseChecks {
     private static boolean isEncryptionAlgorithmCode(AttributeContent option) {
         return option != null && option.getContentType() == AttributeContentType.STRING
                 && option.getData() instanceof String code && EncryptionAlgorithm.lookupByCode(code).isPresent();
-    }
-
-    public OperationValidationResult validateKeyUsageList(List<KeyUsage> response) {
-        return validateResponseElements(response, "key usage");
     }
 
     public OperationValidationResult validateSupportedKeyRequestTypes(List<KeyRequestType> response) {

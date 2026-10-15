@@ -31,8 +31,6 @@ class TokenProfileControllerContractTest {
 
     private static final String TOKEN_PROFILE_ATTRIBUTES_PATH = "/tokens/{tokenInstanceUuid}/tokenProfiles/attributes";
 
-    private static final String TOKEN_PROFILE_KEY_USAGES_PATH = "/tokens/{tokenInstanceUuid}/tokenProfiles/keyUsages";
-
     private static final String TOKEN_PROFILE_KEY_REQUEST_TYPES_PATH = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/keys/types";
 
     private static final String TOKEN_INSTANCE_UUID = "tokenInstanceUuid";
@@ -54,23 +52,6 @@ class TokenProfileControllerContractTest {
         assertArrayEquals(new String[]{TOKEN_PROFILE_ATTRIBUTES_PATH}, methodMapping.path());
         assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, methodMapping.produces());
         assertPathVariables(attributes, TOKEN_INSTANCE_UUID);
-    }
-
-    @Test
-    void supportedKeyUsagesArePublishedOnTheGetRoute() {
-        // given
-        Method keyUsages = method("listSupportedTokenProfileKeyUsages");
-
-        // when
-        RequestMapping controllerMapping = TokenProfileController.class.getAnnotation(RequestMapping.class);
-        GetMapping methodMapping = keyUsages.getAnnotation(GetMapping.class);
-
-        // then
-        assertControllerBasePath(controllerMapping);
-        assertNotNull(methodMapping, "token profile key-usage discovery must be a GET");
-        assertArrayEquals(new String[]{TOKEN_PROFILE_KEY_USAGES_PATH}, methodMapping.path());
-        assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, methodMapping.produces());
-        assertPathVariables(keyUsages, TOKEN_INSTANCE_UUID);
     }
 
     @Test

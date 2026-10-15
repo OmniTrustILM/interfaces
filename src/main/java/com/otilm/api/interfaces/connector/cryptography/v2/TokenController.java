@@ -7,7 +7,6 @@ import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -77,24 +76,6 @@ public interface TokenController extends AuthProtectedConnectorController {
     @PostMapping(path = "/tokenProfile/attributes", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listTokenProfileAttributes(@RequestBody @Valid TokenScopedRequestV2Dto request);
-
-    @Operation(summary = "List supported token profile key usages",
-            description = "Returns the key usages supported for the supplied token context")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Supported key usages retrieved"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including malformed JSON, "
-                            + "unknown properties, and values outside the published enum values",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "422",
-                    description = "Request body was read successfully but violates a field validation rule "
-                            + "(errorCode VALIDATION_FAILED)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
-    @PostMapping(path = "/tokenProfile/keyUsages", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    List<KeyUsage> listTokenProfileKeyUsages(@RequestBody @Valid TokenScopedRequestV2Dto request);
 
     @Operation(summary = "List key request types supported by the Token Profile",
             description = "List key types supported for the supplied token and token-profile context")

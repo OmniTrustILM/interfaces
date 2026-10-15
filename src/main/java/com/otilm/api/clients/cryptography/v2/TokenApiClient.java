@@ -11,7 +11,6 @@ import com.otilm.api.model.connector.cryptography.v2.OperationValidationResult;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,6 @@ public class TokenApiClient extends BaseApiClient implements TokenSyncApiClient 
     private static final String ATTRIBUTES_PATH = BASE_PATH + "/attributes";
     private static final String STATUS_PATH = BASE_PATH + "/status";
     private static final String PROFILE_ATTRIBUTES_PATH = BASE_PATH + "/tokenProfile/attributes";
-    private static final String PROFILE_KEY_USAGES_PATH = BASE_PATH + "/tokenProfile/keyUsages";
     private final OperationResponseValidator responseValidator;
 
     public TokenApiClient(WebClient webClient, TrustManager[] defaultTrustManagers,
@@ -82,19 +80,6 @@ public class TokenApiClient extends BaseApiClient implements TokenSyncApiClient 
                 .retrieve()
                 .toEntityList(BaseAttribute.class), "listTokenProfileAttributes"), request, connector);
         requireValid(responseValidator.validateAttributeList(response), connector);
-        return response;
-    }
-
-    @Override
-    public List<KeyUsage> listTokenProfileKeyUsages(ApiClientConnectorInfo connector, TokenScopedRequestV2Dto body)
-            throws ConnectorException {
-        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
-        List<KeyUsage> response = processRequest(r -> requireBody(r
-                .uri(connector.getUrl() + PROFILE_KEY_USAGES_PATH)
-                .bodyValue(body)
-                .retrieve()
-                .toEntityList(KeyUsage.class), "listTokenProfileKeyUsages"), request, connector);
-        requireValid(responseValidator.validateKeyUsageList(response), connector);
         return response;
     }
 
