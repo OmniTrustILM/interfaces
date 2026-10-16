@@ -7,7 +7,6 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 
 import java.util.List;
 
@@ -22,9 +21,6 @@ public interface TokenSyncApiClient {
             throws ConnectorException;
 
     List<BaseAttribute> listTokenProfileAttributes(ApiClientConnectorInfo connector, TokenScopedRequestV2Dto request)
-            throws ConnectorException;
-
-    List<KeyUsage> listTokenProfileKeyUsages(ApiClientConnectorInfo connector, TokenScopedRequestV2Dto request)
             throws ConnectorException;
 
     List<KeyRequestType> listSupportedKeyRequestTypes(ApiClientConnectorInfo connector,

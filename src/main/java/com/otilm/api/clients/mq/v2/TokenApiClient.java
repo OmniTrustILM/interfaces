@@ -11,7 +11,6 @@ import com.otilm.api.model.connector.cryptography.v2.OperationValidationResult;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +26,6 @@ public class TokenApiClient implements TokenSyncApiClient {
     private static final String ATTRIBUTES_PATH = BASE_PATH + "/attributes";
     private static final String STATUS_PATH = BASE_PATH + "/status";
     private static final String PROFILE_ATTRIBUTES_PATH = BASE_PATH + "/tokenProfile/attributes";
-    private static final String PROFILE_KEY_USAGES_PATH = BASE_PATH + "/tokenProfile/keyUsages";
     private static final String GET = "GET";
     private static final String POST = "POST";
 
@@ -82,19 +80,6 @@ public class TokenApiClient implements TokenSyncApiClient {
             return response;
         } catch (RuntimeException e) {
             throw new ConnectorException("get token profile attributes request has failed", e, connector);
-        }
-    }
-
-    @Override
-    public List<KeyUsage> listTokenProfileKeyUsages(ApiClientConnectorInfo connector, TokenScopedRequestV2Dto request)
-            throws ConnectorException {
-        try {
-            List<KeyUsage> response = sendForList(connector, PROFILE_KEY_USAGES_PATH, POST, request, KeyUsage[].class,
-                    "listTokenProfileKeyUsages");
-            requireValid(responseValidator.validateKeyUsageList(response), connector);
-            return response;
-        } catch (RuntimeException e) {
-            throw new ConnectorException("get token profile key-usage request has failed", e, connector);
         }
     }
 

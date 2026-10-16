@@ -9,7 +9,6 @@ import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2D
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
 import com.otilm.api.model.core.connector.ConnectorDto;
-import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import com.otilm.api.testsupport.RecordingProxyClient;
 import com.otilm.api.testsupport.RecordingProxyClient.Invocation;
 import com.otilm.api.testsupport.ValidatorFixture;
@@ -35,7 +34,6 @@ class TokenApiClientMqTest {
     private static final String ATTRIBUTES_PATH = BASE_PATH + "/attributes";
     private static final String STATUS_PATH = BASE_PATH + "/status";
     private static final String PROFILE_ATTRIBUTES_PATH = BASE_PATH + "/tokenProfile/attributes";
-    private static final String PROFILE_KEY_USAGES_PATH = BASE_PATH + "/tokenProfile/keyUsages";
     private static final String KEY_REQUEST_TYPES_PATH = BASE_PATH + "/keyRequestTypes";
 
     @AutoClose
@@ -129,33 +127,6 @@ class TokenApiClientMqTest {
 
         // when
         Executable call = () -> client.listTokenProfileAttributes(connector, tokenScopedRequest());
-
-        // then
-        assertValidationFailure(call);
-    }
-
-    @Test
-    void listTokenProfileKeyUsages_delegatesPostAndReturnsKeyUsages() throws ConnectorException {
-        // given
-        TokenScopedRequestV2Dto request = tokenScopedRequest();
-        KeyUsage[] response = {KeyUsage.SIGN, KeyUsage.ENCRYPT};
-        proxyClient.respondWith(response);
-
-        // when
-        List<KeyUsage> result = client.listTokenProfileKeyUsages(connector, request);
-
-        // then
-        assertEquals(List.of(response), result);
-        assertPlainInvocation(PROFILE_KEY_USAGES_PATH, "POST", request, KeyUsage[].class);
-    }
-
-    @Test
-    void listTokenProfileKeyUsages_rejectsInvalidResponse() {
-        // given
-        proxyClient.respondWith(new KeyUsage[]{null});
-
-        // when
-        Executable call = () -> client.listTokenProfileKeyUsages(connector, tokenScopedRequest());
 
         // then
         assertValidationFailure(call);

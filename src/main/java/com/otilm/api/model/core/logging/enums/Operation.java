@@ -69,7 +69,6 @@ public enum Operation implements IPlatformEnum {
                     + "full budget where the work has one."),
     COMPROMISE("compromise", "Compromise"),
     DESTROY("destroy", "Destroy"),
-    LIST_KEY_USAGES("listKeyUsages", "List key usages"),
     UPDATE_KEY_USAGE("updateKeyUsage", "Update key usage"),
     LIST_KEY_REQUEST_TYPES("listKeyRequestTypes", "List key request types"),
     ENCRYPT("encrypt", "Encrypt"),
