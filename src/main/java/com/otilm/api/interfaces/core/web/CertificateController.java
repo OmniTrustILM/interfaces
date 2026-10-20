@@ -31,6 +31,7 @@ import com.otilm.api.model.core.certificate.CertificateContentDto;
 import com.otilm.api.model.core.certificate.CertificateDetailDto;
 import com.otilm.api.model.core.certificate.CertificateDownloadResponseDto;
 import com.otilm.api.model.core.certificate.CertificateEventHistoryDto;
+import com.otilm.api.model.core.certificate.CertificateExtensionDto;
 import com.otilm.api.model.core.certificate.CertificateFormat;
 import com.otilm.api.model.core.certificate.CertificateFormatEncoding;
 import com.otilm.api.model.core.certificate.CertificateRelationsDto;
@@ -411,6 +412,23 @@ public interface CertificateController extends AuthProtectedController {
             value = {@ApiResponse(responseCode = "200", description = "Certificate relations retrieved successfully")})
     @GetMapping("/{uuid}/relations")
     CertificateRelationsDto getCertificateRelations(@PathVariable UUID uuid) throws NotFoundException;
+
+    @Operation(summary = "Get Certificate Extensions")
+    @ApiResponses(
+            value = {@ApiResponse(responseCode = "200", description = "Certificate extensions retrieved successfully")})
+    @GetMapping(path = "/{uuid}/extensions", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<CertificateExtensionDto> getCertificateExtensions(@PathVariable UUID uuid)
+            throws NotFoundException, CertificateException, IOException;
+
+    @Operation(summary = "Get Certificate Requested Extensions",
+            description = "Lists the extensions the requester asked for in the certificate request. "
+                    + "The issued certificate may differ from them.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Certificate requested extensions retrieved successfully")})
+    @GetMapping(path = "/{uuid}/request/extensions", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<CertificateExtensionDto> getCertificateRequestExtensions(@PathVariable UUID uuid)
+            throws NotFoundException, CertificateException, IOException;
 
     @Operation(summary = "Associate a source certificate to the given certificate")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Certificates associated successfully")})
