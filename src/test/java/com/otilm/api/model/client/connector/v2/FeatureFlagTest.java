@@ -53,6 +53,21 @@ class FeatureFlagTest {
     }
 
     @Test
+    void keyListFlag_declaresCryptographyCapability() {
+        // given
+        var keyListCode = "keyList";
+
+        // when
+        FeatureFlag flag = FeatureFlag.findByCode(keyListCode);
+
+        // then
+        assertEquals(FeatureFlag.KEY_LIST, flag);
+        assertEquals("Key List", flag.getLabel());
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
+        assertEquals(List.of(ConnectorInterface.CRYPTOGRAPHY), flag.getApplicableInterfaces());
+    }
+
+    @Test
     void keyExportFlag_declaresCryptographyCapability() {
         // given
         var keyExportCode = "keyExport";

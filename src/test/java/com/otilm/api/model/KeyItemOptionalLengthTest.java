@@ -9,6 +9,7 @@ import com.otilm.api.model.core.compliance.ComplianceStatus;
 import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDto;
 import com.otilm.api.model.core.cryptography.key.KeyState;
+import com.otilm.api.model.core.cryptography.key.TokenKeyDto;
 import io.swagger.v3.oas.models.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class KeyItemOptionalLengthTest {
 
     @ParameterizedTest
-    @ValueSource(classes = {KeyItemDto.class, KeyItemDetailDto.class})
+    @ValueSource(classes = {KeyItemDto.class, KeyItemDetailDto.class, TokenKeyDto.class})
     void response_preservesNullLength_andDeclaresItOptional(Class<?> responseType) throws Exception {
         // given
         Object response = responseType.getConstructor().newInstance();

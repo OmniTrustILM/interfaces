@@ -49,6 +49,11 @@ public enum FeatureFlag implements IPlatformEnum {
                     + "itself: the transport is trusted with them as it is with connector credentials, and the request must not "
                     + "outlive its operation, so over a message broker it expires with the operation timeout.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
+    KEY_LIST("keyList", "Key List",
+            "Supports listing the keys a token holds, including those created outside the platform. The platform can "
+                    + "then onboard them. Every later request addresses a listed key by the metadata the listing returned, "
+                    + "exactly like a key the platform created.",
+            FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
     SECRET_VERSIONING("secretVersioning", "Secret Versioning",
             "Supports versioning of secrets, allowing to keep track of history of secrets.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SECRET)),

@@ -78,7 +78,7 @@ class TokenProfileControllerContractTest {
     @Test
     void listTokenProfilesTakesARepeatableImportableFilter() throws NoSuchMethodException {
         // given
-        Method list = TokenProfileController.class.getMethod("listTokenProfiles", Optional.class, List.class);
+        Method list = listTokenProfiles();
 
         // when
         RequestParam param = list.getParameters()[1].getAnnotation(RequestParam.class);
@@ -89,6 +89,24 @@ class TokenProfileControllerContractTest {
         assertEquals("importable", param.name());
         assertFalse(param.required());
         assertEquals(Explode.TRUE, doc.explode());
+    }
+
+    @Test
+    void listTokenProfilesTakesAKeyListableFilterThatIsOffByDefault() throws NoSuchMethodException {
+        // given
+        Method list = listTokenProfiles();
+
+        // when
+        RequestParam param = list.getParameters()[2].getAnnotation(RequestParam.class);
+
+        // then
+        assertEquals("keyListable", param.name());
+        assertFalse(param.required());
+        assertEquals("false", param.defaultValue());
+    }
+
+    private static Method listTokenProfiles() throws NoSuchMethodException {
+        return TokenProfileController.class.getMethod("listTokenProfiles", Optional.class, List.class, boolean.class);
     }
 
     private static void assertControllerBasePath(RequestMapping mapping) {

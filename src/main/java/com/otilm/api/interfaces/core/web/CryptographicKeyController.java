@@ -19,13 +19,17 @@ import com.otilm.api.model.client.cryptography.key.KeyExportRequestDto;
 import com.otilm.api.model.client.cryptography.key.KeyImportRequestDto;
 import com.otilm.api.model.client.cryptography.key.KeyRequestDto;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.client.cryptography.key.OnboardTokenKeysRequestDto;
 import com.otilm.api.model.client.cryptography.key.UpdateKeyUsageRequestDto;
+import com.otilm.api.model.common.BulkActionMessageDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.core.cryptography.key.KeyDetailDto;
 import com.otilm.api.model.core.cryptography.key.KeyDto;
 import com.otilm.api.model.core.cryptography.key.KeyEventHistoryDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
+import com.otilm.api.model.core.cryptography.key.OnboardTokenKeysResponseDto;
+import com.otilm.api.model.core.cryptography.key.TokenKeyListResponseDto;
 import com.otilm.api.model.core.search.ConfigurableColumnsDocs;
 import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -314,6 +318,99 @@ public interface CryptographicKeyController extends AuthProtectedController {
     @PatchMapping(path = "/keys/{uuid}/items/{keyItemUuid}/export/disable", produces = MediaType.APPLICATION_JSON_VALUE)
     KeyItemDetailDto disableKeyExport(@Parameter(description = "Key UUID") @PathVariable String uuid,
             @Parameter(description = "Key Item UUID") @PathVariable String keyItemUuid) throws NotFoundException;
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+    // Token Key Listing and Onboarding
+    // -----------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+
+    @Operation(summary = "List keys in the key storage",
+            description = "Returns one page of the keys in the key storage of the specified token instance, including "
+                    + "keys created outside the platform. Each key carries its onboarding status, and the reason when "
+                    + "it cannot be onboarded. Requires `keyListAvailable` on the token profile.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Keys retrieved"),
+            @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "The connector of the token instance cannot list keys",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/tokenKeys",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    TokenKeyListResponseDto listTokenKeys(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
+            @Parameter(description = "Page number, starting at 1") @RequestParam(required = false,
+                    defaultValue = "1") int pageNumber,
+            @Parameter(description = "Number of keys per page") @RequestParam(required = false,
+                    defaultValue = "10") int itemsPerPage)
+            throws ConnectorException, NotFoundException;
+
+    @Operation(summary = "Onboard keys from the key storage",
+            description = "Onboard the selected keys into the specified token profile, reading each key again from the "
+                    + "key storage. For a key pair, the inventory may already hold a key with its public key but no "
+                    + "token instance. Onboarding then adds the private key to that key, and requires permission to "
+                    + "update it. That key keeps its name, owner, groups, custom attributes and certificates. A key "
+                    + "the inventory holds in any other way is skipped, and its result names the key that holds it.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Onboarding finished with one result per selected key"),
+            @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "The connector of the token instance cannot list keys",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
+            @ApiResponse(responseCode = "502", description = "Connector Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "503", description = "Connector Communication Error",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @PostMapping(path = "/tokens/{tokenInstanceUuid}/tokenProfiles/{tokenProfileUuid}/tokenKeys/onboard",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    OnboardTokenKeysResponseDto onboardTokenKeys(
+            @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
+            @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
+            @RequestBody @Valid OnboardTokenKeysRequestDto request)
+            throws ConnectorException, NotFoundException, AttributeException;
+
+    @Operation(summary = "Remove a key from the inventory",
+            description = "Delete the inventory record of the key, including its history. The key stays in the key "
+                    + "storage, and a later listing offers it for onboarding again. Removal requires a key that has a "
+                    + "private key, belongs to a token instance whose connector can list keys, and has no compromised "
+                    + "items. Any other key can only be deleted or destroyed.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Key removed from the inventory"),
+            @ApiResponse(responseCode = "404", description = "Key not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "The key cannot be removed from the inventory",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+    @PatchMapping(path = "/keys/{uuid}/removeFromInventory")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void removeKeyFromInventory(@Parameter(description = "Key UUID") @PathVariable String uuid)
+            throws NotFoundException;
+
+    @Operation(operationId = "removeKeysFromInventory", summary = "Remove keys from the inventory",
+            description = "Delete the inventory records of the listed keys, including their history. The keys stay in "
+                    + "the key storage, and a later listing offers them for onboarding again. Removal requires a key "
+                    + "that has a private key, belongs to a token instance whose connector can list keys, and has no "
+                    + "compromised items. Any other key, or one not found, is reported and left unchanged. If the user "
+                    + "lacks the key delete permission or the members permission on the token instance of any listed "
+                    + "key, the request is refused and nothing is removed.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Removal finished with one entry per key not removed",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = BulkActionMessageDto.class))))})
+    @PatchMapping(path = "/keys/removeFromInventory", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<BulkActionMessageDto> removeKeysFromInventory(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Key UUIDs",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = {
+                    @ExampleObject(
+                            value = "[\"c2f685d4-6a3e-11ec-90d6-0242ac120003\",\"b9b09548-a97c-4c6a-a06a-e4ee6fc2da98\"]")})) @RequestBody List<String> keyUuids);
 
     // -----------------------------------------------------------------------------------------------------------------
 
