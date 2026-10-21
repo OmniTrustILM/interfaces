@@ -158,6 +158,62 @@ class ListKeysResponseValidationTest {
     }
 
     @Test
+    void validateListKeys_refusesAPageReachingBeyondItsTotal() {
+        // given
+        ListKeysRequestV2Dto request = request(10);
+        request.setOffset(5);
+        ListKeysResponseV2Dto page = page(listed("0a"), listed("0b"));
+        page.setTotalItems(6L);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
+
+        // then
+        assertInvalid(result, "Connector returned keys up to position 7 of a listing it reports as holding 6");
+    }
+
+    @Test
+    void validateListKeys_countsUnaddressableKeysTowardTheTotal() {
+        // given
+        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), unaddressable());
+        page.setTotalItems(1L);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page);
+
+        // then
+        assertInvalid(result, "Connector returned keys up to position 2 of a listing it reports as holding 1");
+    }
+
+    @Test
+    void validateListKeys_acceptsAnEmptyPageBeyondTheEndOfTheListing() {
+        // given
+        ListKeysRequestV2Dto request = request(10);
+        request.setOffset(20);
+        ListKeysResponseV2Dto page = page();
+        page.setTotalItems(3L);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
+
+        // then
+        assertTrue(result.isValid());
+    }
+
+    @Test
+    void validateListKeys_requiresTheOffset() {
+        // given
+        ListKeysRequestV2Dto request = request(10);
+        request.setOffset(null);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request, page(listed("0a")));
+
+        // then
+        assertInvalid(result, "Key listing offset is required");
+    }
+
+    @Test
     void validateListKeys_acceptsTheKeyPairsTheFilterNames() {
         // given
         ListKeysRequestV2Dto request = request(10);

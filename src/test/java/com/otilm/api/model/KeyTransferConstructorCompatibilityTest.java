@@ -5,6 +5,7 @@ import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.cryptography.key.KeyRequestDto;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.connector.cryptography.enums.TokenInstanceStatus;
+import com.otilm.api.model.core.cryptography.key.KeyTransferCapabilityDto;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceDetailDto;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceStatusDetailDto;
@@ -17,8 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Holds the constructor signature each of these classes carried before it gained a key-transfer field. Each call below
- * compiles only while the previous signature exists, and states what the new field is when nobody supplies it.
+ * Holds the constructor signatures these classes carried before they gained a key-transfer or key-listing field. Each
+ * call below compiles only while the previous signature exists, and states what the new field is when nobody supplies
+ * it.
  */
 class KeyTransferConstructorCompatibilityTest {
 
@@ -50,6 +52,21 @@ class KeyTransferConstructorCompatibilityTest {
         assertEquals("token", profile.getTokenInstanceName());
         assertEquals(List.of(KeyUsage.SIGN), profile.getUsages());
         assertNull(profile.getKeyTransfer(), "key transfer is unreported rather than reported as unavailable");
+    }
+
+    @Test
+    void aTokenProfileBuiltWithoutKeyListingReportsItUnavailable() {
+        // given
+        KeyTransferCapabilityDto keyTransfer = new KeyTransferCapabilityDto();
+
+        // when
+        TokenProfileDetailDto profile = new TokenProfileDetailDto("description", "token-uuid", "token",
+                NO_RESPONSE_ATTRIBUTES, NO_RESPONSE_ATTRIBUTES, TokenInstanceStatus.CONNECTED, true,
+                List.of(KeyUsage.SIGN), keyTransfer);
+
+        // then
+        assertEquals(keyTransfer, profile.getKeyTransfer());
+        assertFalse(profile.isKeyListAvailable(), "key listing is reported as unavailable");
     }
 
     @Test

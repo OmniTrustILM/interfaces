@@ -242,6 +242,7 @@ public final class OperationResponseValidator extends ResponseChecks {
             requireRequest(request, "Key listing");
             validateRequiredBean(response);
             requireWithinLimit(request, response);
+            requireTotalCoveringPage(request, response);
             requireRequestedType(request.getKeyRequestType(), response);
             requireNameableHandles(response.getItems());
             requireUnaddressableKeysOnlyWhenUnfiltered(request, response);
@@ -254,11 +255,29 @@ public final class OperationResponseValidator extends ResponseChecks {
         if (limit == null) {
             throw new IllegalArgumentException("Key listing limit is required");
         }
-        int returned = response.getItems().size() + unaddressableKeysOf(response).size();
+        int returned = keysOnPage(response);
         if (returned > limit) {
             throw new IllegalArgumentException(
                     "Connector returned " + returned + " keys; the request allows at most " + limit);
         }
+    }
+
+    /** An empty page may lie beyond the end of the listing, since the token can lose keys between two pages. */
+    private static void requireTotalCoveringPage(ListKeysRequestV2Dto request, ListKeysResponseV2Dto response) {
+        Integer offset = request.getOffset();
+        if (offset == null) {
+            throw new IllegalArgumentException("Key listing offset is required");
+        }
+        int returned = keysOnPage(response);
+        long reached = (long) offset + returned;
+        if (returned > 0 && response.getTotalItems() < reached) {
+            throw new IllegalArgumentException("Connector returned keys up to position " + reached
+                    + " of a listing it reports as holding " + response.getTotalItems());
+        }
+    }
+
+    private static int keysOnPage(ListKeysResponseV2Dto response) {
+        return response.getItems().size() + unaddressableKeysOf(response).size();
     }
 
     private static void requireRequestedType(KeyRequestType requested, ListKeysResponseV2Dto response) {
