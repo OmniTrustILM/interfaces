@@ -32,13 +32,15 @@ public class ListKeysRequestV2Dto extends TokenProfileScopedRequestV2Dto {
     @NotNull(message = "keyRequestType is required")
     private KeyRequestType keyRequestType;
 
-    @Schema(description = "Number of keys to skip", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
+    @Schema(description = "Number of keys to skip. Keys the connector leaves out count toward it.",
+            requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
     @NotNull(message = "offset is required")
     @Min(value = 0, message = "offset must not be negative")
     private Integer offset;
 
-    @Schema(description = "Maximum number of keys to return", requiredMode = Schema.RequiredMode.REQUIRED,
-            minimum = "1", maximum = "" + MAX_LIMIT)
+    @Schema(description = "Maximum number of keys to return. A page may hold fewer keys before the end of the "
+            + "listing. Only an `offset` at or past `totalItems` marks the end.",
+            requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1", maximum = "" + MAX_LIMIT)
     @NotNull(message = "limit is required")
     @Min(value = 1, message = "limit must be positive")
     @Max(value = MAX_LIMIT, message = "limit must not exceed " + MAX_LIMIT)

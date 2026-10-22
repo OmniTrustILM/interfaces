@@ -24,6 +24,7 @@ import com.otilm.api.model.client.cryptography.key.UpdateKeyUsageRequestDto;
 import com.otilm.api.model.common.BulkActionMessageDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.core.cryptography.key.KeyDetailDto;
 import com.otilm.api.model.core.cryptography.key.KeyDto;
 import com.otilm.api.model.core.cryptography.key.KeyEventHistoryDto;
@@ -43,6 +44,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.core.io.Resource;
@@ -50,6 +53,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -63,6 +67,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping("/v1")
 @Tag(name = "Cryptographic Key Management", description = "Cryptographic Key Management API")
+@Validated
 public interface CryptographicKeyController extends AuthProtectedController {
 
     // Token Instance Operation APIs
@@ -333,7 +338,9 @@ public interface CryptographicKeyController extends AuthProtectedController {
             @ApiResponse(responseCode = "200", description = "Keys retrieved"),
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "The connector of the token instance cannot list keys",
+            @ApiResponse(responseCode = "422",
+                    description = "The page is out of range, the token profile is disabled, or the connector of "
+                            + "the token instance cannot list keys",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",
@@ -346,9 +353,12 @@ public interface CryptographicKeyController extends AuthProtectedController {
             @Parameter(description = "Token Instance UUID") @PathVariable String tokenInstanceUuid,
             @Parameter(description = "Token Profile UUID") @PathVariable String tokenProfileUuid,
             @Parameter(description = "Page number, starting at 1") @RequestParam(required = false,
-                    defaultValue = "1") int pageNumber,
+                    defaultValue = "1") @Min(value = 1, message = "pageNumber must be at least 1") int pageNumber,
             @Parameter(description = "Number of keys per page") @RequestParam(required = false,
-                    defaultValue = "10") int itemsPerPage)
+                    defaultValue = "10") @Min(value = 1, message = "itemsPerPage must be at least 1") @Max(
+                            value = ListKeysRequestV2Dto.MAX_LIMIT,
+                            message = "itemsPerPage must be at most "
+                                    + ListKeysRequestV2Dto.MAX_LIMIT) int itemsPerPage)
             throws ConnectorException, NotFoundException;
 
     @Operation(summary = "Onboard keys from the key storage",
@@ -356,12 +366,16 @@ public interface CryptographicKeyController extends AuthProtectedController {
                     + "key storage. For a key pair, the inventory may already hold a key with its public key but no "
                     + "token instance. Onboarding then adds the private key to that key, and requires permission to "
                     + "update it. That key keeps its name, owner, groups, custom attributes and certificates. A key "
-                    + "the inventory holds in any other way is skipped, and its result names the key that holds it.")
+                    + "the inventory holds in any other way is skipped. A result names an existing key only when the "
+                    + "caller may see that key in detail.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Onboarding finished with one result per selected key"),
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
-            @ApiResponse(responseCode = "422", description = "The connector of the token instance cannot list keys",
+            @ApiResponse(responseCode = "422",
+                    description = "The request is invalid, the token profile is disabled, the connector of the "
+                            + "token instance cannot list keys, or the key storage lists only some of the key pairs "
+                            + "under the selected handles in one page of " + ListKeysRequestV2Dto.MAX_LIMIT,
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",

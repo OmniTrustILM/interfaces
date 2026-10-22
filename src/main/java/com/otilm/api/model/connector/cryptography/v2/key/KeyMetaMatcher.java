@@ -47,7 +47,11 @@ public final class KeyMetaMatcher {
 
     private static List<Object> contentData(MetadataAttribute attribute) {
         List<? extends AttributeContent> content = attribute.getContent();
-        return content == null ? List.of() : content.stream().map(AttributeContent::getData).toList();
+        return content == null ? List.of() : content.stream().map(KeyMetaMatcher::dataOf).toList();
+    }
+
+    private static Object dataOf(AttributeContent item) {
+        return item == null ? null : item.getData();
     }
 
     private static boolean hasContentWithoutData(List<Object> values) {

@@ -29,8 +29,8 @@ public class ListKeysResponseV2Dto {
     private List<@NotNull(
             message = "unaddressableKeys must not contain null items") @Valid UnaddressableKeyV2Dto> unaddressableKeys;
 
-    @Schema(description = "Number of keys in the whole listing, after `keyMetaFilter`",
-            requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
+    @Schema(description = "Number of keys in the whole listing, after `keyMetaFilter`. Keys the connector leaves out "
+            + "are included in the count.", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
     @NotNull(message = "totalItems is required")
     @Min(value = 0, message = "totalItems must not be negative")
     private Long totalItems;

@@ -32,11 +32,13 @@ public class TokenKeyOnboardingResultDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean intoExistingKey;
 
-    @Schema(description = "UUID of the onboarded key, or of the inventory key that already holds the key",
+    @Schema(description = "UUID of the onboarded key, or of the inventory key that already holds the key. "
+            + "For an existing key, present only when the caller may see that key in detail.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID keyUuid;
 
-    @Schema(description = "Name of the onboarded key, or of the inventory key that already holds the key",
+    @Schema(description = "Name of the onboarded key, or of the inventory key that already holds the key. "
+            + "For an existing key, present only when the caller may see that key in detail.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String keyName;
 

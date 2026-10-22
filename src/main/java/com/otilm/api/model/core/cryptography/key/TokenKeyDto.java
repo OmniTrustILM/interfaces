@@ -43,11 +43,13 @@ public class TokenKeyDto {
     @Schema(description = "Onboarding status of the key", requiredMode = Schema.RequiredMode.REQUIRED)
     private TokenKeyStatus status;
 
-    @Schema(description = "UUID of the inventory key that already holds this key or its public key",
+    @Schema(description = "UUID of the inventory key that already holds this key or its public key. "
+            + "Present only when the caller may see that key in detail.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID inventoryKeyUuid;
 
-    @Schema(description = "Name of the inventory key that already holds this key or its public key",
+    @Schema(description = "Name of the inventory key that already holds this key or its public key. "
+            + "Present only when the caller may see that key in detail.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String inventoryKeyName;
 
