@@ -340,7 +340,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
                     description = "The page starts past the largest offset, the token profile is disabled, or the "
-                            + "connector of the token instance cannot list keys",
+                            + "connector of the token instance cannot list keys or refuses the listing",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",
@@ -374,7 +374,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
                     description = "The request is invalid, the token profile is disabled, or the connector of "
-                            + "the token instance cannot list keys",
+                            + "the token instance cannot list keys or refuses to resolve the selected keys",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",
@@ -391,9 +391,9 @@ public interface CryptographicKeyController extends AuthProtectedController {
 
     @Operation(summary = "Remove a key from the inventory",
             description = "Delete the inventory record of the key, including its history. The key stays in the key "
-                    + "storage, and a later listing offers it for onboarding again. Removal requires a key that has a "
-                    + "private key, belongs to a token instance whose connector can list keys, and has no compromised "
-                    + "items. Any other key can only be deleted or destroyed.")
+                    + "storage. Removal requires a key that has a private key, belongs to a token instance whose "
+                    + "connector can list keys, and has no compromised items. Any other key can only be deleted or "
+                    + "destroyed.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Key removed from the inventory"),
             @ApiResponse(responseCode = "404", description = "Key not found",
@@ -408,11 +408,11 @@ public interface CryptographicKeyController extends AuthProtectedController {
 
     @Operation(operationId = "removeKeysFromInventory", summary = "Remove keys from the inventory",
             description = "Delete the inventory records of the listed keys, including their history. The keys stay in "
-                    + "the key storage, and a later listing offers them for onboarding again. Removal requires a key "
-                    + "that has a private key, belongs to a token instance whose connector can list keys, and has no "
-                    + "compromised items. Any other key, or one not found, is reported and left unchanged. If the user "
-                    + "lacks the key delete permission or the members permission on the token instance of any listed "
-                    + "key, the request is refused and nothing is removed.")
+                    + "the key storage. Removal requires a key that has a private key, belongs to a token instance "
+                    + "whose connector can list keys, and has no compromised items. Any other key, or one not found, "
+                    + "is reported and left unchanged. If the user lacks the key delete permission or the members "
+                    + "permission on the token instance of any listed key, the request is refused and nothing is "
+                    + "removed.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Removal finished with one entry per key not removed",
                     content = @Content(
