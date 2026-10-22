@@ -8,7 +8,9 @@ import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.enums.IPlatformEnum;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
+import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyReason;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
@@ -56,6 +58,24 @@ class CryptographyEnumsTest {
                         contract(OperationStatus.FAILED, "failed", "Failed", "Operation has reached terminal failure"),
                         contract(OperationStatus.CANCELLED, "cancelled", "Cancelled",
                                 "Operation was deliberately terminated before completion"),
+                        contract(UnusableKeyReason.UNADDRESSABLE, "unaddressable", "Unaddressable",
+                                "The connector cannot name the key in a handle that addresses it alone"),
+                        contract(UnusableKeyReason.UNSUPPORTED_TYPE, "unsupportedType", "Unsupported type",
+                                "The key is of a type the connector cannot operate"),
+                        contract(UnusableKeyReason.UNREADABLE, "unreadable", "Unreadable",
+                                "The connector cannot read the key"),
+                        contract(UnusableKeyReason.NOT_FOUND, "notFound", "Not found",
+                                "The token no longer holds the key it counted"),
+                        contract(KeyResolutionOutcome.FOUND, "found", "Found",
+                                "The token holds one key under the handle"),
+                        contract(KeyResolutionOutcome.NOT_FOUND, "notFound", "Not found",
+                                "The token holds no key under the handle"),
+                        contract(KeyResolutionOutcome.AMBIGUOUS, "ambiguous", "Ambiguous",
+                                "The token holds more than one key under the handle"),
+                        contract(KeyResolutionOutcome.UNREADABLE, "unreadable", "Unreadable",
+                                "The token holds the key, and the connector cannot read it"),
+                        contract(KeyResolutionOutcome.INVALID_HANDLE, "invalidHandle", "Invalid handle",
+                                "The handle is not one this connector issues"),
                         contract(TokenStatusV2.CONNECTED, "Connected", "Connected",
                                 "The token or its backing provider is reachable"),
                         contract(TokenStatusV2.DISCONNECTED, "Disconnected", "Disconnected",
@@ -108,6 +128,12 @@ class CryptographyEnumsTest {
                                 .of(OperationStatus.values())
                                 .map(value -> wireContract(value, value.getCode(), OperationStatus.class)),
                         Stream
+                                .of(UnusableKeyReason.values())
+                                .map(value -> wireContract(value, value.getCode(), UnusableKeyReason.class)),
+                        Stream
+                                .of(KeyResolutionOutcome.values())
+                                .map(value -> wireContract(value, value.getCode(), KeyResolutionOutcome.class)),
+                        Stream
                                 .of(KeyTypeV2.values())
                                 .map(value -> wireContract(value, value.getCode(), KeyTypeV2.class)),
                         Stream
@@ -140,6 +166,11 @@ class CryptographyEnumsTest {
                                         ValidationException.class)),
                         named("operation status",
                                 new UnknownWireCode(OperationStatus.class, unknownCode, ValidationException.class)),
+                        named("unusable key reason",
+                                new UnknownWireCode(UnusableKeyReason.class, unknownCode, ValidationException.class)),
+                        named("key resolution outcome",
+                                new UnknownWireCode(KeyResolutionOutcome.class, unknownCode,
+                                        ValidationException.class)),
                         named("key type",
                                 new UnknownWireCode(KeyTypeV2.class, unknownCode, IllegalArgumentException.class)),
                         named("legacy split key type",

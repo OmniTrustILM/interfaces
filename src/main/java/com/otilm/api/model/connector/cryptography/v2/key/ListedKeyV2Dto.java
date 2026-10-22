@@ -31,7 +31,7 @@ public abstract sealed class ListedKeyV2Dto permits ListedSecretKeyV2Dto, Listed
     public abstract KeyRequestType getKeyRequestType();
 
     /**
-     * The metadata that {@code keyMetaFilter} matches.
+     * The metadata the key resolution takes back as the key's handle.
      */
     public abstract List<MetadataAttribute> handle();
 

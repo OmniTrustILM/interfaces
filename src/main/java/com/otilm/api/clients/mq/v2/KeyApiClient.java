@@ -26,6 +26,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusRes
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +63,7 @@ public class KeyApiClient implements KeySyncApiClient {
     private static final String IMPORT_CANCEL_PATH = IMPORT_PATH + "/cancel";
     private static final String IMPORT_RESULT_PATH = IMPORT_PATH + "/result";
     private static final String LIST_PATH = BASE_PATH + "/list";
+    private static final String RESOLVE_PATH = BASE_PATH + "/resolve";
     private static final String POST = "POST";
     private final ProxyClient proxyClient;
     private final OperationResponseValidator responseValidator;
@@ -210,6 +213,14 @@ public class KeyApiClient implements KeySyncApiClient {
         ListKeysResponseV2Dto page = send(connector, LIST_PATH, request, ListKeysResponseV2Dto.class);
         requireValid(responseValidator.validateListKeys(request, page), connector);
         return page;
+    }
+
+    @Override
+    public ResolveKeysResponseV2Dto resolveKeys(ApiClientConnectorInfo connector, ResolveKeysRequestV2Dto request)
+            throws ConnectorException {
+        ResolveKeysResponseV2Dto response = send(connector, RESOLVE_PATH, request, ResolveKeysResponseV2Dto.class);
+        requireValid(responseValidator.validateResolveKeys(request, response), connector);
+        return response;
     }
 
     private KeyCreationStatusResponseV2Dto importOutcome(ApiClientConnectorInfo connector, String path, Object request)

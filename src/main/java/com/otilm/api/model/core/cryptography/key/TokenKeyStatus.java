@@ -20,8 +20,12 @@ public enum TokenKeyStatus implements IPlatformEnum {
             "An import of this key is still in progress. Onboarding waits until it settles."),
     NO_PUBLIC_KEY("noPublicKey", "No public key in key storage",
             "The key storage lacks a public key object for this private key. Onboarding requires one."),
-    NO_UNIQUE_ID("noUniqueId", "No unique ID in key storage",
-            "The key storage holds this key without an ID unique to it. Onboarding requires one.");
+    NO_USABLE_ID("noUsableId", "No usable ID in key storage",
+            "The key storage holds this key without an ID the platform can address it by. Onboarding requires one."),
+    UNSUPPORTED_KEY_TYPE("unsupportedKeyType", "Unsupported key type",
+            "The connector of the token instance cannot operate a key of this type."),
+    UNREADABLE("unreadable", "Unreadable in key storage", "The connector of the token instance cannot read this key."),
+    GONE("gone", "No longer in key storage", "The key storage no longer holds this key.");
 
     private static final TokenKeyStatus[] VALUES;
 

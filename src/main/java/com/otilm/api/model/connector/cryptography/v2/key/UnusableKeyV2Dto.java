@@ -13,24 +13,27 @@ import lombok.ToString;
 @Setter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@Schema(name = "UnaddressableKeyV2Dto", description = """
-        A key the token holds without an identifier unique to it. Onboarding needs such an identifier, so the platform
-        only lists the key.
-        """, additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
-public class UnaddressableKeyV2Dto {
+@Schema(name = "UnusableKeyV2Dto",
+        description = "A key the token holds that the platform cannot onboard, with the reason",
+        additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
+public class UnusableKeyV2Dto {
 
     @Schema(description = "Label the token keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String label;
 
+    @Schema(description = "Reason the platform cannot onboard the key", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "reason is required")
+    private UnusableKeyReason reason;
+
     @Schema(description = "Descriptor of the key: a private key for a key pair listing, a secret key for a secret "
-            + "key listing", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "key listing. Absent when the connector cannot read the key's type.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Valid
-    @NotNull(message = "keyData is required")
     private KeyDataV2Dto keyData;
 
     @JsonAnySetter
     @Schema(hidden = true)
     public void rejectUnknownProperty(String property, Object ignoredValue) {
-        throw new IllegalArgumentException("Unsupported unaddressable key property: " + property);
+        throw new IllegalArgumentException("Unsupported unusable key property: " + property);
     }
 }

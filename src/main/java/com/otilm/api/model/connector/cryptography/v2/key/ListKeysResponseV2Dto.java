@@ -22,15 +22,13 @@ public class ListKeysResponseV2Dto {
     @NotNull(message = "items is required")
     private List<@NotNull(message = "items must not contain null items") @Valid ListedKeyV2Dto> items;
 
-    @Schema(description = "Keys of the requested page without an identifier unique to them. Each counts as one key "
-            + "toward `limit` and `totalItems`. Only an unfiltered listing returns them.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Keys on this page that cannot be offered for onboarding, each with its reason. Each "
+            + "counts toward `limit` and `totalItems`.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<@NotNull(
-            message = "unaddressableKeys must not contain null items") @Valid UnaddressableKeyV2Dto> unaddressableKeys;
+    private List<@NotNull(message = "unusableKeys must not contain null items") @Valid UnusableKeyV2Dto> unusableKeys;
 
-    @Schema(description = "Number of keys in the whole listing, after `keyMetaFilter`. Keys the connector leaves out "
-            + "are included in the count.", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "0")
+    @Schema(description = "Number of keys in the whole listing", requiredMode = Schema.RequiredMode.REQUIRED,
+            minimum = "0")
     @NotNull(message = "totalItems is required")
     @Min(value = 0, message = "totalItems must not be negative")
     private Long totalItems;

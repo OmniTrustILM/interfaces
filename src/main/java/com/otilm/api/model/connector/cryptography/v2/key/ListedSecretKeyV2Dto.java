@@ -33,9 +33,9 @@ public final class ListedSecretKeyV2Dto extends ListedKeyV2Dto {
 
     @Schema(description = "Connector-defined metadata of the key. It must identify the key durably, and for a key "
             + "the platform created it equals the metadata creation returned: a secret key has no public key, so the "
-            + "platform recognises one it already holds by this metadata alone. `keyMetaFilter` matches against it. "
-            + "Each metadata name appears once, and every content item carries data. A key that cannot meet this "
-            + "is reported in `unaddressableKeys` or left out.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "platform recognises one it already holds by this metadata alone. The key resolution takes it back as "
+            + "the key's handle. Each metadata name appears once, and every content item carries data. A key that "
+            + "cannot meet this is reported in `unusableKeys`.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyMeta is required and must not be empty")
     private List<@NotNull(
             message = "keyMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyMeta;

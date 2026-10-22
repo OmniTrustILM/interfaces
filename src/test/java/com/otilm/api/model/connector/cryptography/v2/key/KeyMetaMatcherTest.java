@@ -5,6 +5,7 @@ import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.MetadataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.MetadataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,52 +34,48 @@ class KeyMetaMatcherTest {
         return attribute;
     }
 
-    static Stream<Arguments> matchingHandles() {
+    static Stream<Arguments> unambiguousHandles() {
         return Stream
-                .of(argumentSet("the same names and content in another order",
-                        List.of(meta("u1", "keyId", "Key ID", "0a0b"), meta("u2", "keyLabel", "Key label", "signer")),
-                        List.of(meta("u2", "keyLabel", "Key label", "signer"), meta("u1", "keyId", "Key ID", "0a0b"))),
-                        argumentSet("another uuid and label of the same name",
-                                List.of(meta("u1", "keyId", "Key ID", "0a0b")),
-                                List.of(meta("u9", "keyId", "Identifier", "0a0b"))),
-                        argumentSet("content without its reference", List.of(meta("u1", "keyId", "Key ID", "0a0b")),
-                                List.of(meta("u1", "keyId", "Key ID", new StringAttributeContentV3(null, "0a0b")))));
-    }
-
-    static Stream<Arguments> refusedHandles() {
-        return Stream
-                .of(argumentSet("other content", List.of(meta("u1", "keyId", "Key ID", "0a0b")),
-                        List.of(meta("u1", "keyId", "Key ID", "0a0c"))),
-                        argumentSet("a missing name",
+                .of(argumentSet("an empty handle", List.<MetadataAttribute>of()),
+                        argumentSet("one attribute", List.of(meta("u1", "keyId", "Key ID", "0a0b"))),
+                        argumentSet("attributes of different names",
                                 List
                                         .of(meta("u1", "keyId", "Key ID", "0a0b"),
-                                                meta("u2", "keyLabel", "Key label", "signer")),
-                                List.of(meta("u1", "keyId", "Key ID", "0a0b"))),
-                        argumentSet("content holding only a reference",
-                                List.of(meta("u1", "keyId", "Key ID", new StringAttributeContentV3("signer-a", null))),
-                                List.of(meta("u1", "keyId", "Key ID", new StringAttributeContentV3("signer-b", null)))),
-                        argumentSet("a repeated name",
-                                List.of(meta("u1", "keyId", "Key ID", "0a0b"), meta("u1", "keyId", "Key ID", "0a0c")),
-                                List.of(meta("u1", "keyId", "Key ID", "0a0c"))));
+                                                meta("u2", "keyLabel", "Key label", "signer"))));
+    }
+
+    private static MetadataAttribute metaWithNullContentItem() {
+        MetadataAttribute attribute = meta("u1", "keyId", "Key ID", "0a0b");
+        attribute.setContent(Arrays.asList((StringAttributeContentV3) null));
+        return attribute;
+    }
+
+    static Stream<Arguments> ambiguousHandles() {
+        return Stream
+                .of(argumentSet("a repeated name",
+                        List.of(meta("u1", "keyId", "Key ID", "0a0b"), meta("u1", "keyId", "Key ID", "0a0c"))),
+                        argumentSet("a null content item", List.of(metaWithNullContentItem())),
+                        argumentSet("content holding only a reference", List
+                                .of(meta("u1", "keyId", "Key ID", new StringAttributeContentV3("signer-a", null)))));
     }
 
     @ParameterizedTest
-    @MethodSource("matchingHandles")
-    void matches_accepts(List<MetadataAttribute> handle, List<MetadataAttribute> other) {
+    @MethodSource("unambiguousHandles")
+    void isUnambiguous_accepts(List<MetadataAttribute> handle) {
         // when
-        boolean matches = KeyMetaMatcher.matches(handle, other);
+        boolean unambiguous = KeyMetaMatcher.isUnambiguous(handle);
 
         // then
-        assertTrue(matches);
+        assertTrue(unambiguous);
     }
 
     @ParameterizedTest
-    @MethodSource("refusedHandles")
-    void matches_refuses(List<MetadataAttribute> handle, List<MetadataAttribute> other) {
+    @MethodSource("ambiguousHandles")
+    void isUnambiguous_refuses(List<MetadataAttribute> handle) {
         // when
-        boolean matches = KeyMetaMatcher.matches(handle, other);
+        boolean unambiguous = KeyMetaMatcher.isUnambiguous(handle);
 
         // then
-        assertFalse(matches);
+        assertFalse(unambiguous);
     }
 }

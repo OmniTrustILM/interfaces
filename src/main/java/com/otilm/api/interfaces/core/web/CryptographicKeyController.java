@@ -373,9 +373,8 @@ public interface CryptographicKeyController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
-                    description = "The request is invalid, the token profile is disabled, the connector of the "
-                            + "token instance cannot list keys, or the key storage lists only some of the key pairs "
-                            + "under the selected handles in one page of " + ListKeysRequestV2Dto.MAX_LIMIT,
+                    description = "The request is invalid, the token profile is disabled, or the connector of "
+                            + "the token instance cannot list keys",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",

@@ -1,6 +1,6 @@
 package com.otilm.api.model.client.cryptography.key;
 
-import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
 import java.util.List;
@@ -27,9 +27,9 @@ class OnboardTokenKeysRequestValidationTest {
     }
 
     @Test
-    void aSelectionFillingOneListingPageIsValid() {
+    void aSelectionOfMaxKeysIsValid() {
         // given
-        OnboardTokenKeysRequestDto request = selecting(ListKeysRequestV2Dto.MAX_LIMIT);
+        OnboardTokenKeysRequestDto request = selecting(ResolveKeysRequestV2Dto.MAX_KEYS);
 
         // when
         Set<ConstraintViolation<OnboardTokenKeysRequestDto>> violations = VALIDATORS.validator().validate(request);
@@ -39,16 +39,16 @@ class OnboardTokenKeysRequestValidationTest {
     }
 
     @Test
-    void aSelectionBeyondOneListingPageIsRefused() {
+    void aSelectionBeyondMaxKeysIsRefused() {
         // given
-        OnboardTokenKeysRequestDto request = selecting(ListKeysRequestV2Dto.MAX_LIMIT + 1);
+        OnboardTokenKeysRequestDto request = selecting(ResolveKeysRequestV2Dto.MAX_KEYS + 1);
 
         // when
         Set<ConstraintViolation<OnboardTokenKeysRequestDto>> violations = VALIDATORS.validator().validate(request);
 
         // then
         assertEquals(1, violations.size());
-        assertEquals("keys must contain at most " + ListKeysRequestV2Dto.MAX_LIMIT + " keys",
+        assertEquals("keys must contain at most " + ResolveKeysRequestV2Dto.MAX_KEYS + " keys",
                 violations.iterator().next().getMessage());
     }
 }

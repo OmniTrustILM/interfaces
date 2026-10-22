@@ -11,7 +11,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyPairV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListedSecretKeyV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.key.UnaddressableKeyV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyReason;
+import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.util.List;
 import org.junit.jupiter.api.AutoClose;
@@ -47,16 +48,16 @@ class ListKeysResponseValidationTest {
         return handle;
     }
 
-    private static UnaddressableKeyV2Dto unaddressable() {
-        UnaddressableKeyV2Dto key = new UnaddressableKeyV2Dto();
+    private static UnusableKeyV2Dto unusable(UnusableKeyReason reason) {
+        UnusableKeyV2Dto key = new UnusableKeyV2Dto();
         key.setLabel("shared");
+        key.setReason(reason);
         key.setKeyData(validPrivateKeyDataResponse().getKeyData());
         return key;
     }
 
-    private static UnaddressableKeyV2Dto unaddressableSecretKey() {
-        UnaddressableKeyV2Dto key = new UnaddressableKeyV2Dto();
-        key.setLabel("shared");
+    private static UnusableKeyV2Dto unusableSecretKey() {
+        UnusableKeyV2Dto key = unusable(UnusableKeyReason.UNADDRESSABLE);
         key.setKeyData(validSecretKeyData());
         return key;
     }
@@ -97,8 +98,8 @@ class ListKeysResponseValidationTest {
         return response;
     }
 
-    private static ListKeysResponseV2Dto withUnaddressable(ListKeysResponseV2Dto page, UnaddressableKeyV2Dto... keys) {
-        page.setUnaddressableKeys(List.of(keys));
+    private static ListKeysResponseV2Dto withUnusable(ListKeysResponseV2Dto page, UnusableKeyV2Dto... keys) {
+        page.setUnusableKeys(List.of(keys));
         page.setTotalItems(page.getTotalItems() + keys.length);
         return page;
     }
@@ -154,7 +155,7 @@ class ListKeysResponseValidationTest {
         OperationValidationResult result = VALIDATOR.validateListKeys(request(1), page(listed("0a"), listed("0b")));
 
         // then
-        assertInvalid(result, "Connector returned 2 keys; the request allows at most 1");
+        assertInvalid(result, "Connector returned 2 keys on a page that holds 1");
     }
 
     @Test
@@ -169,20 +170,20 @@ class ListKeysResponseValidationTest {
         OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
 
         // then
-        assertInvalid(result, "Connector returned keys up to position 7 of a listing it reports as holding 6");
+        assertInvalid(result, "Connector returned 2 keys on a page that holds 1");
     }
 
     @Test
-    void validateListKeys_countsUnaddressableKeysTowardTheTotal() {
+    void validateListKeys_countsUnusableKeysTowardTheTotal() {
         // given
-        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), unaddressable());
+        ListKeysResponseV2Dto page = withUnusable(page(listed("0a")), unusable(UnusableKeyReason.UNADDRESSABLE));
         page.setTotalItems(1L);
 
         // when
         OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page);
 
         // then
-        assertInvalid(result, "Connector returned keys up to position 2 of a listing it reports as holding 1");
+        assertInvalid(result, "Connector returned 2 keys on a page that holds 1");
     }
 
     @Test
@@ -214,71 +215,19 @@ class ListKeysResponseValidationTest {
     }
 
     @Test
-    void validateListKeys_acceptsTheKeyPairsTheFilterNames() {
+    void validateListKeys_countsUnusableKeysTowardTheLimit() {
         // given
-        ListKeysRequestV2Dto request = request(10);
-        request.setKeyMetaFilter(List.of(handle("0a"), handle("0b")));
-
-        // when
-        OperationValidationResult result = VALIDATOR.validateListKeys(request, page(listed("0b"), listed("0a")));
-
-        // then
-        assertTrue(result.isValid());
-    }
-
-    @Test
-    void validateListKeys_refusesAKeyPairOutsideTheFilter() {
-        // given
-        ListKeysRequestV2Dto request = request(10);
-        request.setKeyMetaFilter(List.of(handle("0a")));
-
-        // when
-        OperationValidationResult result = VALIDATOR.validateListKeys(request, page(listed("0a"), listed("0c")));
-
-        // then
-        assertInvalid(result, "Connector returned a key the filter does not name");
-    }
-
-    @Test
-    void validateListKeys_countsUnaddressableKeysTowardTheLimit() {
-        // given
-        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), unaddressable());
+        ListKeysResponseV2Dto page = withUnusable(page(listed("0a")), unusable(UnusableKeyReason.UNADDRESSABLE));
 
         // when
         OperationValidationResult result = VALIDATOR.validateListKeys(request(1), page);
 
         // then
-        assertInvalid(result, "Connector returned 2 keys; the request allows at most 1");
+        assertInvalid(result, "Connector returned 2 keys on a page that holds 1");
     }
 
     @Test
-    void validateListKeys_acceptsUnaddressableKeysInAnUnfilteredPage() {
-        // given
-        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), unaddressable());
-
-        // when
-        OperationValidationResult result = VALIDATOR.validateListKeys(request(2), page);
-
-        // then
-        assertTrue(result.isValid());
-    }
-
-    @Test
-    void validateListKeys_refusesUnaddressableKeysInAFilteredPage() {
-        // given
-        ListKeysRequestV2Dto request = request(10);
-        request.setKeyMetaFilter(List.of(handle("0a")));
-        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), unaddressable());
-
-        // when
-        OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
-
-        // then
-        assertInvalid(result, "Connector returned unaddressable keys to a filtered listing");
-    }
-
-    @Test
-    void validateListKeys_refusesAKeyPairNoFilterCanName() {
+    void validateListKeys_refusesAKeyPairWhoseMetadataCannotServeAsAHandle() {
         // given
         ListedKeyPairV2Dto referenceOnly = listed("0a");
         referenceOnly.setKeyPairMeta(referenceOnlyHandle("signer-a"));
@@ -287,22 +236,98 @@ class ListKeysResponseValidationTest {
         OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page(referenceOnly));
 
         // then
-        assertInvalid(result, "Connector returned a key whose metadata no filter can name");
+        assertInvalid(result, "Connector returned a key whose metadata cannot serve as a handle");
     }
 
     @Test
-    void validateListKeys_refusesAnUnaddressableKeyWithoutKeyData() {
+    void validateListKeys_refusesAShortPageBeforeTheEnd() {
         // given
-        UnaddressableKeyV2Dto incomplete = unaddressable();
-        incomplete.setKeyData(null);
-        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), incomplete);
+        ListKeysRequestV2Dto request = request(2);
+        ListKeysResponseV2Dto page = page(listed("0a"));
+        page.setTotalItems(5L);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
+
+        // then
+        assertInvalid(result, "Connector returned 1 keys on a page that holds 2");
+    }
+
+    @Test
+    void validateListKeys_acceptsAShortLastPage() {
+        // given
+        ListKeysRequestV2Dto request = request(2);
+        request.setOffset(4);
+        ListKeysResponseV2Dto page = page(listed("0a"));
+        page.setTotalItems(5L);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
+
+        // then
+        assertTrue(result.isValid());
+    }
+
+    @Test
+    void validateListKeys_refusesAKeyOnAPageBeyondTheEnd() {
+        // given
+        ListKeysRequestV2Dto request = request(10);
+        request.setOffset(5);
+        ListKeysResponseV2Dto page = page(listed("0a"));
+        page.setTotalItems(2L);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request, page);
+
+        // then
+        assertInvalid(result, "Connector returned 1 keys on a page that holds 0");
+    }
+
+    @Test
+    void validateListKeys_expectsAFullPageAtTheLargestOffset() {
+        // given
+        ListKeysRequestV2Dto request = request(1000);
+        request.setOffset(Integer.MAX_VALUE);
+        ListKeysResponseV2Dto full = page(listed("0a"), listed("0b"), listed("0c"), listed("0d"), listed("0e"));
+        full.setTotalItems(Integer.MAX_VALUE + 5L);
+        ListKeysResponseV2Dto short4 = page(listed("0a"), listed("0b"), listed("0c"), listed("0d"));
+        short4.setTotalItems(Integer.MAX_VALUE + 5L);
+
+        // when
+        OperationValidationResult accepted = VALIDATOR.validateListKeys(request, full);
+        OperationValidationResult refused = VALIDATOR.validateListKeys(request, short4);
+
+        // then
+        assertTrue(accepted.isValid());
+        assertInvalid(refused, "Connector returned 4 keys on a page that holds 5");
+    }
+
+    @Test
+    void validateListKeys_acceptsAnUnusableKeyWithoutKeyData() {
+        // given
+        UnusableKeyV2Dto unreadable = unusable(UnusableKeyReason.UNREADABLE);
+        unreadable.setKeyData(null);
+        ListKeysResponseV2Dto page = withUnusable(page(listed("0a")), unreadable);
 
         // when
         OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page);
 
         // then
-        assertInvalid(result,
-                "Connector response validation failed: unaddressableKeys[0].keyData: keyData is required");
+        assertTrue(result.isValid());
+    }
+
+    @Test
+    void validateListKeys_refusesAnUnusableKeyWithoutAReason() {
+        // given
+        UnusableKeyV2Dto incomplete = unusable(UnusableKeyReason.UNADDRESSABLE);
+        incomplete.setReason(null);
+        ListKeysResponseV2Dto page = withUnusable(page(listed("0a")), incomplete);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page);
+
+        // then
+        assertInvalid(result, "Connector response validation failed: unusableKeys[0].reason: reason is required");
     }
 
     @Test
@@ -334,7 +359,7 @@ class ListKeysResponseValidationTest {
     @Test
     void validateListKeys_acceptsSecretKeysInASecretKeyListing() {
         // given
-        ListKeysResponseV2Dto page = withUnaddressable(page(listedSecretKey("0a")), unaddressableSecretKey());
+        ListKeysResponseV2Dto page = withUnusable(page(listedSecretKey("0a")), unusableSecretKey());
 
         // when
         OperationValidationResult result = VALIDATOR.validateListKeys(request(KeyRequestType.SECRET, 10), page);
@@ -350,7 +375,7 @@ class ListKeysResponseValidationTest {
                 .validateListKeys(request(10), page(listed("0a"), listedSecretKey("0b")));
 
         // then
-        assertInvalid(result, "Connector returned a key of another type than the request lists");
+        assertInvalid(result, "Connector returned a key of another type than the request names");
     }
 
     @Test
@@ -360,46 +385,32 @@ class ListKeysResponseValidationTest {
                 .validateListKeys(request(KeyRequestType.SECRET, 10), page(listed("0a")));
 
         // then
-        assertInvalid(result, "Connector returned a key of another type than the request lists");
+        assertInvalid(result, "Connector returned a key of another type than the request names");
     }
 
     @Test
-    void validateListKeys_refusesAnUnaddressableSecretKeyInAKeyPairListing() {
+    void validateListKeys_refusesAnUnusableSecretKeyInAKeyPairListing() {
         // given
-        ListKeysResponseV2Dto page = withUnaddressable(page(listed("0a")), unaddressableSecretKey());
+        ListKeysResponseV2Dto page = withUnusable(page(listed("0a")), unusableSecretKey());
 
         // when
         OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page);
 
         // then
-        assertInvalid(result, "Connector returned a key of another type than the request lists");
+        assertInvalid(result, "Connector returned a key of another type than the request names");
     }
 
     @Test
-    void validateListKeys_refusesAnUnaddressablePrivateKeyInASecretKeyListing() {
+    void validateListKeys_refusesAnUnusablePrivateKeyInASecretKeyListing() {
         // given
-        ListKeysResponseV2Dto page = withUnaddressable(page(listedSecretKey("0a")), unaddressable());
+        ListKeysResponseV2Dto page = withUnusable(page(listedSecretKey("0a")),
+                unusable(UnusableKeyReason.UNADDRESSABLE));
 
         // when
         OperationValidationResult result = VALIDATOR.validateListKeys(request(KeyRequestType.SECRET, 10), page);
 
         // then
-        assertInvalid(result, "Connector returned a key of another type than the request lists");
-    }
-
-    @Test
-    void validateListKeys_matchesTheFilterAgainstTheKeyMetaOfASecretKey() {
-        // given
-        ListKeysRequestV2Dto request = request(KeyRequestType.SECRET, 10);
-        request.setKeyMetaFilter(List.of(handle("0a")));
-
-        // when
-        OperationValidationResult named = VALIDATOR.validateListKeys(request, page(listedSecretKey("0a")));
-        OperationValidationResult unnamed = VALIDATOR.validateListKeys(request, page(listedSecretKey("0c")));
-
-        // then
-        assertTrue(named.isValid());
-        assertInvalid(unnamed, "Connector returned a key the filter does not name");
+        assertInvalid(result, "Connector returned a key of another type than the request names");
     }
 
     @Test

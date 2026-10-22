@@ -28,11 +28,14 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyHandleV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyPairV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.core.connector.ConnectorDto;
@@ -87,6 +90,7 @@ class KeyApiClientTest {
     private static final String IMPORT_CANCEL_PATH = IMPORT_PATH + "/cancel";
     private static final String IMPORT_RESULT_PATH = IMPORT_PATH + "/result";
     private static final String LIST_PATH = BASE_PATH + "/list";
+    private static final String RESOLVE_PATH = BASE_PATH + "/resolve";
     private static final String ATTRIBUTE_NAME = "createKeyAttribute";
     private static final String METADATA_NAME = "provider handle";
     private static final String KEY_CREATION_ID = "key-creation-1";
@@ -800,7 +804,7 @@ class KeyApiClientTest {
     }
 
     @Test
-    void listKeys_rejectsAPageLargerThanTheLimit() {
+    void listKeys_rejectsAPageThatIsNotFull() {
         // given
         stubJsonResponse(LIST_PATH, HttpStatus.OK, listedKeyPairsJson());
 
@@ -808,7 +812,86 @@ class KeyApiClientTest {
         Executable call = () -> client.listKeys(connector, listKeysRequest(1));
 
         // then
-        assertValidationFailure(call);
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+        assertEquals("Connector returned 2 keys on a page that holds 1", exception.getCause().getMessage());
+        assertSame(connector, exception.getConnector());
+    }
+
+    @Test
+    void resolveKeys_postsTheHandlesAndReturnsTheResults() throws ConnectorException {
+        // given
+        stubJsonResponse(RESOLVE_PATH, HttpStatus.OK, resolutionsJson());
+
+        // when
+        ResolveKeysResponseV2Dto result = client.resolveKeys(connector, resolveKeysRequest());
+
+        // then
+        assertEquals(2, result.getResults().size());
+        assertEquals("0", result.getResults().get(0).getIdentifier());
+        assertNotNull(result.getResults().get(0).getKey());
+        assertNull(result.getResults().get(1).getKey());
+        RequestPatternBuilder request = tokenProfileRequest(RESOLVE_PATH)
+                .withRequestBody(WireMock.matchingJsonPath("$.keyRequestType", WireMock.equalTo("keyPair")))
+                .withRequestBody(WireMock.matchingJsonPath("$.keys[0].identifier", WireMock.equalTo("0")))
+                .withRequestBody(WireMock.matchingJsonPath("$.keys[1].identifier", WireMock.equalTo("1")))
+                .withRequestBody(
+                        WireMock.matchingJsonPath("$.keys[0].keyMeta[0].name", WireMock.equalTo(METADATA_NAME)));
+        mockServer.verify(request);
+    }
+
+    @Test
+    void resolveKeys_rejectsAResponseMissingAResult() {
+        // given
+        stubJsonResponse(RESOLVE_PATH, HttpStatus.OK, """
+                {"results": [{"identifier": "1", "outcome": "notFound"}]}
+                """);
+
+        // when
+        Executable call = () -> client.resolveKeys(connector, resolveKeysRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+        assertEquals("Key resolution response identifiers must match request identifiers",
+                exception.getCause().getMessage());
+        assertSame(connector, exception.getConnector());
+    }
+
+    private static ResolveKeysRequestV2Dto resolveKeysRequest() {
+        return ResolveKeysRequestV2Dto
+                .builder()
+                .scope(withValidTokenProfileScope(new TokenProfileScopedRequestV2Dto()))
+                .keyRequestType(KeyRequestType.KEY_PAIR)
+                .keys(List.of(new KeyHandleV2Dto("0", validMetadata()), new KeyHandleV2Dto("1", validMetadata())))
+                .build();
+    }
+
+    private static String resolutionsJson() {
+        return """
+                {
+                  "results": [
+                    {
+                      "identifier": "0",
+                      "outcome": "found",
+                      "key": {
+                        "keyRequestType": "keyPair",
+                        "keyPairMeta": [%3$s],
+                        "label": "signer",
+                        "privateKeyData": {
+                          "keyMeta": [%1$s],
+                          "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                        },
+                        "publicKeyData": {
+                          "keyMeta": [%1$s],
+                          "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                        }
+                      }
+                    },
+                    {"identifier": "1", "outcome": "notFound"}
+                  ]
+                }
+                """.formatted(VALID_METADATA_JSON, publicKeySpkiBase64(), LISTED_HANDLE_JSON);
     }
 
     private static ListKeysRequestV2Dto listKeysRequest(int limit) {

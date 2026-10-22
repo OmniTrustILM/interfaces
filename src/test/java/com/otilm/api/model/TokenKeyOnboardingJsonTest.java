@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.client.cryptography.key.OnboardTokenKeysRequestDto;
 import com.otilm.api.model.client.cryptography.key.TokenKeySelectionDto;
+import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
@@ -14,10 +15,12 @@ import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingResultDto;
 import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TokenKeyOnboardingJsonTest {
@@ -52,7 +55,9 @@ class TokenKeyOnboardingJsonTest {
         TokenKeySelectionDto read = mapper.readValue(mapper.writeValueAsString(selection), TokenKeySelectionDto.class);
 
         // then
-        assertTrue(KeyMetaMatcher.matches(keyPairMeta, read.getKeyPairMeta()));
+        assertEquals(keyPairMeta.get(0).getName(), read.getKeyPairMeta().get(0).getName());
+        assertEquals(dataOf(keyPairMeta.get(0)), dataOf(read.getKeyPairMeta().get(0)));
+        assertTrue(KeyMetaMatcher.isUnambiguous(read.getKeyPairMeta()));
     }
 
     @Test
@@ -92,5 +97,39 @@ class TokenKeyOnboardingJsonTest {
 
         // then
         assertEquals(TokenKeyStatus.ONBOARDABLE_INTO_KEY, status);
+    }
+
+    @Test
+    void anEntryWithoutAnAlgorithmRoundTrips() throws Exception {
+        // given
+        TokenKeyDto entry = new TokenKeyDto();
+        entry.setStatus(TokenKeyStatus.UNREADABLE);
+
+        // when
+        TokenKeyDto read = mapper.readValue(mapper.writeValueAsString(entry), TokenKeyDto.class);
+
+        // then
+        assertNull(read.getKeyAlgorithm());
+        assertEquals(TokenKeyStatus.UNREADABLE, read.getStatus());
+    }
+
+    @Test
+    void theStatusesOfUnusableKeysHaveCodesOfTheirOwn() {
+        // when
+        List<TokenKeyStatus> statuses = Stream
+                .of("noUsableId", "unsupportedKeyType", "unreadable", "gone")
+                .map(TokenKeyStatus::findByCode)
+                .toList();
+
+        // then
+        assertEquals(List
+                .of(TokenKeyStatus.NO_USABLE_ID, TokenKeyStatus.UNSUPPORTED_KEY_TYPE, TokenKeyStatus.UNREADABLE,
+                        TokenKeyStatus.GONE),
+                statuses);
+    }
+
+    private static List<Object> dataOf(MetadataAttribute attribute) {
+        List<? extends AttributeContent> content = attribute.getContent();
+        return content.stream().<Object>map(AttributeContent::getData).toList();
     }
 }

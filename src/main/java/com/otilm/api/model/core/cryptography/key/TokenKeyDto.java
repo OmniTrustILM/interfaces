@@ -23,13 +23,14 @@ import lombok.ToString;
 public class TokenKeyDto {
 
     @Schema(description = "Metadata identifying the key pair in the key storage. Send it back unchanged to onboard the "
-            + "key pair. Absent for a key without a unique ID.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "key pair. Absent for a key without a usable ID.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> keyPairMeta;
 
     @Schema(description = "Label the key storage keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String label;
 
-    @Schema(description = "Algorithm of the key", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Algorithm of the key. Absent when the connector cannot read the key's type.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyAlgorithm keyAlgorithm;
 
     @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",

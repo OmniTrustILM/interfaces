@@ -26,6 +26,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusRes
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import org.springframework.http.HttpMethod;
@@ -55,6 +57,7 @@ public class KeyApiClient extends BaseApiClient implements KeySyncApiClient {
     private static final String IMPORT_CANCEL_PATH = IMPORT_PATH + "/cancel";
     private static final String IMPORT_RESULT_PATH = IMPORT_PATH + "/result";
     private static final String LIST_PATH = BASE_PATH + "/list";
+    private static final String RESOLVE_PATH = BASE_PATH + "/resolve";
     private final OperationResponseValidator responseValidator;
 
     public KeyApiClient(WebClient webClient, TrustManager[] defaultTrustManagers,
@@ -275,6 +278,19 @@ public class KeyApiClient extends BaseApiClient implements KeySyncApiClient {
                 r.uri(connector.getUrl() + LIST_PATH).bodyValue(body).retrieve().toEntity(ListKeysResponseV2Dto.class),
                 "listKeys"), request, connector);
         requireValid(responseValidator.validateListKeys(body, response), connector);
+        return response;
+    }
+
+    @Override
+    public ResolveKeysResponseV2Dto resolveKeys(ApiClientConnectorInfo connector, ResolveKeysRequestV2Dto body)
+            throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+        ResolveKeysResponseV2Dto response = processRequest(r -> requireBody(r
+                .uri(connector.getUrl() + RESOLVE_PATH)
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(ResolveKeysResponseV2Dto.class), "resolveKeys"), request, connector);
+        requireValid(responseValidator.validateResolveKeys(body, response), connector);
         return response;
     }
 }

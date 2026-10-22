@@ -22,6 +22,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusRes
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,9 +55,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * </p>
  *
  * <p>
- * Key listing is available when {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. Each
- * listed key or key pair has the key-creation response shape. The platform then addresses a key the token already held
- * like one it created.
+ * Key listing and key resolution are available when
+ * {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. Each listed key or key pair has the
+ * key-creation response shape. The platform then addresses a key the token already held like one it created.
  * </p>
  *
  * <p>
@@ -377,7 +379,8 @@ public interface KeyController extends AuthProtectedConnectorController {
     // ---- Listing ----
 
     @Operation(summary = "List keys",
-            description = "Return one page of the keys the token holds, including keys created outside the platform")
+            description = "Return one page of the keys the token holds, including keys created outside the platform. "
+                    + "An error about one key goes into that key's entry. Only a fault of the whole token fails the request.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Keys retrieved"),
             @ApiResponse(responseCode = "422", description = """
@@ -389,4 +392,22 @@ public interface KeyController extends AuthProtectedConnectorController {
     @PostMapping(path = "/list", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     ListKeysResponseV2Dto listKeys(@RequestBody @Valid ListKeysRequestV2Dto request);
+
+    // ---- Resolution ----
+
+    @Operation(summary = "Resolve key handles",
+            description = "Return the key the token holds under each handle a listing returned, or why it holds none. "
+                    + "An error about one key goes into that key's result. "
+                    + "Only a fault of the whole token fails the request.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Handles resolved"),
+            @ApiResponse(responseCode = "422", description = """
+                    - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
+                    - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
+                    """,
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+    @PostMapping(path = "/resolve", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ResolveKeysResponseV2Dto resolveKeys(@RequestBody @Valid ResolveKeysRequestV2Dto request);
 }

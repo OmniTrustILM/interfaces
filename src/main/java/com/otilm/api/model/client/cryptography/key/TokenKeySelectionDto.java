@@ -35,7 +35,7 @@ public class TokenKeySelectionDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 
-    /** An ambiguous handle matches no listed key pair, so its selection could only fail. */
+    /** A listing never returns an ambiguous handle, so a selection carrying one could only fail. */
     @AssertTrue(message = "keyPairMeta must name each attribute once, and each content item must carry data")
     @JsonIgnore
     @Schema(hidden = true)

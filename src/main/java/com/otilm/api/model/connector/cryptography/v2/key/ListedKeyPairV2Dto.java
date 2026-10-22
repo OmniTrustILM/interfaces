@@ -35,8 +35,8 @@ public final class ListedKeyPairV2Dto extends ListedKeyV2Dto {
     }
 
     @Schema(description = "Connector-defined metadata for the pair as a whole. It must identify the pair durably. "
-            + "`keyMetaFilter` matches against it. Each metadata name appears once, and every content item "
-            + "carries data. A key that cannot meet this is reported in `unaddressableKeys` or left out.",
+            + "The key resolution takes it back as the key's handle. Each metadata name appears once, and "
+            + "every content item carries data. A key that cannot meet this is reported in `unusableKeys`.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyPairMeta is required and must not be empty")
     private List<@NotNull(
