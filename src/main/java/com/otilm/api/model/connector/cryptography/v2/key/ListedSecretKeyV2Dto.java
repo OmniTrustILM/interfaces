@@ -19,8 +19,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Schema(name = "ListedSecretKeyV2Dto", description = """
-        A secret key the token holds, in the shape of a secret-key creation response. Any later request accepts its
-        metadata exactly like metadata returned at creation.
+        A secret key the token holds. Any later request accepts its metadata exactly like metadata returned at
+        creation.
         """, additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public final class ListedSecretKeyV2Dto extends ListedKeyV2Dto {
 

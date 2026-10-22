@@ -339,8 +339,8 @@ public interface CryptographicKeyController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
-                    description = "The page is out of range, the token profile is disabled, or the connector of "
-                            + "the token instance cannot list keys",
+                    description = "The page starts past the largest offset, the token profile is disabled, or the "
+                            + "connector of the token instance cannot list keys",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",

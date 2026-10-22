@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * A key the token holds, in the shape of the creation response for its key request type.
+ * A key the token holds, as a listing or a resolution returns it.
  */
 @Getter
 @Setter

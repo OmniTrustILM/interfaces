@@ -9,7 +9,7 @@ import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
-import com.otilm.api.model.connector.cryptography.v2.key.KeyMetaMatcher;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyHandles;
 import com.otilm.api.model.core.cryptography.key.TokenKeyDto;
 import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingResultDto;
 import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
@@ -57,7 +57,7 @@ class TokenKeyOnboardingJsonTest {
         // then
         assertEquals(keyPairMeta.get(0).getName(), read.getKeyPairMeta().get(0).getName());
         assertEquals(dataOf(keyPairMeta.get(0)), dataOf(read.getKeyPairMeta().get(0)));
-        assertTrue(KeyMetaMatcher.isUnambiguous(read.getKeyPairMeta()));
+        assertTrue(KeyHandles.isUnambiguous(read.getKeyPairMeta()));
     }
 
     @Test

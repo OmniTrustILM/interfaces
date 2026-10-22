@@ -4,16 +4,14 @@ import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import java.util.List;
 
-/**
- * Tells whether a key handle is unambiguous: each metadata name occurs once and each content item carries data.
- */
-public final class KeyMetaMatcher {
+public final class KeyHandles {
 
-    private KeyMetaMatcher() {
+    private KeyHandles() {
     }
 
+    /** Whether the handle names each metadata attribute once and every content item carries data. */
     public static boolean isUnambiguous(List<MetadataAttribute> handle) {
-        return !hasRepeatedName(handle) && handle.stream().noneMatch(KeyMetaMatcher::hasContentWithoutData);
+        return !hasRepeatedName(handle) && handle.stream().noneMatch(KeyHandles::hasContentWithoutData);
     }
 
     private static boolean hasRepeatedName(List<MetadataAttribute> handle) {

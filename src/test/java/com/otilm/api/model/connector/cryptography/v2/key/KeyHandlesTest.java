@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
-class KeyMetaMatcherTest {
+class KeyHandlesTest {
 
     private static MetadataAttribute meta(String uuid, String name, String label, String value) {
         return meta(uuid, name, label, new StringAttributeContentV3(value));
@@ -63,7 +63,7 @@ class KeyMetaMatcherTest {
     @MethodSource("unambiguousHandles")
     void isUnambiguous_accepts(List<MetadataAttribute> handle) {
         // when
-        boolean unambiguous = KeyMetaMatcher.isUnambiguous(handle);
+        boolean unambiguous = KeyHandles.isUnambiguous(handle);
 
         // then
         assertTrue(unambiguous);
@@ -73,7 +73,7 @@ class KeyMetaMatcherTest {
     @MethodSource("ambiguousHandles")
     void isUnambiguous_refuses(List<MetadataAttribute> handle) {
         // when
-        boolean unambiguous = KeyMetaMatcher.isUnambiguous(handle);
+        boolean unambiguous = KeyHandles.isUnambiguous(handle);
 
         // then
         assertFalse(unambiguous);

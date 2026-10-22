@@ -22,8 +22,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Schema(name = "ListedKeyPairV2Dto", description = """
-        A key pair the token holds, in the shape of a key-pair creation response. Any later request accepts its
-        metadata exactly like metadata returned at creation.
+        A key pair the token holds. Any later request accepts its metadata exactly like metadata returned at
+        creation.
         """, additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public final class ListedKeyPairV2Dto extends ListedKeyV2Dto {
 

@@ -56,8 +56,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * <p>
  * Key listing and key resolution are available when
- * {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. Each listed key or key pair has the
- * key-creation response shape. The platform then addresses a key the token already held like one it created.
+ * {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. The platform then addresses a key
+ * the token already held like one it created.
  * </p>
  *
  * <p>
@@ -396,7 +396,7 @@ public interface KeyController extends AuthProtectedConnectorController {
     // ---- Resolution ----
 
     @Operation(summary = "Resolve key handles",
-            description = "Return the key the token holds under each handle a listing returned, or why it holds none. "
+            description = "Return the key the token holds under each handle a listing returned, or why it cannot. "
                     + "An error about one key goes into that key's result. "
                     + "Only a fault of the whole token fails the request.")
     @ApiResponses({

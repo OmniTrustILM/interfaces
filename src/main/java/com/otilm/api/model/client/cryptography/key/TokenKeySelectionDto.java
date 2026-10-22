@@ -3,7 +3,7 @@ package com.otilm.api.model.client.cryptography.key;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
-import com.otilm.api.model.connector.cryptography.v2.key.KeyMetaMatcher;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyHandles;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,7 +30,7 @@ public class TokenKeySelectionDto {
     private List<@NotNull(
             message = "keyPairMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyPairMeta;
 
-    @Schema(description = "Name of the onboarded key, by default the name the listing suggested. A key pair "
+    @Schema(description = "Name of the onboarded key, by default one the platform suggests. A key pair "
             + "onboarded into an existing key keeps the name of that key.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
@@ -43,6 +43,6 @@ public class TokenKeySelectionDto {
         if (keyPairMeta == null || keyPairMeta.stream().anyMatch(Objects::isNull)) {
             return true;
         }
-        return KeyMetaMatcher.isUnambiguous(keyPairMeta);
+        return KeyHandles.isUnambiguous(keyPairMeta);
     }
 }

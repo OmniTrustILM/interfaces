@@ -14,7 +14,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.key.KeyMetaMatcher;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyHandles;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
@@ -312,7 +312,7 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     private static void requireNameableHandles(List<ListedKeyV2Dto> keys) {
-        if (!keys.stream().allMatch(key -> KeyMetaMatcher.isUnambiguous(key.handle()))) {
+        if (!keys.stream().allMatch(key -> KeyHandles.isUnambiguous(key.handle()))) {
             throw new IllegalArgumentException("Connector returned a key whose metadata cannot serve as a handle");
         }
     }
