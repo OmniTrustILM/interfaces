@@ -72,6 +72,8 @@ class CryptographyEnumsTest {
                                 "The token holds no key under the handle"),
                         contract(KeyResolutionOutcome.AMBIGUOUS, "ambiguous", "Ambiguous",
                                 "The token holds more than one key under the handle"),
+                        contract(KeyResolutionOutcome.UNSUPPORTED_TYPE, "unsupportedType", "Unsupported type",
+                                "The token holds the key, and it is of a type the connector cannot operate"),
                         contract(KeyResolutionOutcome.UNREADABLE, "unreadable", "Unreadable",
                                 "The token holds the key, and the connector cannot read it"),
                         contract(KeyResolutionOutcome.INVALID_HANDLE, "invalidHandle", "Invalid handle",

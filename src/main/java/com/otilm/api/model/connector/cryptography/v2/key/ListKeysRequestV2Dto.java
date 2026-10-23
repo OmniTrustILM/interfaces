@@ -32,7 +32,8 @@ public class ListKeysRequestV2Dto extends TokenProfileScopedRequestV2Dto {
     @Min(value = 0, message = "offset must not be negative")
     private Integer offset;
 
-    @Schema(description = "Maximum number of keys to return", requiredMode = Schema.RequiredMode.REQUIRED,
+    @Schema(description = "Number of keys to return. The page holds exactly this many entries, `items` and "
+            + "`unusableKeys` together, unless the listing ends first.", requiredMode = Schema.RequiredMode.REQUIRED,
             minimum = "1", maximum = "" + MAX_LIMIT)
     @NotNull(message = "limit is required")
     @Min(value = 1, message = "limit must be positive")

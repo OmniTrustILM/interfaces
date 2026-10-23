@@ -30,8 +30,8 @@ public class TokenKeySelectionDto {
     private List<@NotNull(
             message = "keyPairMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyPairMeta;
 
-    @Schema(description = "Name of the onboarded key, by default one the platform suggests. A key pair "
-            + "onboarded into an existing key keeps the name of that key.",
+    @Schema(description = "Name of the onboarded key. Onboarding picks one when it is absent. "
+            + "A key pair onboarded into an existing key keeps the name of that key.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 

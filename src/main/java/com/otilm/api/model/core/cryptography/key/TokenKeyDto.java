@@ -53,7 +53,8 @@ public class TokenKeyDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String inventoryKeyName;
 
-    @Schema(description = "Default name of the onboarded key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Name the platform suggests for the onboarded key",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String suggestedName;
 
     @Schema(description = "Why the key cannot be onboarded", requiredMode = Schema.RequiredMode.NOT_REQUIRED)

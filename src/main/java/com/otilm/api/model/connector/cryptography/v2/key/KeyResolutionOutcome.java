@@ -15,6 +15,8 @@ public enum KeyResolutionOutcome implements IPlatformEnum {
     FOUND("found", "Found", "The token holds one key under the handle"),
     NOT_FOUND("notFound", "Not found", "The token holds no key under the handle"),
     AMBIGUOUS("ambiguous", "Ambiguous", "The token holds more than one key under the handle"),
+    UNSUPPORTED_TYPE("unsupportedType", "Unsupported type",
+            "The token holds the key, and it is of a type the connector cannot operate"),
     UNREADABLE("unreadable", "Unreadable", "The token holds the key, and the connector cannot read it"),
     INVALID_HANDLE("invalidHandle", "Invalid handle", "The handle is not one this connector issues");
 
