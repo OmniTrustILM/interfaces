@@ -79,8 +79,9 @@ class ErrorCodeTest {
     void connectorCryptographyEntries() {
         for (ErrorCode code : List
                 .of(ErrorCode.KEY_TYPE_NOT_IMPORTABLE, ErrorCode.KEY_TYPE_NOT_EXPORTABLE,
-                        ErrorCode.KEY_MATERIAL_MISMATCH, ErrorCode.KEY_DECRYPTION_FAILED,
-                        ErrorCode.EXPORTABLE_NOT_SUPPORTED, ErrorCode.KEY_NOT_EXPORTABLE)) {
+                        ErrorCode.KEY_TYPE_NOT_LISTABLE, ErrorCode.KEY_MATERIAL_MISMATCH,
+                        ErrorCode.KEY_DECRYPTION_FAILED, ErrorCode.EXPORTABLE_NOT_SUPPORTED,
+                        ErrorCode.KEY_NOT_EXPORTABLE)) {
             assertEquals(ProblemTypeCategory.CONNECTOR, code.getCategory(), code.name());
             assertEquals(ConnectorInterface.CRYPTOGRAPHY, code.getInterfaceCode(), code.name());
             assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, code.getStatus(), code.name());

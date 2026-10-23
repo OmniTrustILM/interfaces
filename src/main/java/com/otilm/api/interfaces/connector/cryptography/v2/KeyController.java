@@ -20,6 +20,10 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dt
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,6 +52,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Key import is available when {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_IMPORT} is enabled. It
  * reuses the key-creation response shapes because the outcome is the same: a key now exists in the technology and the
  * platform receives its public part and its handle.
+ * </p>
+ *
+ * <p>
+ * Key listing and key resolution are available when
+ * {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. The platform then addresses a key
+ * the token already held like one it created.
  * </p>
  *
  * <p>
@@ -365,4 +375,39 @@ public interface KeyController extends AuthProtectedConnectorController {
     @PostMapping(path = "/export", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     ExportKeyResponseV2Dto exportKey(@RequestBody @Valid ExportKeyRequestV2Dto request);
+
+    // ---- Listing ----
+
+    @Operation(summary = "List keys",
+            description = "Return one page of the keys the token holds, including keys created outside the platform. "
+                    + "An error about one key goes into that key's entry. Only a fault of the whole token fails the request.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Keys retrieved"),
+            @ApiResponse(responseCode = "422", description = """
+                    - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
+                    - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
+                    """,
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+    @PostMapping(path = "/list", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ListKeysResponseV2Dto listKeys(@RequestBody @Valid ListKeysRequestV2Dto request);
+
+    // ---- Resolution ----
+
+    @Operation(summary = "Resolve key handles",
+            description = "Return the key the token holds under each handle a listing returned, or why it cannot. "
+                    + "An error about one key goes into that key's result. "
+                    + "Only a fault of the whole token fails the request.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Handles resolved"),
+            @ApiResponse(responseCode = "422", description = """
+                    - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
+                    - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
+                    """,
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+    @PostMapping(path = "/resolve", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ResolveKeysResponseV2Dto resolveKeys(@RequestBody @Valid ResolveKeysRequestV2Dto request);
 }

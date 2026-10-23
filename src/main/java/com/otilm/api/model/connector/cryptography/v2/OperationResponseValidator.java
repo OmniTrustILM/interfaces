@@ -14,7 +14,16 @@ import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyHandles;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -32,6 +41,7 @@ import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2
 import jakarta.validation.Validator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -41,6 +51,8 @@ import org.springframework.http.ResponseEntity;
  * Validates that an async-capable connector response honors the caller-selected execution mode.
  */
 public final class OperationResponseValidator extends ResponseChecks {
+
+    private static final String ANOTHER_KEY_TYPE_MESSAGE = "Connector returned a key of another type than the request names";
 
     private final KeyTransferResponseValidator keyTransfer;
 
@@ -226,6 +238,87 @@ public final class OperationResponseValidator extends ResponseChecks {
 
     public OperationValidationResult validateDestroyKeyStatus(KeyDestructionStatusResponseV2Dto response) {
         return validateBeanConstraints(response);
+    }
+
+    public OperationValidationResult validateListKeys(ListKeysRequestV2Dto request, ListKeysResponseV2Dto response) {
+        return validate(() -> {
+            requireRequest(request, "Key listing");
+            validateRequiredBean(response);
+            requireFullPage(request, response);
+            requireRequestedType(request.getKeyRequestType(), response);
+            requireNameableHandles(response.getItems());
+        });
+    }
+
+    public OperationValidationResult validateResolveKeys(ResolveKeysRequestV2Dto request,
+            ResolveKeysResponseV2Dto response) {
+        return validate(() -> {
+            requireRequest(request, "Key resolution");
+            validateRequiredBean(response);
+            requireMatchingIdentifiers(request.getKeys(), response.getResults(),
+                    "Key resolution response identifiers must match request identifiers");
+            List<ListedKeyV2Dto> found = response
+                    .getResults()
+                    .stream()
+                    .map(KeyResolutionV2Dto::getKey)
+                    .filter(Objects::nonNull)
+                    .toList();
+            requireKeysOfType(request.getKeyRequestType(), found);
+            requireNameableHandles(found);
+        });
+    }
+
+    /** Every key the listing counts for the page appears, as an item or as an unusable key. */
+    private static void requireFullPage(ListKeysRequestV2Dto request, ListKeysResponseV2Dto response) {
+        Integer limit = request.getLimit();
+        if (limit == null) {
+            throw new IllegalArgumentException("Key listing limit is required");
+        }
+        Integer offset = request.getOffset();
+        if (offset == null) {
+            throw new IllegalArgumentException("Key listing offset is required");
+        }
+        long expected = Math.min(limit, Math.max(0L, response.getTotalItems() - offset));
+        int returned = response.getItems().size() + unusableKeysOf(response).size();
+        if (returned != expected) {
+            throw new IllegalArgumentException(
+                    "Connector returned %d keys on a page that holds %d".formatted(returned, expected));
+        }
+    }
+
+    private static void requireRequestedType(KeyRequestType requested, ListKeysResponseV2Dto response) {
+        if (requested == null) {
+            throw new IllegalArgumentException("Key listing key request type is required");
+        }
+        requireKeysOfType(requested, response.getItems());
+        boolean unusableOfType = unusableKeysOf(response)
+                .stream()
+                .filter(key -> key.getKeyData() != null)
+                .allMatch(key -> unusableKeyTypeOf(requested) == key.getKeyData().getType());
+        if (!unusableOfType) {
+            throw new IllegalArgumentException(ANOTHER_KEY_TYPE_MESSAGE);
+        }
+    }
+
+    private static void requireKeysOfType(KeyRequestType requested, List<ListedKeyV2Dto> keys) {
+        if (!keys.stream().allMatch(key -> key.getKeyRequestType() == requested)) {
+            throw new IllegalArgumentException(ANOTHER_KEY_TYPE_MESSAGE);
+        }
+    }
+
+    /** A key pair the token cannot use is reported by its private key. */
+    private static KeyTypeV2 unusableKeyTypeOf(KeyRequestType requested) {
+        return requested == KeyRequestType.SECRET ? KeyTypeV2.SECRET : KeyTypeV2.PRIVATE;
+    }
+
+    private static void requireNameableHandles(List<ListedKeyV2Dto> keys) {
+        if (!keys.stream().allMatch(key -> KeyHandles.isUnambiguous(key.handle()))) {
+            throw new IllegalArgumentException("Connector returned a key whose metadata cannot serve as a handle");
+        }
+    }
+
+    private static List<UnusableKeyV2Dto> unusableKeysOf(ListKeysResponseV2Dto response) {
+        return Objects.requireNonNullElse(response.getUnusableKeys(), List.of());
     }
 
     public OperationValidationResult validateEncrypt(CipherDataRequestV2Dto request,

@@ -23,8 +23,15 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyHandleV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import com.otilm.api.model.core.connector.ConnectorDto;
@@ -74,6 +81,8 @@ class KeyApiClientMqTest {
     private static final String IMPORT_STATUS_PATH = IMPORT_PATH + "/status";
     private static final String IMPORT_CANCEL_PATH = IMPORT_PATH + "/cancel";
     private static final String IMPORT_RESULT_PATH = IMPORT_PATH + "/result";
+    private static final String LIST_PATH = BASE_PATH + "/list";
+    private static final String RESOLVE_PATH = BASE_PATH + "/resolve";
     private static final String KEY_IMPORT_ID = "key-import-1";
     private static final String TRANSPORT_PASSPHRASE = "8FQmS3ZbW1xkP0vTqA9rYcE4uHnJ6dLiKgOw2sXeVm0";
     private static final String KEY_CREATION_ID = "key-creation-1";
@@ -458,6 +467,85 @@ class KeyApiClientMqTest {
         // then
         assertEquals(List.of(attribute), result);
         assertPlainInvocation(EXPORT_ATTRIBUTES_PATH, request, BaseAttribute[].class);
+    }
+
+    @Test
+    void listKeys_delegatesPostAndReturnsThePage() throws ConnectorException {
+        // given
+        ListKeysRequestV2Dto request = withValidTokenProfileScope(new ListKeysRequestV2Dto());
+        request.setKeyRequestType(KeyRequestType.KEY_PAIR);
+        request.setOffset(0);
+        request.setLimit(10);
+        ListKeysResponseV2Dto page = new ListKeysResponseV2Dto();
+        page.setItems(List.of());
+        page.setTotalItems(0L);
+        proxyClient.respondWith(page);
+
+        // when
+        ListKeysResponseV2Dto result = client.listKeys(connector, request);
+
+        // then
+        assertSame(page, result);
+        assertPlainInvocation(LIST_PATH, request, ListKeysResponseV2Dto.class);
+    }
+
+    @Test
+    void listKeys_rejectsAPageWithoutItems() {
+        // given
+        ListKeysRequestV2Dto request = withValidTokenProfileScope(new ListKeysRequestV2Dto());
+        request.setKeyRequestType(KeyRequestType.KEY_PAIR);
+        request.setOffset(0);
+        request.setLimit(10);
+        ListKeysResponseV2Dto withoutItems = new ListKeysResponseV2Dto();
+        withoutItems.setTotalItems(0L);
+        proxyClient.respondWith(withoutItems);
+
+        // when
+        Executable call = () -> client.listKeys(connector, request);
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals("Connector response validation failed: items: items is required",
+                exception.getCause().getMessage());
+    }
+
+    @Test
+    void resolveKeys_delegatesPostAndReturnsTheResults() throws ConnectorException {
+        // given
+        ResolveKeysRequestV2Dto request = resolveKeysRequest();
+        ResolveKeysResponseV2Dto response = new ResolveKeysResponseV2Dto(
+                List.of(new KeyResolutionV2Dto("0", KeyResolutionOutcome.NOT_FOUND, null)));
+        proxyClient.respondWith(response);
+
+        // when
+        ResolveKeysResponseV2Dto result = client.resolveKeys(connector, request);
+
+        // then
+        assertSame(response, result);
+        assertPlainInvocation(RESOLVE_PATH, request, ResolveKeysResponseV2Dto.class);
+    }
+
+    @Test
+    void resolveKeys_rejectsAResponseWithoutResults() {
+        // given
+        proxyClient.respondWith(new ResolveKeysResponseV2Dto());
+
+        // when
+        Executable call = () -> client.resolveKeys(connector, resolveKeysRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertEquals("Connector response validation failed: results: results is required",
+                exception.getCause().getMessage());
+    }
+
+    private static ResolveKeysRequestV2Dto resolveKeysRequest() {
+        return ResolveKeysRequestV2Dto
+                .builder()
+                .scope(withValidTokenProfileScope(new TokenProfileScopedRequestV2Dto()))
+                .keyRequestType(KeyRequestType.KEY_PAIR)
+                .keys(List.of(new KeyHandleV2Dto("0", validMetadata())))
+                .build();
     }
 
     @Test

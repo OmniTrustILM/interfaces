@@ -4,6 +4,7 @@ import com.otilm.api.model.client.connector.v2.FeatureFlag;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyExportableAttribute;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.testsupport.OpenApiProseAssertions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -198,6 +199,17 @@ class KeyControllerDocTest {
                 .anyMatch(r -> r.description().contains(ErrorCode.KEY_NOT_EXPORTABLE.name()));
 
         assertTrue(documentsRefusal, "exportKey must document the refusal of a key that is not exportable");
+    }
+
+    @Test
+    void listingDocumentsTheRefusalOfAKeyTypeItCannotList() throws NoSuchMethodException {
+        Method listKeys = KeyController.class.getMethod("listKeys", ListKeysRequestV2Dto.class);
+
+        boolean documentsRefusal = Arrays
+                .stream(listKeys.getAnnotation(ApiResponses.class).value())
+                .anyMatch(r -> r.description().contains(ErrorCode.KEY_TYPE_NOT_LISTABLE.name()));
+
+        assertTrue(documentsRefusal, "listKeys must document the refusal of a key type it cannot list");
     }
 
     @Test

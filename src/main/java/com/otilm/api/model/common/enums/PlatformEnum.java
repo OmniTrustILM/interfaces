@@ -63,6 +63,7 @@ import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.cryptography.key.KeyState;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
+import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
 import com.otilm.api.model.core.discovery.DiscoveryMessageSeverity;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.enums.CertificateProtocol;
@@ -143,6 +144,7 @@ public enum PlatformEnum implements IPlatformEnum {
     KEY_TYPE(KeyType.class, "Key type"),
     KEY_USAGE(KeyUsage.class, "Key usage"),
     KEY_REQUEST_TYPE(KeyRequestType.class, "Key request type"),
+    TOKEN_KEY_STATUS(TokenKeyStatus.class, "Status of a key found on a token"),
     KEY_COMPROMISE_REASON(KeyCompromiseReason.class, "Key compromise reason"),
     TOKEN_STATUS(TokenInstanceStatus.class, "Token instance status"),
     DIGEST_ALGORITHM(DigestAlgorithm.class, "Digest algorithm"),

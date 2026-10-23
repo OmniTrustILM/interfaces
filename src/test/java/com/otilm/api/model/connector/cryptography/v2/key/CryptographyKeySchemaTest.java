@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Named.named;
 class CryptographyKeySchemaTest {
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("creationUnions")
-    void keyCreationSchema_publishesDiscriminatedUnionWithOpenCompleteParent(UnionContract contract) {
+    @MethodSource("keyUnions")
+    void keyUnionSchema_publishesDiscriminatedUnionWithOpenCompleteParent(UnionContract contract) {
         // given
         Map<String, Schema> schemas = openApi31Schemas(contract.root());
 
@@ -44,7 +44,7 @@ class CryptographyKeySchemaTest {
                         member + " must remain closed"));
     }
 
-    static Stream<Named<UnionContract>> creationUnions() {
+    static Stream<Named<UnionContract>> keyUnions() {
         return Stream
                 .of(named("creation response",
                         new UnionContract(KeyCreationResponseV2Dto.class, "KeyCreationResponse", "keyRequestType",
@@ -61,7 +61,14 @@ class CryptographyKeySchemaTest {
                                 Set.of("keyRequestType", "status", "reason", "result"),
                                 Set
                                         .of("SecretKeyOperationStatusResponseV2Dto",
-                                                "KeyPairOperationStatusResponseV2Dto"))));
+                                                "KeyPairOperationStatusResponseV2Dto"))),
+                        named("listed key",
+                                new UnionContract(ListedKeyV2Dto.class, "ListedKeyV2", "keyRequestType",
+                                        Map
+                                                .of("secret", "#/components/schemas/ListedSecretKeyV2Dto", "keyPair",
+                                                        "#/components/schemas/ListedKeyPairV2Dto"),
+                                        Set.of("keyRequestType", "label"),
+                                        Set.of("ListedSecretKeyV2Dto", "ListedKeyPairV2Dto"))));
     }
 
     @Test
@@ -138,7 +145,9 @@ class CryptographyKeySchemaTest {
                         schema("secret status", SecretKeyOperationStatusResponseV2Dto.class,
                                 "SecretKeyOperationStatusResponseV2Dto"),
                         schema("key pair status", KeyPairOperationStatusResponseV2Dto.class,
-                                "KeyPairOperationStatusResponseV2Dto"));
+                                "KeyPairOperationStatusResponseV2Dto"),
+                        schema("listed secret key", ListedSecretKeyV2Dto.class, "ListedSecretKeyV2Dto"),
+                        schema("listed key pair", ListedKeyPairV2Dto.class, "ListedKeyPairV2Dto"));
     }
 
     private static Named<SchemaContract> schema(String name, Class<?> root, String schemaName) {
