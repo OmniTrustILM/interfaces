@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
 
       - id: check-version
@@ -91,7 +91,7 @@ jobs:
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           server-id: github
           server-username: GITHUB_ACTOR
@@ -156,7 +156,7 @@ jobs:
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           server-id: github
           server-username: GITHUB_ACTOR
