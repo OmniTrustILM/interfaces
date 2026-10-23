@@ -10,6 +10,7 @@ import java.util.Arrays;
 public enum KeyEvent {
     CREATE("Create Key"),
     IMPORT("Import Key"),
+    ONBOARD("Onboard Key"),
     EXPORT("Export Key"),
     EXPORT_DISABLED("Disable Key Export"),
     COMPROMISED("Compromised Key"),

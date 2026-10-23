@@ -82,6 +82,8 @@ public enum ErrorCode {
             "Key type or algorithm cannot be imported into this token", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_TYPE_NOT_EXPORTABLE(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
             "Key type or algorithm cannot be exported from this token", HttpStatus.UNPROCESSABLE_CONTENT, false),
+    KEY_TYPE_NOT_LISTABLE(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
+            "Key type cannot be listed on this token", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_MATERIAL_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
             "Key material does not match the declared key type or algorithm", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_DECRYPTION_FAILED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,

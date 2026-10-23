@@ -97,6 +97,32 @@ class CryptographyKeyJsonContractTest {
     }
 
     @ParameterizedTest(name = "{0}")
+    @MethodSource("listedKeys")
+    void listedKey_roundTripsDiscriminatedSubtype(ListedKeyContract contract) throws Exception {
+        // given
+        ListedKeyV2Dto key = contract.key();
+        key.setLabel("signing");
+
+        // when
+        String json = mapper.writeValueAsString(key);
+        ListedKeyV2Dto roundTripped = mapper.readValue(json, ListedKeyV2Dto.class);
+
+        // then
+        assertEquals(contract.wireCode(), mapper.readTree(json).get("keyRequestType").textValue());
+        assertInstanceOf(contract.type(), roundTripped);
+        assertEquals("signing", roundTripped.getLabel());
+    }
+
+    static Stream<Named<ListedKeyContract>> listedKeys() {
+        return Stream
+                .of(named("secret key",
+                        new ListedKeyContract(new ListedSecretKeyV2Dto(), ListedSecretKeyV2Dto.class,
+                                KeyRequestType.Codes.SECRET)),
+                        named("key pair", new ListedKeyContract(new ListedKeyPairV2Dto(), ListedKeyPairV2Dto.class,
+                                KeyRequestType.Codes.KEY_PAIR)));
+    }
+
+    @ParameterizedTest(name = "{0}")
     @MethodSource("polymorphicBases")
     void polymorphicBase_rejectsUnknownDiscriminator(PolymorphicBase base) {
         // given
@@ -113,7 +139,8 @@ class CryptographyKeyJsonContractTest {
     static Stream<Named<PolymorphicBase>> polymorphicBases() {
         return Stream
                 .of(named("creation response", new PolymorphicBase(KeyCreationResponseV2Dto.class)),
-                        named("creation status", new PolymorphicBase(KeyCreationStatusResponseV2Dto.class)));
+                        named("creation status", new PolymorphicBase(KeyCreationStatusResponseV2Dto.class)),
+                        named("listed key", new PolymorphicBase(ListedKeyV2Dto.class)));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -148,7 +175,9 @@ class CryptographyKeyJsonContractTest {
                         closed("secret creation status", KeyCreationStatusResponseV2Dto.class,
                                 "{\"keyRequestType\":\"secret\",\"status\":\"inProgress\"}"),
                         closed("key pair creation status", KeyCreationStatusResponseV2Dto.class,
-                                "{\"keyRequestType\":\"keyPair\",\"status\":\"inProgress\"}"));
+                                "{\"keyRequestType\":\"keyPair\",\"status\":\"inProgress\"}"),
+                        closed("listed secret key", ListedKeyV2Dto.class, "{\"keyRequestType\":\"secret\"}"),
+                        closed("listed key pair", ListedKeyV2Dto.class, "{\"keyRequestType\":\"keyPair\"}"));
     }
 
     private static Named<ClosedDto> closed(String name, Class<?> type, String json) {
@@ -161,6 +190,9 @@ class CryptographyKeyJsonContractTest {
 
     private record CreationStatusContract(KeyCreationStatusResponseV2Dto response, Class<?> type,
             KeyRequestType requestType, String wireCode) {
+    }
+
+    private record ListedKeyContract(ListedKeyV2Dto key, Class<?> type, String wireCode) {
     }
 
     private record PolymorphicBase(Class<?> type) {
