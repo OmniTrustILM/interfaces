@@ -86,14 +86,22 @@ public interface VaultInstanceController extends AuthProtectedController {
             throws NotFoundException;
 
     @Operation(summary = "Create a Vault instance")
-    @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Vault instance created")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Vault instance created"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     VaultInstanceDetailDto createVaultInstance(@RequestBody @Valid VaultInstanceRequestDto vaultInstanceRequest)
             throws ConnectorException, NotFoundException, AttributeException, AlreadyExistException;
 
     @Operation(summary = "Update a Vault instance")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Vault instance updated")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Vault instance updated"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PutMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     VaultInstanceDetailDto updateVaultInstance(@Parameter(description = "Vault instance UUID") @PathVariable UUID uuid,
             @RequestBody VaultInstanceUpdateRequestDto vaultInstanceRequest)

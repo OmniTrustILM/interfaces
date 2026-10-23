@@ -122,7 +122,11 @@ public interface SecretManagementController extends AuthProtectedController {
             throws NotFoundException, AttributeException, ConnectorException;
 
     @Operation(summary = "Delete a secret")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Secret deleted successfully")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Secret deleted successfully"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @DeleteMapping(path = "/secrets/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteSecret(@Parameter(description = "UUID of the secret") @PathVariable UUID uuid,

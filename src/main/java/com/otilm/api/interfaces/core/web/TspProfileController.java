@@ -92,7 +92,11 @@ public interface TspProfileController extends AuthProtectedController {
             throws AlreadyExistException, AttributeException, NotFoundException;
 
     @Operation(operationId = "deleteTspProfile", summary = "Delete TSP Profile")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "TSP Profile deleted")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "TSP Profile deleted"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @DeleteMapping(path = "/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteTspProfile(@Parameter(description = "TSP Profile UUID") @PathVariable UUID uuid)

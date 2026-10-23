@@ -8,6 +8,7 @@ import com.otilm.api.model.core.auth.AttributeResource;
 import com.otilm.api.model.core.auth.Resource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -38,6 +39,21 @@ public class ResourceObjectContentData extends NameAndUuidDto implements Resourc
 
         if (uuid == null || uuid.isEmpty()) {
             throw new ValidationException("UUID must be provided in Resource Object Content Data");
+        }
+
+        if (!isCanonicalUuid(uuid)) {
+            throw new ValidationException("UUID in Resource Object Content Data must be a canonical UUID");
+        }
+    }
+
+    /**
+     * A stored reference is matched to its object as text, and {@link UUID#fromString} also accepts shortened groups.
+     */
+    private static boolean isCanonicalUuid(String value) {
+        try {
+            return UUID.fromString(value).toString().equalsIgnoreCase(value);
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
