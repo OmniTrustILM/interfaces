@@ -49,10 +49,6 @@ public class TokenProfileDetailDto extends NameAndUuidDto {
             + "which key types", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyTransferCapabilityDto keyTransfer;
 
-    @Schema(description = "Whether the keys in the key storage of this token profile can be listed and onboarded",
-            requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "false")
-    private boolean keyListAvailable;
-
     /**
      * The signature this class carried before {@code keyTransfer} was added, so a caller that constructs it
      * positionally still compiles. Key transfer is then unreported rather than reported as unavailable.
@@ -62,17 +58,5 @@ public class TokenProfileDetailDto extends NameAndUuidDto {
             TokenInstanceStatus tokenInstanceStatus, Boolean enabled, List<KeyUsage> usages) {
         this(description, tokenInstanceUuid, tokenInstanceName, attributes, customAttributes, tokenInstanceStatus,
                 enabled, usages, null);
-    }
-
-    /**
-     * This signature predates {@code keyListAvailable}. Positional callers still compile against it, with key listing
-     * reported as unavailable.
-     */
-    public TokenProfileDetailDto(String description, String tokenInstanceUuid, String tokenInstanceName,
-            List<ResponseAttribute> attributes, List<ResponseAttribute> customAttributes,
-            TokenInstanceStatus tokenInstanceStatus, Boolean enabled, List<KeyUsage> usages,
-            KeyTransferCapabilityDto keyTransfer) {
-        this(description, tokenInstanceUuid, tokenInstanceName, attributes, customAttributes, tokenInstanceStatus,
-                enabled, usages, keyTransfer, false);
     }
 }

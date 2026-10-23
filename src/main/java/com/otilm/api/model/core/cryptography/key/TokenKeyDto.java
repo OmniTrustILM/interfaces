@@ -23,22 +23,21 @@ import lombok.ToString;
 public class TokenKeyDto {
 
     @Schema(description = "Metadata identifying the key pair in the key storage. Send it back unchanged to onboard the "
-            + "key pair. Absent for a key without a usable ID.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "key pair.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> keyPairMeta;
 
     @Schema(description = "Label the key storage keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String label;
 
-    @Schema(description = "Algorithm of the key. Absent when the connector cannot read the key's type.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Algorithm of the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyAlgorithm keyAlgorithm;
 
-    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true, minimum = "1")
+    @Schema(description = "Key length in bits", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true,
+            minimum = "1")
     private Integer length;
 
-    @Schema(description = "SHA-256 fingerprint of the public key of a key pair. Absent when the key storage lacks a public "
-            + "key object.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "SHA-256 fingerprint of the public key of a key pair",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
 
     @Schema(description = "Onboarding status of the key", requiredMode = Schema.RequiredMode.REQUIRED)

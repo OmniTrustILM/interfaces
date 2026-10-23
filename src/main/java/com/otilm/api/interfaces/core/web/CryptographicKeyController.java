@@ -333,7 +333,7 @@ public interface CryptographicKeyController extends AuthProtectedController {
     @Operation(summary = "List keys in the key storage",
             description = "Returns one page of the keys in the key storage of the specified token instance, including "
                     + "keys created outside the platform. Each key carries its onboarding status, and the reason when "
-                    + "it cannot be onboarded. Requires `keyListAvailable` on the token profile.")
+                    + "it cannot be onboarded.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Keys retrieved"),
             @ApiResponse(responseCode = "404", description = "Token instance or token profile not found",

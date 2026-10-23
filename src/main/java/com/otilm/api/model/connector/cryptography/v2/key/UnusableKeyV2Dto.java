@@ -26,8 +26,7 @@ public class UnusableKeyV2Dto {
     private UnusableKeyReason reason;
 
     @Schema(description = "Descriptor of the key: a private key for a key pair listing, a secret key for a secret "
-            + "key listing. Absent when the connector cannot read the key's type.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "key listing", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Valid
     private KeyDataV2Dto keyData;
 
