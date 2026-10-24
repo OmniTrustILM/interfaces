@@ -64,4 +64,21 @@ public class KeyDetailDto extends NameAndUuidDto {
     @Schema(description = "Key compliance status", requiredMode = Schema.RequiredMode.REQUIRED)
     private ComplianceStatus complianceStatus;
 
+    @Schema(description = "Whether the key meets the conditions for removal from the inventory. Removal also checks "
+            + "the permissions of the user.", requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean removableFromInventory;
+
+    /**
+     * The signature this class carried before {@code removableFromInventory} was added, so a caller that constructs it
+     * positionally still compiles. The key then reads as not removable.
+     */
+    public KeyDetailDto(String description, OffsetDateTime creationTime, String tokenProfileUuid,
+            String tokenProfileName, String tokenInstanceUuid, String tokenInstanceName,
+            List<ResponseAttribute> customAttributes, List<ResponseAttribute> attributes, String owner,
+            String ownerUuid, List<GroupDto> groups, List<KeyItemDetailDto> items, List<KeyAssociationDto> associations,
+            ComplianceStatus complianceStatus) {
+        this(description, creationTime, tokenProfileUuid, tokenProfileName, tokenInstanceUuid, tokenInstanceName,
+                customAttributes, attributes, owner, ownerUuid, groups, items, associations, complianceStatus, false);
+    }
+
 }
