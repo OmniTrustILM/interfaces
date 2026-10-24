@@ -99,8 +99,7 @@ public class KeyItemDto extends NameAndUuidDto implements AttributeProjectable {
     private Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues;
 
     @Schema(description = "Whether the key this item belongs to meets the conditions for removal from the inventory. "
-            + "Removal also checks the permissions of the user. Always false in the key of a certificate.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            + "Always false for a key of a certificate.", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean removableFromInventory;
 
     /**

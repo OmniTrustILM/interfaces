@@ -64,8 +64,8 @@ public class KeyDetailDto extends NameAndUuidDto {
     @Schema(description = "Key compliance status", requiredMode = Schema.RequiredMode.REQUIRED)
     private ComplianceStatus complianceStatus;
 
-    @Schema(description = "Whether the key meets the conditions for removal from the inventory. Removal also checks "
-            + "the permissions of the user.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Whether the key meets the conditions for removal from the inventory",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean removableFromInventory;
 
     /**
