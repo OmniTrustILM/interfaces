@@ -98,4 +98,24 @@ public class KeyItemDto extends NameAndUuidDto implements AttributeProjectable {
             example = AttributeProjectable.ATTRIBUTE_VALUES_EXAMPLE, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues;
 
+    @Schema(description = "Whether the key this item belongs to meets the conditions for removal from the inventory. "
+            + "Removal also checks the permissions of the user. Always false in the key of a certificate.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean removableFromInventory;
+
+    /**
+     * The signature this class carried before {@code removableFromInventory} was added, so a caller that constructs it
+     * positionally still compiles. The key then reads as not removable.
+     */
+    public KeyItemDto(String description, OffsetDateTime creationTime, String keyWrapperUuid, String tokenProfileUuid,
+            String tokenProfileName, String tokenInstanceUuid, String tokenInstanceName, String owner, String ownerUuid,
+            List<GroupDto> groups, int associations, String keyReferenceUuid, KeyType type, KeyAlgorithm keyAlgorithm,
+            KeyFormat format, Integer length, List<KeyUsage> usage, boolean enabled, KeyState state,
+            ComplianceStatus complianceStatus,
+            Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues) {
+        this(description, creationTime, keyWrapperUuid, tokenProfileUuid, tokenProfileName, tokenInstanceUuid,
+                tokenInstanceName, owner, ownerUuid, groups, associations, keyReferenceUuid, type, keyAlgorithm, format,
+                length, usage, enabled, state, complianceStatus, attributeValues, false);
+    }
+
 }
