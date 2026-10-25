@@ -79,4 +79,14 @@ public class OAuth2ProviderSettingsUpdateDto implements Serializable {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String usernameClaim;
 
+    @Schema(description = "Identifiers of delegates this provider may assert in RFC 8693 delegation tokens. A provider "
+            + "without allowed delegates refuses every delegation token. Identifiers are matched exactly; there is no wildcard.",
+            defaultValue = "[]", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<String> allowedDelegates = new ArrayList<>();
+
+    @Schema(description = "The claim inside the outermost act object that identifies the immediate delegate. "
+            + "The delegate is read from the signature-validated access token, never from user info claims.",
+            defaultValue = "client_id", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String delegateClaim = "client_id";
+
 }
