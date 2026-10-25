@@ -70,7 +70,7 @@ public class KeyDetailDto extends NameAndUuidDto {
 
     /**
      * The signature this class carried before {@code removableFromInventory} was added, so a caller that constructs it
-     * positionally still compiles. The key then reads as not removable.
+     * positionally still compiles. It leaves the removable flag false.
      */
     public KeyDetailDto(String description, OffsetDateTime creationTime, String tokenProfileUuid,
             String tokenProfileName, String tokenInstanceUuid, String tokenInstanceName,

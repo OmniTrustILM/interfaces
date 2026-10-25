@@ -99,12 +99,12 @@ public class KeyItemDto extends NameAndUuidDto implements AttributeProjectable {
     private Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues;
 
     @Schema(description = "Whether the key this item belongs to meets the conditions for removal from the inventory. "
-            + "Always false for a key of a certificate.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "Always false under a certificate's `key` or `altKey`.", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean removableFromInventory;
 
     /**
      * The signature this class carried before {@code removableFromInventory} was added, so a caller that constructs it
-     * positionally still compiles. The key then reads as not removable.
+     * positionally still compiles. It leaves the removable flag false.
      */
     public KeyItemDto(String description, OffsetDateTime creationTime, String keyWrapperUuid, String tokenProfileUuid,
             String tokenProfileName, String tokenInstanceUuid, String tokenInstanceName, String owner, String ownerUuid,
