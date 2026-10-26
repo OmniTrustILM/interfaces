@@ -22,6 +22,8 @@ public enum ConnectorInterface implements IPlatformEnum {
     ENTITY("entity", "Entity", InterfaceCategory.FUNCTIONAL),
     COMPLIANCE("compliance", "Compliance", InterfaceCategory.FUNCTIONAL),
     CRYPTOGRAPHY("cryptography", "Cryptography", InterfaceCategory.FUNCTIONAL),
+    KEY_LIFECYCLE("keyLifecycle", "Key Lifecycle", InterfaceCategory.FUNCTIONAL,
+            "Hooks into the platform's key lifecycle for keys under a signature activation module."),
     NOTIFICATION("notification", "Notification", InterfaceCategory.FUNCTIONAL),
     SECRET("secret", "Secret", InterfaceCategory.FUNCTIONAL),
     SIGNATURE_FORMATTING("signatureFormatting", "Signature Formatting", InterfaceCategory.FUNCTIONAL),

@@ -14,6 +14,11 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyAttributesRequ
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyResultRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateRequestCreationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CreateCertificateRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMaterialV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRequestV2Dto;
@@ -98,7 +103,12 @@ class CryptographyDtoClosedContractTest {
                         dto("importable key type", ImportableKeyTypeV2Dto.class),
                         dto("export-key request", ExportKeyRequestV2Dto.class),
                         dto("export-key response", ExportKeyResponseV2Dto.class),
-                        dto("exportable key type", ExportableKeyTypeV2Dto.class));
+                        dto("exportable key type", ExportableKeyTypeV2Dto.class),
+                        dto("certificate request", CreateCertificateRequestV2Dto.class),
+                        dto("certificate request response", CertificateRequestCreationResponseV2Dto.class),
+                        dto("certificate issued request", CertificateIssuedRequestV2Dto.class),
+                        dto("certificate issued response", CertificateIssuedResponseV2Dto.class),
+                        dto("operation event", OperationEventV2Dto.class));
     }
 
     private static Named<DtoContract> dto(String name, Class<?> type) {

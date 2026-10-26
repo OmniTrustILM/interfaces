@@ -24,6 +24,9 @@ import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateRequestCreationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.CreateCertificateRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -39,11 +42,23 @@ import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
 import jakarta.validation.Validator;
+import java.io.IOException;
+import java.security.Provider;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.ArrayUtils;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.pkcs.CertificationRequest;
+import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCSException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -52,6 +67,8 @@ import org.springframework.http.ResponseEntity;
  */
 public final class OperationResponseValidator extends ResponseChecks {
 
+    private static final Provider BOUNCY_CASTLE = new BouncyCastleProvider();
+    private static final String MALFORMED_PKCS10_MESSAGE = "Connector returned a malformed PKCS#10";
     private static final String ANOTHER_KEY_TYPE_MESSAGE = "Connector returned a key of another type than the request names";
 
     private final KeyTransferResponseValidator keyTransfer;
@@ -113,12 +130,36 @@ public final class OperationResponseValidator extends ResponseChecks {
         return validateResponseElements(response, "attribute");
     }
 
+    /** Signer attributes come back filled in, as v3 request attributes. */
+    public OperationValidationResult validateSignerAttributeList(List<BaseAttribute> response) {
+        OperationValidationResult validationResult = validateAttributeList(response);
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+        return validate(() -> {
+            if (!response.stream().allMatch(OperationResponseValidator::isV3DataAttribute)) {
+                throw new IllegalArgumentException("Signer attributes must be v3 data attributes");
+            }
+        });
+    }
+
+    private static boolean isV3DataAttribute(BaseAttribute attribute) {
+        return attribute instanceof DataAttributeV3 definition
+                && definition.getVersion() == AttributeVersion.V3.getVersion()
+                && definition.getSchemaVersion() == AttributeVersion.V3;
+    }
+
     public OperationValidationResult validateSignAttributeList(List<BaseAttribute> response) {
         return validateSignatureAttributeList(response, "Sign");
     }
 
     public OperationValidationResult validateVerifyAttributeList(List<BaseAttribute> response) {
         return validateSignatureAttributeList(response, "Verify");
+    }
+
+    /** A certificate request listing offers signature algorithms exactly as a sign listing does. */
+    public OperationValidationResult validateCertificateRequestAttributeList(List<BaseAttribute> response) {
+        return validateSignatureAttributeList(response, "Certificate request");
     }
 
     private OperationValidationResult validateSignatureAttributeList(List<BaseAttribute> response, String operation) {
@@ -237,6 +278,91 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     public OperationValidationResult validateDestroyKeyStatus(KeyDestructionStatusResponseV2Dto response) {
+        return validateBeanConstraints(response);
+    }
+
+    /**
+     * A technology may build its own request info, so the subject, the public key, the algorithm and the self-signature
+     * are what binds the returned PKCS#10. Requested extensions are advisory.
+     */
+    public OperationValidationResult validateCreateCertificateRequest(CreateCertificateRequestV2Dto request,
+            CertificateRequestCreationResponseV2Dto response) {
+        return validate(() -> {
+            requireRequest(request, "Certificate request creation");
+            validateRequiredBean(response);
+            requireRequestedPkcs10(request, response);
+            requireBoundSigner(request, response);
+        });
+    }
+
+    private static void requireRequestedPkcs10(CreateCertificateRequestV2Dto request,
+            CertificateRequestCreationResponseV2Dto response) {
+        if (ArrayUtils.isEmpty(request.getCertificationRequestInfo())) {
+            throw new IllegalArgumentException("Certificate request info is required");
+        }
+        SignatureAlgorithm requestedAlgorithm = request.getSignatureAlgorithm();
+        if (requestedAlgorithm == null) {
+            throw new IllegalArgumentException("Certificate request signature algorithm is required");
+        }
+        CertificationRequestInfo requested = parseRequestInfo(request.getCertificationRequestInfo());
+        CertificationRequest pkcs10 = parsePkcs10(response.getPkcs10());
+        CertificationRequestInfo returned = pkcs10.getCertificationRequestInfo();
+        if (!returned.getSubject().equals(requested.getSubject())) {
+            throw new IllegalArgumentException("Connector returned a PKCS#10 for another subject");
+        }
+        if (!returned.getSubjectPublicKeyInfo().equals(requested.getSubjectPublicKeyInfo())) {
+            throw new IllegalArgumentException("Connector returned a PKCS#10 for another public key");
+        }
+        if (!requestedAlgorithm.isIdentifiedBy(pkcs10.getSignatureAlgorithm())) {
+            throw new IllegalArgumentException("Connector returned a PKCS#10 under another signature algorithm");
+        }
+        if (!hasValidSelfSignature(pkcs10)) {
+            throw new IllegalArgumentException("Connector returned a PKCS#10 whose signature fails verification");
+        }
+    }
+
+    private static void requireBoundSigner(CreateCertificateRequestV2Dto request,
+            CertificateRequestCreationResponseV2Dto response) {
+        String boundSigner = request.getSigner();
+        if (boundSigner != null && !boundSigner.equals(response.getSigner())) {
+            throw new IllegalArgumentException("Connector returned another signer for a bound key");
+        }
+    }
+
+    /**
+     * Bouncy Castle reports a malformed structure through several unchecked exceptions.
+     */
+    private static CertificationRequest parsePkcs10(byte[] pkcs10) {
+        try {
+            return CertificationRequest.getInstance(ASN1Primitive.fromByteArray(pkcs10));
+        } catch (IOException | RuntimeException e) {
+            throw new IllegalArgumentException(MALFORMED_PKCS10_MESSAGE, e);
+        }
+    }
+
+    private static CertificationRequestInfo parseRequestInfo(byte[] requestInfo) {
+        try {
+            return CertificationRequestInfo.getInstance(ASN1Primitive.fromByteArray(requestInfo));
+        } catch (IOException | RuntimeException e) {
+            throw new IllegalArgumentException("Certificate request info is malformed", e);
+        }
+    }
+
+    /**
+     * A key or signature that Bouncy Castle cannot read fails verification.
+     */
+    private static boolean hasValidSelfSignature(CertificationRequest pkcs10) {
+        try {
+            ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder()
+                    .setProvider(BOUNCY_CASTLE)
+                    .build(pkcs10.getCertificationRequestInfo().getSubjectPublicKeyInfo());
+            return new PKCS10CertificationRequest(pkcs10).isSignatureValid(verifier);
+        } catch (OperatorCreationException | PKCSException | RuntimeException e) {
+            return false;
+        }
+    }
+
+    public OperationValidationResult validateCertificateIssued(CertificateIssuedResponseV2Dto response) {
         return validateBeanConstraints(response);
     }
 
