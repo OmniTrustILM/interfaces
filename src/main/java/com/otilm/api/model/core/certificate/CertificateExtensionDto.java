@@ -17,6 +17,10 @@ public class CertificateExtensionDto {
             example = "2.5.29.15")
     private String oid;
 
+    @Schema(description = "Human-readable name of the extension from the certificate extension OID registry; "
+            + "absent when the OID is not registered", example = "Key Usage")
+    private String name;
+
     @Schema(description = "Whether the extension is marked critical", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean critical;
 
@@ -26,6 +30,6 @@ public class CertificateExtensionDto {
     private String der;
 
     @Schema(description = "Extension value decoded to JSON Encoding Rules (JER). Present only when the OID has "
-            + "a registered ASN.1 module and decoding succeeded.")
+            + "a registered or Core-shipped ASN.1 module and decoding succeeded.")
     private JsonNode jer;
 }
