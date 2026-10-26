@@ -13,6 +13,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validBoundCertificateRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateIssuedRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateRequestResponse;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validUnboundCertificateRequest;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -77,5 +78,20 @@ class KeyLifecycleJsonContractTest {
         assertEquals("SHA256withRSA", tree.get("signatureAlgorithm").textValue());
         assertEquals(BOUND_SIGNER, tree.get("signer").textValue());
         assertFalse(tree.has("signerAttributes"));
+    }
+
+    @Test
+    void certificateRequest_writesEachSignerAttributeAsV3WithAContentTypeOnEveryItem() throws Exception {
+        // given
+        CreateCertificateRequestV2Dto request = validUnboundCertificateRequest();
+
+        // when
+        JsonNode attribute = mapper.readTree(mapper.writeValueAsString(request)).get("signerAttributes").get(0);
+
+        // then
+        assertEquals("v3", attribute.get("version").textValue());
+        assertEquals("string", attribute.get("contentType").textValue());
+        assertEquals(1, attribute.get("content").size());
+        assertEquals("string", attribute.get("content").get(0).get("contentType").textValue());
     }
 }

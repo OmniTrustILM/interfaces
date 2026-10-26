@@ -21,8 +21,8 @@ import lombok.ToString;
 public class CertificateRequestCreationResponseV2Dto {
 
     @Schema(description = "DER PKCS#10 CertificationRequest, signed with the requested algorithm. "
-            + "It carries the requested subject and the key's public key.", format = "byte",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            + "It carries the requested subject and the request info's public key in the same encoding.",
+            format = "byte", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "pkcs10 is required and must not be empty")
     @ToString.Exclude
     private byte[] pkcs10;

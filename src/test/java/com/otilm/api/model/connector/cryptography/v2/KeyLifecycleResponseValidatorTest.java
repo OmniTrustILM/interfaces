@@ -46,6 +46,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.keyPairFor;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.pkcs10;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.pkcs10WithFillerSignature;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.pkcs10WithIndefiniteLength;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.signerIdDefinition;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validBoundCertificateRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateIssuedResponse;
@@ -282,6 +283,20 @@ class KeyLifecycleResponseValidatorTest {
     }
 
     @Test
+    void validateCreateCertificateRequest_rejectsAPkcs10OfIndefiniteLength() {
+        // given
+        CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
+        response.setPkcs10(pkcs10WithIndefiniteLength(certificationRequestInfo(), CERTIFICATE_REQUEST_ALGORITHM));
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateCertificateRequest(validBoundCertificateRequest(), response);
+
+        // then
+        assertInvalid(result, "Connector returned a PKCS#10 that is not DER-encoded");
+    }
+
+    @Test
     void validateCreateCertificateRequest_rejectsARequestWithMalformedRequestInfo() {
         // given
         CreateCertificateRequestV2Dto request = validBoundCertificateRequest();
@@ -342,6 +357,21 @@ class KeyLifecycleResponseValidatorTest {
         // when
         OperationValidationResult result = VALIDATOR
                 .validateCreateCertificateRequest(validBoundCertificateRequest(), response);
+
+        // then
+        assertInvalid(result, "Connector returned a PKCS#10 for another subject");
+    }
+
+    @Test
+    void validateCreateCertificateRequest_rejectsAPkcs10WithTheSubjectReordered() {
+        // given
+        CreateCertificateRequestV2Dto request = validBoundCertificateRequest();
+        request.setCertificationRequestInfo(certificationRequestInfo("CN=Jane Doe,O=Example"));
+        CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
+        response.setPkcs10(pkcs10(certificationRequestInfo("O=Example,CN=Jane Doe"), CERTIFICATE_REQUEST_ALGORITHM));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateCertificateRequest(request, response);
 
         // then
         assertInvalid(result, "Connector returned a PKCS#10 for another subject");

@@ -47,8 +47,8 @@ class KeyLifecycleRequestValidationTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("missingRequiredFields")
-    void validate_hasExpectedViolation_forMissingRequiredField(InvalidRequest invalidRequest) {
+    @MethodSource({"missingRequiredFields", "invalidRequestCollections", "emptySignerSources"})
+    void validate_hasExpectedViolation_forInvalidRequest(InvalidRequest invalidRequest) {
         // when
         Set<ConstraintViolation<Object>> violations = VALIDATOR.validate(invalidRequest.request());
 
@@ -75,16 +75,6 @@ class KeyLifecycleRequestValidationTest {
                         invalidRequest("certificate identifier", validCertificateIssuedRequest(),
                                 CertificateIssuedRequestV2Dto::setCertificateUuid, "certificateUuid",
                                 "certificateUuid is required"));
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("invalidRequestCollections")
-    void validate_hasExpectedViolation_forInvalidRequestCollection(InvalidRequest invalidRequest) {
-        // when
-        Set<ConstraintViolation<Object>> violations = VALIDATOR.validate(invalidRequest.request());
-
-        // then
-        assertHasViolation(violations, invalidRequest.path(), invalidRequest.message());
     }
 
     static Stream<Named<InvalidRequest>> invalidRequestCollections() {
@@ -123,16 +113,6 @@ class KeyLifecycleRequestValidationTest {
                 .of(named("signer and signer attributes", both), named("neither signer nor signer attributes", neither),
                         named("blank signer beside signer attributes", blankSignerBesideAttributes),
                         named("signer beside empty signer attributes", signerBesideEmptyAttributes));
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("emptySignerSources")
-    void validate_hasExpectedViolation_forEmptySignerSource(InvalidRequest invalidRequest) {
-        // when
-        Set<ConstraintViolation<Object>> violations = VALIDATOR.validate(invalidRequest.request());
-
-        // then
-        assertHasViolation(violations, invalidRequest.path(), invalidRequest.message());
     }
 
     static Stream<Named<InvalidRequest>> emptySignerSources() {

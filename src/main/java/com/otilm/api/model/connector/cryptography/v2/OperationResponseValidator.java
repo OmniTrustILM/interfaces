@@ -44,15 +44,18 @@ import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2
 import jakarta.validation.Validator;
 import java.io.IOException;
 import java.security.Provider;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.asn1.x500.style.BCStrictStyle;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -307,7 +310,7 @@ public final class OperationResponseValidator extends ResponseChecks {
         CertificationRequestInfo requested = parseRequestInfo(request.getCertificationRequestInfo());
         CertificationRequest pkcs10 = parsePkcs10(response.getPkcs10());
         CertificationRequestInfo returned = pkcs10.getCertificationRequestInfo();
-        if (!returned.getSubject().equals(requested.getSubject())) {
+        if (!BCStrictStyle.INSTANCE.areEqual(returned.getSubject(), requested.getSubject())) {
             throw new IllegalArgumentException("Connector returned a PKCS#10 for another subject");
         }
         if (!returned.getSubjectPublicKeyInfo().equals(requested.getSubjectPublicKeyInfo())) {
@@ -330,14 +333,22 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     /**
-     * Bouncy Castle reports a malformed structure through several unchecked exceptions.
+     * Bouncy Castle reports a malformed structure through several unchecked exceptions. It also reads BER, so the bytes
+     * must match their DER re-encoding.
      */
     private static CertificationRequest parsePkcs10(byte[] pkcs10) {
+        CertificationRequest parsed;
+        byte[] der;
         try {
-            return CertificationRequest.getInstance(ASN1Primitive.fromByteArray(pkcs10));
+            parsed = CertificationRequest.getInstance(ASN1Primitive.fromByteArray(pkcs10));
+            der = parsed.getEncoded(ASN1Encoding.DER);
         } catch (IOException | RuntimeException e) {
             throw new IllegalArgumentException(MALFORMED_PKCS10_MESSAGE, e);
         }
+        if (!Arrays.equals(pkcs10, der)) {
+            throw new IllegalArgumentException("Connector returned a PKCS#10 that is not DER-encoded");
+        }
+        return parsed;
     }
 
     private static CertificationRequestInfo parseRequestInfo(byte[] requestInfo) {

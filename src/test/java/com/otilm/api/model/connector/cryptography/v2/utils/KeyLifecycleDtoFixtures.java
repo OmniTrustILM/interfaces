@@ -25,8 +25,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.Attribute;
@@ -101,6 +103,18 @@ public final class KeyLifecycleDtoFixtures {
     public static byte[] pkcs10WithFillerSignature(byte[] certificationRequestInfo,
             AlgorithmIdentifier signatureAlgorithm) {
         return assemble(certificationRequestInfo, signatureAlgorithm, new byte[FILLER_SIGNATURE_LENGTH]);
+    }
+
+    public static byte[] pkcs10WithIndefiniteLength(byte[] certificationRequestInfo, SignatureAlgorithm algorithm) {
+        CertificationRequest request = CertificationRequest.getInstance(pkcs10(certificationRequestInfo, algorithm));
+        try {
+            return new BERSequence(new ASN1Encodable[]{
+                    request.getCertificationRequestInfo(),
+                    request.getSignatureAlgorithm(),
+                    request.getSignature()}).getEncoded(ASN1Encoding.BER);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
