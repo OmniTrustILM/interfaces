@@ -20,6 +20,10 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dt
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
@@ -74,5 +78,11 @@ public interface KeySyncApiClient {
             throws ConnectorException;
 
     ExportKeyResponseV2Dto exportKey(ApiClientConnectorInfo connector, ExportKeyRequestV2Dto request)
+            throws ConnectorException;
+
+    ListKeysResponseV2Dto listKeys(ApiClientConnectorInfo connector, ListKeysRequestV2Dto request)
+            throws ConnectorException;
+
+    ResolveKeysResponseV2Dto resolveKeys(ApiClientConnectorInfo connector, ResolveKeysRequestV2Dto request)
             throws ConnectorException;
 }

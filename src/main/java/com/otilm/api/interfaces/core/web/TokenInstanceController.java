@@ -178,7 +178,10 @@ public interface TokenInstanceController extends AuthProtectedController {
 
             @ApiResponse(responseCode = "200", description = "Token Instance Status Reloaded from Connector"),
             @ApiResponse(responseCode = "404", description = "Token Instance not found",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PatchMapping(path = "/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
     TokenInstanceDetailDto reloadStatus(
             @Parameter(description = "UUID of the Token Instance") @PathVariable String uuid)

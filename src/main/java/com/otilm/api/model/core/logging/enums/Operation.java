@@ -42,6 +42,7 @@ public enum Operation implements IPlatformEnum {
     REVOKE("revoke", "Revoke"),
     EXPORT("export", "Export"),
     IMPORT("import", "Import"),
+    ONBOARD("onboard", "Onboard"),
     INSPECT("inspect", "Inspect"),
     GET_STATUS("getStatus", "Get status"),
     GET_CONTENT("getContent", "Get content"),

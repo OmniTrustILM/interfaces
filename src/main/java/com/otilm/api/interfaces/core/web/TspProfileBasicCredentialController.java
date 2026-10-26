@@ -94,6 +94,9 @@ public interface TspProfileBasicCredentialController extends AuthProtectedContro
             @ApiResponse(responseCode = "204", description = "Basic credential deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "503", description = "Vault Connector Unavailable",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),})
     @DeleteMapping(path = "/{uuid}")

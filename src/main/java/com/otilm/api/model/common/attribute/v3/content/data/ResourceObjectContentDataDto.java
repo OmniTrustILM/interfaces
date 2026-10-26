@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
                 ResourceSecretContentData.class,})
 public interface ResourceObjectContentDataDto extends AttributeContentData {
 
-    @Schema(description = "Resource identifier", examples = {"7b55ge1c-844f-11dc-a8a3-0242ac120002"},
+    @Schema(description = "Resource identifier", examples = {"7b55de1c-844f-11dc-a8a3-0242ac120002"},
             requiredMode = Schema.RequiredMode.REQUIRED)
     String getUuid();
 

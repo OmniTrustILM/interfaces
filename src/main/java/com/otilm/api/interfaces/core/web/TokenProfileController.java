@@ -48,7 +48,8 @@ public interface TokenProfileController extends AuthProtectedController {
     @Operation(summary = "List of available Token Profiles",
             description = "With importable, lists only the token profiles whose provider imports every given key"
                     + " type and algorithm, as far as the platform has recorded. A profile whose provider declares key"
-                    + " import but whose answer is not recorded yet is listed; the import then checks it.")
+                    + " import but whose answer is not recorded yet is listed; the import then checks it. With"
+                    + " keyListable, lists only the token profiles whose connector can list the keys in their key storage.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token Profiles retrieved"),
             @ApiResponse(responseCode = "422",
@@ -59,13 +60,19 @@ public interface TokenProfileController extends AuthProtectedController {
     List<TokenProfileDto> listTokenProfiles(Optional<Boolean> enabled, @Parameter(
             description = "A key request type and an algorithm the token profile must import, as"
                     + " `type:algorithm` codes such as `keyPair:RSA`. Repeat the parameter per pair.",
-            explode = Explode.TRUE) @RequestParam(name = "importable", required = false) List<String> importable);
+            explode = Explode.TRUE) @RequestParam(name = "importable", required = false) List<String> importable,
+            @Parameter(
+                    description = "Whether to list only the token profiles whose connector can list keys") @RequestParam(
+                            name = "keyListable", required = false, defaultValue = "false") boolean keyListable);
 
     @Operation(summary = "List Token Profile Attributes")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token Profile Attributes retrieved"),
             @ApiResponse(responseCode = "404", description = "Token Instance not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "503", description = "Connector Communication Error",
