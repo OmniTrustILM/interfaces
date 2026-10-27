@@ -118,10 +118,14 @@ class KeyLifecycleRequestValidationTest {
     static Stream<Named<InvalidRequest>> emptySignerSources() {
         CreateCertificateRequestV2Dto blankSigner = validBoundCertificateRequest();
         blankSigner.setSigner(" ");
+        CreateCertificateRequestV2Dto unicodeBlankSigner = validBoundCertificateRequest();
+        unicodeBlankSigner.setSigner("\u2003");
         CreateCertificateRequestV2Dto emptySignerAttributes = validUnboundCertificateRequest();
         emptySignerAttributes.setSignerAttributes(List.of());
         return Stream
                 .of(named("blank signer", new InvalidRequest(blankSigner, "signer", "signer must not be blank")),
+                        named("Unicode-blank signer",
+                                new InvalidRequest(unicodeBlankSigner, "signer", "signer must not be blank")),
                         named("empty signer attributes", new InvalidRequest(emptySignerAttributes, "signerAttributes",
                                 "signerAttributes must not be empty")));
     }

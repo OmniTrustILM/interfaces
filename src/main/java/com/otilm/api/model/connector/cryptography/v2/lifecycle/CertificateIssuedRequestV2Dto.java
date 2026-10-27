@@ -25,8 +25,8 @@ public class CertificateIssuedRequestV2Dto extends KeyScopedRequestV2Dto {
     @ToString.Exclude
     private byte[] certificate;
 
-    @ArraySchema(arraySchema = @Schema(description = "Issuing chain in DER, starting with the certificate's issuer. "
-            + "Absent when the platform holds none."))
+    @ArraySchema(arraySchema = @Schema(description = "Issuing chain in DER, starting with the certificate's issuer; "
+            + "absent when the platform holds none."))
     @ToString.Exclude
     private List<byte @NotNull(message = "chain must not contain null items") []> chain;
 

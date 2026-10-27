@@ -24,16 +24,14 @@ import lombok.ToString;
 @Schema(name = "CreateCertificateRequestV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public class CreateCertificateRequestV2Dto extends KeyScopedRequestV2Dto {
 
-    @Schema(description = "DER CertificationRequestInfo the platform requests. "
-            + "It holds the subject, the key's public key and the requested extensions.", format = "byte",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "DER CertificationRequestInfo the platform requests, holding the subject, the key's "
+            + "public key and the requested extensions.", format = "byte", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "certificationRequestInfo is required and must not be empty")
     @ToString.Exclude
     private byte[] certificationRequestInfo;
 
-    @Schema(description = "Signature algorithm of the certificate request. "
-            + "It is selected from the certificate request attribute listing.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Signature algorithm of the certificate request, selected from the certificate "
+            + "request attribute listing.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "signatureAlgorithm is required")
     private SignatureAlgorithm signatureAlgorithm;
 
@@ -43,8 +41,8 @@ public class CreateCertificateRequestV2Dto extends KeyScopedRequestV2Dto {
     private String signer;
 
     @ArraySchema(minItems = 1,
-            arraySchema = @Schema(description = "Values of the signer attributes from the signer "
-                    + "attribute listing. Present only for an unbound key. Every attribute is a v3 request attribute."))
+            arraySchema = @Schema(description = "Values of the attributes from the signer attribute listing, "
+                    + "each a v3 request attribute. Present only for an unbound key."))
     @Size(min = 1, message = "signerAttributes must not be empty")
     private List<@NotNull(message = "signerAttributes must not contain null items") RequestAttribute> signerAttributes;
 }

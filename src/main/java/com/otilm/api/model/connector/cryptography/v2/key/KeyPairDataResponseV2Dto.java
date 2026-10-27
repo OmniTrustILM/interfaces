@@ -68,8 +68,8 @@ public final class KeyPairDataResponseV2Dto extends KeyCreationResponseV2Dto {
     private List<@NotNull(
             message = "keyPairMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyPairMeta;
 
-    @Schema(description = "Canonical signer the key pair is bound to. "
-            + "Present only for a connector declaring `signerBoundAtCreation`. Absent on async 202.",
+    @Schema(description = "For a connector declaring `signerBoundAtCreation`, on a synchronous 200 and in a completed "
+            + "asynchronous creation-status result, must contain the canonical signer bound to the created key pair.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Null(message = "signer must be absent for asynchronous execution", groups = AsynchronousResponse.class)
     @NullableNotBlank(message = "signer must not be blank")

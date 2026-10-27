@@ -15,8 +15,8 @@ import lombok.ToString;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Schema(name = "OperationEventV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE,
-        description = "One step of a signature activation, as the connector observed it. The platform keeps "
-                + "events as audit history.")
+        description = "One step of a signature activation as the connector observed it, kept by the platform "
+                + "as audit history.")
 public class OperationEventV2Dto {
 
     @Schema(description = "Step the event reports", requiredMode = Schema.RequiredMode.REQUIRED)

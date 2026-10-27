@@ -17,7 +17,7 @@ public enum OperationEventType implements IPlatformEnum {
     AUTHORIZATION_REQUESTED("authorizationRequested", "Authorization requested",
             "The module's authorization material for the operation is in flight"),
     AUTHORIZATION_PROGRESS("authorizationProgress", "Authorization progress",
-            "Part of a multi-party authorization completed. The step may repeat"),
+            "Part of a multi-party authorization completed; the step may repeat"),
     AUTHORIZATION_GRANTED("authorizationGranted", "Authorization granted",
             "The module realized the sole-control decision inside the signature creation device"),
     SIGNATURE_CREATED("signatureCreated", "Signature created",

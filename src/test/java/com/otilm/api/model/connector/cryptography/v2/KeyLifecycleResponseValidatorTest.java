@@ -8,6 +8,7 @@ import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
+import com.otilm.api.model.connector.cryptography.v2.key.BoundSignerAttribute;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyExportableAttribute;
@@ -16,6 +17,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyPairOperationStatusR
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateRequestCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CreateCertificateRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.testsupport.ValidatorFixture;
@@ -45,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.ResponseEntity;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
@@ -76,7 +79,10 @@ import static org.junit.jupiter.api.Named.named;
 class KeyLifecycleResponseValidatorTest {
 
     private static final String EVENT_WITHOUT_TYPE_MESSAGE = "Connector response validation failed: events[0].type: type is required";
+    private static final String EVENT_WITHOUT_TIME_MESSAGE = "Connector response validation failed: events[0].at: at is required";
     private static final String BLANK_SIGNER_MESSAGE = "Connector response validation failed: signer: signer must not be blank";
+    private static final String ANOTHER_SIGNER_MESSAGE = "Connector returned another signer for a bound key";
+    private static final String MISSING_SIGNER_MESSAGE = "Connector returned no signer for a bound key";
     private static final String IMPORTED_SIGNER_MESSAGE = "Connector returned a signer for an imported key";
     private static final String ALGORITHM_IDENTITY = "attribute with name '" + SignatureAlgorithmAttribute.NAME
             + "' and UUID '" + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
@@ -264,7 +270,7 @@ class KeyLifecycleResponseValidatorTest {
                 .validateCreateCertificateRequest(validBoundCertificateRequest(), response);
 
         // then
-        assertInvalid(result, "Connector returned another signer for a bound key");
+        assertInvalid(result, ANOTHER_SIGNER_MESSAGE);
     }
 
     @Test
@@ -438,6 +444,24 @@ class KeyLifecycleResponseValidatorTest {
     }
 
     @Test
+    void validateCreateCertificateRequest_rejectsASignatureTheVerifierCannotDecode() {
+        // given
+        SignatureAlgorithm algorithm = SignatureAlgorithm.SHA256_WITH_ECDSA;
+        byte[] requestInfo = certificationRequestInfo(keyPairFor(algorithm).getPublic());
+        CreateCertificateRequestV2Dto request = validBoundCertificateRequest();
+        request.setCertificationRequestInfo(requestInfo);
+        request.setSignatureAlgorithm(algorithm);
+        CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
+        response.setPkcs10(pkcs10WithFillerSignature(requestInfo, algorithm.getAlgorithmIdentifier()));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateCertificateRequest(request, response);
+
+        // then
+        assertInvalid(result, "Connector returned a PKCS#10 whose signature fails verification");
+    }
+
+    @Test
     void validateCreateCertificateRequest_rejectsAPkcs10UnderAnotherSignatureAlgorithm() {
         // given
         CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
@@ -522,6 +546,20 @@ class KeyLifecycleResponseValidatorTest {
     }
 
     @Test
+    void validateCreateCertificateRequest_rejectsAnEventWithoutItsTime() {
+        // given
+        CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
+        response.setEvents(List.of(eventWithoutTime()));
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateCertificateRequest(validBoundCertificateRequest(), response);
+
+        // then
+        assertInvalid(result, EVENT_WITHOUT_TIME_MESSAGE);
+    }
+
+    @Test
     void validateCreateKey_acceptsTheSignerOfABoundKeyPair() {
         // given
         CreateKeyRequestV2Dto request = validKeyPairCreationRequest();
@@ -533,11 +571,12 @@ class KeyLifecycleResponseValidatorTest {
         assertValid(result);
     }
 
-    @Test
-    void validateCreateKey_rejectsABlankSigner() {
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\u2003"})
+    void validateCreateKey_rejectsABlankSigner(String blankSigner) {
         // given
         KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
-        keyPair.setSigner(" ");
+        keyPair.setSigner(blankSigner);
 
         // when
         OperationValidationResult result = VALIDATOR
@@ -574,6 +613,56 @@ class KeyLifecycleResponseValidatorTest {
         // then
         assertInvalid(result,
                 "Connector response validation failed: signer: signer must be absent for asynchronous execution");
+    }
+
+    @Test
+    void validateCreateKey_acceptsARekeyReturningTheBoundSigner() {
+        // given
+        CreateKeyRequestV2Dto request = rekeyRequest();
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateKey(request, ResponseEntity.ok(validBoundKeyPair()));
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateCreateKey_rejectsARekeyReturningAnotherSigner() {
+        // given
+        KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
+        keyPair.setSigner("john.roe|signers.example");
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateKey(rekeyRequest(), ResponseEntity.ok(keyPair));
+
+        // then
+        assertInvalid(result, ANOTHER_SIGNER_MESSAGE);
+    }
+
+    @Test
+    void validateCreateKey_rejectsARekeyReturningNoSigner() {
+        // given
+        KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateKey(rekeyRequest(), ResponseEntity.ok(keyPair));
+
+        // then
+        assertInvalid(result, MISSING_SIGNER_MESSAGE);
+    }
+
+    @Test
+    void validateCreateKey_acceptsAnAsynchronousRekeyAcceptanceWithoutASigner() {
+        // given
+        CreateKeyRequestV2Dto request = asynchronous(rekeyRequest());
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateKey(request, ResponseEntity.accepted().body(acceptedKeyPair()));
+
+        // then
+        assertValid(result);
     }
 
     @Test
@@ -676,6 +765,19 @@ class KeyLifecycleResponseValidatorTest {
         assertInvalid(result, EVENT_WITHOUT_TYPE_MESSAGE);
     }
 
+    @Test
+    void validateCertificateIssued_rejectsAnEventWithoutItsTime() {
+        // given
+        CertificateIssuedResponseV2Dto response = new CertificateIssuedResponseV2Dto();
+        response.setEvents(List.of(eventWithoutTime()));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCertificateIssued(response);
+
+        // then
+        assertInvalid(result, EVENT_WITHOUT_TIME_MESSAGE);
+    }
+
     private static CreateKeyRequestV2Dto asynchronous(CreateKeyRequestV2Dto request) {
         request.setExecutionMode(OperationExecutionMode.ASYNCHRONOUS);
         return request;
@@ -694,6 +796,12 @@ class KeyLifecycleResponseValidatorTest {
         return status;
     }
 
+    private static CreateKeyRequestV2Dto rekeyRequest() {
+        CreateKeyRequestV2Dto request = validKeyPairCreationRequest();
+        request.setCreateKeyAttributes(List.of(BoundSignerAttribute.request(BOUND_SIGNER)));
+        return request;
+    }
+
     private static ImportKeyRequestV2Dto keyPairImportRequest() {
         ImportKeyRequestV2Dto request = new ImportKeyRequestV2Dto();
         request.setKeyRequestType(KeyRequestType.KEY_PAIR);
@@ -704,6 +812,12 @@ class KeyLifecycleResponseValidatorTest {
     private static OperationEventV2Dto eventWithoutType() {
         OperationEventV2Dto event = new OperationEventV2Dto();
         event.setAt(EVENT_TIME);
+        return event;
+    }
+
+    private static OperationEventV2Dto eventWithoutTime() {
+        OperationEventV2Dto event = new OperationEventV2Dto();
+        event.setType(OperationEventType.OPERATION_ACCEPTED);
         return event;
     }
 

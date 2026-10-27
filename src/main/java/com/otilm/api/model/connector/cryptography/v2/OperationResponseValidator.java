@@ -10,6 +10,7 @@ import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
+import com.otilm.api.model.connector.cryptography.v2.key.BoundSignerAttribute;
 import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
@@ -266,6 +267,11 @@ public final class OperationResponseValidator extends ResponseChecks {
         return validate(() -> {
             requireRequest(request, "Key creation");
             validateKeyCreationOutcome(request.getKeyRequestType(), request.getExecutionMode(), response);
+            if (request.getExecutionMode() == OperationExecutionMode.SYNCHRONOUS) {
+                BoundSignerAttribute
+                        .statedSigner(request.getCreateKeyAttributes())
+                        .ifPresent(boundSigner -> requireSameSigner(boundSigner, signerOf(requireBody(response))));
+            }
         });
     }
 
@@ -330,7 +336,16 @@ public final class OperationResponseValidator extends ResponseChecks {
     private static void requireBoundSigner(CreateCertificateRequestV2Dto request,
             CertificateRequestCreationResponseV2Dto response) {
         String boundSigner = request.getSigner();
-        if (boundSigner != null && !boundSigner.equals(response.getSigner())) {
+        if (boundSigner != null) {
+            requireSameSigner(boundSigner, response.getSigner());
+        }
+    }
+
+    private static void requireSameSigner(String boundSigner, String returnedSigner) {
+        if (returnedSigner == null) {
+            throw new IllegalArgumentException("Connector returned no signer for a bound key");
+        }
+        if (!boundSigner.equals(returnedSigner)) {
             throw new IllegalArgumentException("Connector returned another signer for a bound key");
         }
     }

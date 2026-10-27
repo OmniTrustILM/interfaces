@@ -88,6 +88,11 @@ public interface KeyController extends AuthProtectedConnectorController {
             of its own for it, and it takes part in `keyCreationId` replay equivalence like any other create-key
             attribute. A connector that does not declare `keyExport` must not publish it and is never sent it, and
             must create keys non-extractable wherever the technology expresses the distinction.
+
+            A connector that declares `signerBoundAtCreation` must include the reserved `boundSigner` attribute here: a
+            v3 data attribute named `boundSigner` with UUID `ab6ce1fe-abd3-47d4-8e6b-a33da08770ae` and string content,
+            optional and hidden. Only the platform states its value, on a rekey, as one content item naming the signer
+            of the key the rekey replaces.
             """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Schema retrieved"),
@@ -102,9 +107,9 @@ public interface KeyController extends AuthProtectedConnectorController {
 
     @Operation(summary = "Create key",
             description = "Create a secret key or key pair synchronously or asynchronously. "
-                    + "A connector declaring `signerBoundAtCreation` binds a key pair to its signer here. "
-                    + "A new key pair carries the signer attribute values among its create-key attributes. "
-                    + "A rekey carries the reserved `boundSigner` attribute in their place.")
+                    + "A connector declaring `signerBoundAtCreation` binds a key pair to its signer here, "
+                    + "taking the signer from the signer attribute values among the create-key attributes of a "
+                    + "new key pair, or from the reserved `boundSigner` attribute on a rekey.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Created synchronously, or existing equivalent operation returned synchronously"),

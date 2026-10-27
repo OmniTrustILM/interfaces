@@ -20,20 +20,20 @@ import lombok.ToString;
 @Schema(name = "CertificateRequestCreationResponseV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public class CertificateRequestCreationResponseV2Dto {
 
-    @Schema(description = "DER PKCS#10 CertificationRequest, signed with the requested algorithm. "
-            + "It carries the requested subject and the request info's public key in the same encoding.",
-            format = "byte", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "DER PKCS#10 CertificationRequest signed with the requested algorithm, carrying the "
+            + "requested subject and the request info's public key in the same encoding.", format = "byte",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "pkcs10 is required and must not be empty")
     @ToString.Exclude
     private byte[] pkcs10;
 
-    @Schema(description = "Canonical signer the key is bound to. The connector derives it from the signer attributes "
-            + "on the first request. Later requests return it unchanged.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Canonical signer the key is bound to, derived from the signer attributes for an unbound "
+            + "key and returned unchanged for a bound one.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "signer is required")
     private String signer;
 
     @ArraySchema(arraySchema = @Schema(
-            description = "Steps the connector took during this call, in order. Absent when it took none."))
+            description = "Steps the connector took during this call, in order; absent when it took none."))
     private List<@NotNull(message = "events must not contain null items") @Valid OperationEventV2Dto> events;
 
     @JsonAnySetter

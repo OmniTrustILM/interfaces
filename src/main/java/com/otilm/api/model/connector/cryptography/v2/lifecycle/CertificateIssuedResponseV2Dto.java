@@ -19,7 +19,7 @@ import lombok.ToString;
 public class CertificateIssuedResponseV2Dto {
 
     @ArraySchema(arraySchema = @Schema(
-            description = "Steps the connector took during this call, in order. Absent when it took none."))
+            description = "Steps the connector took during this call, in order; absent when it took none."))
     private List<@NotNull(message = "events must not contain null items") @Valid OperationEventV2Dto> events;
 
     @JsonAnySetter
