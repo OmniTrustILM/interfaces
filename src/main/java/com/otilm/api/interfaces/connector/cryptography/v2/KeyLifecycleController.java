@@ -39,6 +39,8 @@ public interface KeyLifecycleController extends AuthProtectedConnectorController
     @Operation(summary = "List signer attributes", description = "Returns the signer attribute definitions. "
             + "The platform renders the attributes like token attributes and validates the values against them. "
             + "The attribute values are sent on the certificate request hook. "
+            + "A connector declaring `signerBoundAtCreation` receives them on create key instead. "
+            + "The listing must hold at least one attribute. "
             + "Every attribute must be a v3 data attribute. The connector must pre-fill a value the token fixes. "
             + "Definitions must not contain resolved credentials or secret values.")
     @ApiResponses({
@@ -73,6 +75,7 @@ public interface KeyLifecycleController extends AuthProtectedConnectorController
                     + "The connector resolves the signer from the signer attributes of an unbound key, "
                     + "or from the signer of a bound one. "
                     + "A rekeyed key arrives bound to the signer of the key it replaces. "
+                    + "Every key of a connector declaring `signerBoundAtCreation` arrives bound. "
                     + "The connector binds the key where the technology binds at this point. "
                     + "The connector must refuse request info that carries another public key. "
                     + "The connector must prove possession with exactly the requested signature algorithm. "

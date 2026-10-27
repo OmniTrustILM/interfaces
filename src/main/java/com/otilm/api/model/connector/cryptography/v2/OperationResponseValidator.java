@@ -133,13 +133,16 @@ public final class OperationResponseValidator extends ResponseChecks {
         return validateResponseElements(response, "attribute");
     }
 
-    /** Signer attributes come back filled in, as v3 request attributes. */
+    /** Signer attributes come back as v3 data attribute definitions, with any value the token fixes pre-filled. */
     public OperationValidationResult validateSignerAttributeList(List<BaseAttribute> response) {
         OperationValidationResult validationResult = validateAttributeList(response);
         if (!validationResult.isValid()) {
             return validationResult;
         }
         return validate(() -> {
+            if (response.isEmpty()) {
+                throw new IllegalArgumentException("Connector returned no signer attributes");
+            }
             if (!response.stream().allMatch(OperationResponseValidator::isV3DataAttribute)) {
                 throw new IllegalArgumentException("Signer attributes must be v3 data attributes");
             }

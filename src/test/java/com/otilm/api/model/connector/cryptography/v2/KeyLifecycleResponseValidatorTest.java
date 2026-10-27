@@ -1,11 +1,18 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
+import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
+import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
+import com.otilm.api.model.connector.common.v2.OperationStatus;
+import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyExportableAttribute;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairOperationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateRequestCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CreateCertificateRequestV2Dto;
@@ -38,7 +45,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.http.ResponseEntity;
 
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.BOUND_SIGNER;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.CERTIFICATE_REQUEST_ALGORITHM;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.EVENT_TIME;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.SIGNER_ID_ATTRIBUTE_UUID;
@@ -49,8 +59,11 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.pkcs10WithIndefiniteLength;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.signerIdDefinition;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validBoundCertificateRequest;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validBoundKeyPair;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateIssuedResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateRequestResponse;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCreatedKeyPair;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validKeyPairCreationRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validUnboundCertificateRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,6 +76,8 @@ import static org.junit.jupiter.api.Named.named;
 class KeyLifecycleResponseValidatorTest {
 
     private static final String EVENT_WITHOUT_TYPE_MESSAGE = "Connector response validation failed: events[0].type: type is required";
+    private static final String BLANK_SIGNER_MESSAGE = "Connector response validation failed: signer: signer must not be blank";
+    private static final String IMPORTED_SIGNER_MESSAGE = "Connector returned a signer for an imported key";
     private static final String ALGORITHM_IDENTITY = "attribute with name '" + SignatureAlgorithmAttribute.NAME
             + "' and UUID '" + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
 
@@ -80,6 +95,18 @@ class KeyLifecycleResponseValidatorTest {
 
         // then
         assertValid(result);
+    }
+
+    @Test
+    void validateSignerAttributeList_rejectsAnEmptyListing() {
+        // given
+        List<BaseAttribute> listing = List.of();
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignerAttributeList(listing);
+
+        // then
+        assertInvalid(result, "Connector returned no signer attributes");
     }
 
     @ParameterizedTest
@@ -495,6 +522,112 @@ class KeyLifecycleResponseValidatorTest {
     }
 
     @Test
+    void validateCreateKey_acceptsTheSignerOfABoundKeyPair() {
+        // given
+        CreateKeyRequestV2Dto request = validKeyPairCreationRequest();
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateKey(request, ResponseEntity.ok(validBoundKeyPair()));
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateCreateKey_rejectsABlankSigner() {
+        // given
+        KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
+        keyPair.setSigner(" ");
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateKey(validKeyPairCreationRequest(), ResponseEntity.ok(keyPair));
+
+        // then
+        assertInvalid(result, BLANK_SIGNER_MESSAGE);
+    }
+
+    @Test
+    void validateCreateKey_acceptsAnAsynchronousAcceptanceWithoutASigner() {
+        // given
+        CreateKeyRequestV2Dto request = asynchronous(validKeyPairCreationRequest());
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateKey(request, ResponseEntity.accepted().body(acceptedKeyPair()));
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateCreateKey_rejectsASignerOnAnAsynchronousAcceptance() {
+        // given
+        CreateKeyRequestV2Dto request = asynchronous(validKeyPairCreationRequest());
+        KeyPairDataResponseV2Dto accepted = acceptedKeyPair();
+        accepted.setSigner(BOUND_SIGNER);
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateKey(request, ResponseEntity.accepted().body(accepted));
+
+        // then
+        assertInvalid(result,
+                "Connector response validation failed: signer: signer must be absent for asynchronous execution");
+    }
+
+    @Test
+    void validateCreateKeyStatus_acceptsACompletedCreationThatReturnsTheSigner() {
+        // given
+        KeyPairOperationStatusResponseV2Dto status = completedCreation(validBoundKeyPair());
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateKeyStatus(status);
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateCreateKeyStatus_rejectsABlankSignerOnACompletedCreation() {
+        // given
+        KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
+        keyPair.setSigner(" ");
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateCreateKeyStatus(completedCreation(keyPair));
+
+        // then
+        assertInvalid(result, "Connector response validation failed: result.signer: signer must not be blank");
+    }
+
+    @Test
+    void validateImportKey_rejectsASignerOnAnImportedKeyPair() {
+        // given
+        ImportKeyRequestV2Dto request = keyPairImportRequest();
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .keyTransfer()
+                .validateImportKey(request, ResponseEntity.ok(validBoundKeyPair()));
+
+        // then
+        assertInvalid(result, IMPORTED_SIGNER_MESSAGE);
+    }
+
+    @Test
+    void validateImportKeyStatus_rejectsASignerOnAnImportedKeyPair() {
+        // given
+        KeyPairOperationStatusResponseV2Dto status = completedCreation(validBoundKeyPair());
+
+        // when
+        OperationValidationResult result = VALIDATOR.keyTransfer().validateImportKeyStatus(status);
+
+        // then
+        assertInvalid(result, IMPORTED_SIGNER_MESSAGE);
+    }
+
+    @Test
     void validateCertificateIssued_acceptsAResponseWithoutEvents() {
         // given
         CertificateIssuedResponseV2Dto response = new CertificateIssuedResponseV2Dto();
@@ -541,6 +674,31 @@ class KeyLifecycleResponseValidatorTest {
 
         // then
         assertInvalid(result, EVENT_WITHOUT_TYPE_MESSAGE);
+    }
+
+    private static CreateKeyRequestV2Dto asynchronous(CreateKeyRequestV2Dto request) {
+        request.setExecutionMode(OperationExecutionMode.ASYNCHRONOUS);
+        return request;
+    }
+
+    private static KeyPairDataResponseV2Dto acceptedKeyPair() {
+        KeyPairDataResponseV2Dto accepted = new KeyPairDataResponseV2Dto();
+        accepted.setOperationMeta(validMetadata());
+        return accepted;
+    }
+
+    private static KeyPairOperationStatusResponseV2Dto completedCreation(KeyPairDataResponseV2Dto keyPair) {
+        KeyPairOperationStatusResponseV2Dto status = new KeyPairOperationStatusResponseV2Dto();
+        status.setStatus(OperationStatus.COMPLETED);
+        status.setResult(keyPair);
+        return status;
+    }
+
+    private static ImportKeyRequestV2Dto keyPairImportRequest() {
+        ImportKeyRequestV2Dto request = new ImportKeyRequestV2Dto();
+        request.setKeyRequestType(KeyRequestType.KEY_PAIR);
+        request.setExecutionMode(OperationExecutionMode.SYNCHRONOUS);
+        return request;
     }
 
     private static OperationEventV2Dto eventWithoutType() {

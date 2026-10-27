@@ -3,6 +3,8 @@ package com.otilm.api.model.connector.cryptography.v2.lifecycle;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
 import java.util.Base64;
 import org.junit.jupiter.api.Test;
 
@@ -11,12 +13,15 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.EVENT_TIME;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.certificateFiller;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validBoundCertificateRequest;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validBoundKeyPair;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateIssuedRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateRequestResponse;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCreatedKeyPair;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validUnboundCertificateRequest;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -93,5 +98,29 @@ class KeyLifecycleJsonContractTest {
         assertEquals("string", attribute.get("contentType").textValue());
         assertEquals(1, attribute.get("content").size());
         assertEquals("string", attribute.get("content").get(0).get("contentType").textValue());
+    }
+
+    @Test
+    void keyPairCreationResponse_readsTheSigner() throws Exception {
+        // given
+        String json = mapper.writeValueAsString(validBoundKeyPair());
+
+        // when
+        KeyCreationResponseV2Dto roundTripped = mapper.readValue(json, KeyCreationResponseV2Dto.class);
+
+        // then
+        assertEquals(BOUND_SIGNER, assertInstanceOf(KeyPairDataResponseV2Dto.class, roundTripped).getSigner());
+    }
+
+    @Test
+    void keyPairCreationResponse_omitsTheAbsentSigner() throws Exception {
+        // given
+        KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
+
+        // when
+        JsonNode tree = mapper.readTree(mapper.writeValueAsString(keyPair));
+
+        // then
+        assertFalse(tree.has("signer"));
     }
 }

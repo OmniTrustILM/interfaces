@@ -38,7 +38,7 @@ public class CreateCertificateRequestV2Dto extends KeyScopedRequestV2Dto {
     private SignatureAlgorithm signatureAlgorithm;
 
     @Schema(description = "Signer the key is bound to, as the connector returned it. "
-            + "Present only for a bound key, a rekeyed one included.")
+            + "Present only for a bound key, such as a rekeyed key or a key bound at creation.")
     @NullableNotBlank(message = "signer must not be blank")
     private String signer;
 

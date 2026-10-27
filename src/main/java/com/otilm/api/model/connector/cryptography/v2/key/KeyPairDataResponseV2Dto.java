@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
+import com.otilm.api.model.common.validation.NullableNotBlank;
 import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
 import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -66,6 +67,13 @@ public final class KeyPairDataResponseV2Dto extends KeyCreationResponseV2Dto {
             groups = SynchronousResponse.class)
     private List<@NotNull(
             message = "keyPairMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyPairMeta;
+
+    @Schema(description = "Canonical signer the key pair is bound to. "
+            + "Present only for a connector declaring `signerBoundAtCreation`. Absent on async 202.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Null(message = "signer must be absent for asynchronous execution", groups = AsynchronousResponse.class)
+    @NullableNotBlank(message = "signer must not be blank")
+    private String signer;
 
     @JsonIgnore
     @Schema(hidden = true)

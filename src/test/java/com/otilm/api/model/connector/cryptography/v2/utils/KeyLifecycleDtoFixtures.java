@@ -1,10 +1,14 @@
 package com.otilm.api.model.connector.cryptography.v2.utils;
 
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
+import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
+import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
+import com.otilm.api.model.connector.cryptography.v2.key.CreateKeyRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateRequestCreationResponseV2Dto;
@@ -40,6 +44,8 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyDataResponse;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPublicKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
 import static com.otilm.util.builders.DataAttributeV3Builder.aDataAttribute;
 
@@ -56,6 +62,7 @@ public final class KeyLifecycleDtoFixtures {
     public static final SignatureAlgorithm CERTIFICATE_REQUEST_ALGORITHM = SignatureAlgorithm.SHA256_WITH_RSA;
     public static final OffsetDateTime EVENT_TIME = OffsetDateTime.of(2026, 10, 25, 10, 0, 0, 0, ZoneOffset.UTC);
     public static final String REQUESTED_SUBJECT = "CN=Jane Doe";
+    public static final String KEY_CREATION_ID = "key-creation-1";
 
     private static final String SIGNER_ID_NAME = "id";
     private static final int FILLER_SIGNATURE_LENGTH = 256;
@@ -154,6 +161,29 @@ public final class KeyLifecycleDtoFixtures {
     public static RequestAttributeV3 signerIdAttribute() {
         return new RequestAttributeV3(SIGNER_ID_ATTRIBUTE_UUID, SIGNER_ID_NAME, AttributeContentType.STRING,
                 List.of(new StringAttributeContentV3(SIGNER_ID)));
+    }
+
+    public static CreateKeyRequestV2Dto validKeyPairCreationRequest() {
+        CreateKeyRequestV2Dto request = withValidTokenProfileScope(new CreateKeyRequestV2Dto());
+        request.setKeyRequestType(KeyRequestType.KEY_PAIR);
+        request.setExecutionMode(OperationExecutionMode.SYNCHRONOUS);
+        request.setKeyCreationId(KEY_CREATION_ID);
+        request.setCreateKeyAttributes(List.of());
+        return request;
+    }
+
+    public static KeyPairDataResponseV2Dto validCreatedKeyPair() {
+        KeyPairDataResponseV2Dto keyPair = new KeyPairDataResponseV2Dto();
+        keyPair.setPublicKeyData(validPublicKeyDataResponse());
+        keyPair.setPrivateKeyData(validPrivateKeyDataResponse());
+        keyPair.setKeyPairMeta(validMetadata());
+        return keyPair;
+    }
+
+    public static KeyPairDataResponseV2Dto validBoundKeyPair() {
+        KeyPairDataResponseV2Dto keyPair = validCreatedKeyPair();
+        keyPair.setSigner(BOUND_SIGNER);
+        return keyPair;
     }
 
     public static CertificateRequestCreationResponseV2Dto validCertificateRequestResponse() {

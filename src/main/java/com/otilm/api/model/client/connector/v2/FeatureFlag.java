@@ -55,6 +55,17 @@ public enum FeatureFlag implements IPlatformEnum {
                     + "addresses a listed key by the metadata the listing returned, exactly like a key the platform "
                     + "created.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
+    SIGNER_BOUND_AT_CREATION("signerBoundAtCreation", "Signer Bound at Creation",
+            "Binds a key pair to its signer when the key is created. The connector lists its signer attributes like "
+                    + "any other connector, and the create-key attributes of a new key pair carry their values. The "
+                    + "connector must publish the reserved boundSigner attribute in its create-key attribute schema. On "
+                    + "a rekey the platform states the signer of the replaced key in boundSigner, in place of the signer "
+                    + "attribute values. The connector must refuse a request that carries both. It must return the "
+                    + "canonical signer with every key pair it creates. Every key of such a connector is bound, so the "
+                    + "flag excludes keyList and keyImport, whose keys arrive without a signer. The platform refuses a "
+                    + "connector that declares them together. A key of any other connector binds at its first "
+                    + "certificate request.",
+            FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.KEY_LIFECYCLE)),
     SECRET_VERSIONING("secretVersioning", "Secret Versioning",
             "Supports versioning of secrets, allowing to keep track of history of secrets.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SECRET)),

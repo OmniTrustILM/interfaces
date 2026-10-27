@@ -100,7 +100,11 @@ public interface KeyController extends AuthProtectedConnectorController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listCreateKeyAttributes(@RequestBody @Valid CreateKeyAttributesRequestV2Dto request);
 
-    @Operation(summary = "Create key", description = "Create a secret key or key pair synchronously or asynchronously")
+    @Operation(summary = "Create key",
+            description = "Create a secret key or key pair synchronously or asynchronously. "
+                    + "A connector declaring `signerBoundAtCreation` binds a key pair to its signer here. "
+                    + "A new key pair carries the signer attribute values among its create-key attributes. "
+                    + "A rekey carries the reserved `boundSigner` attribute in their place.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Created synchronously, or existing equivalent operation returned synchronously"),
@@ -115,6 +119,8 @@ public interface KeyController extends AuthProtectedConnectorController {
                     - `EXPORTABLE_NOT_SUPPORTED` — the reserved `keyExportable` attribute asked for an exportable key
                       and this token cannot hold one. A connector must refuse rather than create a key whose flag it
                       cannot deliver.
+                    - `SIGNER_INVALID` — the create-key attributes identify no signer, or carry both signer attribute
+                      values and `boundSigner`. The problem names the attribute.
                     - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
                     """,
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
