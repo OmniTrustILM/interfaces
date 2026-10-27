@@ -1,6 +1,6 @@
 package com.otilm.api.model.client.cryptography;
 
-import com.otilm.api.model.core.cryptography.key.KeyItemListDto;
+import com.otilm.api.model.core.cryptography.key.KeyItemDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Data;
 public class CryptographicKeyResponseDto {
 
     @Schema(description = "Cryptographic Keys", requiredMode = Schema.RequiredMode.REQUIRED)
-    private List<KeyItemListDto> cryptographicKeys;
+    private List<KeyItemDto> cryptographicKeys;
 
     @Schema(description = "Number of entries per page", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer itemsPerPage;
