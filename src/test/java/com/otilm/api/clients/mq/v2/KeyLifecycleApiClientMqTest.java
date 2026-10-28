@@ -20,6 +20,10 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
@@ -32,7 +36,6 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateIssuedResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validCertificateRequestResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,7 +76,7 @@ class KeyLifecycleApiClientMqTest {
 
         // then
         assertEquals(List.of(definition), result);
-        assertPostInvocation(SIGNER_ATTRIBUTES_PATH, request, BaseAttribute[].class);
+        assertPostInvocation(SIGNER_ATTRIBUTES_PATH, request, BaseAttribute[].class, false);
     }
 
     @Test
@@ -103,6 +106,21 @@ class KeyLifecycleApiClientMqTest {
     }
 
     @Test
+    void listSignerAttributes_wrapsProxyRuntimeFailure() {
+        // given
+        RuntimeException proxyFailure = new IllegalStateException("proxy failure");
+        proxyClient.failWith(proxyFailure);
+
+        // when
+        Executable call = () -> client.listSignerAttributes(connector, tokenProfileScopedRequest());
+
+        // then
+        ConnectorException exception = assertThrows(ConnectorException.class, call);
+        assertSame(proxyFailure, exception.getCause());
+        assertSame(connector, exception.getConnector());
+    }
+
+    @Test
     void listCertificateRequestAttributes_delegatesPostAndReturnsTheAlgorithmListing() throws ConnectorException {
         // given
         KeyScopedRequestV2Dto request = keyScopedRequest();
@@ -114,7 +132,7 @@ class KeyLifecycleApiClientMqTest {
 
         // then
         assertEquals(List.of(definition), result);
-        assertPostInvocation(CERTIFICATE_REQUEST_ATTRIBUTES_PATH, request, BaseAttribute[].class);
+        assertPostInvocation(CERTIFICATE_REQUEST_ATTRIBUTES_PATH, request, BaseAttribute[].class, false);
     }
 
     @Test
@@ -134,14 +152,14 @@ class KeyLifecycleApiClientMqTest {
         // given
         CreateCertificateRequestV2Dto request = validBoundCertificateRequest();
         CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
-        proxyClient.respondWith(response);
+        proxyClient.respondWithEntity(ResponseEntity.ok(response));
 
         // when
         CertificateRequestCreationResponseV2Dto result = client.createCertificateRequest(connector, request);
 
         // then
         assertSame(response, result);
-        assertPostInvocation(CERTIFICATE_REQUEST_PATH, request, CertificateRequestCreationResponseV2Dto.class);
+        assertPostInvocation(CERTIFICATE_REQUEST_PATH, request, CertificateRequestCreationResponseV2Dto.class, true);
     }
 
     @Test
@@ -149,7 +167,7 @@ class KeyLifecycleApiClientMqTest {
         // given
         CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
         response.setPkcs10(pkcs10(certificationRequestInfo("CN=John Roe"), CERTIFICATE_REQUEST_ALGORITHM));
-        proxyClient.respondWith(response);
+        proxyClient.respondWithEntity(ResponseEntity.ok(response));
 
         // when
         Executable call = () -> client.createCertificateRequest(connector, validBoundCertificateRequest());
@@ -159,25 +177,51 @@ class KeyLifecycleApiClientMqTest {
         assertTrue(exception.getMessage().contains("another subject"), exception.getMessage());
     }
 
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "PARTIAL_CONTENT"})
+    void createCertificateRequest_rejectsUnexpectedSuccessStatusWithValidBody(HttpStatus status) {
+        // given
+        proxyClient.respondWithEntity(ResponseEntity.status(status).body(validCertificateRequestResponse()));
+
+        // when
+        Executable call = () -> client.createCertificateRequest(connector, validBoundCertificateRequest());
+
+        // then
+        assertUnexpectedSuccessStatus(status, call);
+    }
+
     @Test
     void certificateIssued_delegatesPostAndReturnsTheEvents() throws ConnectorException {
         // given
         CertificateIssuedRequestV2Dto request = validCertificateIssuedRequest();
         CertificateIssuedResponseV2Dto response = validCertificateIssuedResponse();
-        proxyClient.respondWith(response);
+        proxyClient.respondWithEntity(ResponseEntity.ok(response));
 
         // when
         CertificateIssuedResponseV2Dto result = client.certificateIssued(connector, request);
 
         // then
         assertSame(response, result);
-        assertPostInvocation(CERTIFICATE_ISSUED_PATH, request, CertificateIssuedResponseV2Dto.class);
+        assertPostInvocation(CERTIFICATE_ISSUED_PATH, request, CertificateIssuedResponseV2Dto.class, true);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"CREATED", "ACCEPTED", "PARTIAL_CONTENT"})
+    void certificateIssued_rejectsUnexpectedSuccessStatusWithValidBody(HttpStatus status) {
+        // given
+        proxyClient.respondWithEntity(ResponseEntity.status(status).body(validCertificateIssuedResponse()));
+
+        // when
+        Executable call = () -> client.certificateIssued(connector, validCertificateIssuedRequest());
+
+        // then
+        assertUnexpectedSuccessStatus(status, call);
     }
 
     @Test
     void certificateIssued_rejectsAnEmptyBody() {
         // given
-        proxyClient.respondWith(null);
+        proxyClient.respondWithEntity(ResponseEntity.ok().build());
 
         // when
         Executable call = () -> client.certificateIssued(connector, validCertificateIssuedRequest());
@@ -201,14 +245,14 @@ class KeyLifecycleApiClientMqTest {
         assertSame(connector, exception.getConnector());
     }
 
-    private void assertPostInvocation(String path, Object body, Class<?> responseType) {
+    private void assertPostInvocation(String path, Object body, Class<?> responseType, boolean entityResponse) {
         Invocation invocation = proxyClient.invocation();
         assertSame(connector, invocation.connector());
         assertEquals(path, invocation.path());
         assertEquals("POST", invocation.method());
         assertSame(body, invocation.body());
         assertEquals(responseType, invocation.responseType());
-        assertFalse(invocation.entityResponse());
+        assertEquals(entityResponse, invocation.entityResponse());
     }
 
     private ConnectorException assertValidationFailure(Executable call) {
@@ -216,6 +260,11 @@ class KeyLifecycleApiClientMqTest {
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertSame(connector, exception.getConnector());
         return exception;
+    }
+
+    private void assertUnexpectedSuccessStatus(HttpStatus status, Executable call) {
+        ConnectorException exception = assertValidationFailure(call);
+        assertEquals("Connector returned HTTP " + status.value() + "; expected HTTP 200", exception.getMessage());
     }
 
     private static TokenProfileScopedRequestV2Dto tokenProfileScopedRequest() {
