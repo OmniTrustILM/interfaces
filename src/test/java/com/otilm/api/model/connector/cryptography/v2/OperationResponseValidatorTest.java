@@ -7,6 +7,7 @@ import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.ObjectAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
@@ -29,10 +30,14 @@ import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatu
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptionAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivation;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationAttribute;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationDecision;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.security.KeyPairGenerator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -817,6 +822,127 @@ class OperationResponseValidatorTest {
 
         // then
         assertInvalid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_acceptsTheReservedSignatureActivation() {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(SignatureActivationAttribute.definition()));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsASignatureActivationDeclaredTwice() {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(
+                List.of(SignatureActivationAttribute.definition(), SignatureActivationAttribute.definition()));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "Sign attributes must declare the attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' at most once");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("halfIdentifiedSignatureActivations")
+    void validateSignAttributeList_rejectsASignatureActivationUnderOnlyOneOfItsIdentifiers(DataAttributeV3 definition) {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(definition));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be declared under both its name and its UUID");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureActivationsOfAnotherKind")
+    void validateSignAttributeList_rejectsASignatureActivationOtherThanAV3DataAttribute(BaseAttribute declaration) {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(declaration));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be a v3 data attribute");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureActivationDefinitionsOfTheWrongShape")
+    void validateSignAttributeList_rejectsASignatureActivationOfTheWrongShape(DataAttributeV3 definition) {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(definition));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be a required, hidden, single object value without a default");
+    }
+
+    static Stream<Named<DataAttributeV3>> halfIdentifiedSignatureActivations() {
+        DataAttributeV3 nameAlone = SignatureActivationAttribute.definition();
+        nameAlone.setUuid(UUID.randomUUID().toString());
+        DataAttributeV3 uuidAlone = SignatureActivationAttribute.definition();
+        uuidAlone.setName("providerActivation");
+        return Stream
+                .of(named("the name under another UUID", nameAlone), named("the UUID under another name", uuidAlone));
+    }
+
+    static Stream<Named<BaseAttribute>> signatureActivationsOfAnotherKind() {
+        DataAttributeV3 definition = SignatureActivationAttribute.definition();
+        InfoAttributeV3 info = new InfoAttributeV3();
+        info.setName(SignatureActivationAttribute.NAME);
+        info.setUuid(SignatureActivationAttribute.ATTRIBUTE_UUID.toString());
+        DataAttributeV2 v2Definition = new DataAttributeV2();
+        v2Definition.setUuid(definition.getUuid());
+        v2Definition.setName(definition.getName());
+        v2Definition.setContentType(definition.getContentType());
+        v2Definition.setProperties(definition.getProperties());
+        return Stream.of(named("an info attribute", info), named("a v2 data attribute", v2Definition));
+    }
+
+    static Stream<Named<DataAttributeV3>> signatureActivationDefinitionsOfTheWrongShape() {
+        DataAttributeV3 visible = SignatureActivationAttribute.definition();
+        visible.getProperties().setVisible(true);
+        DataAttributeV3 optional = SignatureActivationAttribute.definition();
+        optional.getProperties().setRequired(false);
+        DataAttributeV3 noProperties = SignatureActivationAttribute.definition();
+        noProperties.setProperties(null);
+        DataAttributeV3 aList = SignatureActivationAttribute.definition();
+        aList.getProperties().setList(true);
+        DataAttributeV3 multiSelect = SignatureActivationAttribute.definition();
+        multiSelect.getProperties().setMultiSelect(true);
+        DataAttributeV3 aString = SignatureActivationAttribute.definition();
+        aString.setContentType(AttributeContentType.STRING);
+        DataAttributeV3 withDefault = SignatureActivationAttribute.definition();
+        withDefault
+                .setContent(List
+                        .of(new ObjectAttributeContentV3(
+                                new SignatureActivation(SignatureActivationDecision.PLATFORM_ASSERTED, "CN=Signer"))));
+        return Stream
+                .of(named("visible", visible), named("optional", optional), named("no properties", noProperties),
+                        named("a list", aList), named("multi-select", multiSelect), named("a string", aString),
+                        named("a default value", withDefault));
+    }
+
+    private static List<BaseAttribute> signSchemaWith(List<? extends BaseAttribute> signatureActivation) {
+        List<BaseAttribute> schema = new ArrayList<>();
+        schema.add(SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+        schema.addAll(signatureActivation);
+        return schema;
     }
 
     static Stream<Named<DataAttributeV3>> malformedSignatureAlgorithmOffers() {
