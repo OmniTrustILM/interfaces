@@ -4,13 +4,13 @@ import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
-import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
-import com.otilm.api.model.common.attribute.v3.content.BaseAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
+import com.otilm.api.model.common.validation.NullableNotBlankValidator;
 import com.otilm.api.model.connector.cryptography.v2.PlatformReservedAttribute;
+import com.otilm.api.model.connector.cryptography.v2.ReservedAttributeStatement;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,41 +72,20 @@ public final class BoundSignerAttribute implements PlatformReservedAttribute {
      * identifiers, as a v2 attribute, or with content other than a single non-blank string
      */
     public static Optional<String> statedSigner(List<? extends RequestAttribute> createKeyAttributes) {
-        if (createKeyAttributes == null) {
-            return Optional.empty();
-        }
+        return ReservedAttributeStatement
+                .find(createKeyAttributes, ATTRIBUTE_UUID, NAME, BoundSignerAttribute::violation)
+                .map(BoundSignerAttribute::signerOf);
+    }
 
-        List<? extends RequestAttribute> declarations = createKeyAttributes
-                .stream()
-                .filter(attribute -> attribute != null
-                        && (ATTRIBUTE_UUID.equals(attribute.getUuid()) || NAME.equals(attribute.getName())))
-                .toList();
-        if (declarations.isEmpty()) {
-            return Optional.empty();
-        }
-        if (declarations.size() > 1) {
-            throw violation("must be supplied at most once.");
-        }
-
-        RequestAttribute declaration = declarations.get(0);
-        if (!ATTRIBUTE_UUID.equals(declaration.getUuid()) || !NAME.equals(declaration.getName())) {
-            throw violation("must be supplied under both its name and its UUID.");
-        }
-        if (!(declaration instanceof RequestAttributeV3 selection) || selection.getVersion() != AttributeVersion.V3) {
-            throw violation("must be a v3 attribute.");
-        }
-        List<BaseAttributeContentV3<?>> content = selection.getContent();
-        if (content == null || content.size() != 1) {
-            throw violation("must carry exactly one content item.");
-        }
-        if (!(content.get(0) instanceof StringAttributeContentV3 item)
-                || selection.getContentType() != AttributeContentType.STRING) {
+    private static String signerOf(ReservedAttributeStatement statement) {
+        if (!(statement.item() instanceof StringAttributeContentV3 item)
+                || statement.contentType() != AttributeContentType.STRING) {
             throw violation("must carry a string value.");
         }
-        if (item.getData() == null || item.getData().isBlank()) {
+        if (NullableNotBlankValidator.readsAsNoValue(item.getData())) {
             throw violation("must carry a non-blank signer.");
         }
-        return Optional.of(item.getData());
+        return item.getData();
     }
 
     private static ValidationException violation(String rule) {
@@ -115,7 +94,7 @@ public final class BoundSignerAttribute implements PlatformReservedAttribute {
     }
 
     private static String requireNonBlank(String signer) {
-        if (signer == null || signer.isBlank()) {
+        if (NullableNotBlankValidator.readsAsNoValue(signer)) {
             throw new IllegalArgumentException(NAME + " must not be blank");
         }
         return signer;

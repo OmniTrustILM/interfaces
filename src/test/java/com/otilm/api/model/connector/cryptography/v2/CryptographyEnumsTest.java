@@ -12,6 +12,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
 import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyReason;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationDecision;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
@@ -105,7 +106,9 @@ class CryptographyEnumsTest {
                         contract(OperationEventType.EXPIRED, "expired", "Expired",
                                 "The authorization lapsed before the signature was created"),
                         contract(OperationEventType.FAILED, "failed", "Failed",
-                                "The operation failed for a technical reason"));
+                                "The operation failed for a technical reason"),
+                        contract(SignatureActivationDecision.PLATFORM_ASSERTED, "platformAsserted", "Platform asserted",
+                                "The platform authorized the signature for the signer bound to the key"));
     }
 
     @Test
@@ -163,7 +166,10 @@ class CryptographyEnumsTest {
                                 .map(value -> wireContract(value, value.getCode(), TokenStatusV2.class)),
                         Stream
                                 .of(OperationEventType.values())
-                                .map(value -> wireContract(value, value.getCode(), OperationEventType.class)))
+                                .map(value -> wireContract(value, value.getCode(), OperationEventType.class)),
+                        Stream
+                                .of(SignatureActivationDecision.values())
+                                .map(value -> wireContract(value, value.getCode(), SignatureActivationDecision.class)))
                 .flatMap(stream -> stream);
     }
 
@@ -198,6 +204,9 @@ class CryptographyEnumsTest {
                                         ValidationException.class)),
                         named("operation event type",
                                 new UnknownWireCode(OperationEventType.class, unknownCode, ValidationException.class)),
+                        named("signature activation decision",
+                                new UnknownWireCode(SignatureActivationDecision.class, unknownCode,
+                                        ValidationException.class)),
                         named("key type",
                                 new UnknownWireCode(KeyTypeV2.class, unknownCode, IllegalArgumentException.class)),
                         named("legacy split key type",

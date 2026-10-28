@@ -128,7 +128,13 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
                     + "The schema must include exactly one v3 string data attribute named signatureAlgorithm with UUID "
                     + "9180267f-c82f-4b7b-8160-d2363d813869, as a required, single-select, non-extensible list "
                     + "offering the signature algorithms the key supports for signing. "
-                    + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum.")
+                    + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum. "
+                    + "A connector implementing `keyLifecycle` must also include the reserved `signatureActivation` "
+                    + "attribute: a v3 data attribute with UUID `ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78` and object "
+                    + "content, required and hidden, without a default. Only the platform states its value, as one "
+                    + "content item whose fields are exactly `decision` and `signer`: `decision` names who "
+                    + "authorized the signature (`platformAsserted`), and `signer` holds the non-blank signer "
+                    + "bound to the key.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -144,15 +150,24 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             description = "Sign a batch using the caller-selected execution mode (synchronous 200 or asynchronous 202). "
                     + "signatureAttributes must include exactly one v3 string attribute named signatureAlgorithm with UUID "
                     + "9180267f-c82f-4b7b-8160-d2363d813869, selecting exactly one code from the required, single-select, "
-                    + "non-extensible list offered by /sign/attributes.")
+                    + "non-extensible list offered by /sign/attributes. "
+                    + "The platform adds the reserved `signatureActivation` attribute when it authorized the signature. "
+                    + "A connector implementing `keyLifecycle` must refuse to sign unless that attribute names the "
+                    + "key's signer.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed synchronously"),
             @ApiResponse(responseCode = "202",
                     description = "Signing accepted asynchronously; body carries operationMeta tracking handle for the batch"),
+            @ApiResponse(responseCode = "409",
+                    description = "The key is bound to another signer, which the problem names "
+                            + "(errorCode `SIGNER_MISMATCH`)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "Request body was read successfully but violates a field validation rule "
                             + "(errorCode VALIDATION_FAILED), or the signatureAlgorithm selection names an algorithm "
-                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED)",
+                            + "the key does not support (errorCode PARAMETER_UNSUPPORTED), or `signatureActivation` is "
+                            + "missing (errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/sign", consumes = MediaType.APPLICATION_JSON_VALUE,
