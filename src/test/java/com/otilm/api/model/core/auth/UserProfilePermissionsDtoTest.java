@@ -52,6 +52,15 @@ class UserProfilePermissionsDtoTest {
                 + "\",\"actions\":[\"detail\"]}]}", mapper.writeValueAsString(settingsEditor()));
     }
 
+    @Test
+    void previousTwoArgumentConstructorReportsNoObjectActions() throws Exception {
+        UserProfilePermissionsDto permissions = new UserProfilePermissionsDto(List.of(Resource.SETTINGS), List.of());
+
+        assertEquals(List.of(), permissions.getObjectActions());
+        assertEquals("{\"allowedListings\":[\"settings\"],\"allowedActions\":[],\"objectActions\":[]}",
+                mapper.writeValueAsString(permissions));
+    }
+
     /** A client gating a control on an absent field would fail open, so no list may be optional. */
     @Test
     void publishesEveryPermissionListAsRequired() {

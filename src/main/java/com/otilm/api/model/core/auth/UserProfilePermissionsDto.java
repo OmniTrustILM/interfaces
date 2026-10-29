@@ -49,4 +49,13 @@ public class UserProfilePermissionsDto {
             """, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ObjectActionsDto> objectActions;
 
+    /**
+     * The signature this class carried before {@code objectActions} was added, so a caller that constructs it
+     * positionally still compiles and links. The field is required on the wire, so it is reported empty rather than
+     * left null.
+     */
+    public UserProfilePermissionsDto(List<Resource> allowedListings, List<ResourceActionsDto> allowedActions) {
+        this(allowedListings, allowedActions, List.of());
+    }
+
 }
