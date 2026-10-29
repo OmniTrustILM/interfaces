@@ -83,6 +83,21 @@ class FeatureFlagTest {
     }
 
     @Test
+    void signerBoundAtCreationFlag_declaresKeyLifecycleCapability() {
+        // given
+        var signerBoundAtCreationCode = "signerBoundAtCreation";
+
+        // when
+        FeatureFlag flag = FeatureFlag.findByCode(signerBoundAtCreationCode);
+
+        // then
+        assertEquals(FeatureFlag.SIGNER_BOUND_AT_CREATION, flag);
+        assertEquals("Signer Bound at Creation", flag.getLabel());
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
+        assertEquals(List.of(ConnectorInterface.KEY_LIFECYCLE), flag.getApplicableInterfaces());
+    }
+
+    @Test
     void findByCodeRoundTripsAllEntries() {
         for (FeatureFlag f : FeatureFlag.values()) {
             assertEquals(f, FeatureFlag.findByCode(f.getCode()));

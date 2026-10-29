@@ -3,6 +3,7 @@ package com.otilm.api.interfaces.connector.cryptography.v2;
 import com.otilm.api.model.client.connector.v2.FeatureFlag;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
+import com.otilm.api.model.connector.cryptography.v2.key.BoundSignerAttribute;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyExportableAttribute;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.testsupport.OpenApiProseAssertions;
@@ -87,6 +88,21 @@ class KeyControllerDocTest {
                 "the key-export flag must name the attribute declaring it obliges a connector to publish");
         assertTrue(flagProse.contains("v3 data attribute"),
                 "the key-export flag must name the version of the reserved attribute");
+    }
+
+    @Test
+    void theReservedBoundSignerAttributeIsPublishedWhereAConnectorWillReadIt() {
+        Method createAttributes = Arrays
+                .stream(KeyController.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals("listCreateKeyAttributes"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("expected a listCreateKeyAttributes operation"));
+
+        String operationProse = createAttributes.getAnnotation(Operation.class).description().replaceAll("\\s+", " ");
+        assertTrue(operationProse.contains(BoundSignerAttribute.NAME),
+                "the key-creation attribute operation must name the reserved attribute a bound connector publishes");
+        assertTrue(operationProse.contains(BoundSignerAttribute.ATTRIBUTE_UUID.toString()),
+                "the key-creation attribute operation must name the reserved attribute's UUID");
     }
 
     @Test
