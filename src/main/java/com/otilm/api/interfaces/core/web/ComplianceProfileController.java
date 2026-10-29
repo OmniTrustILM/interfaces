@@ -187,7 +187,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     List<BulkActionMessageDto> forceDeleteComplianceProfiles(@RequestBody List<String> uuids)
             throws NotFoundException, ValidationException;
 
-    @Operation(summary = "Associate Compliance Profile to RA Profile")
+    @Operation(summary = "Associate Compliance Profile to RA Profile", description = "The RA profiles must exist.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "RA Profile association successful"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",

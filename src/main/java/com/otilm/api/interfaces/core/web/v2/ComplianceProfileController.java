@@ -221,7 +221,8 @@ public interface ComplianceProfileController extends AuthProtectedController {
             throws NotFoundException;
 
     @Operation(operationId = "associateComplianceProfileV2",
-            summary = "Associate Compliance Profile to specified resource object")
+            summary = "Associate Compliance Profile to specified resource object",
+            description = "The object must exist and be of a resource that compliance checks apply to.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Resource object association successful"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",
