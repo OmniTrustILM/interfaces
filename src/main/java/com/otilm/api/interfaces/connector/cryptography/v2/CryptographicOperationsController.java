@@ -131,10 +131,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
                     + "It must offer at least one value, and every offered value must be a code from the SignatureAlgorithm enum. "
                     + "A connector implementing `keyLifecycle` must also include the reserved `signatureActivation` "
                     + "attribute: a v3 data attribute with UUID `ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78` and object "
-                    + "content, required and hidden, without a default. Only the platform states its value, as one "
-                    + "content item whose fields are exactly `decision` and `signer`: `decision` names who "
-                    + "authorized the signature (`platformAsserted`), and `signer` holds the non-blank signer "
-                    + "bound to the key.")
+                    + "content, required and hidden, without a default. Only the platform states its value. "
+                    + "Refer to SignatureActivationAttribute.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signing attributes retrieved"),
             @ApiResponse(responseCode = "422",
@@ -159,8 +157,7 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             @ApiResponse(responseCode = "202",
                     description = "Signing accepted asynchronously; body carries operationMeta tracking handle for the batch"),
             @ApiResponse(responseCode = "409",
-                    description = "The key is bound to another signer, which the problem names "
-                            + "(errorCode `SIGNER_MISMATCH`)",
+                    description = "The key is bound to another signer (errorCode `SIGNER_MISMATCH`)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
