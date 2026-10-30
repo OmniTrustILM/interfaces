@@ -92,7 +92,19 @@ public enum ErrorCode {
     EXPORTABLE_NOT_SUPPORTED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
             "Token cannot hold a key that stays exportable", HttpStatus.UNPROCESSABLE_CONTENT, false),
     KEY_NOT_EXPORTABLE(ProblemTypeCategory.CONNECTOR, ConnectorInterface.CRYPTOGRAPHY,
-            "Key was not created or imported as exportable", HttpStatus.UNPROCESSABLE_CONTENT, false);
+            "Key was not created or imported as exportable", HttpStatus.UNPROCESSABLE_CONTENT, false),
+
+    // CONNECTOR + KEY_LIFECYCLE — interface-specific
+    SIGNER_INVALID(ProblemTypeCategory.CONNECTOR, ConnectorInterface.KEY_LIFECYCLE,
+            "Signer attributes do not identify a signer", HttpStatus.UNPROCESSABLE_CONTENT, false),
+    SIGNER_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.KEY_LIFECYCLE, "Key is bound to another signer",
+            HttpStatus.CONFLICT, false),
+    KEY_CERTIFIED(ProblemTypeCategory.CONNECTOR, ConnectorInterface.KEY_LIFECYCLE, "Key is already certified",
+            HttpStatus.CONFLICT, false),
+    KEY_UNBOUND(ProblemTypeCategory.CONNECTOR, ConnectorInterface.KEY_LIFECYCLE, "Key is not bound to a signer",
+            HttpStatus.CONFLICT, false),
+    PUBLIC_KEY_MISMATCH(ProblemTypeCategory.CONNECTOR, ConnectorInterface.KEY_LIFECYCLE,
+            "Public key does not match the key", HttpStatus.UNPROCESSABLE_CONTENT, false);
 
     private final ProblemTypeCategory category;
 

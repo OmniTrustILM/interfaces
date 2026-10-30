@@ -80,7 +80,7 @@ class SchemaViewWireOrderTest {
                                 List.of("operationMeta", "keyData", "keyMeta", "keyRequestType")),
                         wireOrder("key pair creation response", fullKeyPairCreationResponse(),
                                 List
-                                        .of("operationMeta", "publicKeyData", "privateKeyData", "keyPairMeta",
+                                        .of("operationMeta", "publicKeyData", "privateKeyData", "keyPairMeta", "signer",
                                                 "keyRequestType")),
                         wireOrder("secret key creation status",
                                 fullCreationStatus(new SecretKeyOperationStatusResponseV2Dto()),
@@ -102,6 +102,7 @@ class SchemaViewWireOrderTest {
         response.setPublicKeyData(validPublicKeyDataResponse());
         response.setPrivateKeyData(validPrivateKeyDataResponse());
         response.setKeyPairMeta(validMetadata());
+        response.setSigner("jane.doe|signers.example");
         return response;
     }
 

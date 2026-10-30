@@ -11,6 +11,7 @@ import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
 import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyReason;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
@@ -85,7 +86,26 @@ class CryptographyEnumsTest {
                         contract(TokenStatusV2.WARNING, "Warning", "Warning",
                                 "The token is reachable, but a provider-observable condition requires attention"),
                         contract(TokenStatusV2.UNKNOWN, "Unknown", "Unknown",
-                                "The connector cannot determine the token status"));
+                                "The connector cannot determine the token status"),
+                        contract(OperationEventType.OPERATION_ACCEPTED, "operationAccepted", "Operation accepted",
+                                "The signature activation module holds a request for the operation"),
+                        contract(OperationEventType.AUTHORIZATION_REQUESTED, "authorizationRequested",
+                                "Authorization requested",
+                                "The module's authorization material for the operation is in flight"),
+                        contract(OperationEventType.AUTHORIZATION_PROGRESS, "authorizationProgress",
+                                "Authorization progress",
+                                "Part of a multi-party authorization completed; the step may repeat"),
+                        contract(OperationEventType.AUTHORIZATION_GRANTED, "authorizationGranted",
+                                "Authorization granted",
+                                "The module realized the sole-control decision inside the signature creation device"),
+                        contract(OperationEventType.SIGNATURE_CREATED, "signatureCreated", "Signature created",
+                                "The module created the signature over one item or the whole batch"),
+                        contract(OperationEventType.REJECTED, "rejected", "Rejected",
+                                "The module refused the authorization"),
+                        contract(OperationEventType.EXPIRED, "expired", "Expired",
+                                "The authorization lapsed before the signature was created"),
+                        contract(OperationEventType.FAILED, "failed", "Failed",
+                                "The operation failed for a technical reason"));
     }
 
     @Test
@@ -140,7 +160,10 @@ class CryptographyEnumsTest {
                                 .map(value -> wireContract(value, value.getCode(), KeyTypeV2.class)),
                         Stream
                                 .of(TokenStatusV2.values())
-                                .map(value -> wireContract(value, value.getCode(), TokenStatusV2.class)))
+                                .map(value -> wireContract(value, value.getCode(), TokenStatusV2.class)),
+                        Stream
+                                .of(OperationEventType.values())
+                                .map(value -> wireContract(value, value.getCode(), OperationEventType.class)))
                 .flatMap(stream -> stream);
     }
 
@@ -173,6 +196,8 @@ class CryptographyEnumsTest {
                         named("key resolution outcome",
                                 new UnknownWireCode(KeyResolutionOutcome.class, unknownCode,
                                         ValidationException.class)),
+                        named("operation event type",
+                                new UnknownWireCode(OperationEventType.class, unknownCode, ValidationException.class)),
                         named("key type",
                                 new UnknownWireCode(KeyTypeV2.class, unknownCode, IllegalArgumentException.class)),
                         named("legacy split key type",

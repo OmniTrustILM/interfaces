@@ -7,8 +7,10 @@ import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
@@ -157,6 +159,50 @@ public enum SignatureAlgorithm implements IPlatformEnum {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    /**
+     * Matches an identifier that encodes this algorithm in any form its standard allows. RFC 4055 treats NULL and
+     * absent parameters alike on an RSA identifier and on the hash identifiers inside RSASSA-PSS parameters.
+     */
+    public boolean isIdentifiedBy(AlgorithmIdentifier identifier) {
+        return algorithmIdentifier.getAlgorithm().equals(identifier.getAlgorithm())
+                && hasEquivalentParameters(identifier.getParameters());
+    }
+
+    private boolean hasEquivalentParameters(ASN1Encodable parameters) {
+        ASN1Encodable own = algorithmIdentifier.getParameters();
+        if (own instanceof RSASSAPSSparams pss) {
+            return isSamePssScheme(pss, parameters);
+        }
+        if (DERNull.INSTANCE.equals(own)) {
+            return parameters == null || DERNull.INSTANCE.equals(parameters);
+        }
+        return Objects.equals(own, parameters);
+    }
+
+    /**
+     * Bouncy Castle reports malformed parameters through several unchecked exceptions.
+     */
+    private static boolean isSamePssScheme(RSASSAPSSparams own, ASN1Encodable parameters) {
+        try {
+            RSASSAPSSparams signed = RSASSAPSSparams.getInstance(parameters);
+            return signed != null && own.equals(withNullHashParameters(signed));
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private static RSASSAPSSparams withNullHashParameters(RSASSAPSSparams parameters) {
+        AlgorithmIdentifier maskGeneration = parameters.getMaskGenAlgorithm();
+        AlgorithmIdentifier maskHash = AlgorithmIdentifier.getInstance(maskGeneration.getParameters());
+        return new RSASSAPSSparams(withNullParameters(parameters.getHashAlgorithm()),
+                new AlgorithmIdentifier(maskGeneration.getAlgorithm(), withNullParameters(maskHash)),
+                new ASN1Integer(parameters.getSaltLength()), new ASN1Integer(parameters.getTrailerField()));
+    }
+
+    private static AlgorithmIdentifier withNullParameters(AlgorithmIdentifier hash) {
+        return hash.getParameters() == null ? new AlgorithmIdentifier(hash.getAlgorithm(), DERNull.INSTANCE) : hash;
     }
 
     public static Optional<SignatureAlgorithm> lookupByCode(String code) {
