@@ -12,6 +12,7 @@ import com.otilm.api.model.common.PaginationResponseDto;
 import com.otilm.api.model.core.cbom.CbomContributedAssetDto;
 import com.otilm.api.model.core.cbom.CbomDetailDto;
 import com.otilm.api.model.core.cbom.CbomDto;
+import com.otilm.api.model.core.cbom.CbomIngestFindingDto;
 import com.otilm.api.model.core.cbom.CbomSyncSkipDto;
 import com.otilm.api.model.core.cbom.CbomUploadRequestDto;
 import com.otilm.api.model.core.search.ConfigurableColumnsDocs;
@@ -228,6 +229,41 @@ public interface CbomController extends AuthProtectedController {
                                                       ]
                                                     }""")})) @Valid @RequestBody SearchRequestDto request)
             throws NotFoundException;
+
+    @Operation(operationId = "listCbomIngestFindings",
+            summary = "List what the cryptographic asset sync had to report about a CBOM", description = """
+                    The report the last cryptographic asset sync attempt wrote about this CBOM record, one line per \
+                    distinct message: what the sync had to tell the producer about the document (kind `finding`) and \
+                    which components it could turn into no asset at all (kind `skip`). A line names the document \
+                    member it is about and may quote a component's `name`, its `bom-ref`, the `type` of its \
+                    material, the names of members it dropped and a size or parameter set the document declares, but \
+                    never the value of a key or of any other material. Each line counts the components that raised it \
+                    and names the first of them in document order; a line about the document as a whole names no \
+                    component.
+
+                    The list is read beside `assetSyncError` and `assetSyncState` on the record. A document the sync \
+                    refused or could not finish (`assetSyncState` `failed`) carries what the last attempt that read it \
+                    had to say about it; an attempt that never read the document, because it could not be fetched or \
+                    the claim was lost, leaves the list as it was. A synced document carries what the sync dropped or \
+                    withheld on the way into the inventory. The list is empty while no attempt has read the document \
+                    and when an attempt had nothing to report. A later version of the document clears it: when that \
+                    version's sync withdraws this record's assets, or when this record, still owing a sync, is next \
+                    offered one and settled as superseded. A record synced without contributing an asset, or one the \
+                    sync no longer retries, keeps its last report. Each sync attempt that stores a report replaces the \
+                    whole of it, and every line of one report carries the same `recordedAt`. An attempt refused \
+                    because the document could not be read for assets clears it; an attempt that fails while storing \
+                    its report leaves the previous one in place.
+
+                    Ordered by `kind` (`finding` before `skip`), then by `detail`, both ascending in the database's \
+                    collation. At most 100 lines of each kind are kept, the most frequent ones; a document raising \
+                    more distinct messages than that has the rest counted in the Core log only.""")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The ingest report of the CBOM record"),
+            @ApiResponse(responseCode = "404", description = "CBOM not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/{uuid}/ingestFindings", produces = {MediaType.APPLICATION_JSON_VALUE})
+    List<CbomIngestFindingDto> listCbomIngestFindings(
+            @Parameter(description = "CBOM entry UUID") @PathVariable UUID uuid) throws NotFoundException;
 
     @Operation(operationId = "getCbomSearchableFields", summary = "Get Cbom searchable fields information",
             description = ConfigurableColumnsDocs.CATALOGUE_FLAGS)
