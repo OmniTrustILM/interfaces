@@ -155,7 +155,7 @@ public interface ComplianceProfileController extends AuthProtectedController {
     @DeleteMapping(path = "/{uuid}", produces = {"application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteComplianceProfile(@Parameter(description = "Compliance Profile UUID") @PathVariable String uuid)
-            throws NotFoundException;
+            throws NotFoundException, ValidationException;
 
     @Operation(summary = "Get RA Profiles for a Compliance Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "RA Profiles retrieved")})
@@ -187,7 +187,8 @@ public interface ComplianceProfileController extends AuthProtectedController {
     List<BulkActionMessageDto> forceDeleteComplianceProfiles(@RequestBody List<String> uuids)
             throws NotFoundException, ValidationException;
 
-    @Operation(summary = "Associate Compliance Profile to RA Profile", description = "The RA profiles must exist.")
+    @Operation(summary = "Associate Compliance Profile to RA Profile",
+            description = "The RA profiles must exist. Either all are associated or none.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "RA Profile association successful"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",
