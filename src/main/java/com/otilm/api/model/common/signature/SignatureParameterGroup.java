@@ -43,6 +43,9 @@ public enum SignatureParameterGroup implements IPlatformEnum {
             Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
     VISIBLE_SIGNATURE_CONTENT(Codes.VISIBLE_SIGNATURE_CONTENT, "Visible signature content",
             "What the visible signature shows: whether it is drawn at all, its caption, and its image",
+            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+    VISIBLE_SIGNATURE_STYLE(Codes.VISIBLE_SIGNATURE_STYLE, "Visible signature style",
+            "How the visible signature is drawn: colours, padding, caption layout, image scaling and resolution",
             Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES)));
 
     public static class Codes {
@@ -56,6 +59,7 @@ public enum SignatureParameterGroup implements IPlatformEnum {
         public static final String SIGNATURE_SCOPE = "signature_scope";
         public static final String VISIBLE_SIGNATURE_PLACEMENT = "visible_signature_placement";
         public static final String VISIBLE_SIGNATURE_CONTENT = "visible_signature_content";
+        public static final String VISIBLE_SIGNATURE_STYLE = "visible_signature_style";
     }
 
     private static final SignatureParameterGroup[] VALUES;

@@ -29,6 +29,7 @@ class SignatureParametersSchemaGenerationTest {
     private static final String PADES = "PadesSignatureParameters";
     private static final String VISIBLE = "PadesVisibleSignature";
     private static final String PLACEMENT = "PadesVisibleSignaturePlacement";
+    private static final String STYLE = "PadesVisibleSignatureStyle";
     private static final String REF = "#/components/schemas/";
 
     @Test
@@ -107,6 +108,15 @@ class SignatureParametersSchemaGenerationTest {
             assertEquals(BigDecimal.ZERO, placement.get(field).getMinimum(), field + " publishes no floor");
             assertEquals(Boolean.TRUE, placement.get(field).getExclusiveMinimum(), field + " must not admit zero");
         }
+
+        Map<String, Schema> style = schemas.get(STYLE).getProperties();
+        for (String field : List.of("textColor", "textBackgroundColor", "backgroundColor")) {
+            assertEquals("^#[0-9A-Fa-f]{6}$", style.get(field).getPattern(), field + " publishes no colour pattern");
+        }
+        assertEquals(BigDecimal.ZERO, style.get("padding").getMinimum(), "padding publishes no floor");
+        assertEquals(BigDecimal.valueOf(100), style.get("padding").getMaximum(), "padding publishes no cap");
+        assertEquals(BigDecimal.valueOf(72), style.get("dpi").getMinimum(), "dpi publishes no floor");
+        assertEquals(BigDecimal.valueOf(1200), style.get("dpi").getMaximum(), "dpi publishes no cap");
     }
 
     /**

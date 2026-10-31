@@ -4,10 +4,13 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSourceRequestDto;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.signature.SignatureParameterGroup;
+import com.otilm.api.model.common.signature.parameters.SignatureParametersDto;
 import com.otilm.api.model.common.validation.OidFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.ArrayList;
@@ -30,13 +33,17 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
 
-    @Schema(description = "UUID of the Signature Formatting Provider that constructs the data-to-be-signed (DTBS) for Content signing. "
-            + "Required for ILM-managed signing; must be omitted for delegated signing.",
+    /** Named so the element annotation fits a line; the formatter cannot break a type-use annotation. */
+    private static final String NO_NULL_GROUPS = "allowedRequestParameterGroups must not contain null items";
+
+    @Schema(description = "UUID of the Signature Formatting Provider that constructs the data-to-be-signed (DTBS) for "
+            + "Content signing. Required for ILM-managed signing; must be omitted for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID signatureFormattingConnectorUuid;
 
     @Schema(description = "Attributes for the Signature Formatting Provider that control DTBS construction "
-            + "for the content signing workflow. " + "Must be omitted for delegated signing.",
+            + "for the content signing workflow. Must be omitted for delegated signing. These attributes carry "
+            + "operator-only knobs; caller-influenceable parameters live in defaultSignatureParameters.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
@@ -75,6 +82,21 @@ public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
     // @Pattern publishes into the generated item schema, and reports the violation on the offending element.
     private Set<@NotBlank @Pattern(regexp = OidFormat.REGEX,
             message = OidFormat.MESSAGE) String> requiredExtendedKeyUsageOids = new LinkedHashSet<>();
+
+    @Schema(description = "Signature parameter groups a signing request may supply; every group must apply to the "
+            + "profile's family. Must be omitted for delegated signing. Membership is the only permission mechanism. "
+            + "A request carrying any field of a group absent from this list is rejected, even when the value matches "
+            + "the profile's own. Omitted or empty means no request-supplied group is accepted. Allowing a group and "
+            + "defaulting it are separate decisions.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Set<@NotNull(
+            message = NO_NULL_GROUPS) SignatureParameterGroup> allowedRequestParameterGroups = new LinkedHashSet<>();
+
+    @Valid
+    @Schema(description = "Signature parameters this profile applies when a request does not override them; their "
+            + "family must match the profile's family. Must be omitted for delegated signing. Merged field by field "
+            + "with the request winning; list-typed fields, and a placement in a different addressing mode, replace "
+            + "the default wholesale.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SignatureParametersDto defaultSignatureParameters;
 
     public ContentSigningWorkflowRequestDto() {
         super(SigningWorkflowType.CONTENT_SIGNING);
