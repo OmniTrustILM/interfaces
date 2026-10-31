@@ -1,6 +1,5 @@
 package com.otilm.api.model.common.signature.parameters;
 
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.parameters.pades.CommitmentType;
 import com.otilm.api.model.common.signature.parameters.pades.HorizontalAlignment;
 import com.otilm.api.model.common.signature.parameters.pades.ImageScaling;
@@ -25,9 +24,7 @@ import java.util.List;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SignatureParametersSerializationTest {
@@ -86,42 +83,7 @@ class SignatureParametersSerializationTest {
         PadesSignatureParametersDto original = fullyPopulatedInCoordinateMode();
         assertTrue(VALIDATOR.validate(original).isEmpty(), "the fixture is not a legal parameters object");
 
-        PadesSignatureParametersDto restored = assertInstanceOf(PadesSignatureParametersDto.class, roundTrip(original));
-
-        assertEquals(SignatureFamily.PADES, restored.getFamily());
-        assertEquals("Contract approval", restored.getReason());
-        assertEquals("Prague", restored.getLocation());
-        assertEquals("jane.doe@example.com", restored.getContactInfo());
-        assertEquals("Jane Doe", restored.getSignerName());
-        assertEquals(PadesSignatureScope.CERTIFICATION, restored.getSignatureScope());
-        assertEquals(CommitmentType.PROOF_OF_APPROVAL, restored.getCommitmentType());
-        assertEquals(List.of("Head of Legal", "Board member"), restored.getClaimedRoles());
-
-        PadesVisibleSignatureDto visibleSignature = restored.getVisibleSignature();
-        assertEquals(Boolean.TRUE, visibleSignature.getVisible());
-        assertEquals("Signed by Jane Doe", visibleSignature.getText());
-        assertArrayEquals(STAMP, visibleSignature.getImage());
-        assertEquals("image/png", visibleSignature.getImageMimeType());
-
-        PadesVisibleSignaturePlacementDto placement = visibleSignature.getPlacement();
-        assertEquals(3, placement.getPage());
-        assertEquals(20f, placement.getOriginX());
-        assertEquals(30f, placement.getOriginY());
-        assertEquals(180f, placement.getWidth());
-        assertEquals(60f, placement.getHeight());
-        assertEquals(90, placement.getRotation());
-
-        PadesVisibleSignatureStyleDto style = visibleSignature.getStyle();
-        assertEquals("#171717", style.getTextColor());
-        assertEquals("#FFFFFF", style.getTextBackgroundColor());
-        assertEquals("#F5F5F5", style.getBackgroundColor());
-        assertEquals(5, style.getPadding());
-        assertEquals(TextWrapping.FILL_BOX_AND_LINEBREAK, style.getTextWrapping());
-        assertEquals(TextPosition.RIGHT, style.getTextPosition());
-        assertEquals(TextHorizontalAlignment.CENTER, style.getTextHorizontalAlignment());
-        assertEquals(TextVerticalAlignment.MIDDLE, style.getTextVerticalAlignment());
-        assertEquals(ImageScaling.ZOOM_AND_CENTER, style.getImageScaling());
-        assertEquals(300, style.getDpi());
+        assertEquals(original, roundTrip(original));
     }
 
     @Test
@@ -131,11 +93,7 @@ class SignatureParametersSerializationTest {
         original.setAlignmentVertical(VerticalAlignment.BOTTOM);
         original.setZoom(75f);
 
-        PadesVisibleSignaturePlacementDto restored = (PadesVisibleSignaturePlacementDto) roundTrip(original);
-
-        assertEquals(HorizontalAlignment.RIGHT, restored.getAlignmentHorizontal());
-        assertEquals(VerticalAlignment.BOTTOM, restored.getAlignmentVertical());
-        assertEquals(75f, restored.getZoom());
+        assertEquals(original, roundTrip(original));
     }
 
     @Test
@@ -143,7 +101,7 @@ class SignatureParametersSerializationTest {
         PadesVisibleSignaturePlacementDto original = new PadesVisibleSignaturePlacementDto();
         original.setFieldId("Signature1");
 
-        assertEquals("Signature1", ((PadesVisibleSignaturePlacementDto) roundTrip(original)).getFieldId());
+        assertEquals(original, roundTrip(original));
     }
 
     private static Serializable roundTrip(Serializable original) throws Exception {

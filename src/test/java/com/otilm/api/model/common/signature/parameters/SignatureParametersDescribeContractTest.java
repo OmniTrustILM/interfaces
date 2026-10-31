@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -85,6 +86,22 @@ class SignatureParametersDescribeContractTest {
     }
 
     @Test
+    void theSweepCatchesAFieldReportedTwice() {
+        List<String> problems = sweepFixture(new TwiceReportedFixture());
+
+        assertEquals(1, problems.size(), String.join("\n", problems));
+        assertTrue(problems.get(0).contains("more than once"), problems.get(0));
+    }
+
+    @Test
+    void theSweepCatchesSwappedContainers() {
+        List<String> problems = sweepFixture(new SwappedContainersFixture());
+
+        assertEquals(2, problems.size(), String.join("\n", problems));
+        problems.forEach(problem -> assertTrue(problem.contains("must report the value of its own field"), problem));
+    }
+
+    @Test
     void theSweepCatchesAContainerReportedAsALeaf() {
         List<String> problems = sweepFixture(new ContainerAsLeafFixture());
 
@@ -128,7 +145,12 @@ class SignatureParametersDescribeContractTest {
     private static void sweep(SignatureParameterContainer node, SignatureFamily family, String path,
             List<String> problems, Set<SignatureParameterGroup> used) {
         RecordingSink sink = RecordingSink.of(node);
-        Set<String> reported = sink.fieldNames();
+        Set<String> reported = new LinkedHashSet<>();
+        for (RecordingSink.Entry entry : sink.entries()) {
+            if (!reported.add(entry.name())) {
+                problems.add(path + "." + entry.name() + " is reported by describe() more than once");
+            }
+        }
         List<Field> fields = ParameterTreeFixture.instanceFields(node.getClass());
 
         for (Field field : fields) {
@@ -169,6 +191,10 @@ class SignatureParametersDescribeContractTest {
                             : " is a value and must be reported with leaf()"));
             return;
         }
+        if (!reportsItsOwnValue(entry, node, fields)) {
+            problems.add(location + " must report the value of its own field");
+            return;
+        }
         if (entry.container()) {
             if (entry.value() instanceof SignatureParameterContainer child) {
                 sweep(child, family, location, problems, used);
@@ -181,10 +207,6 @@ class SignatureParametersDescribeContractTest {
         }
         if (!entry.group().appliesTo(family)) {
             problems.add(location + " reports " + entry.group() + ", which does not apply to " + family);
-            return;
-        }
-        if (!reportsItsOwnValue(entry, node, fields)) {
-            problems.add(location + " must report the value of its own field");
             return;
         }
         used.add(entry.group());
@@ -241,12 +263,37 @@ class SignatureParametersDescribeContractTest {
         }
     }
 
+    static final class TwiceReportedFixture implements SignatureParameterContainer {
+        String reason;
+
+        @Override
+        public void describe(SignatureParameterSink sink) {
+            sink.leaf("reason", SignatureParameterGroup.SIGNATURE_CONTEXT, reason);
+            sink.leaf("reason", SignatureParameterGroup.SIGNATURE_CONTEXT, reason);
+        }
+    }
+
     static final class NestedFixture implements SignatureParameterContainer {
         String nestedParameter;
 
         @Override
         public void describe(SignatureParameterSink sink) {
             sink.leaf("nestedParameter", SignatureParameterGroup.SIGNATURE_CONTEXT, nestedParameter);
+        }
+    }
+
+    static final class SwappedContainersFixture implements SignatureParameterContainer {
+
+        @Valid
+        NestedFixture first = new NestedFixture();
+
+        @Valid
+        NestedFixture second = new NestedFixture();
+
+        @Override
+        public void describe(SignatureParameterSink sink) {
+            sink.container("first", second);
+            sink.container("second", first);
         }
     }
 
