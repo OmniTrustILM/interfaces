@@ -157,7 +157,8 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
             @ApiResponse(responseCode = "202",
                     description = "Signing accepted asynchronously; body carries operationMeta tracking handle for the batch"),
             @ApiResponse(responseCode = "409",
-                    description = "The key is bound to another signer (errorCode `SIGNER_MISMATCH`)",
+                    description = "The key is bound to another signer (errorCode `SIGNER_MISMATCH`), or the key is "
+                            + "not bound to a signer (errorCode `KEY_UNBOUND`)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",

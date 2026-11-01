@@ -4,10 +4,7 @@ import jakarta.validation.ConstraintValidator;
 
 public class NullableNotBlankValidator implements ConstraintValidator<NullableNotBlank, String> {
 
-    /**
-     * Blank test of {@link NullableNotBlank}, stricter than {@link String#isBlank()} on control characters. Missing
-     * text counts as blank.
-     */
+    /** Blank test of {@link NullableNotBlank}; missing text counts as blank. */
     public static boolean readsAsNoValue(String value) {
         return value == null || value.isBlank() || value.trim().isEmpty();
     }

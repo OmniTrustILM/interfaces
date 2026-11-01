@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
@@ -911,7 +912,17 @@ class OperationResponseValidatorTest {
         v2Definition.setName(definition.getName());
         v2Definition.setContentType(definition.getContentType());
         v2Definition.setProperties(definition.getProperties());
-        return Stream.of(named("an info attribute", info), named("a v2 data attribute", v2Definition));
+        DataAttributeV3 v2Version = SignatureActivationAttribute.definition();
+        v2Version.setVersion(AttributeVersion.V2.getVersion());
+        DataAttributeV3 v2SchemaVersion = SignatureActivationAttribute.definition();
+        v2SchemaVersion.setSchemaVersion(AttributeVersion.V2);
+        DataAttributeV3 noSchemaVersion = SignatureActivationAttribute.definition();
+        noSchemaVersion.setSchemaVersion(null);
+        return Stream
+                .of(named("an info attribute", info), named("a v2 data attribute", v2Definition),
+                        named("a v3 data attribute with a v2 version", v2Version),
+                        named("a v3 data attribute with a v2 schema version", v2SchemaVersion),
+                        named("a v3 data attribute without a schema version", noSchemaVersion));
     }
 
     static Stream<Named<DataAttributeV3>> signatureActivationDefinitionsOfTheWrongShape() {
