@@ -249,7 +249,7 @@ class KeyLifecycleResponseValidatorTest {
     void validateCreateCertificateRequest_rejectsAResponseWithoutItsSigner() {
         // given
         CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
-        response.setSigner(" ");
+        response.setSigner(null);
 
         // when
         OperationValidationResult result = VALIDATOR
@@ -257,6 +257,21 @@ class KeyLifecycleResponseValidatorTest {
 
         // then
         assertInvalid(result, "Connector response validation failed: signer: signer is required");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\u0000", "\u2003"})
+    void validateCreateCertificateRequest_rejectsABlankSigner(String blankSigner) {
+        // given
+        CertificateRequestCreationResponseV2Dto response = validCertificateRequestResponse();
+        response.setSigner(blankSigner);
+
+        // when
+        OperationValidationResult result = VALIDATOR
+                .validateCreateCertificateRequest(validBoundCertificateRequest(), response);
+
+        // then
+        assertInvalid(result, BLANK_SIGNER_MESSAGE);
     }
 
     @Test

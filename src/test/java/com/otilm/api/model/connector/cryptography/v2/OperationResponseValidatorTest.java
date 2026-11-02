@@ -3,6 +3,8 @@ package com.otilm.api.model.connector.cryptography.v2;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.callback.AttributeCallback;
+import com.otilm.api.model.common.attribute.common.constraint.RegexpAttributeConstraint;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
@@ -890,7 +892,7 @@ class OperationResponseValidatorTest {
 
         // then
         assertInvalid(result,
-                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be a required, hidden, single object value without a default");
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be a required, hidden, writable, single object value without a default, constraints or callback");
     }
 
     static Stream<Named<DataAttributeV3>> halfIdentifiedSignatureActivations() {
@@ -930,6 +932,8 @@ class OperationResponseValidatorTest {
         visible.getProperties().setVisible(true);
         DataAttributeV3 optional = SignatureActivationAttribute.definition();
         optional.getProperties().setRequired(false);
+        DataAttributeV3 readOnly = SignatureActivationAttribute.definition();
+        readOnly.getProperties().setReadOnly(true);
         DataAttributeV3 noProperties = SignatureActivationAttribute.definition();
         noProperties.setProperties(null);
         DataAttributeV3 aList = SignatureActivationAttribute.definition();
@@ -943,10 +947,16 @@ class OperationResponseValidatorTest {
                 .setContent(List
                         .of(new ObjectAttributeContentV3(
                                 new SignatureActivation(SignatureActivationDecision.PLATFORM_ASSERTED, "CN=Signer"))));
+        DataAttributeV3 constrained = SignatureActivationAttribute.definition();
+        constrained.setConstraints(List.of(new RegexpAttributeConstraint("Signer", "Not a signer", "^CN=.+$")));
+        DataAttributeV3 withCallback = SignatureActivationAttribute.definition();
+        withCallback.setAttributeCallback(new AttributeCallback());
         return Stream
-                .of(named("visible", visible), named("optional", optional), named("no properties", noProperties),
-                        named("a list", aList), named("multi-select", multiSelect), named("a string", aString),
-                        named("a default value", withDefault));
+                .of(named("visible", visible), named("optional", optional), named("read-only", readOnly),
+                        named("no properties", noProperties), named("a list", aList),
+                        named("multi-select", multiSelect), named("a string", aString),
+                        named("a default value", withDefault), named("constraints", constrained),
+                        named("a callback", withCallback));
     }
 
     private static List<BaseAttribute> signSchemaWith(List<? extends BaseAttribute> signatureActivation) {
