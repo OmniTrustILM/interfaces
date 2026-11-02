@@ -145,12 +145,17 @@ public interface ComplianceProfileController extends AuthProtectedController {
     void removeGroup(@Parameter(description = "Compliance Profile UUID") @PathVariable String uuid,
             @RequestBody ComplianceGroupRequestDto request) throws NotFoundException, ConnectorException;
 
-    @Operation(summary = "Delete Compliance Profile")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Compliance Profile deleted")})
+    @Operation(summary = "Delete Compliance Profile",
+            description = "Refused while the profile is associated with existing objects; use force delete to remove it anyway.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Compliance Profile deleted"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @DeleteMapping(path = "/{uuid}", produces = {"application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteComplianceProfile(@Parameter(description = "Compliance Profile UUID") @PathVariable String uuid)
-            throws NotFoundException;
+            throws NotFoundException, ValidationException;
 
     @Operation(summary = "Get RA Profiles for a Compliance Profile")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "RA Profiles retrieved")})
@@ -182,7 +187,8 @@ public interface ComplianceProfileController extends AuthProtectedController {
     List<BulkActionMessageDto> forceDeleteComplianceProfiles(@RequestBody List<String> uuids)
             throws NotFoundException, ValidationException;
 
-    @Operation(summary = "Associate Compliance Profile to RA Profile")
+    @Operation(summary = "Associate Compliance Profile to RA Profile",
+            description = "The RA profiles must exist. Either all are associated or none.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "RA Profile association successful"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",

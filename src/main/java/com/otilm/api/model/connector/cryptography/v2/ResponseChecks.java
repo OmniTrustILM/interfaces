@@ -5,6 +5,10 @@ import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
 import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.groups.Default;
@@ -102,6 +106,17 @@ abstract class ResponseChecks {
             throw new IllegalArgumentException(
                     "Connector returned key request type " + responseType + "; expected " + requestedType);
         }
+    }
+
+    static KeyCreationResponseV2Dto resultOf(KeyCreationStatusResponseV2Dto status) {
+        return switch (status) {
+            case KeyPairOperationStatusResponseV2Dto keyPair -> keyPair.getResult();
+            case SecretKeyOperationStatusResponseV2Dto secretKey -> secretKey.getResult();
+        };
+    }
+
+    static String signerOf(KeyCreationResponseV2Dto created) {
+        return created instanceof KeyPairDataResponseV2Dto keyPair ? keyPair.getSigner() : null;
     }
 
     final OperationValidationResult validateBeanConstraints(Object response) {

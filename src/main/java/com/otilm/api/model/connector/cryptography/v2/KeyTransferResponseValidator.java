@@ -32,7 +32,8 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
     }
 
     /**
-     * Validates an import response against the key the request asked for.
+     * Validates an import response against the key the request asked for. An imported key binds at its first
+     * certificate request.
      *
      * @param request the import request that was sent
      * @param response the connector's response
@@ -43,6 +44,7 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
         return validate(() -> {
             requireRequest(request, "Key import");
             validateKeyCreationOutcome(request.getKeyRequestType(), request.getExecutionMode(), response);
+            requireUnbound(response.getBody());
         });
     }
 
@@ -53,7 +55,16 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
      * @return the validation outcome
      */
     public OperationValidationResult validateImportKeyStatus(KeyCreationStatusResponseV2Dto response) {
-        return validateBeanConstraints(response);
+        return validate(() -> {
+            validateRequiredBean(response);
+            requireUnbound(resultOf(response));
+        });
+    }
+
+    private static void requireUnbound(KeyCreationResponseV2Dto imported) {
+        if (signerOf(imported) != null) {
+            throw new IllegalArgumentException("Connector returned a signer for an imported key");
+        }
     }
 
     /**

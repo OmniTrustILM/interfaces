@@ -89,8 +89,13 @@ public interface ComplianceProfileController extends AuthProtectedController {
             @RequestBody @Valid ComplianceProfileUpdateRequestDto request)
             throws ConnectorException, NotFoundException, AttributeException;
 
-    @Operation(operationId = "deleteComplianceProfileV2", summary = "Delete Compliance Profile")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Compliance Profile deleted")})
+    @Operation(operationId = "deleteComplianceProfileV2", summary = "Delete Compliance Profile",
+            description = "Refused while the profile is associated with existing objects; use force delete to remove it anyway.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Compliance Profile deleted"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),})
     @DeleteMapping(path = "/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteComplianceProfile(@Parameter(description = "Compliance Profile UUID") @PathVariable UUID uuid)
@@ -216,7 +221,8 @@ public interface ComplianceProfileController extends AuthProtectedController {
             throws NotFoundException;
 
     @Operation(operationId = "associateComplianceProfileV2",
-            summary = "Associate Compliance Profile to specified resource object")
+            summary = "Associate Compliance Profile to specified resource object",
+            description = "The object must exist and be of a resource that compliance checks apply to.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Resource object association successful"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",

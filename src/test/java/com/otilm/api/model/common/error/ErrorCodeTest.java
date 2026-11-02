@@ -90,6 +90,22 @@ class ErrorCodeTest {
     }
 
     @Test
+    void connectorKeyLifecycleEntries() {
+        for (ErrorCode code : List
+                .of(ErrorCode.SIGNER_INVALID, ErrorCode.SIGNER_MISMATCH, ErrorCode.KEY_CERTIFIED, ErrorCode.KEY_UNBOUND,
+                        ErrorCode.PUBLIC_KEY_MISMATCH)) {
+            assertEquals(ProblemTypeCategory.CONNECTOR, code.getCategory(), code.name());
+            assertEquals(ConnectorInterface.KEY_LIFECYCLE, code.getInterfaceCode(), code.name());
+            assertFalse(code.isRetryable(), code.name());
+        }
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.SIGNER_INVALID.getStatus());
+        assertEquals(HttpStatus.CONFLICT, ErrorCode.SIGNER_MISMATCH.getStatus());
+        assertEquals(HttpStatus.CONFLICT, ErrorCode.KEY_CERTIFIED.getStatus());
+        assertEquals(HttpStatus.CONFLICT, ErrorCode.KEY_UNBOUND.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.PUBLIC_KEY_MISMATCH.getStatus());
+    }
+
+    @Test
     void connectorDocumentHandlingEntries() {
         ErrorCode[] documentCodes = {
                 ErrorCode.DOCUMENT_MALFORMED,
