@@ -12,4 +12,6 @@ public class CertificateSettingsDto implements Serializable {
 
     private CertificateRegistrationSettingsDto registration;
 
+    private CertificateUploadSettingsDto upload;
+
 }
