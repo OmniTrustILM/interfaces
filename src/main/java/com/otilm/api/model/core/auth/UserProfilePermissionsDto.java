@@ -11,13 +11,16 @@ public class UserProfilePermissionsDto {
 
     @Schema(description = """
             Resources the user may list. A resource is listed when the user holds the list action on it, either on \
-            the resource as a whole or on at least one of its objects. A resource that can be assigned to a group is \
-            also listed for a user who may manage group members, and some listings are granted to every user by \
+            the resource as a whole or on at least one of its objects, and some listings are granted to every user by \
             default.
 
-            A resource whose objects have an owner (Certificate, Cryptographic Key, Secret) is also listed when the \
-            user owns at least one of its objects, or belongs to a group that owns one. It is not listed for a user \
-            who has none of these, so a client can hide that section entirely.
+            A resource without owners that can be assigned to a group is also listed for a user who holds the members \
+            action on at least one group.
+
+            A resource whose objects have an owner (Certificate, Cryptographic Key, Secret) does not follow that group \
+            rule. Without a list grant it is listed only when the user holds the create action on it, owns at least \
+            one of its objects, or holds the members action on a group one of its objects is assigned to, and is not \
+            listed for a user who has none of these, so a client can hide that section entirely.
             """, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Resource> allowedListings;
 
@@ -39,7 +42,9 @@ public class UserProfilePermissionsDto {
     @Schema(description = """
             Actions the user is permitted to perform on specific objects, one entry per object. An action is \
             available on an object when allowedActions holds it for the object's resource, when it is listed here for \
-            that object, or when the user owns the object or belongs to its owning group.
+            that object, or when the user owns the object. List and detail are also available when the user holds the \
+            members action on a group the object is assigned to; that grant appears here under the group, or in \
+            allowedActions for Group as a whole.
 
             Reports explicit object-scoped grants only. Ownership is not listed, because the object itself carries \
             its owner. Denials are not reported either, so the authorization service may still refuse a resource-level \
@@ -52,8 +57,9 @@ public class UserProfilePermissionsDto {
     /**
      * The signature this class carried before {@code objectActions} was added, so a caller that constructs it
      * positionally still compiles and links. The field is required on the wire, so it is reported empty rather than
-     * left null.
+     * left null, which tells a client the user holds no object-scoped grants.
      */
+    @Deprecated(since = "2.21.0", forRemoval = true)
     public UserProfilePermissionsDto(List<Resource> allowedListings, List<ResourceActionsDto> allowedActions) {
         this(allowedListings, allowedActions, List.of());
     }

@@ -53,6 +53,7 @@ class UserProfilePermissionsDtoTest {
     }
 
     @Test
+    @SuppressWarnings("removal")
     void previousTwoArgumentConstructorReportsNoObjectActions() throws Exception {
         UserProfilePermissionsDto permissions = new UserProfilePermissionsDto(List.of(Resource.SETTINGS), List.of());
 
@@ -110,11 +111,13 @@ class UserProfilePermissionsDtoTest {
         assertDocuments("allowedActions", "resource-level grants only", "Object-scoped grants are excluded",
                 "reported in objectActions", "omitted rather than reported with an empty list",
                 "not derivable from allowedListings");
-        assertDocuments("objectActions", "explicit object-scoped grants only", "belongs to its owning group",
-                "Ownership is not listed", "Denials are not reported",
-                "omitted rather than reported with an empty list");
-        assertDocuments("allowedListings", "may manage group members", "granted to every user by default",
-                "Certificate, Cryptographic Key, Secret", "owns at least one", "belongs to a group that owns one",
+        assertDocuments("objectActions", "explicit object-scoped grants only", "when the user owns the object",
+                "holds the members action on a group the object is assigned to", "Ownership is not listed",
+                "Denials are not reported", "omitted rather than reported with an empty list");
+        assertDocuments("allowedListings", "granted to every user by default",
+                "holds the members action on at least one group", "Certificate, Cryptographic Key, Secret",
+                "does not follow that group rule", "holds the create action on it", "owns at least one",
+                "holds the members action on a group one of its objects is assigned to",
                 "not listed for a user who has none of these");
     }
 
