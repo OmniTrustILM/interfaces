@@ -38,8 +38,8 @@ public class ContentSigningWorkflowDto extends WorkflowDto {
 
     @Schema(description = "Attributes configured on the Signature Formatting Provider that control DTBS construction "
             + "for the content signing workflow. Applicable only when ILM-managed signing is used. These attributes "
-            + "carry operator-only knobs; caller-influenceable parameters live in defaultSignatureParameters.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "carry operator-only settings; a request supplies signature parameters only in the groups that "
+            + "allowedRequestParameterGroups lists.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
     @Schema(description = "Signature family this profile produces. "

@@ -43,8 +43,8 @@ public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
 
     @Schema(description = "Attributes for the Signature Formatting Provider that control DTBS construction "
             + "for the content signing workflow. Must be omitted for delegated signing. These attributes carry "
-            + "operator-only knobs; caller-influenceable parameters live in defaultSignatureParameters.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "operator-only settings; a request supplies signature parameters only in the groups that "
+            + "allowedRequestParameterGroups lists.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
     @Schema(description = "Signature family this profile produces. "
