@@ -16,19 +16,21 @@ import lombok.ToString;
  *
  * <p>
  * Raw signing requires no Signature Formatting Provider and carries a digest cap per request and the
- * certificate-purpose constraints. The digest algorithm is not configurable: the scheme's signature algorithm fixes it.
+ * certificate-purpose constraints.
  * </p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(name = "RawSigningWorkflowRequestDto", description = "Raw signing workflow configuration request.")
+@Schema(name = "RawSigningWorkflowRequestDto", description = "Raw signing workflow configuration request."
+        + " The digest algorithm is not configured here: the signature algorithm of the signing scheme fixes it, "
+        + "and a signHash request must name that digest.")
 @ToString(callSuper = true)
 public class RawSigningWorkflowRequestDto extends WorkflowRequestDto {
 
     @Min(1)
     @Schema(minimum = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             description = "Maximum digests one signHash request may carry. Absent means the platform default "
-                    + "applies. The digest algorithm is the one the scheme's signature algorithm fixes.")
+                    + "applies. Applies to ILM-managed signing only; must be omitted for delegated signing.")
     private Integer maxDigestsPerRequest;
 
     @Schema(description = "Demand the nonRepudiation key-usage bit specifically, for commitment-grade profiles. "

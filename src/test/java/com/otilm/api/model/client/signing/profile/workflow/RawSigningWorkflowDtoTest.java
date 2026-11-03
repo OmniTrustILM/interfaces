@@ -9,7 +9,6 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,7 +76,18 @@ class RawSigningWorkflowDtoTest {
         RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
         workflow.setMaxDigestsPerRequest(0);
 
-        assertFalse(VALIDATOR.validate(workflow).isEmpty());
+        Set<ConstraintViolation<RawSigningWorkflowRequestDto>> violations = VALIDATOR.validate(workflow);
+
+        assertEquals(1, violations.size(), violations.toString());
+        assertEquals("maxDigestsPerRequest", violations.iterator().next().getPropertyPath().toString());
+    }
+
+    @Test
+    void aDigestCapOfOneIsAccepted() {
+        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
+        workflow.setMaxDigestsPerRequest(1);
+
+        assertTrue(VALIDATOR.validate(workflow).isEmpty());
     }
 
     @Test
