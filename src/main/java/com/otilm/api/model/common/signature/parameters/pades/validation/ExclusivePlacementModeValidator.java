@@ -17,13 +17,12 @@ public class ExclusivePlacementModeValidator
                 || value.getHeight() != null;
         boolean anchor = value.getAlignmentHorizontal() != null || value.getAlignmentVertical() != null
                 || value.getZoom() != null;
-        boolean onThePage = value.getPage() != null || value.getRotation() != null;
 
         if (value.getFieldId() == null) {
             // A mixture belongs to no single field, so its violation stays on the object.
             return !(coordinates && anchor);
         }
-        if (!coordinates && !anchor && !onThePage) {
+        if (!coordinates && !anchor && value.getPage() == null) {
             return true;
         }
         context.disableDefaultConstraintViolation();

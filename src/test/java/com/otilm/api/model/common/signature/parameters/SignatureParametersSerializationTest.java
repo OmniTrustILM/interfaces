@@ -44,7 +44,6 @@ class SignatureParametersSerializationTest {
         placement.setOriginY(30f);
         placement.setWidth(180f);
         placement.setHeight(60f);
-        placement.setRotation(90);
 
         PadesVisibleSignatureStyleDto style = new PadesVisibleSignatureStyleDto();
         style.setTextColor("#171717");

@@ -4,7 +4,6 @@ import com.otilm.api.model.common.signature.SignatureParameterGroup;
 import com.otilm.api.model.common.signature.parameters.SignatureParameterContainer;
 import com.otilm.api.model.common.signature.parameters.SignatureParameterSink;
 import com.otilm.api.model.common.signature.parameters.pades.validation.ExclusivePlacementMode;
-import com.otilm.api.model.common.signature.parameters.pades.validation.QuarterTurn;
 import com.otilm.api.model.common.validation.NullableNotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
@@ -32,15 +31,16 @@ import lombok.ToString;
 @Schema(name = "PadesVisibleSignaturePlacement",
         description = "Placement of a PAdES visible signature, in one addressing mode only: a named signature field "
                 + "(fieldId alone), explicit coordinates, or an anchor. Coordinates are in PDF points (1/72 inch) "
-                + "measured from the top-left corner of the page. Whether a mode is complete is decided after the "
-                + "request has been merged over the profile's defaults.")
+                + "measured from the top-left corner of the page as a viewer displays it, so the signature reads "
+                + "upright on a rotated page. Whether a mode is complete is decided after the request has been merged "
+                + "over the profile's defaults.")
 public class PadesVisibleSignaturePlacementDto implements SignatureParameterContainer {
 
     @ToString.Exclude
     @Size(max = 256, message = "fieldId must be at most 256 characters")
     @NullableNotBlank(message = "fieldId must not be blank if provided")
     @Schema(description = "Name of an existing signature field to sign into. Addresses the placement on its own: no "
-            + "page, coordinates, anchor or rotation may accompany it, because the field already carries all of them.",
+            + "page, coordinates or anchor may accompany it, because the field already carries all of them.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "Signature1")
     private String fieldId;
 
@@ -69,11 +69,6 @@ public class PadesVisibleSignaturePlacementDto implements SignatureParameterCont
             example = "60")
     private Float height;
 
-    @QuarterTurn
-    @Schema(description = "Clockwise rotation of the signature, in degrees. Quarter turns only.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, allowableValues = {"0", "90", "180", "270"}, example = "0")
-    private Integer rotation;
-
     @Schema(description = "Horizontal edge to anchor the signature to, in the anchor mode",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private HorizontalAlignment alignmentHorizontal;
@@ -98,7 +93,6 @@ public class PadesVisibleSignaturePlacementDto implements SignatureParameterCont
         sink.leaf("originY", placement, originY);
         sink.leaf("width", placement, width);
         sink.leaf("height", placement, height);
-        sink.leaf("rotation", placement, rotation);
         sink.leaf("alignmentHorizontal", placement, alignmentHorizontal);
         sink.leaf("alignmentVertical", placement, alignmentVertical);
         sink.leaf("zoom", placement, zoom);

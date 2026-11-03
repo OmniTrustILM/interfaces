@@ -91,8 +91,6 @@ class SignatureParametersSchemaGenerationTest {
 
         Map<String, Schema> placement = schemas.get(PLACEMENT).getProperties();
         assertEquals(Integer.valueOf(256), placement.get("fieldId").getMaxLength(), "fieldId publishes no cap");
-        assertEquals(List.of(0, 90, 180, 270), placement.get("rotation").getEnum(),
-                "rotation publishes no quarter-turn enumeration");
 
         assertNotNull(placement.get("page").getMinimum(), "page publishes no lower bound");
         assertEquals(1, placement.get("page").getMinimum().intValue());
