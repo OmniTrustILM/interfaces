@@ -14,7 +14,15 @@ class SigningProtocolTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /** These codes persist in signing_record.protocol, so changing one costs a data migration. */
+    /** Core persists the constant names in signing_record.protocol, so renaming one costs a data migration. */
+    @Test
+    void persistedNamesArePinned() {
+        assertEquals("CSC_API", SigningProtocol.CSC_API.name());
+        assertEquals("TSP", SigningProtocol.TSP.name());
+        assertEquals("INTERNAL_TSA", SigningProtocol.INTERNAL_TSA.name());
+        assertEquals("ILM_NATIVE", SigningProtocol.ILM_NATIVE.name());
+    }
+
     @Test
     void wireCodesArePinned() {
         assertEquals("csc_api", SigningProtocol.CSC_API.getCode());
