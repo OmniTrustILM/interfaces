@@ -22,7 +22,7 @@ import lombok.ToString;
 public class RawSigningWorkflowDto extends WorkflowDto {
 
     @Schema(minimum = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
-            description = "Maximum digests one signHash request may carry. Null when no cap applies. The digest "
+            description = "Maximum digests one signHash request may carry. Null when the platform default applies. The digest "
                     + "algorithm is the one the scheme's signature algorithm fixes.")
     private Integer maxDigestsPerRequest;
 

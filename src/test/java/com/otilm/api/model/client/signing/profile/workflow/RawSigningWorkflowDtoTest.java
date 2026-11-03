@@ -34,6 +34,14 @@ class RawSigningWorkflowDtoTest {
     }
 
     @Test
+    void anEmptyRequestValidatesBecauseAnAbsentCapTakesThePlatformDefault() {
+        Set<ConstraintViolation<RawSigningWorkflowRequestDto>> violations = VALIDATOR
+                .validate(new RawSigningWorkflowRequestDto());
+
+        assertTrue(violations.isEmpty(), "unexpected violations: " + violations);
+    }
+
+    @Test
     void theRequestRoundTripsThroughTheWorkflowUnion() throws Exception {
         RawSigningWorkflowRequestDto original = new RawSigningWorkflowRequestDto();
         original.setMaxDigestsPerRequest(100);
