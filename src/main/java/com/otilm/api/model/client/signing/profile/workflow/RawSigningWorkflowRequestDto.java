@@ -1,6 +1,12 @@
 package com.otilm.api.model.client.signing.profile.workflow;
 
+import com.otilm.api.model.common.validation.OidFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -9,7 +15,8 @@ import lombok.ToString;
  * Raw signing workflow configuration request embedded in a Signing Profile create/update request.
  *
  * <p>
- * Raw signing requires no Signature Formatting Provider and currently has no workflow-specific validation properties.
+ * Raw signing requires no Signature Formatting Provider and carries a digest cap per request and the
+ * certificate-purpose constraints. The digest algorithm is not configurable: the scheme's signature algorithm fixes it.
  * </p>
  */
 @Data
@@ -17,6 +24,25 @@ import lombok.ToString;
 @Schema(name = "RawSigningWorkflowRequestDto", description = "Raw signing workflow configuration request.")
 @ToString(callSuper = true)
 public class RawSigningWorkflowRequestDto extends WorkflowRequestDto {
+
+    @Min(1)
+    @Schema(minimum = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            description = "Maximum digests one signHash request may carry. The digest algorithm is the one the "
+                    + "scheme's signature algorithm fixes.")
+    private Integer maxDigestsPerRequest;
+
+    @Schema(description = "Demand the nonRepudiation key-usage bit specifically, for commitment-grade profiles. "
+            + "Applies to ILM-managed signing only. For delegated signing, omit it or send false; an echoed "
+            + "false from a response is accepted, true is rejected.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Boolean requireNonRepudiation;
+
+    @Schema(description = "Extended key usage OIDs the signing certificate must all carry, in dot notation "
+            + "(1.3.6.1.5.5.7.3.36 is RFC 9336 id-kp-documentSigning). An empty set accepts any extended key "
+            + "usage. Applies to ILM-managed signing only; for delegated signing send nothing or an empty set.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    // @Pattern publishes into the generated item schema, and reports the violation on the offending element.
+    private Set<@NotBlank @Pattern(regexp = OidFormat.REGEX,
+            message = OidFormat.MESSAGE) String> requiredExtendedKeyUsageOids = new LinkedHashSet<>();
 
     public RawSigningWorkflowRequestDto() {
         super(SigningWorkflowType.RAW_SIGNING);
