@@ -25,8 +25,7 @@ public class PadesComputeDtbsRequestDto extends ComputeDtbsRequestDto {
     @Valid
     @Schema(description = "The effective signature parameters. Already merged over the Signing Profile's defaults, "
             + "already checked against the profile's allowed parameter groups, and with the stamp image already "
-            + "resolved to bytes. The connector applies these values and never authorizes them. A connector that "
-            + "cannot honour a parameter it is sent answers 422 with errorCode PARAMETER_UNSUPPORTED. Absent when the "
+            + "resolved to bytes. The connector applies these values and never authorizes them. Absent when the "
             + "profile sets no defaults and the request supplies nothing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private PadesSignatureParametersDto signatureParameters;

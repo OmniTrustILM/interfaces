@@ -117,10 +117,14 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves, including a signatureAlgorithm it cannot format; the message names "
-                            + "the set it does support.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
-                            + "rule, such as an absent document or a digest transfer missing its algorithm.",
+                            + "`DOCUMENT_SIGNING_FORBIDDEN` — the document forbids the requested signature, such as a "
+                            + "certification of a document already signed.\n- "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector; the message names the supported set.\n- "
+                            + "`SIGNATURE_PLACEMENT_REJECTED` — the document cannot hold the visible signature at the "
+                            + "requested place.\n- "
+                            + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
+                            + "document or a digest transfer missing its algorithm.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeDtbs", consumes = MediaType.APPLICATION_JSON_VALUE,

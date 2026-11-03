@@ -111,7 +111,9 @@ class ErrorCodeTest {
                 ErrorCode.DOCUMENT_MALFORMED,
                 ErrorCode.DOCUMENT_TOO_LARGE,
                 ErrorCode.SIGNATURE_NOT_FOUND,
-                ErrorCode.PARAMETER_UNSUPPORTED};
+                ErrorCode.PARAMETER_UNSUPPORTED,
+                ErrorCode.SIGNATURE_PLACEMENT_REJECTED,
+                ErrorCode.DOCUMENT_SIGNING_FORBIDDEN};
 
         for (ErrorCode code : documentCodes) {
             assertEquals(ProblemTypeCategory.CONNECTOR, code.getCategory(), code.name() + " category");
@@ -123,6 +125,8 @@ class ErrorCodeTest {
         assertEquals(HttpStatus.CONTENT_TOO_LARGE, ErrorCode.DOCUMENT_TOO_LARGE.getStatus());
         assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.SIGNATURE_NOT_FOUND.getStatus());
         assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.PARAMETER_UNSUPPORTED.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.SIGNATURE_PLACEMENT_REJECTED.getStatus());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.DOCUMENT_SIGNING_FORBIDDEN.getStatus());
     }
 
     @Test
@@ -156,6 +160,8 @@ class ErrorCodeTest {
         assertFalse(ErrorCode.DOCUMENT_TOO_LARGE.isRetryable());
         assertFalse(ErrorCode.SIGNATURE_NOT_FOUND.isRetryable());
         assertFalse(ErrorCode.PARAMETER_UNSUPPORTED.isRetryable());
+        assertFalse(ErrorCode.SIGNATURE_PLACEMENT_REJECTED.isRetryable());
+        assertFalse(ErrorCode.DOCUMENT_SIGNING_FORBIDDEN.isRetryable());
         assertFalse(ErrorCode.CONTEXT_MISMATCH.isRetryable());
     }
 
