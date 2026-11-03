@@ -32,9 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Pins the formatting attribute discovery routes against their annotation values. The admin UI builds the formatting
- * attribute form from these paths and Core implements them, so a changed path, verb or parameter has to fail a build
- * rather than surface as an empty form.
+ * Pins the signing-profile routes the admin UI and Core build against, namely the formatting attribute discovery routes
+ * and the protocol activation pairs, against their annotation values. A changed path, verb, parameter or response shape
+ * has to fail a build rather than surface as an empty form or a broken client.
  */
 class SigningProfileControllerContractTest {
 
@@ -192,6 +192,10 @@ class SigningProfileControllerContractTest {
             assertEquals("Signing Profile not found", notFound.description());
             assertEquals(ErrorMessageDto.class, notFound.content()[0].schema().implementation());
         }
+        assertTrue(activate
+                .getAnnotation(Operation.class)
+                .description()
+                .contains("Refused with 422 on a timestamping profile and on a profile that uses delegated signing."));
         ApiResponse unprocessable = documented(activate, "422");
         assertEquals("Unprocessable Content", unprocessable.description());
         assertEquals(String.class, unprocessable.content()[0].array().schema().implementation(),

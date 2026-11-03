@@ -353,7 +353,10 @@ public interface SigningProfileController extends AuthProtectedController {
     void deactivateTsp(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
             throws NotFoundException;
 
-    @Operation(operationId = "activateIlmNative", summary = "Activate the ILM Native API for Signing Profile")
+    @Operation(operationId = "activateIlmNative", summary = "Activate the ILM Native API for Signing Profile",
+            description = "Enables the native signing API on a content-signing or raw-signing profile that uses "
+                    + "ILM-managed signing. Refused with 422 on a timestamping profile and on a profile that uses "
+                    + "delegated signing.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "ILM Native API activated"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
