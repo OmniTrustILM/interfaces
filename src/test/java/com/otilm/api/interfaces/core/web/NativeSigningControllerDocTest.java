@@ -49,15 +49,29 @@ class NativeSigningControllerDocTest {
     void classLevelErrorsDeclareErrorMessageContent() {
         ApiResponses responses = NativeSigningController.class.getAnnotation(ApiResponses.class);
         assertNotNull(responses, "missing class-level @ApiResponses");
-        assertEquals(List.of("404", "502", "503"),
+        assertEquals(List.of("404", "422", "502", "503"),
                 Arrays.stream(responses.value()).map(ApiResponse::responseCode).toList());
         for (ApiResponse response : responses.value()) {
+            if (response.responseCode().equals("422")) {
+                continue;
+            }
             assertTrue(
                     Arrays
                             .stream(response.content())
                             .anyMatch(c -> c.schema().implementation() == ErrorMessageDto.class),
                     "class-level " + response.responseCode() + " must declare ErrorMessageDto");
         }
+    }
+
+    @Test
+    void unprocessableAnswersAnArrayOfMessages() {
+        ApiResponse unprocessable = Arrays
+                .stream(NativeSigningController.class.getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals("422"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no class-level 422 response"));
+        assertEquals(String.class, unprocessable.content()[0].array().schema().implementation(),
+                "Core renders a refusal as an array of messages");
     }
 
     @Test
