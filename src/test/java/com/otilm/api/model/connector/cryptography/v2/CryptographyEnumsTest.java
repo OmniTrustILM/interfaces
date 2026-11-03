@@ -13,6 +13,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
 import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyReason;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationDecision;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureInputMode;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
@@ -53,6 +54,10 @@ class CryptographyEnumsTest {
                                 "Complete the operation before returning the response"),
                         contract(OperationExecutionMode.ASYNCHRONOUS, "asynchronous", "Asynchronous",
                                 "Return 202 Accepted with an operation tracking handle"),
+                        contract(SignatureInputMode.DATA, "data", "Data",
+                                "Sign the data as given; the connector hashes it with the digest the signature algorithm fixes"),
+                        contract(SignatureInputMode.PREHASHED_DIGEST, "prehashedDigest", "Prehashed digest",
+                                "Each item is already the digest the signature algorithm fixes; the connector signs it without hashing again"),
                         contract(OperationStatus.IN_PROGRESS, "inProgress", "In progress",
                                 "Operation is still running at the upstream system"),
                         contract(OperationStatus.COMPLETED, "completed", "Completed",
@@ -195,6 +200,8 @@ class CryptographyEnumsTest {
                         named("execution mode",
                                 new UnknownWireCode(OperationExecutionMode.class, unknownCode,
                                         ValidationException.class)),
+                        named("signature input mode",
+                                new UnknownWireCode(SignatureInputMode.class, unknownCode, ValidationException.class)),
                         named("operation status",
                                 new UnknownWireCode(OperationStatus.class, unknownCode, ValidationException.class)),
                         named("unusable key reason",
