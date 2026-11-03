@@ -56,8 +56,9 @@ public enum FeatureFlag implements IPlatformEnum {
                     + "created.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
     PREHASHED_SIGNING("prehashedSigning", "Prehashed Signing",
-            "Signs items that are already digests without hashing them again", FeatureFlagBehavior.ENFORCED,
-            List.of(ConnectorInterface.CRYPTOGRAPHY)),
+            "Signs items that are already digests without hashing them again: accepts signatureInputMode "
+                    + "prehashedDigest on the sign request",
+            FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
     SIGNER_BOUND_AT_CREATION("signerBoundAtCreation", "Signer Bound at Creation",
             "Supports binding a key pair to its signer when the key is created. The connector lists its signer "
                     + "attributes like any other connector, and the create-key attributes of a new key pair carry "
