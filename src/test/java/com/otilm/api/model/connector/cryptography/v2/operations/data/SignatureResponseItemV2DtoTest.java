@@ -10,6 +10,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AutoClose;
@@ -84,6 +85,8 @@ class SignatureResponseItemV2DtoTest {
     static Stream<Named<InvalidItem>> invalidItems() {
         OperationEventV2Dto eventWithoutType = validEvent(OperationEventType.SIGNATURE_CREATED);
         eventWithoutType.setType(null);
+        OperationEventV2Dto eventWithoutTime = validEvent(OperationEventType.SIGNATURE_CREATED);
+        eventWithoutTime.setAt(null);
         return Stream
                 .of(named("empty signature",
                         new InvalidItem(new SignatureResponseItemV2Dto(new byte[0], IDENTIFIER), "data",
@@ -96,9 +99,12 @@ class SignatureResponseItemV2DtoTest {
                                         new SignatureResponseItemV2Dto(SIGNATURE, IDENTIFIER,
                                                 Collections.singletonList(null)),
                                         "events[0].<list element>", "events must not contain null items")),
-                        named("event without its type", new InvalidItem(
-                                new SignatureResponseItemV2Dto(SIGNATURE, IDENTIFIER, List.of(eventWithoutType)),
-                                "events[0].type", "type is required")));
+                        named("event without its type",
+                                new InvalidItem(new SignatureResponseItemV2Dto(SIGNATURE, IDENTIFIER,
+                                        List.of(eventWithoutType)), "events[0].type", "type is required")),
+                        named("event without its time", new InvalidItem(
+                                new SignatureResponseItemV2Dto(SIGNATURE, IDENTIFIER, List.of(eventWithoutTime)),
+                                "events[0].at", "at is required")));
     }
 
     @Test
@@ -113,6 +119,22 @@ class SignatureResponseItemV2DtoTest {
         // then
         assertFalse(representation.contains(signatureMarker));
         assertTrue(representation.contains(IDENTIFIER));
+    }
+
+    @Test
+    void toString_omitsEventVendorDetail() {
+        // given
+        String vendorDetailMarker = "vendor-request-42";
+        OperationEventV2Dto event = validEvent(OperationEventType.SIGNATURE_CREATED);
+        event.setVendorDetail(Map.of("requestId", vendorDetailMarker));
+        SignatureResponseItemV2Dto item = new SignatureResponseItemV2Dto(SIGNATURE, IDENTIFIER, List.of(event));
+
+        // when
+        String representation = item.toString();
+
+        // then
+        assertFalse(representation.contains(vendorDetailMarker));
+        assertTrue(representation.contains(OperationEventType.SIGNATURE_CREATED.name()));
     }
 
     @Test
