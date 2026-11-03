@@ -173,6 +173,9 @@ class CryptographyEnumsTest {
                                 .of(OperationEventType.values())
                                 .map(value -> wireContract(value, value.getCode(), OperationEventType.class)),
                         Stream
+                                .of(SignatureInputMode.values())
+                                .map(value -> wireContract(value, value.getCode(), SignatureInputMode.class)),
+                        Stream
                                 .of(SignatureActivationDecision.values())
                                 .map(value -> wireContract(value, value.getCode(), SignatureActivationDecision.class)))
                 .flatMap(stream -> stream);

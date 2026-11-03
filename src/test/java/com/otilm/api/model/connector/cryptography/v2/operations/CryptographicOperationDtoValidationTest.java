@@ -3,8 +3,10 @@ package com.otilm.api.model.connector.cryptography.v2.operations;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
+import com.otilm.api.model.client.cryptography.operations.SignDataRequestDto;
 import com.otilm.api.model.common.attribute.v2.MetadataAttributeV2;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
@@ -37,6 +39,8 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
@@ -645,14 +649,32 @@ class CryptographicOperationDtoValidationTest {
     @Test
     void unknownInputModeIsRejected() throws Exception {
         String json = signRequestJsonWith("\"signatureInputMode\":\"prehashed\"");
-        assertThrows(JsonProcessingException.class, () -> mapper.readValue(json, SignDataRequestV2Dto.class));
+        JsonProcessingException exception = assertThrows(JsonProcessingException.class,
+                () -> mapper.readValue(json, SignDataRequestV2Dto.class));
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertInstanceOf(ValidationException.class, rootCause);
+    }
+
+    @Test
+    void explicitDataModeIsNeverSerialized() throws Exception {
+        SignDataRequestV2Dto request = validSignRequest();
+        request.setSignatureInputMode(SignatureInputMode.DATA);
+        assertNull(request.getSignatureInputMode());
+        assertFalse(mapper.writeValueAsString(request).contains("signatureInputMode"));
+    }
+
+    @Test
+    void dataWireValueDeserializesToAbsent() throws Exception {
+        String json = signRequestJsonWith("\"signatureInputMode\":\"data\"");
+        assertNull(mapper.readValue(json, SignDataRequestV2Dto.class).getSignatureInputMode());
     }
 
     @Test
     void clientSignRequestCarriesNoInputMode() {
-        assertThrows(NoSuchFieldException.class,
-                () -> com.otilm.api.model.client.cryptography.operations.SignDataRequestDto.class
-                        .getDeclaredField("signatureInputMode"));
+        assertThrows(NoSuchFieldException.class, () -> SignDataRequestDto.class.getDeclaredField("signatureInputMode"));
     }
 
     private String signRequestJsonWith(String extraProperty) throws JsonProcessingException {

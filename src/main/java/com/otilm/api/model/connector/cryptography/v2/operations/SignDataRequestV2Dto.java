@@ -57,4 +57,9 @@ public class SignDataRequestV2Dto extends KeyScopedRequestV2Dto {
     @NotEmpty(message = "data must contain at least one item")
     @UniqueIdentifiers
     private List<@NotNull(message = "data must not contain null items") @Valid SignatureDataV2Dto> data;
+
+    public void setSignatureInputMode(SignatureInputMode signatureInputMode) {
+        // Absent and data are equivalent by contract, and released connectors refuse the property.
+        this.signatureInputMode = signatureInputMode == SignatureInputMode.DATA ? null : signatureInputMode;
+    }
 }
