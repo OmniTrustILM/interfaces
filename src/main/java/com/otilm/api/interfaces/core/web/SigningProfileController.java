@@ -352,4 +352,26 @@ public interface SigningProfileController extends AuthProtectedController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deactivateTsp(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
             throws NotFoundException;
+
+    @Operation(operationId = "activateIlmNative", summary = "Activate the ILM Native API for Signing Profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "ILM Native API activated"),
+            @ApiResponse(responseCode = "404", description = "Signing Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @PatchMapping(path = "/{uuid}/protocols/ilmNative/activate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void activateIlmNative(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
+            throws NotFoundException;
+
+    @Operation(operationId = "deactivateIlmNative", summary = "Deactivate the ILM Native API for Signing Profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "ILM Native API deactivated"),
+            @ApiResponse(responseCode = "404", description = "Signing Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @PatchMapping(path = "/{uuid}/protocols/ilmNative/deactivate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deactivateIlmNative(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
+            throws NotFoundException;
 }

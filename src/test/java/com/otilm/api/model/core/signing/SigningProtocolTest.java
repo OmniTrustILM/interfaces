@@ -20,6 +20,7 @@ class SigningProtocolTest {
         assertEquals("csc_api", SigningProtocol.CSC_API.getCode());
         assertEquals("tsp", SigningProtocol.TSP.getCode());
         assertEquals("internal_tsa", SigningProtocol.INTERNAL_TSA.getCode());
+        assertEquals("ilm_native", SigningProtocol.ILM_NATIVE.getCode());
     }
 
     @Test
@@ -59,7 +60,14 @@ class SigningProtocolTest {
     void clientProtocolsAreEnableableOnAProfile() {
         assertTrue(SigningProtocol.TSP.isEnableableOnProfile());
         assertTrue(SigningProtocol.CSC_API.isEnableableOnProfile());
-        assertEquals(List.of(SigningProtocol.CSC_API, SigningProtocol.TSP), SigningProtocol.enableableValues());
+        assertEquals(List.of(SigningProtocol.CSC_API, SigningProtocol.TSP, SigningProtocol.ILM_NATIVE),
+                SigningProtocol.enableableValues());
+    }
+
+    @Test
+    void ilmNativeIsEnableableOnAProfile() {
+        assertTrue(SigningProtocol.ILM_NATIVE.isEnableableOnProfile());
+        assertEquals(SigningProtocol.ILM_NATIVE, SigningProtocol.findByCode("ilm_native"));
     }
 
     @Test

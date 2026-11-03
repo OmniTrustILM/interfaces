@@ -15,10 +15,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.ValueConstants;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -164,5 +167,29 @@ class SigningProfileControllerContractTest {
                 "the generated client method name is contract");
         assertTrue(operation.description().contains("does not narrow the returned descriptors"),
                 "the description must state that family does not filter, which callers cannot infer");
+    }
+
+    @Test
+    void ilmNativeActivationPairIsPatchedAndAnswersNoContent() {
+        // given
+        Method activate = method("activateIlmNative");
+        Method deactivate = method("deactivateIlmNative");
+
+        // when
+        String[] activatePath = activate.getAnnotation(PatchMapping.class).path();
+        String[] deactivatePath = deactivate.getAnnotation(PatchMapping.class).path();
+
+        // then
+        assertArrayEquals(new String[]{"/{uuid}/protocols/ilmNative/activate"}, activatePath);
+        assertArrayEquals(new String[]{"/{uuid}/protocols/ilmNative/deactivate"}, deactivatePath);
+        assertEquals(HttpStatus.NO_CONTENT, activate.getAnnotation(ResponseStatus.class).value());
+        assertEquals(HttpStatus.NO_CONTENT, deactivate.getAnnotation(ResponseStatus.class).value());
+        String unprocessable = Arrays
+                .stream(activate.getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals("422"))
+                .map(ApiResponse::description)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("activateIlmNative documents no 422 response"));
+        assertEquals("Unprocessable Content", unprocessable);
     }
 }
