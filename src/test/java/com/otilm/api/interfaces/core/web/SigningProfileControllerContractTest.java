@@ -1,5 +1,6 @@
 package com.otilm.api.interfaces.core.web;
 
+import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
@@ -184,12 +185,24 @@ class SigningProfileControllerContractTest {
         assertArrayEquals(new String[]{"/{uuid}/protocols/ilmNative/deactivate"}, deactivatePath);
         assertEquals(HttpStatus.NO_CONTENT, activate.getAnnotation(ResponseStatus.class).value());
         assertEquals(HttpStatus.NO_CONTENT, deactivate.getAnnotation(ResponseStatus.class).value());
-        String unprocessable = Arrays
-                .stream(activate.getAnnotation(ApiResponses.class).value())
-                .filter(r -> r.responseCode().equals("422"))
-                .map(ApiResponse::description)
+        assertEquals("ILM Native API activated", documented(activate, "204").description());
+        assertEquals("ILM Native API deactivated", documented(deactivate, "204").description());
+        for (Method operation : List.of(activate, deactivate)) {
+            ApiResponse notFound = documented(operation, "404");
+            assertEquals("Signing Profile not found", notFound.description());
+            assertEquals(ErrorMessageDto.class, notFound.content()[0].schema().implementation());
+        }
+        ApiResponse unprocessable = documented(activate, "422");
+        assertEquals("Unprocessable Content", unprocessable.description());
+        assertEquals(String.class, unprocessable.content()[0].array().schema().implementation(),
+                "Core renders a validation failure as an array of messages");
+    }
+
+    private static ApiResponse documented(Method operation, String status) {
+        return Arrays
+                .stream(operation.getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals(status))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("activateIlmNative documents no 422 response"));
-        assertEquals("Unprocessable Content", unprocessable);
+                .orElseThrow(() -> new AssertionError(operation.getName() + " documents no " + status + " response"));
     }
 }

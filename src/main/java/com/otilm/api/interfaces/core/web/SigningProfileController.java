@@ -359,7 +359,8 @@ public interface SigningProfileController extends AuthProtectedController {
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",
-                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PatchMapping(path = "/{uuid}/protocols/ilmNative/activate", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void activateIlmNative(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)

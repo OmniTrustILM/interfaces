@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Guards the public OpenAPI surface of {@link NativeSigningController}: the route prefix and tag that every native
- * operation inherits, and the class-level not-found response.
+ * operation inherits, and the class-level error responses.
  */
 class NativeSigningControllerDocTest {
 
@@ -46,16 +46,28 @@ class NativeSigningControllerDocTest {
     }
 
     @Test
-    void classLevelNotFoundDeclaresErrorMessageContent() {
+    void classLevelErrorsDeclareErrorMessageContent() {
         ApiResponses responses = NativeSigningController.class.getAnnotation(ApiResponses.class);
         assertNotNull(responses, "missing class-level @ApiResponses");
-        ApiResponse notFound = Arrays
-                .stream(responses.value())
-                .filter(r -> r.responseCode().equals("404"))
+        assertEquals(List.of("404", "502", "503"),
+                Arrays.stream(responses.value()).map(ApiResponse::responseCode).toList());
+        for (ApiResponse response : responses.value()) {
+            assertTrue(
+                    Arrays
+                            .stream(response.content())
+                            .anyMatch(c -> c.schema().implementation() == ErrorMessageDto.class),
+                    "class-level " + response.responseCode() + " must declare ErrorMessageDto");
+        }
+    }
+
+    @Test
+    void serviceUnavailableDeclaresTheRetryAfterHeader() {
+        ApiResponse unavailable = Arrays
+                .stream(NativeSigningController.class.getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals("503"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("no class-level 404 response"));
-        assertTrue(
-                Arrays.stream(notFound.content()).anyMatch(c -> c.schema().implementation() == ErrorMessageDto.class),
-                "class-level 404 must declare ErrorMessageDto");
+                .orElseThrow(() -> new AssertionError("no class-level 503 response"));
+        assertTrue(Arrays.stream(unavailable.headers()).anyMatch(h -> h.name().equals("Retry-After")),
+                "class-level 503 must declare the Retry-After header");
     }
 }
