@@ -37,6 +37,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.RandomDataRespon
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
@@ -50,6 +51,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -157,7 +159,60 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     public OperationValidationResult validateSignAttributeList(List<BaseAttribute> response) {
-        return validateSignatureAttributeList(response, "Sign");
+        OperationValidationResult validationResult = validateSignatureAttributeList(response, "Sign");
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+        return validate(() -> requireReservedSignatureActivationIfDeclared(response));
+    }
+
+    /** Only the platform fills a declared signatureActivation. */
+    private static void requireReservedSignatureActivationIfDeclared(List<BaseAttribute> schema) {
+        String identity = reservedAttributeIdentity(SignatureActivationAttribute.NAME,
+                SignatureActivationAttribute.ATTRIBUTE_UUID);
+        List<BaseAttribute> declarations = schema
+                .stream()
+                .filter(attribute -> SignatureActivationAttribute.ATTRIBUTE_UUID
+                        .toString()
+                        .equalsIgnoreCase(attribute.getUuid())
+                        || SignatureActivationAttribute.NAME.equals(attribute.getName()))
+                .toList();
+        if (declarations.isEmpty()) {
+            return;
+        }
+        if (declarations.size() > 1) {
+            throw new IllegalArgumentException("Sign attributes must declare the " + identity + " at most once");
+        }
+        BaseAttribute declaration = declarations.get(0);
+        if (!SignatureActivationAttribute.ATTRIBUTE_UUID.toString().equalsIgnoreCase(declaration.getUuid())
+                || !SignatureActivationAttribute.NAME.equals(declaration.getName())) {
+            throw new IllegalArgumentException(
+                    "The " + identity + " must be declared under both its name and its UUID");
+        }
+        if (!(declaration instanceof DataAttributeV3 definition) || !isV3DataAttribute(definition)) {
+            throw new IllegalArgumentException("The " + identity + " must be a v3 data attribute");
+        }
+        DataAttributeProperties properties = definition.getProperties();
+        if (properties == null || !properties.isRequired() || properties.isVisible() || properties.isReadOnly()
+                || properties.isList() || properties.isMultiSelect()
+                || definition.getContentType() != AttributeContentType.OBJECT || hasDefault(definition)
+                || hasConstraints(definition) || definition.getAttributeCallback() != null) {
+            throw new IllegalArgumentException("The " + identity
+                    + " must be a required, hidden, writable, single object value without a default, constraints or "
+                    + "callback");
+        }
+    }
+
+    private static boolean hasDefault(DataAttributeV3 definition) {
+        return definition.getContent() != null && !definition.getContent().isEmpty();
+    }
+
+    private static boolean hasConstraints(DataAttributeV3 definition) {
+        return definition.getConstraints() != null && !definition.getConstraints().isEmpty();
+    }
+
+    private static String reservedAttributeIdentity(String name, UUID uuid) {
+        return "attribute with name '" + name + "' and UUID '" + uuid + "'";
     }
 
     public OperationValidationResult validateVerifyAttributeList(List<BaseAttribute> response) {
@@ -178,8 +233,8 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     private static void requireSignatureAlgorithmOffered(List<BaseAttribute> schema, String operation) {
-        String identity = "attribute with name '" + SignatureAlgorithmAttribute.NAME + "' and UUID '"
-                + SignatureAlgorithmAttribute.ATTRIBUTE_UUID + "'";
+        String identity = reservedAttributeIdentity(SignatureAlgorithmAttribute.NAME,
+                SignatureAlgorithmAttribute.ATTRIBUTE_UUID);
         List<BaseAttribute> declarations = schema
                 .stream()
                 .filter(attribute -> SignatureAlgorithmAttribute.ATTRIBUTE_UUID
@@ -223,8 +278,8 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     private static void requireEncryptionAlgorithmOffered(List<BaseAttribute> schema) {
-        String identity = "attribute with name '" + EncryptionAlgorithmAttribute.NAME + "' and UUID '"
-                + EncryptionAlgorithmAttribute.ATTRIBUTE_UUID + "'";
+        String identity = reservedAttributeIdentity(EncryptionAlgorithmAttribute.NAME,
+                EncryptionAlgorithmAttribute.ATTRIBUTE_UUID);
         List<BaseAttribute> declarations = schema
                 .stream()
                 .filter(attribute -> EncryptionAlgorithmAttribute.ATTRIBUTE_UUID
