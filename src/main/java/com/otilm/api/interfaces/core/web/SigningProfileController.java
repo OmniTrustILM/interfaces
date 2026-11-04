@@ -67,7 +67,9 @@ public interface SigningProfileController extends AuthProtectedController {
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
 
     @Operation(operationId = "listSupportedProtocols",
-            summary = "List signing protocols supported for a given workflow type")
+            summary = "List signing protocols supported for a given workflow type",
+            description = "Lists the protocols a profile of this workflow type can enable. Activation can still refuse "
+                    + "a protocol for the profile's signing scheme: the ILM Native API needs ILM-managed signing.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Supported protocols retrieved")})
     @GetMapping(path = "/supportedProtocols", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SigningProtocol> listSupportedProtocols(

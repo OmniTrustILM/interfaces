@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * ILM's own signing API for server-side integrations. Every operation authorizes as {@code ResourceAction.SIGN} on
- * {@code Resource.SIGNING_PROFILE}. Operations are synchronous and carry no signature-activation evidence. The
- * ILM_NATIVE gate refusal and input refusals answer 422 with an array of messages; each operation documents its own
- * causes.
+ * {@code Resource.SIGNING_PROFILE}. Operations are synchronous and carry no signature-activation evidence. Each
+ * operation documents its own causes for the shared 422.
  */
 @RequestMapping("/v1/signing")
 @Tag(name = "Native Signing",
         description = "Native Signing API. "
                 + "Synchronous signing operations for server-side integrations, authorized against the Signing Profile "
-                + "that is used.")
+                + "that is used. The Signing Profile must have the ILM Native API activated; otherwise the operation "
+                + "answers 422.")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "404", description = "Not Found",
                 content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),

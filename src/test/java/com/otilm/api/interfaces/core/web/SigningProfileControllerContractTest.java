@@ -33,8 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Pins the signing-profile routes the admin UI and Core build against, namely the formatting attribute discovery routes
- * and the protocol activation pairs, against their annotation values. A changed path, verb, parameter or response shape
- * has to fail a build rather than surface as an empty form or a broken client.
+ * and the ILM Native activation pair, against their annotation values. A changed path, verb, parameter or response
+ * shape has to fail a build rather than surface as an empty form or a broken client.
  */
 class SigningProfileControllerContractTest {
 
