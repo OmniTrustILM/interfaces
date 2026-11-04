@@ -69,8 +69,8 @@ public class PadesVisibleSignatureStyleDto implements SignatureParameterContaine
 
     @Min(value = 72, message = "dpi must be at least 72")
     @Max(value = 1200, message = "dpi must be at most 1200")
-    @Schema(description = "Resolution the signature appearance is rendered at, in dots per inch",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "300")
+    @Schema(description = "Resolution the stamp image is drawn at, in dots per inch, "
+            + "which sets the image's natural size", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "300")
     private Integer dpi;
 
     @Override
