@@ -30,6 +30,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.PublicKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptionAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
@@ -38,6 +40,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivat
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationDecision;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResponseItemV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.security.KeyPairGenerator;
 import java.util.ArrayList;
@@ -66,6 +69,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyData;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -644,6 +648,43 @@ class OperationResponseValidatorTest {
 
         // then
         assertInvalid(result);
+    }
+
+    @Test
+    void validateSign_acceptsTheEventsOfEachSignature() {
+        // given
+        String identifier = "item-1";
+        SignDataRequestV2Dto request = signRequest(OperationExecutionMode.SYNCHRONOUS, identifier);
+        SignDataResponseV2Dto body = synchronousSignBody(identifier);
+        body
+                .getSignatures()
+                .getFirst()
+                .setEvents(List
+                        .of(validEvent(OperationEventType.AUTHORIZATION_GRANTED),
+                                validEvent(OperationEventType.SIGNATURE_CREATED)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSign(request, ResponseEntity.ok(body));
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSign_rejectsASignatureEventWithoutItsType() {
+        // given
+        String identifier = "item-1";
+        SignDataRequestV2Dto request = signRequest(OperationExecutionMode.SYNCHRONOUS, identifier);
+        SignDataResponseV2Dto body = synchronousSignBody(identifier);
+        OperationEventV2Dto eventWithoutType = validEvent(OperationEventType.SIGNATURE_CREATED);
+        eventWithoutType.setType(null);
+        body.getSignatures().getFirst().setEvents(List.of(eventWithoutType));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSign(request, ResponseEntity.ok(body));
+
+        // then
+        assertInvalid(result, "Connector response validation failed: signatures[0].events[0].type: type is required");
     }
 
     @Test
@@ -1246,7 +1287,7 @@ class OperationResponseValidatorTest {
         SignDataResponseV2Dto synchronousBodyWithOperationMetadata = synchronousSignBody(identifier);
         synchronousBodyWithOperationMetadata.setOperationMeta(validMetadata());
         SignDataResponseV2Dto asynchronousBodyWithSignatures = asynchronousSignBody();
-        asynchronousBodyWithSignatures.setSignatures(List.of(signatureItem(identifier)));
+        asynchronousBodyWithSignatures.setSignatures(List.of(signatureResponseItem(identifier)));
         return Stream
                 .of(named("synchronous body contains operation metadata",
                         new SignCase(signRequest(OperationExecutionMode.SYNCHRONOUS, identifier),
@@ -1737,7 +1778,9 @@ class OperationResponseValidatorTest {
 
     private static SignDataResponseV2Dto synchronousSignBody(String... identifiers) {
         SignDataResponseV2Dto response = new SignDataResponseV2Dto();
-        response.setSignatures(Stream.of(identifiers).map(OperationResponseValidatorTest::signatureItem).toList());
+        response
+                .setSignatures(
+                        Stream.of(identifiers).map(OperationResponseValidatorTest::signatureResponseItem).toList());
         return response;
     }
 
@@ -1754,6 +1797,11 @@ class OperationResponseValidatorTest {
     private static SignatureDataV2Dto signatureItem(String identifier) {
         byte[] data = {1};
         return new SignatureDataV2Dto(data, identifier);
+    }
+
+    private static SignatureResponseItemV2Dto signatureResponseItem(String identifier) {
+        byte[] signature = {2};
+        return new SignatureResponseItemV2Dto(signature, identifier);
     }
 
     private static void assertValid(OperationValidationResult result) {
