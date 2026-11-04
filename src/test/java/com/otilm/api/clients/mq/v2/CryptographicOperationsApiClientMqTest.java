@@ -24,6 +24,7 @@ import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataReques
 import com.otilm.api.model.connector.cryptography.v2.operations.VerifyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResponseItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResultItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.VerificationResponseItemV2Dto;
 import com.otilm.api.model.core.connector.ConnectorDto;
@@ -252,7 +253,7 @@ class CryptographicOperationsApiClientMqTest {
         // given
         SignDataRequestV2Dto request = signRequest(OperationExecutionMode.SYNCHRONOUS);
         SignDataResponseV2Dto body = new SignDataResponseV2Dto();
-        body.setSignatures(List.of(new SignatureDataV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
+        body.setSignatures(List.of(new SignatureResponseItemV2Dto(ITEM_DATA, ITEM_IDENTIFIER)));
         ResponseEntity<SignDataResponseV2Dto> response = ResponseEntity.ok(body);
         proxyClient.respondWithEntity(response);
 
