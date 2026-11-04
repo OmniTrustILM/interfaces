@@ -14,12 +14,21 @@ class SigningProtocolTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /** These codes persist in signing_record.protocol, so changing one costs a data migration. */
+    /** Core persists the constant names in signing_record.protocol, so renaming one costs a data migration. */
+    @Test
+    void persistedNamesArePinned() {
+        assertEquals("CSC_API", SigningProtocol.CSC_API.name());
+        assertEquals("TSP", SigningProtocol.TSP.name());
+        assertEquals("INTERNAL_TSA", SigningProtocol.INTERNAL_TSA.name());
+        assertEquals("ILM_NATIVE", SigningProtocol.ILM_NATIVE.name());
+    }
+
     @Test
     void wireCodesArePinned() {
         assertEquals("csc_api", SigningProtocol.CSC_API.getCode());
         assertEquals("tsp", SigningProtocol.TSP.getCode());
         assertEquals("internal_tsa", SigningProtocol.INTERNAL_TSA.getCode());
+        assertEquals("ilm_native", SigningProtocol.ILM_NATIVE.getCode());
     }
 
     @Test
@@ -59,7 +68,14 @@ class SigningProtocolTest {
     void clientProtocolsAreEnableableOnAProfile() {
         assertTrue(SigningProtocol.TSP.isEnableableOnProfile());
         assertTrue(SigningProtocol.CSC_API.isEnableableOnProfile());
-        assertEquals(List.of(SigningProtocol.CSC_API, SigningProtocol.TSP), SigningProtocol.enableableValues());
+        assertEquals(List.of(SigningProtocol.CSC_API, SigningProtocol.TSP, SigningProtocol.ILM_NATIVE),
+                SigningProtocol.enableableValues());
+    }
+
+    @Test
+    void ilmNativeIsEnableableOnAProfile() {
+        assertTrue(SigningProtocol.ILM_NATIVE.isEnableableOnProfile());
+        assertEquals(SigningProtocol.ILM_NATIVE, SigningProtocol.findByCode("ilm_native"));
     }
 
     @Test

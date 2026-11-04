@@ -21,6 +21,8 @@ public enum SigningProtocol implements IPlatformEnum {
 
     CSC_API(Codes.CSC_API, "CSC API Protocol", "Cloud Signature Consortium API v2", true),
     TSP(Codes.TSP, "Timestamping Protocol", "Timestamping Protocol based on RFC 3161", true),
+    ILM_NATIVE(Codes.ILM_NATIVE, "ILM Native API", "ILM's own synchronous signing API for server-side integrations",
+            true),
     INTERNAL_TSA(Codes.INTERNAL_TSA, "Internal TSA",
             "In-process timestamp issuance by the signing engine, recorded but never reachable by a client", false);
 
@@ -81,6 +83,7 @@ public enum SigningProtocol implements IPlatformEnum {
     public static class Codes {
         public static final String CSC_API = "csc_api";
         public static final String TSP = "tsp";
+        public static final String ILM_NATIVE = "ilm_native";
         public static final String INTERNAL_TSA = "internal_tsa";
 
         private Codes() {

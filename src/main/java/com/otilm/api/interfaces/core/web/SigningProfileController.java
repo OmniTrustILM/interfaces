@@ -67,7 +67,9 @@ public interface SigningProfileController extends AuthProtectedController {
     List<SearchFieldDataByGroupDto> getSearchableFieldInformation();
 
     @Operation(operationId = "listSupportedProtocols",
-            summary = "List signing protocols supported for a given workflow type")
+            summary = "List signing protocols supported for a given workflow type",
+            description = "Lists the protocols a profile of this workflow type can enable. Activation can still refuse "
+                    + "a protocol for the profile's signing scheme: the ILM Native API needs ILM-managed signing.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Supported protocols retrieved")})
     @GetMapping(path = "/supportedProtocols", produces = {MediaType.APPLICATION_JSON_VALUE})
     List<SigningProtocol> listSupportedProtocols(
@@ -351,5 +353,31 @@ public interface SigningProfileController extends AuthProtectedController {
     @PatchMapping(path = "/{uuid}/protocols/tsp/deactivate", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deactivateTsp(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
+            throws NotFoundException;
+
+    @Operation(operationId = "activateIlmNative", summary = "Activate the ILM Native API for Signing Profile",
+            description = "Enables the native signing API on a content-signing or raw-signing profile that uses "
+                    + "ILM-managed signing. Refused with 422 on a timestamping profile and on a profile that uses "
+                    + "delegated signing.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "ILM Native API activated"),
+            @ApiResponse(responseCode = "404", description = "Signing Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+    @PatchMapping(path = "/{uuid}/protocols/ilmNative/activate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void activateIlmNative(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
+            throws NotFoundException;
+
+    @Operation(operationId = "deactivateIlmNative", summary = "Deactivate the ILM Native API for Signing Profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "ILM Native API deactivated"),
+            @ApiResponse(responseCode = "404", description = "Signing Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @PatchMapping(path = "/{uuid}/protocols/ilmNative/deactivate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deactivateIlmNative(@Parameter(description = "Signing Profile UUID") @PathVariable UUID uuid)
             throws NotFoundException;
 }
