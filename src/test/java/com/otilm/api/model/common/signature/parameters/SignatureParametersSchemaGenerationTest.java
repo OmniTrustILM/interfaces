@@ -94,6 +94,8 @@ class SignatureParametersSchemaGenerationTest {
 
         assertNotNull(placement.get("page").getMinimum(), "page publishes no lower bound");
         assertEquals(1, placement.get("page").getMinimum().intValue());
+        assertNotNull(placement.get("zoom").getMinimum(), "zoom publishes no lower bound");
+        assertEquals(1, placement.get("zoom").getMinimum().intValue());
         assertNotNull(placement.get("zoom").getMaximum(), "zoom publishes no upper bound");
         assertEquals(1000, placement.get("zoom").getMaximum().intValue());
 
@@ -102,7 +104,7 @@ class SignatureParametersSchemaGenerationTest {
             assertEquals(Boolean.FALSE, placement.get(field).getExclusiveMinimum(),
                     field + " must admit the page edge");
         }
-        for (String field : List.of("width", "height", "zoom")) {
+        for (String field : List.of("width", "height")) {
             assertEquals(BigDecimal.ZERO, placement.get(field).getMinimum(), field + " publishes no floor");
             assertEquals(Boolean.TRUE, placement.get(field).getExclusiveMinimum(), field + " must not admit zero");
         }

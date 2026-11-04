@@ -51,6 +51,11 @@ public enum ErrorCode {
     PARAMETER_UNSUPPORTED(ProblemTypeCategory.CONNECTOR, null,
             "Requested parameter or signature family is not supported by this connector",
             HttpStatus.UNPROCESSABLE_CONTENT, false),
+    SIGNATURE_PLACEMENT_REJECTED(ProblemTypeCategory.CONNECTOR, null,
+            "Document cannot hold the visible signature at the requested place", HttpStatus.UNPROCESSABLE_CONTENT,
+            false),
+    DOCUMENT_SIGNING_FORBIDDEN(ProblemTypeCategory.CONNECTOR, null, "Document forbids the requested signature",
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
 
     // Replayed-context divergence. Distinct from VALIDATION_FAILED: the body is well formed, so no field
     // rule is what failed. It says the platform's own state moved between a compute step and the embed
