@@ -165,9 +165,9 @@ public interface CryptographicOperationsController extends AuthProtectedConnecto
                     description = "Request body was read successfully but violates a field validation rule "
                             + "(errorCode VALIDATION_FAILED), or the signatureAlgorithm selection names an algorithm "
                             + "the key does not support (errorCode PARAMETER_UNSUPPORTED), or `signatureActivation` is "
-                            + "missing (errorCode VALIDATION_FAILED), or signatureInputMode prehashedDigest is not "
-                            + "implemented by the connector or not defined for the selected signatureAlgorithm "
-                            + "(errorCode PARAMETER_UNSUPPORTED), or a prehashedDigest item is not the length of the "
+                            + "missing (errorCode VALIDATION_FAILED), or the connector does not implement the "
+                            + "requested signatureInputMode, or prehashedDigest is not defined for the selected "
+                            + "signatureAlgorithm (errorCode PARAMETER_UNSUPPORTED), or a prehashedDigest item is not the length of the "
                             + "digest the signatureAlgorithm fixes (errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})

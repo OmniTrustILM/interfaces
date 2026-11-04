@@ -41,8 +41,9 @@ public class SignDataRequestV2Dto extends KeyScopedRequestV2Dto {
                     + "fixes. prehashedDigest is defined for RSA PKCS#1 v1.5, RSA-PSS and ECDSA signature "
                     + "algorithm codes only: any other code answers 422 PARAMETER_UNSUPPORTED, and an item whose "
                     + "length is not the output length of the fixed digest answers 422 VALIDATION_FAILED. A "
-                    + "connector that does not implement the mode answers 422 PARAMETER_UNSUPPORTED and never "
-                    + "ignores the field; one that implements it advertises the prehashedSigning feature flag.")
+                    + "connector answers 422 PARAMETER_UNSUPPORTED to any signatureInputMode it does not implement "
+                    + "and never ignores the field; one that implements prehashedDigest advertises the "
+                    + "prehashedSigning feature flag.")
     private SignatureInputMode signatureInputMode;
 
     @Schema(description = "Batch-wide signature settings. Must include exactly one v3 string attribute named "

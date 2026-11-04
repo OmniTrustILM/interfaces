@@ -22,7 +22,8 @@ class SignatureInputModeSchemaTest {
     private static final List<String> RULES = List
             .of("never hashed again", "RFC 8017 section 9.2", "explicit NULL",
                     "RSA PKCS#1 v1.5, RSA-PSS and ECDSA signature algorithm codes only", "PARAMETER_UNSUPPORTED",
-                    "VALIDATION_FAILED", "never ignores the field", "prehashedSigning");
+                    "VALIDATION_FAILED", "any signatureInputMode it does not implement", "never ignores the field",
+                    "prehashedSigning");
 
     @Test
     void fieldSchemaCarriesTheConformanceRules() throws NoSuchFieldException {
@@ -56,8 +57,8 @@ class SignatureInputModeSchemaTest {
 
         // then
         assertTrue(description
-                .contains("signatureInputMode prehashedDigest is not implemented by the connector "
-                        + "or not defined for the selected signatureAlgorithm (errorCode PARAMETER_UNSUPPORTED)"));
+                .contains("the connector does not implement the requested signatureInputMode, or prehashedDigest "
+                        + "is not defined for the selected signatureAlgorithm (errorCode PARAMETER_UNSUPPORTED)"));
         assertTrue(description
                 .contains("a prehashedDigest item is not the length of the digest the "
                         + "signatureAlgorithm fixes (errorCode VALIDATION_FAILED)"));
