@@ -13,6 +13,7 @@ import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationTrackingRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.CipherDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResponseItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResultItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.VerificationResponseItemV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
@@ -308,9 +309,10 @@ class CryptographicOperationDtoValidationTest {
         SignDataResponseV2Dto synchronousNullItem = validSynchronousSignResponse();
         synchronousNullItem.setSignatures(Collections.singletonList(null));
         SignDataResponseV2Dto synchronousDuplicate = validSynchronousSignResponse();
-        synchronousDuplicate.setSignatures(List.of(signatureItem("duplicate"), signatureItem("duplicate")));
+        synchronousDuplicate
+                .setSignatures(List.of(signatureResponseItem("duplicate"), signatureResponseItem("duplicate")));
         SignDataResponseV2Dto asynchronousWithSignatures = validAsynchronousSignResponse();
-        asynchronousWithSignatures.setSignatures(List.of(signatureItem("item-1")));
+        asynchronousWithSignatures.setSignatures(List.of(signatureResponseItem("item-1")));
         SignDataResponseV2Dto asynchronousWithoutTrackingMeta = validAsynchronousSignResponse();
         asynchronousWithoutTrackingMeta.setOperationMeta(null);
         SignDataResponseV2Dto asynchronousNullMeta = validAsynchronousSignResponse();
@@ -630,7 +632,7 @@ class CryptographicOperationDtoValidationTest {
 
     private static SignDataResponseV2Dto validSynchronousSignResponse() {
         SignDataResponseV2Dto response = new SignDataResponseV2Dto();
-        response.setSignatures(List.of(signatureItem("item-1")));
+        response.setSignatures(List.of(signatureResponseItem("item-1")));
         return response;
     }
 
@@ -678,6 +680,10 @@ class CryptographicOperationDtoValidationTest {
 
     private static SignatureDataV2Dto signatureItem(String identifier) {
         return new SignatureDataV2Dto(new byte[]{1}, identifier);
+    }
+
+    private static SignatureResponseItemV2Dto signatureResponseItem(String identifier) {
+        return new SignatureResponseItemV2Dto(new byte[]{2}, identifier);
     }
 
     private static SignatureResultItemV2Dto signResult(String identifier) {
