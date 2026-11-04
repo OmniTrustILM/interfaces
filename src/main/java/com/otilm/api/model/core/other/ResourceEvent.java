@@ -105,6 +105,11 @@ public enum ResourceEvent implements IPlatformEnum {
     private final List<Resource> overridingResources;
     private final Class<? extends EventData> eventData;
     private final boolean monitoring;
+    /**
+     * For a monitoring event: notify once, instead of on every raise, when the notification profile sets neither
+     * frequency nor repetitions. {@code CERTIFICATE_EXPIRING} does not, so it keeps notifying on every raise. Read by
+     * Core when it sends notifications; not part of the API.
+     */
     private final boolean singleNotificationWithoutReminders;
 
     ResourceEvent(final String code, final String label, final String description, final Resource resource,
