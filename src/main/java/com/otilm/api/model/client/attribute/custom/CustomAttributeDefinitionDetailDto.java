@@ -2,6 +2,8 @@ package com.otilm.api.model.client.attribute.custom;
 
 import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.AttributeType;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Getter;
@@ -11,7 +13,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Getter
 @Setter
-public class CustomAttributeDefinitionDetailDto extends CustomAttributeDefinitionDto {
+public class CustomAttributeDefinitionDetailDto extends CustomAttributeDefinitionDto implements ObjectActionsAware {
 
     /**
      * Type of the Attribute. For the custom attribute, the type will always be "custom"
@@ -62,6 +64,9 @@ public class CustomAttributeDefinitionDetailDto extends CustomAttributeDefinitio
 
     @Schema(description = "Boolean determining if a list Attribute can have values other than predefined options")
     private boolean extensibleList;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

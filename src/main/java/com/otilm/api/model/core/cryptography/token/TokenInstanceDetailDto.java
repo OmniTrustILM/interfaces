@@ -3,7 +3,9 @@ package com.otilm.api.model.core.cryptography.token;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.cryptography.key.KeyTransferAvailabilityDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,7 +19,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class TokenInstanceDetailDto extends NameAndUuidDto {
+public class TokenInstanceDetailDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "Connector Name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String connectorName;
@@ -50,6 +52,9 @@ public class TokenInstanceDetailDto extends NameAndUuidDto {
             + "that profile.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyTransferAvailabilityDto keyTransfer;
 
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
     /**
      * The signature this class carried before {@code keyTransfer} was added, so a caller that constructs it
      * positionally still compiles. Key transfer is then unreported rather than reported as unavailable.
@@ -57,6 +62,19 @@ public class TokenInstanceDetailDto extends NameAndUuidDto {
     public TokenInstanceDetailDto(String connectorName, String connectorUuid, String kind,
             TokenInstanceStatusDetailDto status, Integer tokenProfiles, List<ResponseAttribute> attributes,
             List<MetadataResponseDto> metadata, List<ResponseAttribute> customAttributes) {
-        this(connectorName, connectorUuid, kind, status, tokenProfiles, attributes, metadata, customAttributes, null);
+        this(connectorName, connectorUuid, kind, status, tokenProfiles, attributes, metadata, customAttributes, null,
+                null);
+    }
+
+    /**
+     * The signature this class carried before {@code allowedActions} was added, so a caller that constructs it
+     * positionally still compiles. The allowed actions are then unreported.
+     */
+    public TokenInstanceDetailDto(String connectorName, String connectorUuid, String kind,
+            TokenInstanceStatusDetailDto status, Integer tokenProfiles, List<ResponseAttribute> attributes,
+            List<MetadataResponseDto> metadata, List<ResponseAttribute> customAttributes,
+            KeyTransferAvailabilityDto keyTransfer) {
+        this(connectorName, connectorUuid, kind, status, tokenProfiles, attributes, metadata, customAttributes,
+                keyTransfer, null);
     }
 }

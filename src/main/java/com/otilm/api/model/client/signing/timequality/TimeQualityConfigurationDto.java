@@ -3,6 +3,8 @@ package com.otilm.api.model.client.signing.timequality;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Schema(name = "TimeQualityConfigurationDto", description = "Time quality configuration details")
 @ToString(callSuper = true)
-public class TimeQualityConfigurationDto extends NameAndUuidDto {
+public class TimeQualityConfigurationDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "Declared accuracy of the profile, in ISO 8601 duration format",
@@ -55,4 +57,8 @@ public class TimeQualityConfigurationDto extends NameAndUuidDto {
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
 }

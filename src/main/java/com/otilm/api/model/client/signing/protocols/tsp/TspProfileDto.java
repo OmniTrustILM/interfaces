@@ -3,8 +3,10 @@ package com.otilm.api.model.client.signing.protocols.tsp;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.signing.profile.SimplifiedSigningProfileDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.signing.TspAuthenticationMethod;
 import com.otilm.api.model.core.vaultprofile.VaultProfileDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Schema(name = "TspProfileDto", description = "TSP (Timestamping Protocol) profile details")
 @ToString(callSuper = true)
-public class TspProfileDto extends NameAndUuidDto {
+public class TspProfileDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "Description of the TSP Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             example = "TSP profile for production timestamping")
@@ -44,4 +46,8 @@ public class TspProfileDto extends NameAndUuidDto {
 
     @Schema(description = "List of Custom Attributes", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
 }

@@ -2,6 +2,8 @@ package com.otilm.api.model.core.entity;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Setter
 @Getter
-public class EntityInstanceDto extends NameAndUuidDto {
+public class EntityInstanceDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "List of Entity instance Attributes", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> attributes = new ArrayList<>();
@@ -32,6 +34,9 @@ public class EntityInstanceDto extends NameAndUuidDto {
     @Schema(description = "Entity instance Kind", examples = {"Keystore, etc."},
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String kind;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

@@ -2,6 +2,8 @@ package com.otilm.api.model.core.credential;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,7 +15,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Setter
 @Getter
-public class CredentialDto extends NameAndUuidDto implements Serializable {
+public class CredentialDto extends NameAndUuidDto implements Serializable, ObjectActionsAware {
 
     @Schema(description = "Credential Kind", examples = {"SoftKeyStore, Basic, ApiKey, etc"},
             requiredMode = Schema.RequiredMode.REQUIRED)
@@ -34,6 +36,9 @@ public class CredentialDto extends NameAndUuidDto implements Serializable {
 
     @Schema(description = "Name of Credential provider Connector", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String connectorName;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

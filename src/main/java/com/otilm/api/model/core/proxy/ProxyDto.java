@@ -1,7 +1,9 @@
 package com.otilm.api.model.core.proxy;
 
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.connector.ConnectorSummaryDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -13,7 +15,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Setter
 @Getter
-public class ProxyDto extends NameAndUuidDto implements Serializable {
+public class ProxyDto extends NameAndUuidDto implements Serializable, ObjectActionsAware {
 
     @Schema(description = "Detailed description of the Proxy",
             examples = {"This proxy is used for connecting to external connectors in DMZ network"},
@@ -32,6 +34,9 @@ public class ProxyDto extends NameAndUuidDto implements Serializable {
 
     @Schema(description = "List of Connectors associated with the Proxy")
     private List<ConnectorSummaryDto> connectors;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

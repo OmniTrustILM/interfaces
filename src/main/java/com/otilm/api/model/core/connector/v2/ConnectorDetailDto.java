@@ -2,7 +2,9 @@ package com.otilm.api.model.core.connector.v2;
 
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.connector.AuthType;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
@@ -11,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(name = "ConnectorDetailDtoV2")
-public class ConnectorDetailDto extends ConnectorDto implements ApiClientConnectorInfo {
+public class ConnectorDetailDto extends ConnectorDto implements ApiClientConnectorInfo, ObjectActionsAware {
 
     @Schema(description = "Type of authentication for the Connector", examples = {"none"},
             requiredMode = Schema.RequiredMode.REQUIRED)
@@ -23,5 +25,8 @@ public class ConnectorDetailDto extends ConnectorDto implements ApiClientConnect
 
     @Schema(description = "List of Custom Attributes")
     private List<ResponseAttribute> customAttributes;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
 }

@@ -2,6 +2,8 @@ package com.otilm.api.model.core.raprofile;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 @Getter
 @Setter
-public class RaProfileDto extends NameAndUuidDto {
+public class RaProfileDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "Description of RA Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
@@ -49,6 +51,9 @@ public class RaProfileDto extends NameAndUuidDto {
     @Schema(description = "Static certificate-request-attribute set configured for the RA Profile",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private RaProfileCertificateRequestAttributesDto certificateRequestAttributes;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

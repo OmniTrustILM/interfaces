@@ -3,7 +3,9 @@ package com.otilm.api.model.core.acme;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.raprofile.SimplifiedRaProfileDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class AcmeProfileDto extends NameAndUuidDto {
+public class AcmeProfileDto extends NameAndUuidDto implements ObjectActionsAware {
     @Schema(description = "Enabled flag - true = enabled; false = disabled",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enabled;
@@ -72,6 +74,9 @@ public class AcmeProfileDto extends NameAndUuidDto {
     @Schema(description = "What happens to an ordered identifier the pre-authorization policy does not cover.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

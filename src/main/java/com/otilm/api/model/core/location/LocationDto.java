@@ -3,6 +3,8 @@ package com.otilm.api.model.core.location;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 @Setter
 @Getter
-public class LocationDto extends NameAndUuidDto {
+public class LocationDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "Description of the Location")
     private String description;
@@ -50,6 +52,9 @@ public class LocationDto extends NameAndUuidDto {
 
     @Schema(description = "Location metadata")
     private List<MetadataResponseDto> metadata;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

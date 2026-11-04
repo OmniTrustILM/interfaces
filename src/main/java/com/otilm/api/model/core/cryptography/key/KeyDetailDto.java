@@ -2,8 +2,10 @@ package com.otilm.api.model.core.cryptography.key;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.certificate.group.GroupDto;
 import com.otilm.api.model.core.compliance.ComplianceStatus;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,7 +20,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class KeyDetailDto extends NameAndUuidDto {
+public class KeyDetailDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "Description of the Key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
@@ -68,6 +70,9 @@ public class KeyDetailDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean removableFromInventory;
 
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
     /**
      * The signature this class carried before {@code removableFromInventory} was added, so a caller that constructs it
      * positionally still compiles. It leaves the removable flag false.
@@ -78,7 +83,21 @@ public class KeyDetailDto extends NameAndUuidDto {
             String ownerUuid, List<GroupDto> groups, List<KeyItemDetailDto> items, List<KeyAssociationDto> associations,
             ComplianceStatus complianceStatus) {
         this(description, creationTime, tokenProfileUuid, tokenProfileName, tokenInstanceUuid, tokenInstanceName,
-                customAttributes, attributes, owner, ownerUuid, groups, items, associations, complianceStatus, false);
+                customAttributes, attributes, owner, ownerUuid, groups, items, associations, complianceStatus, false,
+                null);
     }
 
+    /**
+     * The signature this class carried before {@code allowedActions} was added, so a caller that constructs it
+     * positionally still compiles. The allowed actions are then unreported.
+     */
+    public KeyDetailDto(String description, OffsetDateTime creationTime, String tokenProfileUuid,
+            String tokenProfileName, String tokenInstanceUuid, String tokenInstanceName,
+            List<ResponseAttribute> customAttributes, List<ResponseAttribute> attributes, String owner,
+            String ownerUuid, List<GroupDto> groups, List<KeyItemDetailDto> items, List<KeyAssociationDto> associations,
+            ComplianceStatus complianceStatus, boolean removableFromInventory) {
+        this(description, creationTime, tokenProfileUuid, tokenProfileName, tokenInstanceUuid, tokenInstanceName,
+                customAttributes, attributes, owner, ownerUuid, groups, items, associations, complianceStatus,
+                removableFromInventory, null);
+    }
 }

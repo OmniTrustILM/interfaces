@@ -1,6 +1,8 @@
 package com.otilm.api.model.core.vault;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
@@ -8,7 +10,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class VaultInstanceDetailDto extends VaultInstanceDto {
+public class VaultInstanceDetailDto extends VaultInstanceDto implements ObjectActionsAware {
 
     @Schema(description = "List of attributes of the Vault instance", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> attributes;
@@ -16,4 +18,8 @@ public class VaultInstanceDetailDto extends VaultInstanceDto {
     @Schema(description = "List of custom attributes of the Vault instance",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> customAttributes;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
 }

@@ -2,7 +2,10 @@ package com.otilm.api.model.client.attribute.metadata;
 
 import com.otilm.api.model.client.attribute.AttributeDefinitionDto;
 import com.otilm.api.model.common.attribute.common.AttributeType;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -10,7 +13,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Setter
 @Getter
-public class GlobalMetadataDefinitionDetailDto extends AttributeDefinitionDto {
+public class GlobalMetadataDefinitionDetailDto extends AttributeDefinitionDto implements ObjectActionsAware {
 
     /**
      * Type of the Attribute. For the custom attribute, the type will always be "custom"
@@ -32,6 +35,9 @@ public class GlobalMetadataDefinitionDetailDto extends AttributeDefinitionDto {
     @Schema(description = "Group of the Attribute, used for the logical grouping of the Attribute",
             examples = {"requiredAttributes"})
     private String group;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

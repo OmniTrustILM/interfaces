@@ -1,6 +1,8 @@
 package com.otilm.api.model.core.compliance.v2;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Schema(name = "ComplianceProfileDtoV2")
-public class ComplianceProfileDto {
+public class ComplianceProfileDto implements ObjectActionsAware {
     @Schema(description = "Compliance profile UUID", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID uuid;
 
@@ -31,4 +33,8 @@ public class ComplianceProfileDto {
 
     @Schema(description = "List of Custom Attributes")
     private List<ResponseAttribute> customAttributes = new ArrayList<>();
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
 }

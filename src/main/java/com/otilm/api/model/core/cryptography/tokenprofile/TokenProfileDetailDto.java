@@ -3,8 +3,10 @@ package com.otilm.api.model.core.cryptography.tokenprofile;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.connector.cryptography.enums.TokenInstanceStatus;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.cryptography.key.KeyTransferCapabilityDto;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-public class TokenProfileDetailDto extends NameAndUuidDto {
+public class TokenProfileDetailDto extends NameAndUuidDto implements ObjectActionsAware {
     @Schema(description = "Description of Token Profile")
     private String description;
 
@@ -49,6 +51,9 @@ public class TokenProfileDetailDto extends NameAndUuidDto {
             + "which key types", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyTransferCapabilityDto keyTransfer;
 
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
     /**
      * The signature this class carried before {@code keyTransfer} was added, so a caller that constructs it
      * positionally still compiles. Key transfer is then unreported rather than reported as unavailable.
@@ -57,6 +62,18 @@ public class TokenProfileDetailDto extends NameAndUuidDto {
             List<ResponseAttribute> attributes, List<ResponseAttribute> customAttributes,
             TokenInstanceStatus tokenInstanceStatus, Boolean enabled, List<KeyUsage> usages) {
         this(description, tokenInstanceUuid, tokenInstanceName, attributes, customAttributes, tokenInstanceStatus,
-                enabled, usages, null);
+                enabled, usages, null, null);
+    }
+
+    /**
+     * The signature this class carried before {@code allowedActions} was added, so a caller that constructs it
+     * positionally still compiles. The allowed actions are then unreported.
+     */
+    public TokenProfileDetailDto(String description, String tokenInstanceUuid, String tokenInstanceName,
+            List<ResponseAttribute> attributes, List<ResponseAttribute> customAttributes,
+            TokenInstanceStatus tokenInstanceStatus, Boolean enabled, List<KeyUsage> usages,
+            KeyTransferCapabilityDto keyTransfer) {
+        this(description, tokenInstanceUuid, tokenInstanceName, attributes, customAttributes, tokenInstanceStatus,
+                enabled, usages, keyTransfer, null);
     }
 }

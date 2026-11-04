@@ -2,7 +2,9 @@ package com.otilm.api.model.core.authority;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Getter
 @Setter
-public class AuthorityInstanceDto extends NameAndUuidDto {
+public class AuthorityInstanceDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "List of Authority instance Attributes", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResponseAttribute> attributes = new ArrayList<>();
@@ -57,6 +59,9 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
             + "which are identified by connectorInterface", examples = {"LegacyEjbca", "ADCS"},
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String kind;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
     @Override
     public String toString() {

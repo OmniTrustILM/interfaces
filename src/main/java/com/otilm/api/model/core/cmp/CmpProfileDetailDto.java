@@ -1,8 +1,10 @@
 package com.otilm.api.model.core.cmp;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.certificate.CertificateDto;
 import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -11,7 +13,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CmpProfileDetailDto extends CmpProfileDto {
+public class CmpProfileDetailDto extends CmpProfileDto implements ObjectActionsAware {
 
     @Schema(description = "List of Attributes to issue a Certificate for the associated RA Profile")
     private List<ResponseAttribute> issueCertificateAttributes;
@@ -35,5 +37,8 @@ public class CmpProfileDetailDto extends CmpProfileDto {
     @Schema(description = "Associations to set for certificates issued by the protocol",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ProtocolCertificateAssociationsDto certificateAssociations;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
 
 }

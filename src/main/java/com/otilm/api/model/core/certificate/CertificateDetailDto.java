@@ -2,9 +2,11 @@ package com.otilm.api.model.core.certificate;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.cryptography.key.KeyDto;
 import com.otilm.api.model.core.location.LocationDto;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CertificateDetailDto extends CertificateDto {
+public class CertificateDetailDto extends CertificateDto implements ObjectActionsAware {
 
     @Schema(description = "Extended key usages", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<String> extendedKeyUsage;
@@ -112,4 +114,8 @@ public class CertificateDetailDto extends CertificateDto {
     @Schema(description = "Parsed ETSI QCStatements extension (RFC 3739 / ETSI EN 319 412-5). "
             + "Absent when the extension is not present in the certificate.")
     private CertificateQcStatementsDto qcStatements;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
 }

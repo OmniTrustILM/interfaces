@@ -5,7 +5,9 @@ import com.otilm.api.model.client.signing.profile.record.SigningRecordPolicyDto;
 import com.otilm.api.model.client.signing.profile.scheme.SigningSchemeDto;
 import com.otilm.api.model.client.signing.profile.workflow.WorkflowDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.core.auth.ObjectActionsAware;
 import com.otilm.api.model.core.signing.SigningProtocol;
+import com.otilm.core.model.auth.ResourceAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Schema(name = "SigningProfileDto", description = "Signing Profile detail")
 @ToString(callSuper = true)
-public class SigningProfileDto extends NameAndUuidDto {
+public class SigningProfileDto extends NameAndUuidDto implements ObjectActionsAware {
 
     @Schema(description = "Description of the Signing Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
@@ -43,4 +45,8 @@ public class SigningProfileDto extends NameAndUuidDto {
 
     @Schema(description = "Effective Signing Record policy", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private SigningRecordPolicyDto recordPolicy;
+
+    @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
+    private List<ResourceAction> allowedActions;
+
 }

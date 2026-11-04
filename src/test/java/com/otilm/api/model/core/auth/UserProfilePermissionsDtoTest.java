@@ -16,8 +16,6 @@ class UserProfilePermissionsDtoTest {
 
     private static final String PROFILE_SCHEMA = "UserProfilePermissionsDto";
     private static final String ACTIONS_SCHEMA = "ResourceActionsDto";
-    private static final String OBJECT_ACTIONS_SCHEMA = "ObjectActionsDto";
-    private static final String SECRET_UUID = "2f8c1f4e-3b7a-4d2e-9c61-0a5e8d7b4f13";
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -39,45 +37,27 @@ class UserProfilePermissionsDtoTest {
         return new UserProfilePermissionsDto(List.of(Resource.SETTINGS),
                 List
                         .of(new ResourceActionsDto(Resource.SETTINGS,
-                                List.of(ResourceAction.UPDATE, ResourceAction.UPDATE_BRANDING))),
-                List.of(new ObjectActionsDto(Resource.SECRET, SECRET_UUID, List.of(ResourceAction.DETAIL))));
+                                List.of(ResourceAction.UPDATE, ResourceAction.UPDATE_BRANDING))));
     }
 
     @Test
     void serializesResourcesAndActionsAsTheirWireCodes() throws Exception {
         // @JsonValue on both enums is the only reason UPDATE_BRANDING arrives as updateBranding.
         assertEquals("{\"allowedListings\":[\"settings\"],"
-                + "\"allowedActions\":[{\"resource\":\"settings\",\"actions\":[\"update\",\"updateBranding\"]}],"
-                + "\"objectActions\":[{\"resource\":\"secrets\",\"objectUuid\":\"" + SECRET_UUID
-                + "\",\"actions\":[\"detail\"]}]}", mapper.writeValueAsString(settingsEditor()));
+                + "\"allowedActions\":[{\"resource\":\"settings\",\"actions\":[\"update\",\"updateBranding\"]}]}",
+                mapper.writeValueAsString(settingsEditor()));
     }
 
+    /** A client gating a control on an absent field would fail open, so neither list may be optional. */
     @Test
-    @SuppressWarnings("removal")
-    void previousTwoArgumentConstructorReportsNoObjectActions() throws Exception {
-        UserProfilePermissionsDto permissions = new UserProfilePermissionsDto(List.of(Resource.SETTINGS), List.of());
-
-        assertEquals(List.of(), permissions.getObjectActions());
-        assertEquals("{\"allowedListings\":[\"settings\"],\"allowedActions\":[],\"objectActions\":[]}",
-                mapper.writeValueAsString(permissions));
-    }
-
-    /** A client gating a control on an absent field would fail open, so no list may be optional. */
-    @Test
-    void publishesEveryPermissionListAsRequired() {
-        assertEquals(Set.of("allowedListings", "allowedActions", "objectActions"),
+    void publishesBothPermissionListsAsRequired() {
+        assertEquals(Set.of("allowedListings", "allowedActions"),
                 Set.copyOf(schemas().get(PROFILE_SCHEMA).getRequired()));
     }
 
     @Test
     void publishesBothResourceActionFieldsAsRequired() {
         assertEquals(Set.of("resource", "actions"), Set.copyOf(schemas().get(ACTIONS_SCHEMA).getRequired()));
-    }
-
-    @Test
-    void publishesEveryObjectActionFieldAsRequired() {
-        assertEquals(Set.of("resource", "objectUuid", "actions"),
-                Set.copyOf(schemas().get(OBJECT_ACTIONS_SCHEMA).getRequired()));
     }
 
     @Test
@@ -95,11 +75,6 @@ class UserProfilePermissionsDtoTest {
                 property(PROFILE_SCHEMA, "allowedActions").getItems().get$ref());
         assertEquals("#/components/schemas/Resource", property(ACTIONS_SCHEMA, "resource").get$ref());
         assertEquals("#/components/schemas/ResourceAction", property(ACTIONS_SCHEMA, "actions").getItems().get$ref());
-        assertEquals("#/components/schemas/" + OBJECT_ACTIONS_SCHEMA,
-                property(PROFILE_SCHEMA, "objectActions").getItems().get$ref());
-        assertEquals("#/components/schemas/Resource", property(OBJECT_ACTIONS_SCHEMA, "resource").get$ref());
-        assertEquals("#/components/schemas/ResourceAction",
-                property(OBJECT_ACTIONS_SCHEMA, "actions").getItems().get$ref());
 
         assertTrue(schemas().get("ResourceAction").getEnum().contains(ResourceAction.UPDATE_BRANDING.getCode()),
                 "the referenced action enum does not publish the code clients gate branding on");
@@ -109,11 +84,8 @@ class UserProfilePermissionsDtoTest {
     @Test
     void documentsTheConstraintsAClientCannotInferFromTheTypes() {
         assertDocuments("allowedActions", "resource-level grants only", "Object-scoped grants are excluded",
-                "reported in objectActions", "omitted rather than reported with an empty list",
+                "detail response of an object", "omitted rather than reported with an empty list",
                 "not derivable from allowedListings");
-        assertDocuments("objectActions", "explicit object-scoped grants only", "when the user owns the object",
-                "holds the members action on a group the object is assigned to", "Ownership is not listed",
-                "Denials are not reported", "omitted rather than reported with an empty list");
         assertDocuments("allowedListings", "granted to every user by default",
                 "holds the members action on at least one group", "Certificate, Cryptographic Key, Secret",
                 "does not follow that group rule", "holds the create action on it", "owns at least one",
