@@ -45,7 +45,7 @@ public enum ResourceEvent implements IPlatformEnum {
             "Event to trigger actions associated with expiring certificates without renewal", Resource.CERTIFICATE,
             List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateExpiringEventData.class, true),
     CERTIFICATE_NOT_COMPLIANT(Codes.CERTIFICATE_NOT_COMPLIANT, "Certificate not compliant",
-            "Event when the certificate is evaluated as not compliant, and while it stays not compliant for notification profiles that set frequency or repetitions",
+            "Event when the certificate is evaluated as not compliant. While it stays not compliant, it is raised again if a notification profile that notified about it sets frequency or repetitions, and the triggers on the event run on every raise.",
             Resource.CERTIFICATE, List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateNotCompliantEventData.class,
             true, true),
     CERTIFICATE_UPLOADED(Codes.CERTIFICATE_UPLOADED, "Certificate uploaded",
