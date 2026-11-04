@@ -95,17 +95,42 @@ class ContentSigningFormattingControllerContractTest {
     /** Drift is its own error code, so an operator can alert on it apart from a caller's bad field. */
     @Test
     void embedSignatureValueDocumentsContextMismatchAmongItsUnprocessableCodes() {
-        String description = Arrays
-                .stream(method("embedSignatureValue").getAnnotation(ApiResponses.class).value())
-                .filter(response -> "422".equals(response.responseCode()))
-                .map(ApiResponse::description)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("embedSignatureValue documents no 422 at all"));
+        String description = unprocessableDescription("embedSignatureValue");
 
         assertTrue(description.contains("`CONTEXT_MISMATCH`"),
                 "embedSignatureValue does not document CONTEXT_MISMATCH as a 422 code");
         assertTrue(description.contains("formattingContext"),
                 "the CONTEXT_MISMATCH entry does not say what the request contradicts");
+    }
+
+    /** A connector author learns from this list which code answers a stamp the document cannot take. */
+    @Test
+    void computeDtbsDocumentsTheStampRefusalsAmongItsUnprocessableCodes() {
+        String description = unprocessableDescription("computeDtbs");
+
+        assertTrue(description.contains("`SIGNATURE_PLACEMENT_REJECTED`"),
+                "computeDtbs does not document SIGNATURE_PLACEMENT_REJECTED as a 422 code");
+        assertTrue(description.contains("`DOCUMENT_SIGNING_FORBIDDEN`"),
+                "computeDtbs does not document DOCUMENT_SIGNING_FORBIDDEN as a 422 code");
+    }
+
+    /** A certification request on a signed document is the document's refusal, not a parameter's. */
+    @Test
+    void computeDtbsForbidsCertifyingAnAlreadySignedDocument() {
+        String description = unprocessableDescription("computeDtbs");
+        String forbidden = description.substring(description.indexOf("`DOCUMENT_SIGNING_FORBIDDEN`"));
+
+        assertTrue(forbidden.substring(0, forbidden.indexOf("\n")).contains("certif"),
+                "the DOCUMENT_SIGNING_FORBIDDEN entry does not cover certifying an already signed document");
+    }
+
+    private static String unprocessableDescription(String methodName) {
+        return Arrays
+                .stream(method(methodName).getAnnotation(ApiResponses.class).value())
+                .filter(response -> "422".equals(response.responseCode()))
+                .map(ApiResponse::description)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(methodName + " documents no 422 at all"));
     }
 
     private static String operationDescription(String methodName) {

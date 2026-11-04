@@ -6,8 +6,8 @@ import com.otilm.api.model.common.signature.parameters.SignatureParameterSink;
 import com.otilm.api.model.common.signature.parameters.pades.validation.ExclusivePlacementMode;
 import com.otilm.api.model.common.validation.NullableNotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
@@ -31,9 +31,9 @@ import lombok.ToString;
 @Schema(name = "PadesVisibleSignaturePlacement",
         description = "Placement of a PAdES visible signature, in one addressing mode only: a named signature field "
                 + "(fieldId alone), explicit coordinates, or an anchor. Coordinates are in PDF points (1/72 inch) "
-                + "measured from the top-left corner of the page as a viewer displays it, so the signature reads "
-                + "upright on a rotated page. Whether a mode is complete is decided after the request has been merged "
-                + "over the profile's defaults.")
+                + "measured from the top-left corner of the page's MediaBox, turned the way a viewer displays the "
+                + "page, so the signature reads upright on a rotated page. Whether a mode is complete is decided "
+                + "after the request has been merged over the profile's defaults.")
 public class PadesVisibleSignaturePlacementDto implements SignatureParameterContainer {
 
     @ToString.Exclude
@@ -50,13 +50,13 @@ public class PadesVisibleSignaturePlacementDto implements SignatureParameterCont
     private Integer page;
 
     @DecimalMin(value = "0", message = "originX must not be negative")
-    @Schema(description = "Distance from the left edge of the page to the left edge of the signature, in PDF points",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "20")
+    @Schema(description = "Distance from the left edge of the page's MediaBox to the left edge of the signature, "
+            + "in PDF points", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "20")
     private Float originX;
 
     @DecimalMin(value = "0", message = "originY must not be negative")
-    @Schema(description = "Distance from the top edge of the page to the top edge of the signature, in PDF points",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "30")
+    @Schema(description = "Distance from the top edge of the page's MediaBox to the top edge of the signature, in "
+            + "PDF points", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "30")
     private Float originY;
 
     @DecimalMin(value = "0", inclusive = false, message = "width must be greater than zero")
@@ -77,12 +77,12 @@ public class PadesVisibleSignaturePlacementDto implements SignatureParameterCont
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private VerticalAlignment alignmentVertical;
 
-    @DecimalMin(value = "0", inclusive = false, message = "zoom must be greater than zero")
-    @DecimalMax(value = "1000", message = "zoom must be at most 1000 percent")
-    @Schema(description = "Size of the anchored signature as a percentage of its natural size, where 100 is natural "
-            + "size. Belongs to the anchor mode; an explicit width and height leave nothing to scale.",
+    @Min(value = 1, message = "zoom must be 1 or greater")
+    @Max(value = 1000, message = "zoom must be at most 1000 percent")
+    @Schema(description = "Size of the anchored signature as a whole percentage of its natural size, where 100 is "
+            + "natural size. Belongs to the anchor mode; an explicit width and height leave nothing to scale.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "100")
-    private Float zoom;
+    private Integer zoom;
 
     @Override
     public void describe(SignatureParameterSink sink) {

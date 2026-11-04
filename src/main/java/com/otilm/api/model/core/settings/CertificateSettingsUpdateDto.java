@@ -19,4 +19,8 @@ public class CertificateSettingsUpdateDto implements Serializable {
     @Valid
     @Schema(description = "Certificate pre-registration settings")
     private CertificateRegistrationSettingsUpdateDto registration;
+
+    @Valid
+    @Schema(description = "Certificate upload settings")
+    private CertificateUploadSettingsUpdateDto upload;
 }

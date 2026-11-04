@@ -90,7 +90,7 @@ class SignatureParametersSerializationTest {
         PadesVisibleSignaturePlacementDto original = new PadesVisibleSignaturePlacementDto();
         original.setAlignmentHorizontal(HorizontalAlignment.RIGHT);
         original.setAlignmentVertical(VerticalAlignment.BOTTOM);
-        original.setZoom(75f);
+        original.setZoom(75);
 
         assertEquals(original, roundTrip(original));
     }

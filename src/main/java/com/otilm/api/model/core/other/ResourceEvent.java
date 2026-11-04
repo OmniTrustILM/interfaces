@@ -45,8 +45,9 @@ public enum ResourceEvent implements IPlatformEnum {
             "Event to trigger actions associated with expiring certificates without renewal", Resource.CERTIFICATE,
             List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateExpiringEventData.class, true),
     CERTIFICATE_NOT_COMPLIANT(Codes.CERTIFICATE_NOT_COMPLIANT, "Certificate not compliant",
-            "Event when the certificate is evaluated as not compliant", Resource.CERTIFICATE,
-            List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateNotCompliantEventData.class, false),
+            "Event when the certificate is evaluated as not compliant. While it stays not compliant, it is raised again if a notification profile that notified about it sets frequency or repetitions, and the triggers on the event run on every raise.",
+            Resource.CERTIFICATE, List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateNotCompliantEventData.class,
+            true, true),
     CERTIFICATE_UPLOADED(Codes.CERTIFICATE_UPLOADED, "Certificate uploaded",
             "Event when the certificate has been uploaded", Resource.CERTIFICATE, CertificateEventData.class, false),
     CERTIFICATE_REGISTERED(Codes.CERTIFICATE_REGISTERED, "Certificate registered",
@@ -104,6 +105,12 @@ public enum ResourceEvent implements IPlatformEnum {
     private final List<Resource> overridingResources;
     private final Class<? extends EventData> eventData;
     private final boolean monitoring;
+    /**
+     * For a monitoring event: notify once, instead of on every raise, when the notification profile sets neither
+     * frequency nor repetitions. {@code CERTIFICATE_EXPIRING} does not, so it keeps notifying on every raise. Read by
+     * Core when it sends notifications; not part of the API.
+     */
+    private final boolean singleNotificationWithoutReminders;
 
     ResourceEvent(final String code, final String label, final String description, final Resource resource,
             Class<? extends EventData> eventData, boolean monitoring) {
@@ -112,6 +119,12 @@ public enum ResourceEvent implements IPlatformEnum {
 
     ResourceEvent(final String code, final String label, final String description, final Resource resource,
             final List<Resource> overridingResources, Class<? extends EventData> eventData, boolean monitoring) {
+        this(code, label, description, resource, overridingResources, eventData, monitoring, false);
+    }
+
+    ResourceEvent(final String code, final String label, final String description, final Resource resource,
+            final List<Resource> overridingResources, Class<? extends EventData> eventData, boolean monitoring,
+            boolean singleNotificationWithoutReminders) {
         this.code = code;
         this.label = label;
         this.description = description;
@@ -119,6 +132,7 @@ public enum ResourceEvent implements IPlatformEnum {
         this.overridingResources = overridingResources == null ? List.of() : overridingResources;
         this.eventData = eventData;
         this.monitoring = monitoring;
+        this.singleNotificationWithoutReminders = singleNotificationWithoutReminders;
     }
 
     @Override

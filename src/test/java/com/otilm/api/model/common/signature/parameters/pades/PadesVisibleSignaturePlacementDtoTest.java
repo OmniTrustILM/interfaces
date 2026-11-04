@@ -29,7 +29,7 @@ class PadesVisibleSignaturePlacementDtoTest {
         placement.setPage(2);
         placement.setAlignmentHorizontal(HorizontalAlignment.RIGHT);
         placement.setAlignmentVertical(VerticalAlignment.BOTTOM);
-        placement.setZoom(75f);
+        placement.setZoom(75);
         return placement;
     }
 
@@ -93,7 +93,7 @@ class PadesVisibleSignaturePlacementDtoTest {
     @Test
     void zoomIsAnAnchorModeValue() {
         PadesVisibleSignaturePlacementDto zoomed = coordinates();
-        zoomed.setZoom(50f);
+        zoomed.setZoom(50);
         assertFalse(valid(zoomed));
     }
 
@@ -129,14 +129,14 @@ class PadesVisibleSignaturePlacementDtoTest {
     @Test
     void aZoomAboveOneThousandPercentIsRejected() {
         PadesVisibleSignaturePlacementDto overZoomed = anchor();
-        overZoomed.setZoom(1001f);
+        overZoomed.setZoom(1001);
         assertFalse(valid(overZoomed));
     }
 
     @Test
     void aZeroZoomIsRejected() {
         PadesVisibleSignaturePlacementDto zeroZoom = anchor();
-        zeroZoom.setZoom(0f);
+        zeroZoom.setZoom(0);
         assertFalse(valid(zeroZoom));
     }
 
@@ -151,7 +151,7 @@ class PadesVisibleSignaturePlacementDtoTest {
     @Test
     void aMixtureViolationStaysOnTheObject() {
         PadesVisibleSignaturePlacementDto zoomedCoordinates = coordinates();
-        zoomedCoordinates.setZoom(50f);
+        zoomedCoordinates.setZoom(50);
 
         Set<ConstraintViolation<PadesVisibleSignaturePlacementDto>> violations = VALIDATOR.validate(zoomedCoordinates);
 
