@@ -2,10 +2,10 @@ package com.otilm.api.model.connector.cryptography.v2.lifecycle;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.otilm.api.model.common.validation.NullableNotBlank;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -29,7 +29,8 @@ public class CertificateRequestCreationResponseV2Dto {
 
     @Schema(description = "Canonical signer the key is bound to, derived from the signer attributes for an unbound "
             + "key and returned unchanged for a bound one.", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "signer is required")
+    @NotNull(message = "signer is required")
+    @NullableNotBlank(message = "signer must not be blank")
     private String signer;
 
     @ArraySchema(arraySchema = @Schema(

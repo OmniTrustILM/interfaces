@@ -29,6 +29,7 @@ public class OperationEventV2Dto {
     private OffsetDateTime at;
 
     @Schema(description = "Opaque technology-specific detail of the step, such as the module's own identifiers")
+    @ToString.Exclude
     private Map<String, Object> vendorDetail;
 
     @JsonAnySetter

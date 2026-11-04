@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -101,12 +103,13 @@ class BoundSignerAttributeTest {
         assertEquals(Optional.of(SIGNER), BoundSignerAttribute.statedSigner(parse(json)));
     }
 
-    @Test
-    void request_rejectsABlankSigner() {
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\u0000", "\u2003"})
+    void request_rejectsABlankSigner(String signer) {
         // given
         // when
         IllegalArgumentException failure = assertThrows(IllegalArgumentException.class,
-                () -> BoundSignerAttribute.request(" "));
+                () -> BoundSignerAttribute.request(signer));
 
         // then
         assertEquals("boundSigner must not be blank", failure.getMessage());
@@ -225,11 +228,12 @@ class BoundSignerAttributeTest {
                 assertThrows(ValidationException.class, read).getMessage());
     }
 
-    @Test
-    void statedSigner_rejectsABlankSigner() {
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\u0000", "\u2003"})
+    void statedSigner_rejectsABlankSigner(String signer) {
         // given
         List<RequestAttribute> attributes = List
-                .of(boundSigner(AttributeContentType.STRING, new StringAttributeContentV3(" ")));
+                .of(boundSigner(AttributeContentType.STRING, new StringAttributeContentV3(signer)));
 
         // when
         Executable read = () -> BoundSignerAttribute.statedSigner(attributes);

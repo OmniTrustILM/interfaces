@@ -1,12 +1,16 @@
 package com.otilm.api.model.connector.cryptography.v2;
 
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.callback.AttributeCallback;
+import com.otilm.api.model.common.attribute.common.constraint.RegexpAttributeConstraint;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v2.DataAttributeV2;
 import com.otilm.api.model.common.attribute.v2.content.StringAttributeContentV2;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.ObjectAttributeContentV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.EncryptionAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
@@ -26,13 +30,20 @@ import com.otilm.api.model.connector.cryptography.v2.key.PublicKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptionAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignDataResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivation;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationAttribute;
+import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationDecision;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureAlgorithmAttribute;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResponseItemV2Dto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import java.security.KeyPairGenerator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +69,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyData;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
+import static com.otilm.api.model.connector.cryptography.v2.utils.KeyLifecycleDtoFixtures.validEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -639,6 +651,43 @@ class OperationResponseValidatorTest {
     }
 
     @Test
+    void validateSign_acceptsTheEventsOfEachSignature() {
+        // given
+        String identifier = "item-1";
+        SignDataRequestV2Dto request = signRequest(OperationExecutionMode.SYNCHRONOUS, identifier);
+        SignDataResponseV2Dto body = synchronousSignBody(identifier);
+        body
+                .getSignatures()
+                .getFirst()
+                .setEvents(List
+                        .of(validEvent(OperationEventType.AUTHORIZATION_GRANTED),
+                                validEvent(OperationEventType.SIGNATURE_CREATED)));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSign(request, ResponseEntity.ok(body));
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSign_rejectsASignatureEventWithoutItsType() {
+        // given
+        String identifier = "item-1";
+        SignDataRequestV2Dto request = signRequest(OperationExecutionMode.SYNCHRONOUS, identifier);
+        SignDataResponseV2Dto body = synchronousSignBody(identifier);
+        OperationEventV2Dto eventWithoutType = validEvent(OperationEventType.SIGNATURE_CREATED);
+        eventWithoutType.setType(null);
+        body.getSignatures().getFirst().setEvents(List.of(eventWithoutType));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSign(request, ResponseEntity.ok(body));
+
+        // then
+        assertInvalid(result, "Connector response validation failed: signatures[0].events[0].type: type is required");
+    }
+
+    @Test
     void validateSignAttributeList_acceptsASchemaThatOffersTheSignatureAlgorithm() {
         // given
         List<BaseAttribute> schema = List
@@ -817,6 +866,145 @@ class OperationResponseValidatorTest {
 
         // then
         assertInvalid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_acceptsTheReservedSignatureActivation() {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(SignatureActivationAttribute.definition()));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertValid(result);
+    }
+
+    @Test
+    void validateSignAttributeList_rejectsASignatureActivationDeclaredTwice() {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(
+                List.of(SignatureActivationAttribute.definition(), SignatureActivationAttribute.definition()));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "Sign attributes must declare the attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' at most once");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("halfIdentifiedSignatureActivations")
+    void validateSignAttributeList_rejectsASignatureActivationUnderOnlyOneOfItsIdentifiers(DataAttributeV3 definition) {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(definition));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be declared under both its name and its UUID");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureActivationsOfAnotherKind")
+    void validateSignAttributeList_rejectsASignatureActivationOtherThanAV3DataAttribute(BaseAttribute declaration) {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(declaration));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be a v3 data attribute");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("signatureActivationDefinitionsOfTheWrongShape")
+    void validateSignAttributeList_rejectsASignatureActivationOfTheWrongShape(DataAttributeV3 definition) {
+        // given
+        List<BaseAttribute> schema = signSchemaWith(List.of(definition));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateSignAttributeList(schema);
+
+        // then
+        assertInvalid(result,
+                "The attribute with name 'signatureActivation' and UUID 'ed4eb7a8-2d0c-42ff-bbfa-4df695d39b78' must be a required, hidden, writable, single object value without a default, constraints or callback");
+    }
+
+    static Stream<Named<DataAttributeV3>> halfIdentifiedSignatureActivations() {
+        DataAttributeV3 nameAlone = SignatureActivationAttribute.definition();
+        nameAlone.setUuid(UUID.randomUUID().toString());
+        DataAttributeV3 uuidAlone = SignatureActivationAttribute.definition();
+        uuidAlone.setName("providerActivation");
+        return Stream
+                .of(named("the name under another UUID", nameAlone), named("the UUID under another name", uuidAlone));
+    }
+
+    static Stream<Named<BaseAttribute>> signatureActivationsOfAnotherKind() {
+        DataAttributeV3 definition = SignatureActivationAttribute.definition();
+        InfoAttributeV3 info = new InfoAttributeV3();
+        info.setName(SignatureActivationAttribute.NAME);
+        info.setUuid(SignatureActivationAttribute.ATTRIBUTE_UUID.toString());
+        DataAttributeV2 v2Definition = new DataAttributeV2();
+        v2Definition.setUuid(definition.getUuid());
+        v2Definition.setName(definition.getName());
+        v2Definition.setContentType(definition.getContentType());
+        v2Definition.setProperties(definition.getProperties());
+        DataAttributeV3 v2Version = SignatureActivationAttribute.definition();
+        v2Version.setVersion(AttributeVersion.V2.getVersion());
+        DataAttributeV3 v2SchemaVersion = SignatureActivationAttribute.definition();
+        v2SchemaVersion.setSchemaVersion(AttributeVersion.V2);
+        DataAttributeV3 noSchemaVersion = SignatureActivationAttribute.definition();
+        noSchemaVersion.setSchemaVersion(null);
+        return Stream
+                .of(named("an info attribute", info), named("a v2 data attribute", v2Definition),
+                        named("a v3 data attribute with a v2 version", v2Version),
+                        named("a v3 data attribute with a v2 schema version", v2SchemaVersion),
+                        named("a v3 data attribute without a schema version", noSchemaVersion));
+    }
+
+    static Stream<Named<DataAttributeV3>> signatureActivationDefinitionsOfTheWrongShape() {
+        DataAttributeV3 visible = SignatureActivationAttribute.definition();
+        visible.getProperties().setVisible(true);
+        DataAttributeV3 optional = SignatureActivationAttribute.definition();
+        optional.getProperties().setRequired(false);
+        DataAttributeV3 readOnly = SignatureActivationAttribute.definition();
+        readOnly.getProperties().setReadOnly(true);
+        DataAttributeV3 noProperties = SignatureActivationAttribute.definition();
+        noProperties.setProperties(null);
+        DataAttributeV3 aList = SignatureActivationAttribute.definition();
+        aList.getProperties().setList(true);
+        DataAttributeV3 multiSelect = SignatureActivationAttribute.definition();
+        multiSelect.getProperties().setMultiSelect(true);
+        DataAttributeV3 aString = SignatureActivationAttribute.definition();
+        aString.setContentType(AttributeContentType.STRING);
+        DataAttributeV3 withDefault = SignatureActivationAttribute.definition();
+        withDefault
+                .setContent(List
+                        .of(new ObjectAttributeContentV3(
+                                new SignatureActivation(SignatureActivationDecision.PLATFORM_ASSERTED, "CN=Signer"))));
+        DataAttributeV3 constrained = SignatureActivationAttribute.definition();
+        constrained.setConstraints(List.of(new RegexpAttributeConstraint("Signer", "Not a signer", "^CN=.+$")));
+        DataAttributeV3 withCallback = SignatureActivationAttribute.definition();
+        withCallback.setAttributeCallback(new AttributeCallback());
+        return Stream
+                .of(named("visible", visible), named("optional", optional), named("read-only", readOnly),
+                        named("no properties", noProperties), named("a list", aList),
+                        named("multi-select", multiSelect), named("a string", aString),
+                        named("a default value", withDefault), named("constraints", constrained),
+                        named("a callback", withCallback));
+    }
+
+    private static List<BaseAttribute> signSchemaWith(List<? extends BaseAttribute> signatureActivation) {
+        List<BaseAttribute> schema = new ArrayList<>();
+        schema.add(SignatureAlgorithmAttribute.definition(List.of(SignatureAlgorithm.SHA256_WITH_RSA)));
+        schema.addAll(signatureActivation);
+        return schema;
     }
 
     static Stream<Named<DataAttributeV3>> malformedSignatureAlgorithmOffers() {
@@ -1099,7 +1287,7 @@ class OperationResponseValidatorTest {
         SignDataResponseV2Dto synchronousBodyWithOperationMetadata = synchronousSignBody(identifier);
         synchronousBodyWithOperationMetadata.setOperationMeta(validMetadata());
         SignDataResponseV2Dto asynchronousBodyWithSignatures = asynchronousSignBody();
-        asynchronousBodyWithSignatures.setSignatures(List.of(signatureItem(identifier)));
+        asynchronousBodyWithSignatures.setSignatures(List.of(signatureResponseItem(identifier)));
         return Stream
                 .of(named("synchronous body contains operation metadata",
                         new SignCase(signRequest(OperationExecutionMode.SYNCHRONOUS, identifier),
@@ -1590,7 +1778,9 @@ class OperationResponseValidatorTest {
 
     private static SignDataResponseV2Dto synchronousSignBody(String... identifiers) {
         SignDataResponseV2Dto response = new SignDataResponseV2Dto();
-        response.setSignatures(Stream.of(identifiers).map(OperationResponseValidatorTest::signatureItem).toList());
+        response
+                .setSignatures(
+                        Stream.of(identifiers).map(OperationResponseValidatorTest::signatureResponseItem).toList());
         return response;
     }
 
@@ -1607,6 +1797,11 @@ class OperationResponseValidatorTest {
     private static SignatureDataV2Dto signatureItem(String identifier) {
         byte[] data = {1};
         return new SignatureDataV2Dto(data, identifier);
+    }
+
+    private static SignatureResponseItemV2Dto signatureResponseItem(String identifier) {
+        byte[] signature = {2};
+        return new SignatureResponseItemV2Dto(signature, identifier);
     }
 
     private static void assertValid(OperationValidationResult result) {

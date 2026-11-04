@@ -117,10 +117,14 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves, including a signatureAlgorithm it cannot format; the message names "
-                            + "the set it does support.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
-                            + "rule, such as an absent document or a digest transfer missing its algorithm.",
+                            + "`DOCUMENT_SIGNING_FORBIDDEN` — the document forbids the requested signature, such as a "
+                            + "certification of a document already signed.\n- "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector.\n- "
+                            + "`SIGNATURE_PLACEMENT_REJECTED` — the document cannot hold the visible signature at the "
+                            + "requested place.\n- "
+                            + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
+                            + "document or a digest transfer missing its algorithm.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeDtbs", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -152,8 +156,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `DOCUMENT_MALFORMED` — the replayed formattingContext cannot be interpreted.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves.\n- `CONTEXT_MISMATCH` — the request contradicts the formattingContext "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector.\n- `CONTEXT_MISMATCH` — the request contradicts the formattingContext "
                             + "it replays, such as a signatureAlgorithm that disagrees with the one that context "
                             + "committed to.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
@@ -181,8 +185,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to timestamp.\n- "
                             + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
                             + "rule.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
@@ -209,8 +213,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to attach the timestamp "
                             + "to.\n- `DOCUMENT_MALFORMED` — the document or token cannot be parsed.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
                             + "rule.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
@@ -237,8 +241,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to timestamp.\n- "
                             + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
                             + "rule.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
@@ -265,8 +269,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to attach the timestamp "
                             + "to.\n- `DOCUMENT_MALFORMED` — the document or token cannot be parsed.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is not one this "
-                            + "connector serves.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
                             + "rule.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
