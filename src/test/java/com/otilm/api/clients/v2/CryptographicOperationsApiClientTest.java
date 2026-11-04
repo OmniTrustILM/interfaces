@@ -15,6 +15,8 @@ import com.otilm.api.model.connector.cryptography.v2.KeyScopedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.OperationResponseValidator;
 import com.otilm.api.model.connector.cryptography.v2.OperationTrackingRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.TokenProfileScopedRequestV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
+import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.CipherDataRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.DecryptDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.EncryptDataResponseV2Dto;
@@ -385,6 +387,41 @@ class CryptographicOperationsApiClientTest {
         assertNotNull(result.getBody());
         assertEquals(ITEM_IDENTIFIER, result.getBody().getSignatures().get(0).getIdentifier());
         verifySignRequest(OperationExecutionMode.SYNCHRONOUS);
+    }
+
+    @Test
+    void signData_returnsTheEventsOfEachSignature() throws ConnectorException {
+        // given
+        String responseJson = """
+                {"signatures":[{"data":"AQ==","identifier":"item-1",
+                "events":[{"type":"signatureCreated","at":"2026-11-03T10:00:00Z"}]}]}
+                """;
+        stubJsonResponse(SIGN_PATH, HttpStatus.OK, responseJson);
+
+        // when
+        ResponseEntity<SignDataResponseV2Dto> result = client
+                .signData(connector, signRequest(OperationExecutionMode.SYNCHRONOUS));
+
+        // then
+        assertNotNull(result.getBody());
+        List<OperationEventV2Dto> events = result.getBody().getSignatures().getFirst().getEvents();
+        assertEquals(1, events.size());
+        assertEquals(OperationEventType.SIGNATURE_CREATED, events.getFirst().getType());
+    }
+
+    @Test
+    void signData_rejectsASignatureEventWithoutItsType() {
+        // given
+        String responseJson = """
+                {"signatures":[{"data":"AQ==","identifier":"item-1","events":[{"at":"2026-11-03T10:00:00Z"}]}]}
+                """;
+        stubJsonResponse(SIGN_PATH, HttpStatus.OK, responseJson);
+
+        // when
+        Executable call = () -> client.signData(connector, signRequest(OperationExecutionMode.SYNCHRONOUS));
+
+        // then
+        assertValidationFailure(call);
     }
 
     @Test

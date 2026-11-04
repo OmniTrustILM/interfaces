@@ -12,7 +12,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * One item of a V2 signing or verification request or response.
+ * One item of a V2 signing or verification request.
  */
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,8 +23,8 @@ import lombok.ToString;
 @Schema(name = "SignatureDataV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public class SignatureDataV2Dto implements IdentifiedDataV2Dto {
 
-    @Schema(description = "Data to be signed or verified, or the resulting signature, depending on the operation "
-            + "direction.", format = "byte", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Data to be signed or verified, or the signature to verify, depending on the request "
+            + "field.", format = "byte", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "data is required and must not be empty")
     @ToString.Exclude
     private byte[] data;
