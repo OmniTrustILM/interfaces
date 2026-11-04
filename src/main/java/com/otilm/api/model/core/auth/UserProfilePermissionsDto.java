@@ -19,8 +19,9 @@ public class UserProfilePermissionsDto {
 
             A resource whose objects have an owner (Certificate, Cryptographic Key, Secret) does not follow that group \
             rule. Without a list grant it is listed only when the user holds the create action on it, owns at least \
-            one of its objects, or holds the members action on a group one of its objects is assigned to, and is not \
-            listed for a user who has none of these, so a client can hide that section entirely.
+            one of its objects, or holds the members action on a group one of its objects is assigned to while that \
+            object is in no group on which the action is denied. It is not listed for a user who has none of these, \
+            so a client can hide that section entirely.
             """, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Resource> allowedListings;
 

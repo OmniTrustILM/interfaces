@@ -122,7 +122,7 @@ class ObjectActionsAwareTest {
     @Test
     void documentsTheConstraintsAClientCannotInferFromTheTypes() {
         for (String constraint : List
-                .of("same authorization check that guards each request", "ownership",
+                .of("authorization check on the object itself", "ownership", "on a parent object",
                         "members action on a group the object is assigned to", "detail response only",
                         "absent where the same model is returned in a list", "by a create or update request",
                         "nested inside another object", "remains the only gate")) {

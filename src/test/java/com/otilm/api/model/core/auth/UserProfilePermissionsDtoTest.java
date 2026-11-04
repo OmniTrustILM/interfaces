@@ -90,7 +90,7 @@ class UserProfilePermissionsDtoTest {
                 "holds the members action on at least one group", "Certificate, Cryptographic Key, Secret",
                 "does not follow that group rule", "holds the create action on it", "owns at least one",
                 "holds the members action on a group one of its objects is assigned to",
-                "not listed for a user who has none of these");
+                "in no group on which the action is denied", "not listed for a user who has none of these");
     }
 
     private static void assertDocuments(String propertyName, String... constraints) {
