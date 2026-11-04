@@ -67,6 +67,7 @@ public class RaProfileDto extends NameAndUuidDto implements ObjectActionsAware {
                 .append("enabled", enabled)
                 .append("authorityInstanceName", authorityInstanceName)
                 .append("legacyAuthority", legacyAuthority)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

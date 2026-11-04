@@ -29,11 +29,11 @@ public class UserProfilePermissionsDto {
             allowedListings, to decide whether to offer a control for anything other than a listing.
 
             Reports resource-level grants only. Object-scoped grants are excluded, including the implicit access an \
-            owner has or that the members action on a group the object is assigned to gives, because an action held \
-            on one object says nothing about the next; the detail response of an object reports the actions the user \
-            may perform on that object. Resources on which \
-            the caller holds no action are omitted rather than reported with an empty list, and actions the \
-            authorization service will not grant at all are never reported.
+            owner has and the access that the members action on a group gives to the objects assigned to that group, \
+            because an action held on one object says nothing about the next; the detail response of an object \
+            reports the actions the user may perform on that object. Resources on which the caller holds no action \
+            are omitted rather than reported with an empty list, and actions the authorization service will not grant \
+            at all are never reported.
 
             This is not derivable from allowedListings and does not supersede it. That field applies a broader rule \
             to the list action alone, unioning object-scoped grants and ownership and adding the listings every user \

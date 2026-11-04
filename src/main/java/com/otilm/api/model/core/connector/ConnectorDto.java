@@ -36,6 +36,7 @@ public class ConnectorDto extends ConnectorApiClientDtoV1 implements ObjectActio
                 .append("name", name)
                 .append("uuid", uuid)
                 .append("customAttributes", customAttributes)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

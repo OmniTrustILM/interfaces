@@ -49,6 +49,7 @@ public class EntityInstanceDto extends NameAndUuidDto implements ObjectActionsAw
                 .append("connectorUuid", connectorUuid)
                 .append("connectorName", connectorName)
                 .append("kind", kind)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

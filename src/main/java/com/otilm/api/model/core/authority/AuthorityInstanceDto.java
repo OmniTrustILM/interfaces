@@ -74,6 +74,7 @@ public class AuthorityInstanceDto extends NameAndUuidDto implements ObjectAction
                 .append("connector", connector)
                 .append("connectorInterface", connectorInterface)
                 .append("kind", kind)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

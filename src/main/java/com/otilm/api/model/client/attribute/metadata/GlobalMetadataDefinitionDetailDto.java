@@ -46,6 +46,7 @@ public class GlobalMetadataDefinitionDetailDto extends AttributeDefinitionDto im
                 .append("label", getLabel())
                 .append("visible", visible)
                 .append("group", group)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

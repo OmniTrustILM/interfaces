@@ -48,6 +48,7 @@ public class ProxyDto extends NameAndUuidDto implements Serializable, ObjectActi
                 .append("status", status)
                 .append("lastActivity", lastActivity)
                 .append("connectors", connectors)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

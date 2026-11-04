@@ -124,7 +124,8 @@ class ObjectActionsAwareTest {
         for (String constraint : List
                 .of("same authorization check that guards each request", "ownership",
                         "members action on a group the object is assigned to", "detail response only",
-                        "absent where the same model is returned in a list", "remains the only gate")) {
+                        "absent where the same model is returned in a list", "by a create or update request",
+                        "nested inside another object", "remains the only gate")) {
             assertTrue(ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION.contains(constraint),
                     "the allowedActions description no longer states: " + constraint);
         }

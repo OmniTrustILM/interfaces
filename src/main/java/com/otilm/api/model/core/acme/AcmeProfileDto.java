@@ -101,6 +101,7 @@ public class AcmeProfileDto extends NameAndUuidDto implements ObjectActionsAware
                 .append("eabSecretUuids", eabSecretUuids)
                 .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
                 .append("identifierAuthorizationMode", identifierAuthorizationMode)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

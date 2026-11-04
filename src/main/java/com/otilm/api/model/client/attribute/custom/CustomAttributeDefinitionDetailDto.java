@@ -82,6 +82,7 @@ public class CustomAttributeDefinitionDetailDto extends CustomAttributeDefinitio
                 .append("resources", getResources())
                 .append("required", isRequired())
                 .append("extensibleList", extensibleList)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

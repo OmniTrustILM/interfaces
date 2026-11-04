@@ -35,6 +35,7 @@ public class GroupDto extends NameAndUuidDto implements ObjectActionsAware {
                 .append("description", description)
                 .append("email", email)
                 .append("customAttributes", customAttributes)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

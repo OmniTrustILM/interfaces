@@ -31,10 +31,10 @@ public class ComplianceProfileDto extends NameAndUuidDto implements ObjectAction
     @Schema(description = "List of Custom Attributes")
     private List<ResponseAttribute> customAttributes;
 
-    // Default getters and setters
-
     @Schema(description = ObjectActionsAware.ALLOWED_ACTIONS_DESCRIPTION)
     private List<ResourceAction> allowedActions;
+
+    // Default getters and setters
 
     @Override
     public String toString() {
@@ -46,6 +46,7 @@ public class ComplianceProfileDto extends NameAndUuidDto implements ObjectAction
                 .append("groups", groups)
                 .append("description", description)
                 .append("customAttributes", customAttributes)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

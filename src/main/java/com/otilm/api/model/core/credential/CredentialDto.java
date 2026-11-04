@@ -51,6 +51,7 @@ public class CredentialDto extends NameAndUuidDto implements Serializable, Objec
                 .append("connectorUuid", connectorUuid)
                 .append("connectorName", connectorName)
                 .append("customAttributes", customAttributes)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }

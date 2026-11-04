@@ -70,6 +70,7 @@ public class LocationDto extends NameAndUuidDto implements ObjectActionsAware {
                 .append("supportMultipleEntries", supportMultipleEntries)
                 .append("supportKeyManagement", supportKeyManagement)
                 .append("metadata", metadata)
+                .append("allowedActions", allowedActions)
                 .toString();
     }
 }
