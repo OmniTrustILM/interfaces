@@ -6,7 +6,7 @@ import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
 import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
 import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
-import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureDataV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResponseItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.operations.validation.UniqueIdentifiers;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,7 +41,8 @@ public class SignDataResponseV2Dto {
     @NotEmpty(message = "signatures must contain at least one item for synchronous execution",
             groups = SynchronousResponse.class)
     @UniqueIdentifiers
-    private List<@NotNull(message = "signatures must not contain null items") @Valid SignatureDataV2Dto> signatures;
+    private List<@NotNull(
+            message = "signatures must not contain null items") @Valid SignatureResponseItemV2Dto> signatures;
 
     @ArraySchema(arraySchema = @Schema(
             description = "Connector-defined signing operation metadata. Required and non-empty "
