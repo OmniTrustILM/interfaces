@@ -3,6 +3,8 @@ package com.otilm.api.interfaces.core.web;
 import com.otilm.api.exception.NotFoundException;
 import com.otilm.api.interfaces.AuthProtectedController;
 import com.otilm.api.model.common.ErrorMessageDto;
+import com.otilm.api.model.core.auth.ObjectAllowedActionsRequestDto;
+import com.otilm.api.model.core.auth.ObjectAllowedActionsResponseDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.other.ResourceDto;
 import com.otilm.api.model.core.other.ResourceEvent;
@@ -10,16 +12,21 @@ import com.otilm.api.model.core.other.ResourceEventDto;
 import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -52,5 +59,25 @@ public interface ResourceController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Events retrieved")})
     @GetMapping(path = "/events", produces = {"application/json"})
     Map<ResourceEvent, List<ResourceEventDto>> listAllResourceEvents();
+
+    @Operation(summary = "Report the actions the caller may perform on objects of a resource", description = """
+            Reports, per object, the actions the caller may perform on it, so a client can disable the \
+            controls the caller cannot use. Detail pages ask for one object, list pages and bulk operations \
+            for many. Each action is answered the way the endpoint that performs it is authorized, so a \
+            reported action is accepted and an omitted one is refused. Objects the caller may neither list \
+            nor view are left out, the same as objects that do not exist. The resource must be one whose \
+            objects are authorized individually, by grants on objects or by ownership.
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Allowed actions reported"),
+            @ApiResponse(responseCode = "422",
+                    description = "The request is invalid, or the resource has no objects authorized individually",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
+    @PostMapping(path = "/{resource}/objects/allowed-actions", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ObjectAllowedActionsResponseDto listObjectAllowedActions(
+            @Parameter(description = "Resource") @PathVariable Resource resource,
+            @RequestBody @Valid ObjectAllowedActionsRequestDto request);
 
 }
