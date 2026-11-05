@@ -215,6 +215,37 @@ class DiscoveryOperationControllerDocTest {
         }
     }
 
+    @Test
+    void resultsDescriptionCarriesTheCheckpointedDeliveryRules() {
+        String description = operation("results").getAnnotation(Operation.class).description();
+        for (String rule : List
+                .of("afterSequence + 1", "the checkpoint after its items", "call again now",
+                        "nothing more is ready now", "100 items", "acknowledgement", "20 seconds", "503")) {
+            assertTrue(description.contains(rule), "results description must state \"" + rule + "\": " + description);
+        }
+    }
+
+    @Test
+    void resultsDocumentsABusyConnector503() {
+        ApiResponses responses = operation("results").getAnnotation(ApiResponses.class);
+        assertTrue(Arrays.stream(responses.value()).anyMatch(r -> r.responseCode().equals("503")),
+                "expected a documented 503 (connector busy) on results");
+    }
+
+    @Test
+    void initiateAndStopDescribeDeliveryModes() {
+        assertTrue(operation("initiate").getAnnotation(Operation.class).description().contains("delivery modes"));
+        assertTrue(operation("stop").getAnnotation(Operation.class).description().contains("without a checkpoint"));
+    }
+
+    private static Method operation(String name) {
+        return Arrays
+                .stream(DiscoveryOperationController.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals(name))
+                .findFirst()
+                .orElseThrow();
+    }
+
     private static boolean isErrorStatus(String responseCode) {
         return responseCode.startsWith("4") || responseCode.startsWith("5");
     }
