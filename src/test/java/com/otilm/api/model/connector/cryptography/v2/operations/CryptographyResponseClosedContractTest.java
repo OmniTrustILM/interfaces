@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.operations.data.SignatureResponseItemV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusResponseV2Dto;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
@@ -59,6 +60,7 @@ class CryptographyResponseClosedContractTest {
     static Stream<Named<ResponseContract>> closedResponses() {
         return Stream
                 .of(response("sign response", SignDataResponseV2Dto.class),
+                        response("sign response item", SignatureResponseItemV2Dto.class),
                         response("encrypt response", EncryptDataResponseV2Dto.class),
                         response("decrypt response", DecryptDataResponseV2Dto.class),
                         response("verify response", VerifyDataResponseV2Dto.class),
