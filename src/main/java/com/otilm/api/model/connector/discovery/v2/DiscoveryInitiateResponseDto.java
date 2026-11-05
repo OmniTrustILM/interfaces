@@ -31,4 +31,8 @@ public class DiscoveryInitiateResponseDto {
             + "resume response replaces the value. A stop can still be refused past the point of no return.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean stoppable;
+
+    @Schema(description = "The delivery mode this run uses from this call on; one of the offered modes. Absent means "
+            + "buffered.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private DiscoveryDeliveryMode deliveryMode;
 }

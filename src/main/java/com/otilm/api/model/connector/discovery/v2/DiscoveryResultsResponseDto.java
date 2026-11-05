@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.discovery.v2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -34,4 +35,11 @@ public class DiscoveryResultsResponseDto {
     @Schema(description = "Whether more items remain beyond this page", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "more is required")
     private Boolean more;
+
+    // Excluded from toString: opaque, no logging value, up to 64 KB.
+    @Schema(description = "Checkpointed delivery only: the run's handle after this page's items, present on every "
+            + "results response. Core stores it with its cursor and replays it on the next call. At most 64 KB "
+            + "serialized. Absent in buffered delivery.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @ToString.Exclude
+    private List<MetadataAttribute> checkpoint;
 }
