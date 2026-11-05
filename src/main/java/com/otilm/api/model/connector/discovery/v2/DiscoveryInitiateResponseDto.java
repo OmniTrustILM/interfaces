@@ -21,8 +21,9 @@ public class DiscoveryInitiateResponseDto {
 
     // Excluded from toString: opaque, no logging value, up to 64 KB.
     @Schema(description = "Opaque run handle. Core replays it on status, results, stop, resume and cancel and never "
-            + "shows it. At most 64 KB serialized; a larger one fails the run.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "shows it. At most 64 KB serialized; a larger one fails the run. In checkpointed delivery each results "
+            + "page replaces it, and a resume response omits it: Core keeps the checkpoint it holds and ignores one "
+            + "sent on resume.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;
 

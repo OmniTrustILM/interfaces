@@ -29,11 +29,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
                 + "Every call replays the run's identity, resources, checkpoint and attributes, so store none of "
                 + "them: rebuild the run from the request, also after a restart. In buffered delivery, hold only the "
                 + "run's undrained items, as the drain operation requires; in checkpointed delivery, hold nothing "
-                + "between calls. Answer 404 only for a runId you cannot rebuild: it ends the run at once, and a "
-                + "stopped run may wait days for its resume.\n\n"
-                + "If you can rebuild the run but no longer hold the items a drain asks for, answer 404 rather than a "
-                + "later page: Core takes the highest sequence returned as its cursor, so a page served across a gap "
-                + "loses everything in it.")
+                + "between calls. Answer 404 only when you cannot serve the run from the request: a runId you cannot "
+                + "rebuild, or, in checkpointed delivery, a replayed checkpoint that disagrees with afterSequence. It "
+                + "ends the run at once, and a stopped run may wait days for its resume.\n\n"
+                + "In buffered delivery, if you can rebuild the run but no longer hold the items a drain asks for, "
+                + "answer 404 rather than a later page: Core takes the highest sequence returned as its cursor, so a "
+                + "page served across a gap loses everything in it.")
 public interface DiscoveryOperationController extends AuthProtectedConnectorController {
 
     /** Shared by every body-taking operation: the scoped base makes runId and resources mandatory on all of them. */
@@ -107,11 +108,15 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "acknowledgement: a drain with afterSequence equal to highestSequence on a finished run, where "
                     + "nothing remains to send.\n"
                     + "- Never split one unit of work, such as one scanned target, across pages. If a single unit's "
-                    + "items exceed maxItems or maxBytes, answer 422 with errorCode VALIDATION_FAILED naming the limit; "
-                    + "this ends the run.\n"
+                    + "items exceed maxItems or maxBytes, answer 422 with errorCode VALIDATION_FAILED naming the limit.\n"
+                    + "- Any 422 on a results call ends a checkpointed run at once, so answer it only for a condition a "
+                    + "retry cannot clear, such as an oversized unit of work or a checkpoint the connector cannot read.\n"
                     + "- A connector too busy to take the call answers 503 with errorCode SERVICE_UNAVAILABLE. Core calls "
-                    + "again shortly, after Retry-After when the transport carries it, and does not count it as a "
-                    + "failure until the run has received nothing but 503s for a bounded time, 30 minutes by default.\n"
+                    + "again shortly and does not count it as a failure until the run has received nothing but 503s "
+                    + "for a bounded time, 30 minutes by default.\n"
+                    + "- A drain whose deliveryModes does not offer checkpointed comes from an older Core that would not "
+                    + "store the page's checkpoint. Answer it 503 with errorCode SERVICE_UNAVAILABLE, so the call is "
+                    + "retried by a Core that does.\n"
                     + "- Bound the work so the call answers within 20 seconds; Core's default call timeout is 30 "
                     + "seconds.\n"
                     + "- When afterSequence and the replayed checkpoint disagree, answer 404 with errorCode "
@@ -127,8 +132,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = VALIDATION_FAILED + "; in checkpointed delivery, also a single unit of work whose "
-                            + "items exceed maxItems or maxBytes, which ends the run",
+                    description = VALIDATION_FAILED + "; in checkpointed delivery any 422 ends the run, for example "
+                            + "for a single unit of work whose items exceed maxItems or maxBytes, or a checkpoint the "
+                            + "connector cannot read",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "503",
@@ -147,8 +153,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             + "run is stopped.\n\n"
             + "In checkpointed delivery, answer without a checkpoint: Core keeps the one it stored with the last "
             + "page. A stop past the point of no return is still refused with 422. Core discards a results page "
-            + "that arrives after a stop, so no special handling is needed, and it does not call the connector "
-            + "while the run is stopped; resume restarts the calls.")
+            + "that arrives after a stop, so no special handling is needed, and it sends no status or results call "
+            + "while the run is stopped; resume restarts them.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Run stopped; in buffered delivery, checkpoint carries the handle to resume from"),
@@ -172,8 +178,11 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "As on initiate, Core lists the delivery modes it supports and the connector answers the one the "
                     + "run uses from now on, which may differ from before, for example after a connector upgrade. A "
                     + "connector that supports none of the offered delivery modes MUST answer 422 with errorCode "
-                    + "VALIDATION_FAILED. In checkpointed delivery, answer without a checkpoint: Core keeps the one it "
-                    + "stored with the last page.")
+                    + "VALIDATION_FAILED.\n\n"
+                    + "In checkpointed delivery, answer without a checkpoint: Core keeps the checkpoint it holds. That is "
+                    + "the one from the last page, or the stop's checkpoint when the run was buffered before it stopped. "
+                    + "A stop's checkpoint can count items Core never received; the first drain then finds afterSequence "
+                    + "and the checkpoint disagreeing.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
                     description = "Resume accepted, with the delivery mode the run uses from now on, optionally whether "

@@ -40,7 +40,8 @@ public class DiscoveryResultsResponseDto {
     // Excluded from toString: opaque, no logging value, up to 64 KB.
     @Schema(description = "Checkpointed delivery only: the run's handle after this page's items, present on every "
             + "results response. Core stores it with its cursor and replays it on the next call. At most 64 KB "
-            + "serialized. Absent in buffered delivery.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "serialized; a larger one fails the run. Absent in buffered delivery.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;
 }

@@ -57,9 +57,10 @@ public abstract class DiscoveryV2ScopedRequestDto {
     @ToString.Exclude
     private Map<Resource, List<RequestAttribute>> resourceAttributes;
 
-    @Schema(description = "Delivery modes Core can drive for this run, in Core's order of preference. Sent on every "
-            + "request; meaningful on initiate and resume. Absent means buffered only. Unknown values are ignored.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Delivery modes Core can drive for this run, in Core's order of preference. Core sends it on "
+            + "every request, so a call without it comes from a Core that predates delivery modes; the connector "
+            + "chooses a mode on initiate and resume. Absent means buffered only. An empty list offers no mode. "
+            + "Unknown values are ignored.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = DiscoveryDeliveryModesDeserializer.class)
     private List<DiscoveryDeliveryMode> deliveryModes;

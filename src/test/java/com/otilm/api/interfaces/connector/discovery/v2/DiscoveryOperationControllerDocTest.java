@@ -273,6 +273,64 @@ class DiscoveryOperationControllerDocTest {
         assertTrue(page.contains("nothing more is ready now"), page);
     }
 
+    @Test
+    void offerSaysItTravelsOnEveryCallAndWhatAnEmptyListMeans() throws NoSuchFieldException {
+        String offer = schemaDescription(DiscoveryV2ScopedRequestDto.class, "deliveryModes");
+        String results = operation("results").getAnnotation(Operation.class).description();
+        assertTrue(offer.contains("a call without it comes from a Core"), offer);
+        assertTrue(offer.contains("An empty list offers no mode"), offer);
+        assertTrue(results.contains("does not offer checkpointed"), results);
+    }
+
+    @Test
+    void tagScopes404ToRunsThatCannotBeServedFromTheRequest() {
+        String tag = DiscoveryOperationController.class.getAnnotation(Tag.class).description();
+        assertFalse(tag.contains("Answer 404 only for a runId you cannot rebuild"), tag);
+        assertTrue(tag.contains("In buffered delivery, if you can rebuild the run"), tag);
+    }
+
+    @Test
+    void anyCheckpointed422OnResultsEndsTheRun() {
+        String refused = response("results", "422").description();
+        String results = operation("results").getAnnotation(Operation.class).description();
+        assertTrue(refused.contains("any 422 ends the run"), refused);
+        assertTrue(results.contains("cannot read"), results);
+    }
+
+    @Test
+    void busyRetryNamesNoTransportCarrier() {
+        String results = operation("results").getAnnotation(Operation.class).description();
+        assertFalse(results.contains("Retry-After"), results);
+    }
+
+    @Test
+    void resumeNamesTheCheckpointCoreActuallyHolds() {
+        String resume = operation("resume").getAnnotation(Operation.class).description();
+        assertTrue(resume.contains("the stop's checkpoint"), resume);
+        assertFalse(resume.contains("Core keeps the one it stored with the last page"), resume);
+    }
+
+    @Test
+    void checkpointFieldsStateTheirCheckpointedDeliveryRules() throws NoSuchFieldException {
+        String stop = schemaDescription(DiscoveryStopResponseDto.class, "checkpoint");
+        String initiate = schemaDescription(DiscoveryInitiateResponseDto.class, "checkpoint");
+        String results = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
+        assertTrue(stop.contains("In checkpointed delivery, omit it"), stop);
+        assertTrue(initiate.contains("In checkpointed delivery"), initiate);
+        assertTrue(results.contains("a larger one fails the run"), results);
+    }
+
+    @Test
+    void stopNamesTheCallsCoreSuspends() {
+        String stop = operation("stop").getAnnotation(Operation.class).description();
+        assertTrue(stop.contains("no status or results call"), stop);
+        assertFalse(stop.contains("does not call the connector"), stop);
+    }
+
+    private static String schemaDescription(Class<?> type, String field) throws NoSuchFieldException {
+        return type.getDeclaredField(field).getAnnotation(Schema.class).description();
+    }
+
     private static ApiResponse response(String operation, String code) {
         return Arrays
                 .stream(operation(operation).getAnnotation(ApiResponses.class).value())
