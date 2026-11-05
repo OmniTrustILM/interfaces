@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.cryptography.v2.operations;
+package com.otilm.api.model.common.enums.cryptography;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -10,9 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 /**
- * How a connector treats each item of a sign request. The obligations of {@link #PREHASHED_DIGEST} are stated on the
- * {@code signatureInputMode} field of {@link SignDataRequestV2Dto}, the operation that imposes them, so this component
- * says only what each value means.
+ * How a signer treats each item it is given: as data to sign, or as a digest already computed. It sits with the other
+ * algorithm enums so that every API naming an input mode, the connector sign request and the platform's own signing API
+ * alike, uses the same codes. The obligations of {@link #PREHASHED_DIGEST} are stated by each operation that takes the
+ * mode, so this component says only what each value means.
  */
 @Schema(name = "SignatureInputMode", enumAsRef = true,
         description = "Whether each data item is the content to sign or already the digest the signature "
