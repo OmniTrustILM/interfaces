@@ -116,8 +116,8 @@ class ObjectAllowedActionsDtoTest {
                 ((Schema<?>) schemas().get("ObjectAllowedActionsDto").getProperties().get("allowedActions"))
                         .getDescription(),
                 "the way the endpoint that performs it is authorized", "on the object itself",
-                "on the resource as a whole", "on a parent object first", "accepts for the caller",
-                "such as create and list", "remains the only gate");
+                "on the resource as a whole", "on a parent object first", "the strictest of them decides",
+                "accepted by every endpoint that performs it", "such as create and list", "remains the only gate");
         assertDocuments(
                 ((Schema<?>) schemas().get("ObjectAllowedActionsResponseDto").getProperties().get("items"))
                         .getDescription(),

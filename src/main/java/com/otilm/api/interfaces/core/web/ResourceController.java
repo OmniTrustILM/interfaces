@@ -63,8 +63,9 @@ public interface ResourceController extends AuthProtectedController {
     @Operation(summary = "Report the actions the caller may perform on objects of a resource", description = """
             Reports, per object, the actions the caller may perform on it, so a client can disable the \
             controls the caller cannot use. Detail pages ask for one object, list pages and bulk operations \
-            for many. Each action is answered the way the endpoint that performs it is authorized, so a \
-            reported action is accepted and an omitted one is refused. Objects the caller may neither list \
+            for many. Each action is answered the way the endpoints that perform it are authorized, and \
+            where they differ the strictest decides, so every reported action is accepted. Objects the caller \
+            may neither list \
             nor view are left out, the same as objects that do not exist. The resource must be one whose \
             objects are authorized individually, by grants on objects or by ownership.
             """)
