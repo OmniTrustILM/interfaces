@@ -55,7 +55,7 @@ class CryptographyEnumsTest {
                         contract(OperationExecutionMode.ASYNCHRONOUS, "asynchronous", "Asynchronous",
                                 "Return 202 Accepted with an operation tracking handle"),
                         contract(SignatureInputMode.DATA, "data", "Data",
-                                "Sign the data as given; the connector hashes it with the digest the signature algorithm fixes"),
+                                "Sign the data as given, applying the signature algorithm to it in full"),
                         contract(SignatureInputMode.PREHASHED_DIGEST, "prehashedDigest", "Prehashed digest",
                                 "Each item is already the digest the signature algorithm fixes; the connector signs it without hashing again"),
                         contract(OperationStatus.IN_PROGRESS, "inProgress", "In progress",

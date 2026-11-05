@@ -19,8 +19,7 @@ import java.util.Arrays;
                 + "algorithm fixes")
 public enum SignatureInputMode implements IPlatformEnum {
 
-    DATA("data", "Data",
-            "Sign the data as given; the connector hashes it with the digest the signature algorithm fixes"),
+    DATA("data", "Data", "Sign the data as given, applying the signature algorithm to it in full"),
     PREHASHED_DIGEST("prehashedDigest", "Prehashed digest",
             "Each item is already the digest the signature algorithm fixes; the connector signs it without hashing again");
 
