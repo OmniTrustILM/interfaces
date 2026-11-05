@@ -39,8 +39,8 @@ public abstract class DiscoveryV2ScopedRequestDto {
     private List<@NotNull(message = "resources must not contain a null resource type") Resource> resources;
 
     // Excluded from toString: the attribute lists can carry target credentials and the checkpoint is opaque.
-    @Schema(description = "Opaque run handle from the last initiate, stop or resume response that carried one. "
-            + "Absent on initiate, which mints it. At most 64 KB serialized.",
+    @Schema(description = "Opaque run handle from the last initiate, stop, resume or, in checkpointed delivery, "
+            + "results response that carried one. Absent on initiate, which mints it. At most 64 KB serialized.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ToString.Exclude

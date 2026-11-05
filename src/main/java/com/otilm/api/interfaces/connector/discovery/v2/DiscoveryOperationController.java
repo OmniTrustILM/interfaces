@@ -110,7 +110,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "items exceed maxItems or maxBytes, answer 422 with errorCode VALIDATION_FAILED naming the limit; "
                     + "this ends the run.\n"
                     + "- A connector too busy to take the call answers 503 with errorCode SERVICE_UNAVAILABLE. Core calls "
-                    + "again shortly and does not count it as a failure.\n"
+                    + "again shortly, after Retry-After when the transport carries it, and does not count it as a "
+                    + "failure until the run has received nothing but 503s for a bounded time, 30 minutes by default.\n"
                     + "- Bound the work so the call answers within 20 seconds; Core's default call timeout is 30 "
                     + "seconds.\n"
                     + "- When afterSequence and the replayed checkpoint disagree, answer 404 with errorCode "
@@ -118,7 +119,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "would hide that.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
-                    description = "Items retrieved; more indicates whether additional items remain beyond this page"),
+                    description = "Items retrieved; more: true means call again now, more: false means nothing more is "
+                            + "ready now"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector, or, in checkpointed delivery, afterSequence and "
                             + "the replayed checkpoint disagree (errorCode OPERATION_NOT_TRACKED)",
@@ -130,8 +132,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "503",
-                    description = "The connector is too busy to take the call now (errorCode SERVICE_UNAVAILABLE); "
-                            + "Core calls again shortly and does not count it as a failure",
+                    description = "The connector is too busy to take the call now (errorCode SERVICE_UNAVAILABLE). In "
+                            + "checkpointed delivery Core calls again shortly and does not count it as a failure, for a "
+                            + "bounded time; in buffered delivery it counts as an unanswered drain",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/results", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -173,8 +176,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "stored with the last page.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
-                    description = "Resume accepted, with the possibly updated checkpoint and, optionally, whether the "
-                            + "run can be stopped again"),
+                    description = "Resume accepted, with the delivery mode the run uses from now on, optionally whether "
+                            + "the run can be stopped again and, in buffered delivery, the possibly updated checkpoint"),
             @ApiResponse(responseCode = "404",
                     description = "Run not tracked by the connector (errorCode OPERATION_NOT_TRACKED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
@@ -184,7 +187,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                             + "404 means the run is not known at all",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "422", description = VALIDATION_FAILED,
+            @ApiResponse(responseCode = "422",
+                    description = VALIDATION_FAILED + "; or none of the offered delivery modes is supported",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/resume", consumes = MediaType.APPLICATION_JSON_VALUE,

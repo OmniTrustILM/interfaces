@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.discovery.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.MetadataAttributeProperties;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DiscoveryV2RequestDtoTest {
@@ -283,6 +285,29 @@ class DiscoveryV2RequestDtoTest {
         assertNull(mapper
                 .readValue("{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"]}",
                         DiscoveryRunRequestDto.class)
+                .getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesSkipElementsThatAreNotStrings() throws Exception {
+        String json = "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                + "\"deliveryModes\":[1,null,{\"x\":1},[\"buffered\"],\"buffered\"]}";
+        assertEquals(List.of(DiscoveryDeliveryMode.BUFFERED),
+                mapper.readValue(json, DiscoveryRunRequestDto.class).getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesThatAreNotAnArrayAreRefused() {
+        String json = "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                + "\"deliveryModes\":\"buffered\"}";
+        assertThrows(MismatchedInputException.class, () -> mapper.readValue(json, DiscoveryRunRequestDto.class));
+    }
+
+    @Test
+    void deliveryModesNullReadsAsNull() throws Exception {
+        assertNull(mapper
+                .readValue("{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                        + "\"deliveryModes\":null}", DiscoveryRunRequestDto.class)
                 .getDeliveryModes());
     }
 

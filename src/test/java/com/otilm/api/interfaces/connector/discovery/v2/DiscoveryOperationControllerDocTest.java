@@ -3,6 +3,7 @@ package com.otilm.api.interfaces.connector.discovery.v2;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryResultsResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryV2ScopedRequestDto;
 import com.otilm.api.testsupport.OpenApiProseAssertions;
@@ -236,6 +237,48 @@ class DiscoveryOperationControllerDocTest {
     void initiateAndStopDescribeDeliveryModes() {
         assertTrue(operation("initiate").getAnnotation(Operation.class).description().contains("delivery modes"));
         assertTrue(operation("stop").getAnnotation(Operation.class).description().contains("without a checkpoint"));
+    }
+
+    @Test
+    void requestCheckpointNamesTheResultsPageAsItsSourceInCheckpointedDelivery() throws NoSuchFieldException {
+        String description = DiscoveryV2ScopedRequestDto.class
+                .getDeclaredField("checkpoint")
+                .getAnnotation(Schema.class)
+                .description();
+        assertTrue(description.contains("checkpointed delivery, results"), description);
+    }
+
+    @Test
+    void resultsBusyResponseIsScopedToCheckpointedDelivery() {
+        String description = response("results", "503").description();
+        assertTrue(description.contains("In checkpointed delivery"), description);
+    }
+
+    @Test
+    void resumeResponsesFollowTheDeliveryModeRules() {
+        String accepted = response("resume", "202").description();
+        String refused = response("resume", "422").description();
+        assertTrue(accepted.contains("in buffered delivery"), accepted);
+        assertTrue(refused.contains("delivery modes"), refused);
+    }
+
+    @Test
+    void moreIsDescribedInTheWordsOfTheResultsContract() throws NoSuchFieldException {
+        String field = DiscoveryResultsResponseDto.class
+                .getDeclaredField("more")
+                .getAnnotation(Schema.class)
+                .description();
+        String page = response("results", "200").description();
+        assertTrue(field.contains("nothing more is ready now"), field);
+        assertTrue(page.contains("nothing more is ready now"), page);
+    }
+
+    private static ApiResponse response(String operation, String code) {
+        return Arrays
+                .stream(operation(operation).getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals(code))
+                .findFirst()
+                .orElseThrow();
     }
 
     private static Method operation(String name) {

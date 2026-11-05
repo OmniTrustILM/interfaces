@@ -158,7 +158,24 @@ class Jackson3ParityTest {
                         new Sample("a delivery-mode offer with an unknown code", """
                                 {"runId": "11111111-1111-1111-1111-111111111111", "resources": ["certificates"],
                                  "deliveryModes": ["streamed", "checkpointed"]}
+                                """, DiscoveryRunRequestDto.class),
+                        new Sample("a delivery-mode offer with elements that are not strings", """
+                                {"runId": "11111111-1111-1111-1111-111111111111", "resources": ["certificates"],
+                                 "deliveryModes": [1, null, {"x": 1}, ["buffered"], "buffered"]}
                                 """, DiscoveryRunRequestDto.class));
+    }
+
+    @Test
+    void refusesADeliveryModeOfferThatIsNotAnArrayLikeJackson2() {
+        String json = """
+                {"runId": "11111111-1111-1111-1111-111111111111", "resources": ["certificates"],
+                 "deliveryModes": "buffered"}
+                """;
+        assertAll(
+                () -> assertThrows(JsonMappingException.class,
+                        () -> Jackson2Mvc.read(json, DiscoveryRunRequestDto.class)),
+                () -> assertThrows(DatabindException.class,
+                        () -> Jackson3Mvc.read(json, DiscoveryRunRequestDto.class)));
     }
 
     @Test

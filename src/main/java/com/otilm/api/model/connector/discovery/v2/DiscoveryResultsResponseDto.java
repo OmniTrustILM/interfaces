@@ -32,7 +32,8 @@ public class DiscoveryResultsResponseDto {
     @PositiveOrZero(message = "highestSequence must not be negative")
     private Long highestSequence;
 
-    @Schema(description = "Whether more items remain beyond this page", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "true means more is ready and Core calls again now; false means nothing more is ready now. "
+            + "Whether the run has finished comes from status.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "more is required")
     private Boolean more;
 
