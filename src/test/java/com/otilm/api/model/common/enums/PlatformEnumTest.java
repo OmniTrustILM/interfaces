@@ -1,5 +1,8 @@
 package com.otilm.api.model.common.enums;
 
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.otilm.api.model.client.signing.profile.record.SigningRecordPersistenceMode;
+import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
@@ -10,9 +13,17 @@ import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
 import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
+import io.swagger.v3.core.jackson.TypeNameResolver;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.util.ClassUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,6 +78,48 @@ class PlatformEnumTest {
     }
 
     @Test
+    void registersEverySignatureModelEnum() {
+        List<Class<?>> signatureModelEnums = platformEnumsUnder("com.otilm.api.model.common.signature");
+        Set<Class<?>> registered = registeredEnumClasses();
+
+        List<String> unregistered = signatureModelEnums
+                .stream()
+                .filter(type -> !registered.contains(type))
+                .map(Class::getSimpleName)
+                .sorted()
+                .toList();
+
+        assertTrue(signatureModelEnums.contains(SignatureFamily.class), "the scan found no signature-model enum");
+        assertEquals(List.of(), unregistered, "signature-model enums missing from PlatformEnum");
+    }
+
+    @Test
+    void everyKeyIsItsEnumsOpenApiSchemaName() {
+        List<String> mismatches = Arrays
+                .stream(PlatformEnum.values())
+                .filter(entry -> !entry.getCode().equals(openApiSchemaNameOf(entry.getEnumClass())))
+                .map(entry -> entry.getCode() + " vs " + openApiSchemaNameOf(entry.getEnumClass()))
+                .toList();
+
+        assertEquals(List.of(), mismatches, "keys that differ from their enum's OpenAPI schema name");
+    }
+
+    @Test
+    void keysAreUnique() {
+        Set<String> seen = new HashSet<>();
+        for (PlatformEnum entry : PlatformEnum.values()) {
+            assertTrue(seen.add(entry.getCode()), "key registered twice: " + entry.getCode());
+        }
+    }
+
+    @Test
+    void signingRecordPersistenceModeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(SigningRecordPersistenceMode.class);
+
+        assertEquals("SigningRecordPersistenceMode", entry.getCode());
+    }
+
+    @Test
     void cryptographicAssetTypeIsRegistered() {
         PlatformEnum entry = PlatformEnum.findByClass(CryptographicAssetType.class);
         assertNotNull(entry);
@@ -112,5 +165,29 @@ class PlatformEnumTest {
         assertEquals(PlatformEnum.SCHEDULED_JOB_SCHEDULE_STATE, entry);
         assertEquals(ScheduledJobScheduleState.class, entry.getEnumClass());
         assertEquals("ScheduledJobScheduleState", entry.getCode());
+    }
+
+    private static String openApiSchemaNameOf(Class<?> enumClass) {
+        return TypeNameResolver.std.nameForType(TypeFactory.defaultInstance().constructType(enumClass));
+    }
+
+    private static Set<Class<?>> registeredEnumClasses() {
+        return Arrays.stream(PlatformEnum.values()).map(PlatformEnum::getEnumClass).collect(Collectors.toSet());
+    }
+
+    private static List<Class<?>> platformEnumsUnder(String basePackage) {
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false) {
+            @Override
+            protected boolean isCandidateComponent(AnnotatedBeanDefinition definition) {
+                return true;
+            }
+        };
+        scanner.addIncludeFilter(new AssignableTypeFilter(IPlatformEnum.class));
+        return scanner
+                .findCandidateComponents(basePackage)
+                .stream()
+                .<Class<?>>map(candidate -> ClassUtils.resolveClassName(candidate.getBeanClassName(), null))
+                .filter(Class::isEnum)
+                .toList();
     }
 }
