@@ -14,6 +14,7 @@ import com.otilm.api.model.common.attribute.v1.content.TimeAttributeContent;
 import com.otilm.api.model.common.attribute.v2.content.DateTimeAttributeContentV2;
 import com.otilm.api.model.common.attribute.v3.content.DateTimeAttributeContentV3;
 import com.otilm.api.model.common.events.data.CertificateExpiringEventData;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryRunRequestDto;
 import com.otilm.api.model.core.secret.Passphrase;
 import com.otilm.api.model.core.secret.PassphraseFormatException;
 import com.otilm.api.model.core.secret.UploadedFile;
@@ -153,7 +154,11 @@ class Jackson3ParityTest {
                                 """, AuthenticationSettingsDto.class),
                         new Sample("an authentication settings update with an OAuth2 provider", """
                                 {"disableLocalhostUser": true, "oauth2Providers": [{"name": "p"}]}
-                                """, AuthenticationSettingsUpdateDto.class));
+                                """, AuthenticationSettingsUpdateDto.class),
+                        new Sample("a delivery-mode offer with an unknown code", """
+                                {"runId": "11111111-1111-1111-1111-111111111111", "resources": ["certificates"],
+                                 "deliveryModes": ["streamed", "checkpointed"]}
+                                """, DiscoveryRunRequestDto.class));
     }
 
     @Test

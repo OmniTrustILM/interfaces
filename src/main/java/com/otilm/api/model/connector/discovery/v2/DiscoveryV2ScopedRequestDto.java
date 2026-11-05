@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.discovery.v2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.core.auth.Resource;
@@ -55,4 +56,11 @@ public abstract class DiscoveryV2ScopedRequestDto {
             propertyNames = Resource.class)
     @ToString.Exclude
     private Map<Resource, List<RequestAttribute>> resourceAttributes;
+
+    @Schema(description = "Delivery modes Core can drive for this run, in Core's order of preference. Sent on every "
+            + "request; meaningful on initiate and resume. Absent means buffered only. Unknown values are ignored.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(using = DiscoveryDeliveryModesDeserializer.class)
+    private List<DiscoveryDeliveryMode> deliveryModes;
 }

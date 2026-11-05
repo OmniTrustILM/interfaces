@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DiscoveryV2RequestDtoTest {
@@ -255,5 +256,41 @@ class DiscoveryV2RequestDtoTest {
                 "toString must include runId, the one field worth correlating log lines by: " + str);
         assertFalse(str.contains("super-secret-target-password"),
                 "toString must not leak run-level attribute values, which can carry target credentials: " + str);
+    }
+
+    @Test
+    void deliveryModesSkipUnknownCodes() throws Exception {
+        DiscoveryRunRequestDto dto = mapper
+                .readValue(
+                        "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                                + "\"deliveryModes\":[\"streamed\",\"checkpointed\",\"buffered\"]}",
+                        DiscoveryRunRequestDto.class);
+        assertEquals(List.of(DiscoveryDeliveryMode.CHECKPOINTED, DiscoveryDeliveryMode.BUFFERED),
+                dto.getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesEmptyAndAllUnknownReadAsEmpty() throws Exception {
+        String base = "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],";
+        assertEquals(List.of(),
+                mapper.readValue(base + "\"deliveryModes\":[]}", DiscoveryRunRequestDto.class).getDeliveryModes());
+        assertEquals(List.of(),
+                mapper.readValue(base + "\"deliveryModes\":[\"x\"]}", DiscoveryRunRequestDto.class).getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesAbsentIsNull() throws Exception {
+        assertNull(mapper
+                .readValue("{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"]}",
+                        DiscoveryRunRequestDto.class)
+                .getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesAbsentIsOmittedFromTheWire() throws Exception {
+        DiscoveryRunRequestDto dto = new DiscoveryRunRequestDto();
+        dto.setRunId(UUID.randomUUID());
+        dto.setResources(List.of(Resource.CERTIFICATE));
+        assertFalse(mapper.writeValueAsString(dto).contains("deliveryModes"));
     }
 }
