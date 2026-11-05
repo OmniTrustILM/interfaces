@@ -15,7 +15,7 @@ import java.io.Serializable;
  * </p>
  *
  * <p>
- * {@code RAW_SIGNING} carries an item cap and the certificate-purpose constraints in its concrete subtype
+ * {@code RAW_SIGNING} carries the certificate-purpose constraints in its concrete subtype
  * {@link RawSigningWorkflowDto}; the subtype also ensures {@code workflow} is never {@code null} on a Signing Profile.
  * </p>
  */

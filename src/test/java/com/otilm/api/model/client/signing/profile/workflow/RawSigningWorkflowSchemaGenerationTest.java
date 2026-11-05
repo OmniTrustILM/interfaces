@@ -3,7 +3,6 @@ package com.otilm.api.model.client.signing.profile.workflow;
 import com.otilm.api.model.common.validation.OidFormat;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.media.Schema;
-import java.math.BigDecimal;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -13,17 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class RawSigningWorkflowSchemaGenerationTest {
-
-    @Test
-    void theRequestPublishesTheItemCapWithAMinimumOfOne() {
-        assertEquals(BigDecimal.ONE,
-                generate(RawSigningWorkflowRequestDto.class).get("maxItemsPerRequest").getMinimum());
-    }
-
-    @Test
-    void theResponsePublishesTheItemCapWithAMinimumOfOne() {
-        assertEquals(BigDecimal.ONE, generate(RawSigningWorkflowDto.class).get("maxItemsPerRequest").getMinimum());
-    }
 
     @Test
     void theRequestPublishesTheEkuOidsAsAUniqueCollectionOfPatternedStrings() {

@@ -14,9 +14,9 @@ import java.io.Serializable;
  * </p>
  *
  * <p>
- * {@code RAW_SIGNING} carries an item cap and the certificate-purpose constraints — use
- * {@link RawSigningWorkflowRequestDto} (body: {@code {"type":"raw_signing"}}) to make the workflow type explicit. The
- * {@code workflow} field must never be {@code null} on a Signing Profile request.
+ * {@code RAW_SIGNING} carries the certificate-purpose constraints — use {@link RawSigningWorkflowRequestDto} (body:
+ * {@code {"type":"raw_signing"}}) to make the workflow type explicit. The {@code workflow} field must never be
+ * {@code null} on a Signing Profile request.
  * </p>
  */
 @Schema(name = "WorkflowRequestInterface",

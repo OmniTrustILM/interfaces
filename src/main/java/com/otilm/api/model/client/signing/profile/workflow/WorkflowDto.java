@@ -23,7 +23,7 @@ import lombok.Data;
  * </ul>
  *
  * <p>
- * {@code RAW_SIGNING} carries an item cap and the certificate-purpose constraints in its concrete subtype
+ * {@code RAW_SIGNING} carries the certificate-purpose constraints in its concrete subtype
  * {@link RawSigningWorkflowDto}; the subtype also ensures {@code workflow} is never {@code null} in a Signing Profile.
  * </p>
  */

@@ -27,13 +27,12 @@ class RawSigningWorkflowDtoTest {
         WorkflowRequestDto decoded = mapper.readValue("{\"type\":\"raw_signing\"}", WorkflowRequestDto.class);
 
         RawSigningWorkflowRequestDto workflow = assertInstanceOf(RawSigningWorkflowRequestDto.class, decoded);
-        assertNull(workflow.getMaxItemsPerRequest());
         assertNull(workflow.getRequireNonRepudiation());
         assertTrue(workflow.getRequiredExtendedKeyUsageOids().isEmpty());
     }
 
     @Test
-    void anEmptyRequestValidatesBecauseAnAbsentCapTakesThePlatformDefault() {
+    void anEmptyRequestValidatesBecauseEveryRawFieldIsOptional() {
         Set<ConstraintViolation<RawSigningWorkflowRequestDto>> violations = VALIDATOR
                 .validate(new RawSigningWorkflowRequestDto());
 
@@ -43,7 +42,6 @@ class RawSigningWorkflowDtoTest {
     @Test
     void theRequestRoundTripsThroughTheWorkflowUnion() throws Exception {
         RawSigningWorkflowRequestDto original = new RawSigningWorkflowRequestDto();
-        original.setMaxItemsPerRequest(100);
         original.setRequireNonRepudiation(true);
         original.setRequiredExtendedKeyUsageOids(Set.of("1.3.6.1.5.5.7.3.36"));
 
@@ -51,7 +49,6 @@ class RawSigningWorkflowDtoTest {
 
         RawSigningWorkflowRequestDto workflow = assertInstanceOf(RawSigningWorkflowRequestDto.class, decoded);
         assertEquals(SigningWorkflowType.RAW_SIGNING, workflow.getType());
-        assertEquals(100, workflow.getMaxItemsPerRequest());
         assertEquals(Boolean.TRUE, workflow.getRequireNonRepudiation());
         assertEquals(Set.of("1.3.6.1.5.5.7.3.36"), workflow.getRequiredExtendedKeyUsageOids());
     }
@@ -59,35 +56,14 @@ class RawSigningWorkflowDtoTest {
     @Test
     void theResponseRoundTripsThroughTheWorkflowUnion() throws Exception {
         RawSigningWorkflowDto original = new RawSigningWorkflowDto();
-        original.setMaxItemsPerRequest(100);
         original.setRequireNonRepudiation(true);
         original.setRequiredExtendedKeyUsageOids(Set.of("1.3.6.1.5.5.7.3.36"));
 
         WorkflowDto decoded = mapper.readValue(mapper.writeValueAsString(original), WorkflowDto.class);
 
         RawSigningWorkflowDto workflow = assertInstanceOf(RawSigningWorkflowDto.class, decoded);
-        assertEquals(100, workflow.getMaxItemsPerRequest());
         assertTrue(workflow.isRequireNonRepudiation());
         assertEquals(Set.of("1.3.6.1.5.5.7.3.36"), workflow.getRequiredExtendedKeyUsageOids());
-    }
-
-    @Test
-    void aZeroItemCapIsRejected() {
-        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
-        workflow.setMaxItemsPerRequest(0);
-
-        Set<ConstraintViolation<RawSigningWorkflowRequestDto>> violations = VALIDATOR.validate(workflow);
-
-        assertEquals(1, violations.size(), violations.toString());
-        assertEquals("maxItemsPerRequest", violations.iterator().next().getPropertyPath().toString());
-    }
-
-    @Test
-    void anItemCapOfOneIsAccepted() {
-        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
-        workflow.setMaxItemsPerRequest(1);
-
-        assertTrue(VALIDATOR.validate(workflow).isEmpty());
     }
 
     @Test

@@ -467,15 +467,6 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
-    void aDelegatedRawProfileCarryingAnItemCapIsRejected() {
-        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
-        workflow.setMaxItemsPerRequest(10);
-
-        assertTrue(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)),
-                "workflow.maxItemsPerRequest"));
-    }
-
-    @Test
     void aDelegatedRawProfileWithNoManagedKnobsIsAccepted() {
         RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
         workflow.setRequireNonRepudiation(false);

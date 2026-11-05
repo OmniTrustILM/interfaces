@@ -114,13 +114,11 @@ public class ManagedSignatureFormattingConnectorValidator
 
     private boolean validateDelegatedRawWorkflow(ConstraintValidatorContext context,
             RawSigningWorkflowRequestDto workflow) {
-        boolean itemCapAbsent = rejectOnDelegatedWorkflow(context, "maxItemsPerRequest",
-                (Object) workflow.getMaxItemsPerRequest());
         boolean nonRepudiationAbsent = rejectTrueOnDelegatedWorkflow(context, "requireNonRepudiation",
                 workflow.getRequireNonRepudiation());
         boolean extendedKeyUsageAbsent = rejectOnDelegatedWorkflow(context, "requiredExtendedKeyUsageOids",
                 workflow.getRequiredExtendedKeyUsageOids());
-        return itemCapAbsent && nonRepudiationAbsent && extendedKeyUsageAbsent;
+        return nonRepudiationAbsent && extendedKeyUsageAbsent;
     }
 
     private boolean rejectOnDelegatedWorkflow(ConstraintValidatorContext context, String property,

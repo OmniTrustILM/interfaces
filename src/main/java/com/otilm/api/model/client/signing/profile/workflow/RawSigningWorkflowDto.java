@@ -11,8 +11,7 @@ import lombok.ToString;
  * Raw signing workflow configuration embedded in a {@code SigningProfileDto}.
  *
  * <p>
- * Raw signing requires no Signature Formatting Provider and carries a cap on the items per request and the
- * certificate-purpose constraints.
+ * Raw signing requires no Signature Formatting Provider and carries the certificate-purpose constraints.
  * </p>
  */
 @Data
@@ -21,11 +20,6 @@ import lombok.ToString;
         + " The digest algorithm is not configured here: the signature algorithm of the signing scheme fixes it.")
 @ToString(callSuper = true)
 public class RawSigningWorkflowDto extends WorkflowDto {
-
-    @Schema(minimum = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
-            description = "Maximum items one raw signing request may carry. Null when the platform default applies. "
-                    + "Applies to ILM-managed signing only.")
-    private Integer maxItemsPerRequest;
 
     @Schema(description = "Demand the nonRepudiation key-usage bit specifically, for commitment-grade profiles. "
             + "Applies to ILM-managed signing only; delegated profile gets always false.",
