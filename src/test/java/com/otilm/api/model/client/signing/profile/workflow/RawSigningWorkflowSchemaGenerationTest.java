@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class RawSigningWorkflowSchemaGenerationTest {
 
     @Test
-    void theRequestPublishesTheDigestCapWithAMinimumOfOne() {
+    void theRequestPublishesTheItemCapWithAMinimumOfOne() {
         assertEquals(BigDecimal.ONE,
-                generate(RawSigningWorkflowRequestDto.class).get("maxDigestsPerRequest").getMinimum());
+                generate(RawSigningWorkflowRequestDto.class).get("maxItemsPerRequest").getMinimum());
     }
 
     @Test
-    void theResponsePublishesTheDigestCapWithAMinimumOfOne() {
-        assertEquals(BigDecimal.ONE, generate(RawSigningWorkflowDto.class).get("maxDigestsPerRequest").getMinimum());
+    void theResponsePublishesTheItemCapWithAMinimumOfOne() {
+        assertEquals(BigDecimal.ONE, generate(RawSigningWorkflowDto.class).get("maxItemsPerRequest").getMinimum());
     }
 
     @Test
