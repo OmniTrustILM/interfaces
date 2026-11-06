@@ -28,9 +28,7 @@ public record DigestOnlyDocumentTransferDto(
                 requiredMode = Schema.RequiredMode.REQUIRED) byte[] documentDigest,
         @NotNull(message = "digestAlgorithm is required") @Schema(
                 description = "Algorithm that produced documentDigest. The enum spans every algorithm the platform "
-                        + "knows, including collision-broken ones. Where this transfer is the document of a "
-                        + "computeDtbs request, the platform pins it to the digest that request's signatureAlgorithm "
-                        + "commits to, and checks it before it calls.",
+                        + "knows, including collision-broken ones.",
                 requiredMode = Schema.RequiredMode.REQUIRED) DigestAlgorithm digestAlgorithm)
         implements
             DocumentTransferDto {

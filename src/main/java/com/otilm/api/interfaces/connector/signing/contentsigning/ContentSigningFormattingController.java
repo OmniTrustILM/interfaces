@@ -99,8 +99,9 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     + "digests it. A digestOnly transfer carries that digest already. The platform pins both to the "
                     + "digest signatureAlgorithm commits to, and checks that before it calls, so an algorithm whose "
                     + "paired digest is not a DigestAlgorithm value is never sent here. Either way the connector "
-                    + "MUST echo that digest in documentDigest. The platform compares that echo against the digest "
-                    + "the user authorized before it releases the signing key.",
+                    + "MUST echo that digest in documentDigest and its algorithm in documentDigestAlgorithm. The "
+                    + "platform compares that echo against the digest the user authorized before it releases the "
+                    + "signing key.",
             operationId = "computeDtbs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data-to-be-signed bytes computed"),
