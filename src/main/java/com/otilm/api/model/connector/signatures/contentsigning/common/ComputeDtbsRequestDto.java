@@ -15,8 +15,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * A family's own content travels in {@code signatureParameters}, in the family's subtype of
- * {@link SignatureParametersDto}.
+ * Request to compute the data-to-be-signed bytes, in one shape for every family. A family's own content travels in
+ * {@code signatureParameters}.
  *
  * <p>
  * Everything the connector needs to build the data-to-be-signed bytes arrives here, including {@code signingTime}. The

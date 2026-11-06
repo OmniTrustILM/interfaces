@@ -1,5 +1,6 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.common.signature.SignatureFamily;
+import com.otilm.api.model.common.signature.parameters.SignatureParametersDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureParametersDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignatureDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignaturePlacementDto;
@@ -14,13 +16,16 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,6 +47,16 @@ class ComputeDtbsRequestDtoTest {
         request.setSignatureAlgorithm(SignatureAlgorithm.SHA256_WITH_RSA);
         request.setFormattingAttributes(List.of());
         return request;
+    }
+
+    private static Stream<Class<? extends SignatureParametersDto>> everyParametersSubtype() {
+        return Arrays
+                .stream(SignatureParametersDto.class.getAnnotation(JsonSubTypes.class).value())
+                .map(type -> type.value().asSubclass(SignatureParametersDto.class));
+    }
+
+    private static SignatureFamily anyFamilyOtherThan(SignatureFamily family) {
+        return Arrays.stream(SignatureFamily.values()).filter(other -> other != family).findFirst().orElseThrow();
     }
 
     @Test
@@ -89,19 +104,18 @@ class ComputeDtbsRequestDtoTest {
         assertFalse(json.contains("signatureParameters"), json);
     }
 
-    @Test
-    void theParametersRoundTripThroughTheRequest() throws Exception {
-        ComputeDtbsRequestDto request = requestFor(SignatureFamily.PADES);
-        PadesSignatureParametersDto parameters = new PadesSignatureParametersDto();
-        parameters.setReason("Contract approval");
+    @ParameterizedTest
+    @MethodSource("everyParametersSubtype")
+    void everyParametersSubtypeRoundTripsThroughTheRequest(Class<? extends SignatureParametersDto> subtype)
+            throws Exception {
+        SignatureParametersDto parameters = subtype.getDeclaredConstructor().newInstance();
+        ComputeDtbsRequestDto request = requestFor(parameters.getFamily());
         request.setSignatureParameters(parameters);
 
         ComputeDtbsRequestDto decoded = mapper
                 .readValue(mapper.writeValueAsString(request), ComputeDtbsRequestDto.class);
 
-        PadesSignatureParametersDto pades = assertInstanceOf(PadesSignatureParametersDto.class,
-                decoded.getSignatureParameters());
-        assertEquals("Contract approval", pades.getReason());
+        assertEquals(parameters, decoded.getSignatureParameters());
     }
 
     /** The parameters object stays self-describing wherever it travels, so it carries its own discriminator. */
@@ -115,11 +129,23 @@ class ComputeDtbsRequestDtoTest {
         assertEquals(2, json.split("\"family\":\"pades\"", -1).length - 1, json);
     }
 
+    @ParameterizedTest
+    @MethodSource("everyParametersSubtype")
+    void parametersOfTheRequestsFamilyPassValidation(Class<? extends SignatureParametersDto> subtype) throws Exception {
+        SignatureParametersDto parameters = subtype.getDeclaredConstructor().newInstance();
+        ComputeDtbsRequestDto request = requestFor(parameters.getFamily());
+        request.setSignatureParameters(parameters);
+
+        assertEquals(Set.of(), VALIDATOR.validate(request));
+    }
+
     /** A connector reads the parameters as its own family's. */
-    @Test
-    void parametersOfAnotherFamilyFailValidation() {
-        ComputeDtbsRequestDto request = requestFor(SignatureFamily.XADES);
-        request.setSignatureParameters(new PadesSignatureParametersDto());
+    @ParameterizedTest
+    @MethodSource("everyParametersSubtype")
+    void parametersOfAnotherFamilyFailValidation(Class<? extends SignatureParametersDto> subtype) throws Exception {
+        SignatureParametersDto parameters = subtype.getDeclaredConstructor().newInstance();
+        ComputeDtbsRequestDto request = requestFor(anyFamilyOtherThan(parameters.getFamily()));
+        request.setSignatureParameters(parameters);
 
         Set<ConstraintViolation<ComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
 

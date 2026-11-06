@@ -22,13 +22,16 @@ public enum SignatureFamily implements IPlatformEnum {
             ConnectorInterface.PADES_FORMATTING, EnumSet.of(DocumentTransferMode.INLINE),
             SignatureLevelNames.etsiBaseline("PAdES")),
     XADES(Codes.XADES, "XAdES", "XML Advanced Electronic Signatures, ETSI EN 319 132",
-            ConnectorInterface.XADES_FORMATTING, EnumSet.allOf(DocumentTransferMode.class),
+            ConnectorInterface.XADES_FORMATTING,
+            EnumSet.of(DocumentTransferMode.INLINE, DocumentTransferMode.DIGEST_ONLY),
             SignatureLevelNames.etsiBaseline("XAdES")),
     CADES(Codes.CADES, "CAdES", "CMS Advanced Electronic Signatures, ETSI EN 319 122",
-            ConnectorInterface.CADES_FORMATTING, EnumSet.allOf(DocumentTransferMode.class),
+            ConnectorInterface.CADES_FORMATTING,
+            EnumSet.of(DocumentTransferMode.INLINE, DocumentTransferMode.DIGEST_ONLY),
             SignatureLevelNames.etsiBaseline("CAdES")),
     JADES(Codes.JADES, "JAdES", "JSON Advanced Electronic Signatures, ETSI TS 119 182",
-            ConnectorInterface.JADES_FORMATTING, EnumSet.allOf(DocumentTransferMode.class),
+            ConnectorInterface.JADES_FORMATTING,
+            EnumSet.of(DocumentTransferMode.INLINE, DocumentTransferMode.DIGEST_ONLY),
             SignatureLevelNames.etsiBaseline("JAdES"));
 
     public static class Codes {
