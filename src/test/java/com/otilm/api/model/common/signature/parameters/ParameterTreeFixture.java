@@ -1,10 +1,14 @@
 package com.otilm.api.model.common.signature.parameters;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /** Builds a signature-parameters tree with every field carrying a distinguishing value. */
 final class ParameterTreeFixture {
@@ -12,6 +16,17 @@ final class ParameterTreeFixture {
     static final String DISCRIMINATOR = "family";
 
     private ParameterTreeFixture() {
+    }
+
+    /** @return every family's parameters subtype, as Jackson resolves the union */
+    static List<Class<? extends SignatureParametersDto>> registeredSubtypes() {
+        JsonSubTypes subTypes = SignatureParametersDto.class.getAnnotation(JsonSubTypes.class);
+        assertNotNull(subTypes, "SignatureParametersDto must register its subtypes with @JsonSubTypes");
+        return Arrays
+                .stream(subTypes.value())
+                .map(JsonSubTypes.Type::value)
+                .<Class<? extends SignatureParametersDto>>map(type -> type.asSubclass(SignatureParametersDto.class))
+                .toList();
     }
 
     static <T extends SignatureParameterContainer> T populated(Class<T> type) {
