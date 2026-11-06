@@ -130,6 +130,11 @@ public enum SignatureAlgorithm implements IPlatformEnum {
     private final String description;
     @Getter
     private final AlgorithmIdentifier algorithmIdentifier;
+    /**
+     * The CMS form: a SHA-2 identifier has absent parameters, and Ed448's SHAKE256 carries its output length. RSA
+     * PKCS#1 v1.5 is the only scheme that puts this identifier into what it signs, a {@code DigestInfo}, where RFC 8017
+     * needs explicit NULL parameters, so build that one from the algorithm OID with {@code DERNull.INSTANCE}.
+     */
     @Getter
     private final AlgorithmIdentifier digestAlgorithmIdentifier;
     @Getter
