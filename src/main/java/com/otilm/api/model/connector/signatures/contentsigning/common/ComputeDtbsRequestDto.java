@@ -29,20 +29,6 @@ import lombok.ToString;
  * </p>
  *
  * <p>
- * {@code signatureAlgorithm} arrives the same way and for the same reason. The connector must build the bytes for the
- * exact algorithm the platform's signer will use.
- * </p>
- *
- * <p>
- * Two digests appear in this operation. The signature's own message digest is the digest half of
- * {@code signatureAlgorithm}, so no field carries it: {@code SHA256withRSA} means {@code SHA-256}. The document digest
- * is a separate choice. It is the value the connector echoes in {@code documentDigest}, and the algorithm a
- * {@code digestOnly} transfer names in {@code document.digestAlgorithm}, and it binds the answer to the document the
- * platform authorized. The platform pins it to the same digest and checks the pair before it calls, so a connector
- * never has to reconcile the two.
- * </p>
- *
- * <p>
  * The union resolves on the inherited {@code family} property. {@link ComputeDtbsInterface} explains why the
  * discriminator sits inside the object. Each subtype fixes that property to its own family and carries whatever typed
  * parameters that family defines.

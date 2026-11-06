@@ -26,10 +26,14 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
  * operation that imposes them.
  */
 @Schema(enumAsRef = true,
-        description = "Signature algorithm, named by its code. Each algorithm fixes the digest carried inside the "
-                + "signature it produces, so naming the algorithm names that digest. It says nothing about a digest an "
-                + "operation takes as a parameter of its own. Where the code spells its digest out, that is the "
-                + "digest. Where it does not, the platform records the digest it pairs the algorithm with: Ed25519 "
+        description = "Signature algorithm, named by its code. It says nothing about a digest an operation takes as a "
+                + "parameter of its own. Only the RSA, RSA-PSS and ECDSA codes spell their digest out: such an algorithm "
+                + "hashes its input with that digest and signs the result, so naming the algorithm names that digest. "
+                + "RSA-PSS codes use MGF1 with the same hash as the code, a salt as long as that hash's output, and "
+                + "trailer field 1. The other algorithms take their input whole and hash it inside as their standard "
+                + "defines. For them the platform records the digest it pairs the algorithm with and applies to the "
+                + "document itself, one layer above the signature algorithm (in CMS, the message-digest algorithm, as "
+                + "RFC 8419, RFC 9882 and RFC 9814 specify). Ed25519 "
                 + "commits to SHA-512, FALCON-1024 commits to SHA-512, ML-DSA-44 commits to SHA-512, ML-DSA-65 "
                 + "commits to SHA-512, ML-DSA-87 commits to SHA-512, SLH-DSA-SHA2-128S commits to SHA-256, "
                 + "SLH-DSA-SHA2-128F commits to SHA-256, SLH-DSA-SHA2-192S commits to SHA-512, SLH-DSA-SHA2-192F "
