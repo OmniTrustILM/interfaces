@@ -423,4 +423,21 @@ class DiscoveryV2SchemaGenerationTest {
                     property + " must be optional on " + type.getSimpleName() + ", was required");
         }
     }
+
+    /**
+     * Core may offer a mode this contract does not list yet, and a connector generated from the published document must
+     * still read that request. Generators turn an enum into a closed type that rejects an unknown code, so the offer's
+     * items are published as plain strings.
+     */
+    @Test
+    void offeredDeliveryModesArePublishedAsOpenStrings() {
+        Schema<?> request = openApi31Schemas(DiscoveryRunRequestDto.class).get("DiscoveryRunRequestDto");
+        Schema<?> offer = (Schema<?>) request.getProperties().get("deliveryModes");
+        Schema<?> items = offer.getItems();
+        assertNull(items.get$ref(), "the offer's items must not reference the closed enum: " + items);
+        assertNull(items.getEnum(), "the offer's items must not be a closed enum: " + items);
+        assertTrue(items.getTypes() != null && items.getTypes().contains("string"),
+                "the offer's items must be strings: " + items);
+        assertNotNull(offer.getDescription(), "the offer must keep its description");
+    }
 }

@@ -8,6 +8,7 @@ import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryV2ScopedRequestDto;
 import com.otilm.api.testsupport.OpenApiProseAssertions;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -275,7 +276,11 @@ class DiscoveryOperationControllerDocTest {
 
     @Test
     void offerSaysItTravelsOnEveryCallAndWhatAnEmptyListMeans() throws NoSuchFieldException {
-        String offer = schemaDescription(DiscoveryV2ScopedRequestDto.class, "deliveryModes");
+        String offer = DiscoveryV2ScopedRequestDto.class
+                .getDeclaredField("deliveryModes")
+                .getAnnotation(ArraySchema.class)
+                .arraySchema()
+                .description();
         String results = operation("results").getAnnotation(Operation.class).description();
         assertTrue(offer.contains("a call without it comes from a Core"), offer);
         assertTrue(offer.contains("An empty list offers no mode"), offer);
