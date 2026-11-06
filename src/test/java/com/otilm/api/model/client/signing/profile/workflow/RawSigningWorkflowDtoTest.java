@@ -78,6 +78,20 @@ class RawSigningWorkflowDtoTest {
     }
 
     @Test
+    void aNullEkuEntryIsRejected() throws Exception {
+        RawSigningWorkflowRequestDto workflow = (RawSigningWorkflowRequestDto) mapper
+                .readValue("{\"type\":\"raw_signing\",\"requiredExtendedKeyUsageOids\":[null]}",
+                        WorkflowRequestDto.class);
+
+        Set<ConstraintViolation<RawSigningWorkflowRequestDto>> violations = VALIDATOR.validate(workflow);
+
+        assertEquals(1, violations.size(), violations.toString());
+        assertTrue(
+                violations.iterator().next().getPropertyPath().toString().startsWith("requiredExtendedKeyUsageOids["),
+                violations.toString());
+    }
+
+    @Test
     void noDigestAlgorithmListIsPublished() {
         assertThrows(NoSuchFieldException.class,
                 () -> RawSigningWorkflowRequestDto.class.getDeclaredField("allowedDigestAlgorithms"));
