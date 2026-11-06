@@ -13,12 +13,14 @@ import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
 import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
+import com.otilm.api.model.core.signing.SigningProtocol;
 import io.swagger.v3.core.jackson.TypeNameResolver;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -78,19 +80,25 @@ class PlatformEnumTest {
     }
 
     @Test
-    void registersEverySignatureModelEnum() {
-        List<Class<?>> signatureModelEnums = platformEnumsUnder("com.otilm.api.model.common.signature");
+    void registersEverySigningEnum() {
+        List<Class<?>> signingEnums = Stream
+                .of("com.otilm.api.model.common.signature", "com.otilm.api.model.client.signing",
+                        "com.otilm.api.model.core.signing")
+                .flatMap(basePackage -> platformEnumsUnder(basePackage).stream())
+                .toList();
         Set<Class<?>> registered = registeredEnumClasses();
 
-        List<String> unregistered = signatureModelEnums
+        List<String> unregistered = signingEnums
                 .stream()
                 .filter(type -> !registered.contains(type))
                 .map(Class::getSimpleName)
                 .sorted()
                 .toList();
 
-        assertTrue(signatureModelEnums.contains(SignatureFamily.class), "the scan found no signature-model enum");
-        assertEquals(List.of(), unregistered, "signature-model enums missing from PlatformEnum");
+        assertTrue(signingEnums
+                .containsAll(List.of(SignatureFamily.class, SigningRecordPersistenceMode.class, SigningProtocol.class)),
+                "the scan missed a signing package");
+        assertEquals(List.of(), unregistered, "signing enums missing from PlatformEnum");
     }
 
     @Test
@@ -110,13 +118,6 @@ class PlatformEnumTest {
         for (PlatformEnum entry : PlatformEnum.values()) {
             assertTrue(seen.add(entry.getCode()), "key registered twice: " + entry.getCode());
         }
-    }
-
-    @Test
-    void signingRecordPersistenceModeIsRegistered() {
-        PlatformEnum entry = PlatformEnum.findByClass(SigningRecordPersistenceMode.class);
-
-        assertEquals("SigningRecordPersistenceMode", entry.getCode());
     }
 
     @Test
