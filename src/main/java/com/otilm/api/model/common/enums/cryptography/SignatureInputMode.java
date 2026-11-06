@@ -10,17 +10,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 /**
- * How a signer treats each item it is given: as data to sign, or as a digest already computed. It sits with the other
- * algorithm enums so that every API naming an input mode, the connector sign request and the platform's own signing API
- * alike, uses the same codes. The obligations of {@link #PREHASHED_DIGEST} are stated by each operation that takes the
- * mode, so this component says only what each value means.
+ * How the connector, which is the signer, treats each data item of a sign request. The operation that takes the mode
+ * states the obligations of {@link #PREHASHED_DIGEST}, so this component says only what each value means.
  */
 @Schema(name = "SignatureInputMode", enumAsRef = true,
-        description = "Whether each data item is the content to sign or already the digest the signature "
-                + "algorithm fixes")
+        description = "Whether each data item is the data itself or its digest. A hash-then-sign algorithm computes "
+                + "a digest of the data and signs that digest, while a pure algorithm signs the data itself. The "
+                + "platform sends prehashedDigest for raw signing, where its caller has already computed the digest")
 public enum SignatureInputMode implements IPlatformEnum {
 
-    DATA("data", "Data", "Sign the data as given, applying the signature algorithm to it in full"),
+    DATA("data", "Data", "Each item is the data; a hash-then-sign algorithm computes its digest before signing"),
     PREHASHED_DIGEST("prehashedDigest", "Prehashed digest",
             "Each item is already the digest the signature algorithm fixes; the connector signs it without hashing again");
 
