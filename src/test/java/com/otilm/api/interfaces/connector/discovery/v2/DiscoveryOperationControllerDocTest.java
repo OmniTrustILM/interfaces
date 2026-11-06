@@ -253,6 +253,7 @@ class DiscoveryOperationControllerDocTest {
     void resultsBusyResponseIsScopedToCheckpointedDelivery() {
         String description = response("results", "503").description();
         assertTrue(description.contains("In checkpointed delivery"), description);
+        assertTrue(description.contains("does not offer checkpointed"), description);
     }
 
     @Test
@@ -285,6 +286,7 @@ class DiscoveryOperationControllerDocTest {
         assertTrue(offer.contains("a call without it comes from a Core"), offer);
         assertTrue(offer.contains("An empty list offers no mode"), offer);
         assertTrue(results.contains("does not offer checkpointed"), results);
+        assertTrue(results.contains("a Core that offers checkpointed can take the retry"), results);
     }
 
     @Test
@@ -292,6 +294,8 @@ class DiscoveryOperationControllerDocTest {
         String tag = DiscoveryOperationController.class.getAnnotation(Tag.class).description();
         assertFalse(tag.contains("Answer 404 only for a runId you cannot rebuild"), tag);
         assertTrue(tag.contains("In buffered delivery, if you can rebuild the run"), tag);
+        assertTrue(tag.contains("a replayed checkpoint that disagrees with afterSequence"), tag);
+        assertTrue(tag.contains("a checkpoint you cannot read is an invalid request"), tag);
     }
 
     @Test
@@ -312,6 +316,7 @@ class DiscoveryOperationControllerDocTest {
     void resumeNamesTheCheckpointCoreActuallyHolds() {
         String resume = operation("resume").getAnnotation(Operation.class).description();
         assertTrue(resume.contains("the stop's checkpoint"), resume);
+        assertTrue(resume.contains("from initiate"), resume);
         assertFalse(resume.contains("Core keeps the one it stored with the last page"), resume);
     }
 
@@ -321,7 +326,8 @@ class DiscoveryOperationControllerDocTest {
         String initiate = schemaDescription(DiscoveryInitiateResponseDto.class, "checkpoint");
         String results = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
         assertTrue(stop.contains("In checkpointed delivery, omit it"), stop);
-        assertTrue(initiate.contains("In checkpointed delivery"), initiate);
+        assertTrue(stop.contains("Core keeps the checkpoint it holds"), stop);
+        assertTrue(initiate.contains("a resume response omits it"), initiate);
         assertTrue(results.contains("a larger one fails the run"), results);
     }
 
@@ -330,6 +336,7 @@ class DiscoveryOperationControllerDocTest {
         String stop = operation("stop").getAnnotation(Operation.class).description();
         assertTrue(stop.contains("no status or results call"), stop);
         assertFalse(stop.contains("does not call the connector"), stop);
+        assertFalse(stop.contains("last page"), stop);
     }
 
     private static String schemaDescription(Class<?> type, String field) throws NoSuchFieldException {

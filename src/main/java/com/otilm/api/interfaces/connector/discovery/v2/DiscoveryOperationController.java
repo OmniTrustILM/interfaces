@@ -31,7 +31,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
                 + "run's undrained items, as the drain operation requires; in checkpointed delivery, hold nothing "
                 + "between calls. Answer 404 only when you cannot serve the run from the request: a runId you cannot "
                 + "rebuild, or, in checkpointed delivery, a replayed checkpoint that disagrees with afterSequence. It "
-                + "ends the run at once, and a stopped run may wait days for its resume.\n\n"
+                + "ends the run at once, and a stopped run may wait days for its resume. In checkpointed delivery, a "
+                + "checkpoint you cannot read is an invalid request rather than a run you cannot rebuild: answer 422 "
+                + "with errorCode VALIDATION_FAILED.\n\n"
                 + "In buffered delivery, if you can rebuild the run but no longer hold the items a drain asks for, "
                 + "answer 404 rather than a later page: Core takes the highest sequence returned as its cursor, so a "
                 + "page served across a gap loses everything in it.")
@@ -114,9 +116,10 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "- A connector too busy to take the call answers 503 with errorCode SERVICE_UNAVAILABLE. Core calls "
                     + "again shortly and does not count it as a failure until the run has received nothing but 503s "
                     + "for a bounded time, 30 minutes by default.\n"
-                    + "- A drain whose deliveryModes does not offer checkpointed comes from an older Core that would not "
-                    + "store the page's checkpoint. Answer it 503 with errorCode SERVICE_UNAVAILABLE, so the call is "
-                    + "retried by a Core that does.\n"
+                    + "- A drain whose deliveryModes does not offer checkpointed comes from a Core that does not drive "
+                    + "checkpointed runs, such as an older one that would not store the page's checkpoint. Answer "
+                    + "it 503 with errorCode SERVICE_UNAVAILABLE, so a Core that offers checkpointed can take the "
+                    + "retry.\n"
                     + "- Bound the work so the call answers within 20 seconds; Core's default call timeout is 30 "
                     + "seconds.\n"
                     + "- When afterSequence and the replayed checkpoint disagree, answer 404 with errorCode "
@@ -138,9 +141,10 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "503",
-                    description = "The connector is too busy to take the call now (errorCode SERVICE_UNAVAILABLE). In "
-                            + "checkpointed delivery Core calls again shortly and does not count it as a failure, for a "
-                            + "bounded time; in buffered delivery it counts as an unanswered drain",
+                    description = "The connector is too busy to take the call now, or, in checkpointed delivery, the "
+                            + "drain does not offer checkpointed (errorCode SERVICE_UNAVAILABLE). In checkpointed "
+                            + "delivery Core calls again shortly and does not count it as a failure, for a bounded "
+                            + "time; in buffered delivery it counts as an unanswered drain",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/results", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -151,8 +155,8 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             + "In buffered delivery, return a best-effort checkpoint, which MUST preserve the item sequence so a "
             + "resume continues numbering where the run stopped. Items not yet drained stay drainable while the "
             + "run is stopped.\n\n"
-            + "In checkpointed delivery, answer without a checkpoint: Core keeps the one it stored with the last "
-            + "page. A stop past the point of no return is still refused with 422. Core discards a results page "
+            + "In checkpointed delivery, answer without a checkpoint: Core keeps the checkpoint it holds. A stop "
+            + "past the point of no return is still refused with 422. Core discards a results page "
             + "that arrives after a stop, so no special handling is needed, and it sends no status or results call "
             + "while the run is stopped; resume restarts them.")
     @ApiResponses({
@@ -180,9 +184,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "connector that supports none of the offered delivery modes MUST answer 422 with errorCode "
                     + "VALIDATION_FAILED.\n\n"
                     + "In checkpointed delivery, answer without a checkpoint: Core keeps the checkpoint it holds. That is "
-                    + "the one from the last page, or the stop's checkpoint when the run was buffered before it stopped. "
-                    + "A stop's checkpoint can count items Core never received; the first drain then finds afterSequence "
-                    + "and the checkpoint disagreeing.")
+                    + "the one from the last page or, before the first page, from initiate; or the stop's checkpoint "
+                    + "when the run was buffered before it stopped. A stop's checkpoint can count items Core never "
+                    + "received; the first drain then finds afterSequence and the checkpoint disagreeing.")
     @ApiResponses({
             @ApiResponse(responseCode = "202",
                     description = "Resume accepted, with the delivery mode the run uses from now on, optionally whether "
