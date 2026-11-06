@@ -449,6 +449,33 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
+    void aDelegatedRawProfileDemandingNonRepudiationIsRejected() {
+        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
+        workflow.setRequireNonRepudiation(true);
+
+        assertTrue(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)),
+                "workflow.requireNonRepudiation"));
+    }
+
+    @Test
+    void aDelegatedRawProfileCarryingRequiredExtendedKeyUsagesIsRejected() {
+        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
+        workflow.setRequiredExtendedKeyUsageOids(Set.of("1.3.6.1.5.5.7.3.36"));
+
+        assertTrue(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)),
+                "workflow.requiredExtendedKeyUsageOids"));
+    }
+
+    @Test
+    void aDelegatedRawProfileWithNoManagedKnobsIsAccepted() {
+        RawSigningWorkflowRequestDto workflow = new RawSigningWorkflowRequestDto();
+        workflow.setRequireNonRepudiation(false);
+        workflow.setRequiredExtendedKeyUsageOids(Set.of());
+
+        assertTrue(validator.validate(profileRequest(delegatedScheme(), workflow)).isEmpty());
+    }
+
+    @Test
     void aDelegatedProfileWithTheDefaultCertificatePurposeConstraintsIsAccepted() {
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(delegatedScheme(), new ContentSigningWorkflowRequestDto()));
