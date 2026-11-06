@@ -3,6 +3,7 @@ package com.otilm.api.model.client.signing.profile.validation;
 import com.otilm.api.model.client.signing.profile.SigningProfileRequestDto;
 import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.ContentSigningWorkflowRequestDto;
+import com.otilm.api.model.client.signing.profile.workflow.RawSigningWorkflowRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.TimestampingWorkflowRequestDto;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import jakarta.validation.ConstraintValidator;
@@ -89,6 +90,9 @@ public class ManagedSignatureFormattingConnectorValidator
      * them names the mistake at the field the caller set, rather than storing configuration the platform never honours.
      */
     private boolean validateDelegatedWorkflow(SigningProfileRequestDto dto, ConstraintValidatorContext context) {
+        if (dto.getWorkflow() instanceof RawSigningWorkflowRequestDto raw) {
+            return validateDelegatedRawWorkflow(context, raw);
+        }
         if (!(dto.getWorkflow() instanceof ContentSigningWorkflowRequestDto workflow)) {
             return true;
         }
@@ -106,6 +110,15 @@ public class ManagedSignatureFormattingConnectorValidator
                 workflow.getRequiredExtendedKeyUsageOids());
         return connectorAbsent && attributesAbsent && familyAbsent && maxLevelAbsent && sourceAbsent
                 && nonRepudiationAbsent && extendedKeyUsageAbsent;
+    }
+
+    private boolean validateDelegatedRawWorkflow(ConstraintValidatorContext context,
+            RawSigningWorkflowRequestDto workflow) {
+        boolean nonRepudiationAbsent = rejectTrueOnDelegatedWorkflow(context, "requireNonRepudiation",
+                workflow.getRequireNonRepudiation());
+        boolean extendedKeyUsageAbsent = rejectOnDelegatedWorkflow(context, "requiredExtendedKeyUsageOids",
+                workflow.getRequiredExtendedKeyUsageOids());
+        return nonRepudiationAbsent && extendedKeyUsageAbsent;
     }
 
     private boolean rejectOnDelegatedWorkflow(ConstraintValidatorContext context, String property,
