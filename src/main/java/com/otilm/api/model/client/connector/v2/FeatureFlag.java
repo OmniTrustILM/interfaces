@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
+import com.otilm.api.model.common.signature.SignatureFamily;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 import java.util.List;
@@ -72,31 +73,16 @@ public enum FeatureFlag implements IPlatformEnum {
     SECRET_ROTATION("secretRotation", "Secret Rotation", "Supports triggering rotation of secrets",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.SECRET)),
     CONTENT_SIGNING("contentSigning", "Content Signing", "Supports content signing workflows",
-            FeatureFlagBehavior.ENFORCED,
-            List
-                    .of(ConnectorInterface.PADES_FORMATTING, ConnectorInterface.XADES_FORMATTING,
-                            ConnectorInterface.CADES_FORMATTING, ConnectorInterface.JADES_FORMATTING)),
+            FeatureFlagBehavior.ENFORCED, familyInterfaces()),
     LEVEL_TIMESTAMPED("levelTimestamped", "Level Timestamped",
             "Reaches the TIMESTAMPED level for the family interface it is declared on, by implementing the signature timestamp imprint and embed pair. The SIGNED level is implied by contentSigning itself",
-            FeatureFlagBehavior.ENFORCED,
-            List
-                    .of(ConnectorInterface.PADES_FORMATTING, ConnectorInterface.XADES_FORMATTING,
-                            ConnectorInterface.CADES_FORMATTING, ConnectorInterface.JADES_FORMATTING),
-            CONTENT_SIGNING),
+            FeatureFlagBehavior.ENFORCED, familyInterfaces(), CONTENT_SIGNING),
     LEVEL_LONG_TERM("levelLongTerm", "Level Long Term",
             "Reaches the LONG_TERM level for the family interface it is declared on, by implementing extendToLevel with its own fetching. A connector without it answers 422 on that operation. Requires levelTimestamped",
-            FeatureFlagBehavior.ENFORCED,
-            List
-                    .of(ConnectorInterface.PADES_FORMATTING, ConnectorInterface.XADES_FORMATTING,
-                            ConnectorInterface.CADES_FORMATTING, ConnectorInterface.JADES_FORMATTING),
-            LEVEL_TIMESTAMPED),
+            FeatureFlagBehavior.ENFORCED, familyInterfaces(), LEVEL_TIMESTAMPED),
     LEVEL_ARCHIVAL("levelArchival", "Level Archival",
             "Reaches the ARCHIVAL level for the family interface it is declared on, by implementing the archive timestamp imprint and embed pair. Requires levelLongTerm",
-            FeatureFlagBehavior.ENFORCED,
-            List
-                    .of(ConnectorInterface.PADES_FORMATTING, ConnectorInterface.XADES_FORMATTING,
-                            ConnectorInterface.CADES_FORMATTING, ConnectorInterface.JADES_FORMATTING),
-            LEVEL_LONG_TERM),
+            FeatureFlagBehavior.ENFORCED, familyInterfaces(), LEVEL_LONG_TERM),
     TIMESTAMPING("timestamping", "Timestamping", "Supports timestamping of signatures", FeatureFlagBehavior.ENFORCED,
             List.of(ConnectorInterface.SIGNATURE_FORMATTING)),
     CERTIFICATE_REGISTRATION("certificateRegistration", "Certificate Registration",
@@ -188,6 +174,10 @@ public enum FeatureFlag implements IPlatformEnum {
      */
     public FeatureFlag getPrerequisite() {
         return prerequisite;
+    }
+
+    private static List<ConnectorInterface> familyInterfaces() {
+        return Arrays.stream(SignatureFamily.values()).map(SignatureFamily::getConnectorInterface).toList();
     }
 
     @JsonCreator

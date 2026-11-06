@@ -1,5 +1,6 @@
-package com.otilm.api.model.connector.signatures.contentsigning.pades;
+package com.otilm.api.model.connector.signatures.contentsigning.common;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
@@ -9,8 +10,6 @@ import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureParametersDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignatureDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignaturePlacementDto;
-import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.common.InlineDocumentTransferDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -20,12 +19,13 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PadesComputeDtbsRequestDtoTest {
+class ComputeDtbsRequestDtoTest {
 
     private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -33,8 +33,9 @@ class PadesComputeDtbsRequestDtoTest {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private static PadesComputeDtbsRequestDto padesRequest() {
-        PadesComputeDtbsRequestDto request = new PadesComputeDtbsRequestDto();
+    private static ComputeDtbsRequestDto requestFor(SignatureFamily family) {
+        ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
+        request.setFamily(family);
         request.setDocument(new InlineDocumentTransferDto(new byte[]{1, 2, 3}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
@@ -43,41 +44,70 @@ class PadesComputeDtbsRequestDtoTest {
         return request;
     }
 
-    /** The field is additive and optional, so an existing connector's payload keeps validating unchanged. */
+    @Test
+    void everyFamilyRoundTripsThroughTheOneRequest() throws Exception {
+        for (SignatureFamily family : SignatureFamily.values()) {
+            ComputeDtbsRequestDto original = requestFor(family);
+
+            ComputeDtbsRequestDto decoded = mapper
+                    .readValue(mapper.writeValueAsString(original), ComputeDtbsRequestDto.class);
+
+            assertEquals(family, decoded.getFamily());
+            assertEquals(original.getSigningTime(), decoded.getSigningTime());
+            assertEquals(original.getDocument(), decoded.getDocument());
+        }
+    }
+
+    @Test
+    void anUnknownFamilyIsRejected() {
+        String json = "{\"family\":\"pkcs7\",\"formattingAttributes\":[]}";
+        assertThrows(JsonMappingException.class, () -> mapper.readValue(json, ComputeDtbsRequestDto.class));
+    }
+
+    @Test
+    void aMissingFamilyFailsValidation() {
+        ComputeDtbsRequestDto request = requestFor(null);
+
+        Set<ConstraintViolation<ComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
+
+        assertEquals(1, violations.size());
+        assertEquals("family", violations.iterator().next().getPropertyPath().toString());
+    }
+
+    /** A profile with no defaults and a request with no parameters leave the field absent. */
     @Test
     void theParametersAreOptional() {
-        PadesComputeDtbsRequestDto request = padesRequest();
+        ComputeDtbsRequestDto request = requestFor(SignatureFamily.PADES);
         assertNull(request.getSignatureParameters());
         assertTrue(VALIDATOR.validate(request).isEmpty());
     }
 
-    /** Non-Java connectors read the key, so it must appear even when the platform sends no parameters. */
     @Test
-    void theAbsentParametersStillAppearOnTheWire() throws Exception {
-        String json = mapper.writeValueAsString(padesRequest());
+    void theAbsentParametersAreLeftOffTheWire() throws Exception {
+        String json = mapper.writeValueAsString(requestFor(SignatureFamily.PADES));
 
-        assertTrue(json.contains("\"signatureParameters\":null"), json);
+        assertFalse(json.contains("signatureParameters"), json);
     }
 
     @Test
-    void theParametersRoundTripThroughTheRequestUnion() throws Exception {
-        PadesComputeDtbsRequestDto request = padesRequest();
+    void theParametersRoundTripThroughTheRequest() throws Exception {
+        ComputeDtbsRequestDto request = requestFor(SignatureFamily.PADES);
         PadesSignatureParametersDto parameters = new PadesSignatureParametersDto();
         parameters.setReason("Contract approval");
         request.setSignatureParameters(parameters);
 
-        String json = mapper.writeValueAsString(request);
-        ComputeDtbsRequestDto decoded = mapper.readValue(json, ComputeDtbsRequestDto.class);
+        ComputeDtbsRequestDto decoded = mapper
+                .readValue(mapper.writeValueAsString(request), ComputeDtbsRequestDto.class);
 
-        PadesComputeDtbsRequestDto pades = assertInstanceOf(PadesComputeDtbsRequestDto.class, decoded);
-        assertEquals(SignatureFamily.PADES, pades.getFamily());
-        assertEquals("Contract approval", pades.getSignatureParameters().getReason());
+        PadesSignatureParametersDto pades = assertInstanceOf(PadesSignatureParametersDto.class,
+                decoded.getSignatureParameters());
+        assertEquals("Contract approval", pades.getReason());
     }
 
     /** The parameters object stays self-describing wherever it travels, so it carries its own discriminator. */
     @Test
     void theParametersCarryTheirOwnFamilyOnTheWire() throws Exception {
-        PadesComputeDtbsRequestDto request = padesRequest();
+        ComputeDtbsRequestDto request = requestFor(SignatureFamily.PADES);
         request.setSignatureParameters(new PadesSignatureParametersDto());
 
         String json = mapper.writeValueAsString(request);
@@ -85,13 +115,21 @@ class PadesComputeDtbsRequestDtoTest {
         assertEquals(2, json.split("\"family\":\"pades\"", -1).length - 1, json);
     }
 
+    /** A connector reads the parameters as its own family's. */
     @Test
-    void aParametersObjectOfAnotherFamilyIsRejected() {
-        String json = "{\"family\":\"pades\",\"signatureParameters\":{\"family\":\"xades\"}}";
-        assertThrows(InvalidTypeIdException.class, () -> mapper.readValue(json, ComputeDtbsRequestDto.class));
+    void parametersOfAnotherFamilyFailValidation() {
+        ComputeDtbsRequestDto request = requestFor(SignatureFamily.XADES);
+        request.setSignatureParameters(new PadesSignatureParametersDto());
+
+        Set<ConstraintViolation<ComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
+
+        assertEquals(1, violations.size());
+        ConstraintViolation<ComputeDtbsRequestDto> violation = violations.iterator().next();
+        assertEquals("signatureParameters", violation.getPropertyPath().toString());
+        assertEquals("signatureParameters must belong to the request's family", violation.getMessage());
     }
 
-    /** The union has no defaultImpl on purpose. */
+    /** The parameters union resolves on its family alone. */
     @Test
     void aParametersObjectWithoutItsFamilyIsRejected() {
         String json = "{\"family\":\"pades\",\"signatureParameters\":{\"reason\":\"x\"}}";
@@ -100,12 +138,12 @@ class PadesComputeDtbsRequestDtoTest {
 
     @Test
     void validationCascadesIntoTheParameters() {
-        PadesComputeDtbsRequestDto request = padesRequest();
+        ComputeDtbsRequestDto request = requestFor(SignatureFamily.PADES);
         PadesSignatureParametersDto parameters = new PadesSignatureParametersDto();
         parameters.setReason("r".repeat(513));
         request.setSignatureParameters(parameters);
 
-        Set<ConstraintViolation<PadesComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
+        Set<ConstraintViolation<ComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
 
         assertEquals(1, violations.size());
         assertEquals("signatureParameters.reason", violations.iterator().next().getPropertyPath().toString());
@@ -117,7 +155,7 @@ class PadesComputeDtbsRequestDtoTest {
      */
     @Test
     void validationCascadesToTheDeepestParameter() {
-        PadesComputeDtbsRequestDto request = padesRequest();
+        ComputeDtbsRequestDto request = requestFor(SignatureFamily.PADES);
         PadesVisibleSignaturePlacementDto placement = new PadesVisibleSignaturePlacementDto();
         placement.setPage(0);
         PadesVisibleSignatureDto visibleSignature = new PadesVisibleSignatureDto();
@@ -126,7 +164,7 @@ class PadesComputeDtbsRequestDtoTest {
         parameters.setVisibleSignature(visibleSignature);
         request.setSignatureParameters(parameters);
 
-        Set<ConstraintViolation<PadesComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
+        Set<ConstraintViolation<ComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
 
         assertEquals(1, violations.size());
         assertEquals("signatureParameters.visibleSignature.placement.page",

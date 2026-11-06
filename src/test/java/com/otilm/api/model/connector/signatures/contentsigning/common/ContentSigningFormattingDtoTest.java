@@ -13,7 +13,6 @@ import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.common.v2.validation.AsynchronousResponse;
 import com.otilm.api.model.connector.common.v2.validation.SynchronousResponse;
-import com.otilm.api.model.connector.signatures.contentsigning.cades.CadesComputeDtbsRequestDto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -49,10 +48,9 @@ class ContentSigningFormattingDtoTest {
 
     @Test
     void computeDtbsRequiresItsCoreSuppliedFields() {
-        CadesComputeDtbsRequestDto dto = new CadesComputeDtbsRequestDto();
+        Set<String> paths = paths(VALIDATOR.validate(new ComputeDtbsRequestDto()));
 
-        Set<String> paths = paths(VALIDATOR.validate(dto));
-
+        assertTrue(paths.contains("family"), paths.toString());
         assertTrue(paths.contains("document"), paths.toString());
         assertTrue(paths.contains("signerCertificateChain"), paths.toString());
         assertTrue(paths.contains("signingTime"), paths.toString());
@@ -63,7 +61,7 @@ class ContentSigningFormattingDtoTest {
     /** An empty chain is not a chain: without a signer certificate there is nothing to build a signature around. */
     @Test
     void computeDtbsRejectsAnEmptySignerCertificateChain() {
-        CadesComputeDtbsRequestDto dto = validComputeDtbs();
+        ComputeDtbsRequestDto dto = validComputeDtbs();
         dto.setSignerCertificateChain(List.of());
 
         assertTrue(paths(VALIDATOR.validate(dto)).contains("signerCertificateChain"));
@@ -75,7 +73,7 @@ class ContentSigningFormattingDtoTest {
      */
     @Test
     void anEmptyFormattingAttributeListIsAccepted() {
-        CadesComputeDtbsRequestDto dto = validComputeDtbs();
+        ComputeDtbsRequestDto dto = validComputeDtbs();
         dto.setFormattingAttributes(List.of());
 
         assertTrue(VALIDATOR.validate(dto).isEmpty());
@@ -84,7 +82,7 @@ class ContentSigningFormattingDtoTest {
     /** The nested transport's own rule must be enforced through the request, not only when validated on its own. */
     @Test
     void anInvalidDocumentTransferFailsThroughTheRequest() {
-        CadesComputeDtbsRequestDto dto = validComputeDtbs();
+        ComputeDtbsRequestDto dto = validComputeDtbs();
         dto.setDocument(new DigestOnlyDocumentTransferDto(new byte[]{7, 7, 7}, null));
 
         assertTrue(paths(VALIDATOR.validate(dto)).contains("document.digestAlgorithm"),
@@ -93,7 +91,7 @@ class ContentSigningFormattingDtoTest {
 
     @Test
     void computeDtbsRoundTripsItsSigningTime() throws Exception {
-        CadesComputeDtbsRequestDto original = validComputeDtbs();
+        ComputeDtbsRequestDto original = validComputeDtbs();
 
         String json = mapper.writeValueAsString(original);
         ComputeDtbsRequestDto deserialized = mapper.readValue(json, ComputeDtbsRequestDto.class);
@@ -105,7 +103,7 @@ class ContentSigningFormattingDtoTest {
     /** The connector matches the algorithm by code, so the enum's spelling is what has to reach the wire. */
     @Test
     void computeDtbsCarriesItsSignatureAlgorithmCodeOverTheWire() throws Exception {
-        CadesComputeDtbsRequestDto original = validComputeDtbs();
+        ComputeDtbsRequestDto original = validComputeDtbs();
         original.setSignatureAlgorithm(SignatureAlgorithm.SHA256_WITH_RSA_PSS);
 
         String json = mapper.writeValueAsString(original);
@@ -530,8 +528,8 @@ class ContentSigningFormattingDtoTest {
         attribute.setContent(List.of(new StringAttributeContentV3(secret)));
 
         for (ContentSigningFormattingRequestDto dto : List
-                .of(new CadesComputeDtbsRequestDto(), new EmbedSignatureValueRequestDto(),
-                        new SignedDocumentRequestDto(), new EmbedTimestampRequestDto(), new ExtendToLevelRequestDto(),
+                .of(new ComputeDtbsRequestDto(), new EmbedSignatureValueRequestDto(), new SignedDocumentRequestDto(),
+                        new EmbedTimestampRequestDto(), new ExtendToLevelRequestDto(),
                         new ExtendOperationScopedRequestDto())) {
             dto.setFormattingAttributes(List.of(attribute));
 
@@ -550,16 +548,10 @@ class ContentSigningFormattingDtoTest {
      */
     @Test
     void familyIsRequiredOnEveryRequestBody() {
+        assertTrue(paths(VALIDATOR.validate(new ComputeDtbsRequestDto())).contains("family"));
         assertTrue(paths(VALIDATOR.validate(new EmbedSignatureValueRequestDto())).contains("family"));
         assertTrue(paths(VALIDATOR.validate(new SignedDocumentRequestDto())).contains("family"));
         assertTrue(paths(VALIDATOR.validate(new ExtendToLevelRequestDto())).contains("family"));
-    }
-
-    /** A family subtype fixes its own discriminator, so the caller never supplies it and it is never missing. */
-    @Test
-    void computeDtbsSubtypesSupplyTheirOwnFamily() {
-        assertEquals(SignatureFamily.CADES, new CadesComputeDtbsRequestDto().getFamily());
-        assertFalse(paths(VALIDATOR.validate(new CadesComputeDtbsRequestDto())).contains("family"));
     }
 
     /**
@@ -665,8 +657,9 @@ class ContentSigningFormattingDtoTest {
         assertTrue(paths(VALIDATOR.validate(artifact)).contains("digestSha256Sized"));
     }
 
-    private static CadesComputeDtbsRequestDto validComputeDtbs() {
-        CadesComputeDtbsRequestDto dto = new CadesComputeDtbsRequestDto();
+    private static ComputeDtbsRequestDto validComputeDtbs() {
+        ComputeDtbsRequestDto dto = new ComputeDtbsRequestDto();
+        dto.setFamily(SignatureFamily.CADES);
         dto.setFormattingAttributes(List.of());
         dto.setSignerCertificateChain(List.of(new byte[]{4, 5, 6}));
         dto.setSigningTime(OffsetDateTime.parse("2026-08-11T09:30:00Z"));

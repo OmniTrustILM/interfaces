@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.contentsigning.common;
+package com.otilm.api.model.common.signature;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -9,14 +9,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
 /**
- * Which transport a {@link DocumentTransferDto} uses, and the discriminator selecting its shape.
+ * Which transport a document transfer uses, and the discriminator selecting its shape.
  */
 @Schema(enumAsRef = true)
 public enum DocumentTransferMode implements IPlatformEnum {
 
-    INLINE(Codes.INLINE, "Inline", "The document travels inline, as enveloped formats require"),
+    INLINE(Codes.INLINE, "Inline", "The document travels inline"),
     DIGEST_ONLY(Codes.DIGEST_ONLY, "Digest only",
-            "Only the document's digest travels, so a detached format never brings the document into the platform");
+            "Only the document's digest travels, so the document never enters the platform");
 
     public static class Codes {
 
