@@ -25,8 +25,8 @@ public class ObjectAllowedActionsDto {
             profile. Where several endpoints perform the same action on an object and are authorized differently, \
             the strictest of them decides, so a reported action is accepted by every endpoint that performs it for \
             the caller, and an action one of them would refuse is left out. Actions that do not act on an existing \
-            object, such as create and list, and actions \
-            the authorization service will not grant at all are never reported. The authorization service remains \
+            object, such as create, list, register and import, and actions the authorization service will not grant \
+            at all are never reported. The authorization service remains \
             the only gate; this is a hint that keeps a control the caller cannot use off the screen.
             """, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResourceAction> allowedActions;

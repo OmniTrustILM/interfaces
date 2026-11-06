@@ -36,9 +36,8 @@ public class UserProfilePermissionsDto {
             specific objects. Resources on which the caller holds no action are omitted rather than reported with an \
             empty list, and actions the authorization service will not grant at all are never reported.
 
-            This is not derivable from allowedListings and does not supersede it. That field applies a broader rule \
-            to the list action alone, unioning object-scoped grants and ownership and adding the listings every user \
-            gets by default, so neither field can be computed from the other.
+            This is not derivable from allowedListings and does not supersede it. That field follows its own rule, \
+            described on it, so neither field can be computed from the other.
             """, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ResourceActionsDto> allowedActions;
 

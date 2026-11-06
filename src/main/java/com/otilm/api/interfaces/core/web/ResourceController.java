@@ -67,12 +67,12 @@ public interface ResourceController extends AuthProtectedController {
             where they differ the strictest decides, so every reported action is accepted. Objects the caller \
             may neither list \
             nor view are left out, the same as objects that do not exist. The resource must be one whose \
-            objects are authorized individually, by grants on objects or by ownership.
+            objects are identified by UUID and authorized individually, by grants on objects or by ownership.
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Allowed actions reported"),
             @ApiResponse(responseCode = "422",
-                    description = "The request is invalid, or the resource has no objects authorized individually",
+                    description = "The request is invalid, or the resource has no objects identified by UUID and authorized individually",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/{resource}/objects/allowed-actions", consumes = MediaType.APPLICATION_JSON_VALUE,
