@@ -6,6 +6,7 @@ import com.otilm.api.model.common.signature.parameters.SignatureParameterSink;
 import com.otilm.api.model.common.signature.parameters.pades.validation.ImageAndMimeTypeTogether;
 import com.otilm.api.model.common.signature.parameters.pades.validation.StampImageSize;
 import com.otilm.api.model.common.validation.NullableNotBlank;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -47,6 +48,8 @@ public class PadesVisibleSignatureDto implements SignatureParameterContainer {
             example = "Signed by Jane Doe")
     private String text;
 
+    // Signing requests and profile saves repeat the stamp. Its bytes would otherwise fill audit and TRACE logs.
+    @Sensitive
     @ToString.Exclude
     @StampImageSize(max = 262144)
     // 349528 base64 characters carry the 262144 decoded bytes above.
