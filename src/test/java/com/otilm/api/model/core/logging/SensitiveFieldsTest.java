@@ -9,6 +9,7 @@ import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialCreate
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialUpdateRequestDto;
 import com.otilm.api.model.common.attribute.common.content.data.FileAttributeContentData;
 import com.otilm.api.model.common.events.data.CertificateRegisteredEventData;
+import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignatureDto;
 import com.otilm.api.model.connector.cryptography.v2.key.ExportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.secrets.content.ApiKeySecretContent;
@@ -81,6 +82,11 @@ class SensitiveFieldsTest {
     @MethodSource("secretFields")
     void everySecretField_isMarkedSensitive(Class<?> type, String fieldName) throws NoSuchFieldException {
         assertTrue(type.getDeclaredField(fieldName).isAnnotationPresent(Sensitive.class));
+    }
+
+    @Test
+    void stampImage_isMarkedSensitive() throws NoSuchFieldException {
+        assertTrue(PadesVisibleSignatureDto.class.getDeclaredField("image").isAnnotationPresent(Sensitive.class));
     }
 
     @Test
