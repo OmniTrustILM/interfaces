@@ -53,6 +53,21 @@ class FeatureFlagTest {
     }
 
     @Test
+    void prehashedSigningFlag_declaresCryptographyCapability() {
+        // given
+        var prehashedSigningCode = "prehashedSigning";
+
+        // when
+        FeatureFlag flag = FeatureFlag.findByCode(prehashedSigningCode);
+
+        // then
+        assertEquals(FeatureFlag.PREHASHED_SIGNING, flag);
+        assertEquals("Prehashed Signing", flag.getLabel());
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
+        assertEquals(List.of(ConnectorInterface.CRYPTOGRAPHY), flag.getApplicableInterfaces());
+    }
+
+    @Test
     void keyListFlag_declaresCryptographyCapability() {
         // given
         var keyListCode = "keyList";

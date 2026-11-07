@@ -327,7 +327,7 @@ class ComputeDtbsSchemaGenerationTest {
         return component.getDescription();
     }
 
-    /** The digest algorithm an algorithm's signatures carry, or {@code null} when the platform can name none. */
+    /** The digest algorithm the platform pairs with an algorithm, or {@code null} when the platform can name none. */
     private static DigestAlgorithm committedDigestOrNull(SignatureAlgorithm algorithm) {
         try {
             return DigestAlgorithm.findByOid(algorithm.getDigestAlgorithmIdentifier().getAlgorithm().getId());

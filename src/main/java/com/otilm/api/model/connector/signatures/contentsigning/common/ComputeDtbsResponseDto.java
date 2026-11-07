@@ -27,15 +27,12 @@ public class ComputeDtbsResponseDto {
 
     @ToString.Exclude
     @NotNull(message = "documentDigest is required")
-    @Schema(description = "Digest of the document the connector embedded in dtbs, base64-encoded in JSON. The "
-            + "platform releases the signing key only if it equals the digest the user authorized, so a connector "
-            + "MUST echo the digest it committed to.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Digest of the document the connector embedded in dtbs, base64-encoded in JSON.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] documentDigest;
 
     @NotNull(message = "documentDigestAlgorithm is required")
-    @Schema(description = "Algorithm that produced documentDigest. The platform needs it to compare the digest "
-            + "against the authorized one, and pins it to the digest the request's signatureAlgorithm commits to.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Algorithm that produced documentDigest.", requiredMode = Schema.RequiredMode.REQUIRED)
     private DigestAlgorithm documentDigestAlgorithm;
 
     @ToString.Exclude
