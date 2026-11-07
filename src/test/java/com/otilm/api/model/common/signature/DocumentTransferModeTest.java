@@ -1,4 +1,4 @@
-package com.otilm.api.model.connector.signatures.contentsigning.common;
+package com.otilm.api.model.common.signature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.exception.ValidationException;

@@ -1,16 +1,16 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
 
 /**
- * The inline arm of {@link DocumentTransferDto}: the document itself travels, as enveloped formats require.
+ * The inline arm of {@link DocumentTransferDto}: the document itself travels.
  */
 @JsonIgnoreProperties(value = "transferMode", allowGetters = true)
-@Schema(name = "InlineDocumentTransfer",
-        description = "Document transport carrying the document itself, for enveloped formats")
+@Schema(name = "InlineDocumentTransfer", description = "Document transport carrying the document itself")
 public record InlineDocumentTransferDto(@NotNull(message = "document is required") @Schema(
         description = "The document itself. Base64-encoded in JSON. "
                 + "Bounded by the Signing Profile's document size cap; a connector that receives a larger document "

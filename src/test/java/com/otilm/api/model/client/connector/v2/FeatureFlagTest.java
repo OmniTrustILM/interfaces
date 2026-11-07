@@ -1,5 +1,7 @@
 package com.otilm.api.model.client.connector.v2;
 
+import com.otilm.api.model.common.signature.SignatureFamily;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -110,6 +112,20 @@ class FeatureFlagTest {
         assertEquals("Signer Bound at Creation", flag.getLabel());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
         assertEquals(List.of(ConnectorInterface.KEY_LIFECYCLE), flag.getApplicableInterfaces());
+    }
+
+    @Test
+    void contentSigningFlagsApplyToEveryFamilysInterface() {
+        List<ConnectorInterface> familyInterfaces = Arrays
+                .stream(SignatureFamily.values())
+                .map(SignatureFamily::getConnectorInterface)
+                .toList();
+
+        for (FeatureFlag flag : List
+                .of(FeatureFlag.CONTENT_SIGNING, FeatureFlag.LEVEL_TIMESTAMPED, FeatureFlag.LEVEL_LONG_TERM,
+                        FeatureFlag.LEVEL_ARCHIVAL)) {
+            assertEquals(familyInterfaces, flag.getApplicableInterfaces(), flag.name());
+        }
     }
 
     @Test

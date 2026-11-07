@@ -52,7 +52,6 @@ public class ContentSigningFormattingApiClient extends BaseApiClient implements 
                 .toEntity(BaseAttribute[].class), "listFormattingAttributes")), request, connector);
     }
 
-    /** Serialized against the abstract base; {@code family} is a real property, so the concrete family still ships. */
     @Override
     public ComputeDtbsResponseDto computeDtbs(ApiClientConnectorInfo connector, ComputeDtbsRequestDto requestDto)
             throws ConnectorException {
@@ -143,7 +142,6 @@ public class ContentSigningFormattingApiClient extends BaseApiClient implements 
                 .toBodilessEntity(), "cancelExtendToLevel"), request, connector);
     }
 
-    /** @param bodyType the declared type the body is serialized against, abstract for {@code computeDtbs} */
     private <B, R> R post(ApiClientConnectorInfo connector, ContentSigningFormattingOperation operation, B requestDto,
             Class<B> bodyType, Class<R> responseType) throws ConnectorException {
         return postTo(connector, ContentSigningFormattingPaths.operation(operation), operation.getCode(), requestDto,

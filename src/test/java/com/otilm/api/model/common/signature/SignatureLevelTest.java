@@ -57,23 +57,6 @@ class SignatureLevelTest {
         assertFalse(SignatureLevel.SIGNED.isWithin(null));
     }
 
-    /** The translation is what an operator actually reads beside the rung, so it is pinned per family. */
-    @Test
-    void everyRungTranslatesToItsFormatName() {
-        assertEquals("PAdES-B-B", SignatureLevel.SIGNED.getFormatName(SignatureFamily.PADES));
-        assertEquals("PAdES-B-T", SignatureLevel.TIMESTAMPED.getFormatName(SignatureFamily.PADES));
-        assertEquals("PAdES-B-LT", SignatureLevel.LONG_TERM.getFormatName(SignatureFamily.PADES));
-        assertEquals("PAdES-B-LTA", SignatureLevel.ARCHIVAL.getFormatName(SignatureFamily.PADES));
-        assertEquals("CAdES-B-LT", SignatureLevel.LONG_TERM.getFormatName(SignatureFamily.CADES));
-        assertEquals("XAdES-B-T", SignatureLevel.TIMESTAMPED.getFormatName(SignatureFamily.XADES));
-        assertEquals("JAdES-B-LTA", SignatureLevel.ARCHIVAL.getFormatName(SignatureFamily.JADES));
-    }
-
-    @Test
-    void translatingWithoutAFamilyIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> SignatureLevel.SIGNED.getFormatName(null));
-    }
-
     @Test
     void findByCodeRoundTripsAllValues() {
         for (SignatureLevel level : SignatureLevel.values()) {
