@@ -1,5 +1,6 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
+import com.otilm.api.model.common.signature.DocumentTransferMode;
 import com.otilm.api.model.connector.discovery.v2.DiscoveredItemPayloadInterface;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,8 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * </p>
  */
 @Schema(name = "DocumentTransfer", description = "Document transport for a formatting operation. The required "
-        + "transferMode property is the discriminator selecting the transport: an enveloped format sends the "
-        + "document inline, a detached format sends only its digest. An inline document is bounded by the size cap "
+        + "transferMode property is the discriminator selecting the transport: the document inline, or only "
+        + "its digest for a signature family that can sign from one. An inline document is bounded by the size cap "
         + "configured on the Signing Profile, which always stays below the platform's 16 MiB request ceiling.",
         type = "object", discriminatorProperty = "transferMode",
         discriminatorMapping = {

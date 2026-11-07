@@ -6,6 +6,7 @@ import com.otilm.api.clients.signing.contentsigning.ContentSigningFormattingPath
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
@@ -17,7 +18,6 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
-import com.otilm.api.model.connector.signatures.contentsigning.pades.PadesComputeDtbsRequestDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import java.time.Duration;
 import java.util.List;
@@ -73,7 +73,7 @@ class ContentSigningFormattingApiClientMqTest {
 
     @Test
     void computeDtbs_delegatesPost() throws ConnectorException {
-        PadesComputeDtbsRequestDto request = new PadesComputeDtbsRequestDto();
+        ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
         ComputeDtbsResponseDto expected = new ComputeDtbsResponseDto();
         proxyClient.syncResponse = expected;
 
@@ -222,7 +222,7 @@ class ContentSigningFormattingApiClientMqTest {
 
         ConnectorException failure = Assertions
                 .assertThrows(ConnectorException.class,
-                        () -> client.computeDtbs(connector, new PadesComputeDtbsRequestDto()));
+                        () -> client.computeDtbs(connector, new ComputeDtbsRequestDto()));
 
         Assertions.assertTrue(failure.getMessage().contains("computeDtbs"), failure.getMessage());
     }

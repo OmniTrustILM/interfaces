@@ -1,14 +1,9 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.api.model.common.signature.SignatureFamily;
-import com.otilm.api.model.connector.signatures.contentsigning.cades.CadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.jades.JadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.pades.PadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.xades.XadesComputeDtbsRequestDto;
+import com.otilm.api.model.common.signature.parameters.SignatureParametersDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.validation.ParametersMatchFamily;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -20,32 +15,21 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Abstract base of the {@code computeDtbs} request, the one operation whose payload varies by family.
+ * Request to compute the data-to-be-signed bytes, in one shape for every family. A family's own content travels in
+ * {@code signatureParameters}.
  *
  * <p>
  * Everything the connector needs to build the data-to-be-signed bytes arrives here, including {@code signingTime}. The
  * connector never reads its own clock. A signature's time must be the one the platform recorded, not the one a
  * connector replica observed.
  * </p>
- *
- * <p>
- * The union resolves on the inherited {@code family} property. {@link ComputeDtbsInterface} explains why the
- * discriminator sits inside the object. Each subtype fixes that property to its own family and carries whatever typed
- * parameters that family defines.
- * </p>
  */
 @Getter
 @Setter
 @ToString(callSuper = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "family",
-        visible = true)
-@JsonSubTypes({
-        @Type(value = PadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.PADES),
-        @Type(value = XadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.XADES),
-        @Type(value = CadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.CADES),
-        @Type(value = JadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.JADES)})
-@Schema(implementation = ComputeDtbsInterface.class)
-public abstract class ComputeDtbsRequestDto extends ContentSigningFormattingRequestDto implements ComputeDtbsInterface {
+@ParametersMatchFamily
+@Schema(name = "ComputeDtbsRequest", description = "Request to compute the data-to-be-signed bytes")
+public class ComputeDtbsRequestDto extends ContentSigningFormattingRequestDto {
 
     @Valid
     @NotNull(message = "document is required")
@@ -71,18 +55,11 @@ public abstract class ComputeDtbsRequestDto extends ContentSigningFormattingRequ
             requiredMode = Schema.RequiredMode.REQUIRED)
     private SignatureAlgorithm signatureAlgorithm;
 
-    protected ComputeDtbsRequestDto(SignatureFamily family) {
-        super.setFamily(family);
-    }
-
-    /**
-     * Refuses to repoint the discriminator.
-     */
-    @Override
-    public void setFamily(SignatureFamily family) {
-        if (family != getFamily()) {
-            throw new IllegalArgumentException("family is fixed to " + getFamily() + " by " + getClass().getSimpleName()
-                    + " and cannot be set to " + family + "; construct the subtype for the family you want");
-        }
-    }
+    @Valid
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "Effective signature parameters of the request's family, merged over the Signing Profile's "
+            + "defaults and checked against its allowed parameter groups, with any image resolved to bytes; absent "
+            + "when the profile sets no defaults and the request supplies none. The connector applies them as "
+            + "given.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SignatureParametersDto signatureParameters;
 }
