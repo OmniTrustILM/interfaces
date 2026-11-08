@@ -32,6 +32,7 @@ final class DiscoveryDeliveryModesDeserializer extends ValueDeserializer<List<Di
     }
 
     @Override
+    @SuppressWarnings("java:S1168") // null means the offer was absent, which differs from an empty offer
     public List<DiscoveryDeliveryMode> getNullValue(DeserializationContext context) {
         return null;
     }
