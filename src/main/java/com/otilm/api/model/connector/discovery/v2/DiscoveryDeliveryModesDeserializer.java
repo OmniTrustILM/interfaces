@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reads the delivery modes Core offers, skipping any code this library does not know. A newer Core may offer a mode an
- * older connector has never heard of, and that request must still parse. Reading the single mode a connector chose
- * stays strict.
+ * Reads the delivery modes Core offers, skipping codes this library does not know, so an offer from a newer Core still
+ * parses. The single mode a connector chooses is read strictly.
  */
 public class DiscoveryDeliveryModesDeserializer extends JsonDeserializer<List<DiscoveryDeliveryMode>> {
 

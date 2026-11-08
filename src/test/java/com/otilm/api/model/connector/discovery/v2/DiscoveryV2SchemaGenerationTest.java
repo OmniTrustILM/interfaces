@@ -424,11 +424,7 @@ class DiscoveryV2SchemaGenerationTest {
         }
     }
 
-    /**
-     * Core may offer a mode this contract does not list yet, and a connector generated from the published document must
-     * still read that request. Generators turn an enum into a closed type that rejects an unknown code, so the offer's
-     * items are published as plain strings.
-     */
+    /** A generated client turns an enum into a closed type, which would reject a mode a newer Core offers. */
     @Test
     void offeredDeliveryModesArePublishedAsOpenStrings() {
         Schema<?> request = openApi31Schemas(DiscoveryRunRequestDto.class).get("DiscoveryRunRequestDto");

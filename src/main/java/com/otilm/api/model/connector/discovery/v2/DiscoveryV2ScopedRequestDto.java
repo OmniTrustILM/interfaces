@@ -60,13 +60,13 @@ public abstract class DiscoveryV2ScopedRequestDto {
     // Items are published as plain strings: a generated client turns an enum into a closed type that would reject a
     // mode a newer Core offers, which the readers here skip.
     @ArraySchema(arraySchema = @Schema(
-            description = "Delivery modes Core can drive for this run, in Core's order of preference. Core sends it on "
-                    + "every request, so a call without it comes from a Core that predates delivery modes; the "
-                    + "connector chooses a mode on initiate and resume. Absent means buffered only. An empty list "
-                    + "offers no mode. Unknown values are ignored.",
+            description = "Delivery modes Core can drive for this run, most preferred first; the connector chooses one "
+                    + "on initiate and resume. Core sends it on every request, so a call without it comes from a Core "
+                    + "that predates delivery modes and offers buffered only. An empty list offers no mode. Unknown "
+                    + "values are ignored.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED),
             schema = @Schema(implementation = String.class,
-                    description = "A delivery mode code: buffered or checkpointed today, and possibly others later.",
+                    description = "A delivery mode code, such as buffered or checkpointed; more may be added.",
                     example = "checkpointed"))
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = DiscoveryDeliveryModesDeserializer.class)
