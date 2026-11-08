@@ -2,6 +2,7 @@ package com.otilm.api.interfaces.connector.discovery.v2;
 
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDrainRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryResultsResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
@@ -330,6 +331,15 @@ class DiscoveryOperationControllerDocTest {
         assertTrue(stop.contains("Core keeps the checkpoint it holds"), stop);
         assertTrue(initiate.contains("a resume response omits it"), initiate);
         assertTrue(results.contains("a larger one fails the run"), results);
+    }
+
+    @Test
+    void maxBytesCountsTheItemsAndCoreLeavesRoomForTheCheckpoint() throws NoSuchFieldException {
+        String maxBytes = schemaDescription(DiscoveryDrainRequestDto.class, "maxBytes");
+        String checkpoint = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
+        assertTrue(maxBytes.contains("so the page's checkpoint always fits"), maxBytes);
+        assertTrue(maxBytes.contains("leaving the same room"), maxBytes);
+        assertTrue(checkpoint.contains("does not count against maxBytes"), checkpoint);
     }
 
     @Test
