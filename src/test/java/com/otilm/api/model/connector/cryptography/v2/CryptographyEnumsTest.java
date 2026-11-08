@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.enums.IPlatformEnum;
+import com.otilm.api.model.common.enums.cryptography.SignatureInputMode;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
@@ -53,6 +54,10 @@ class CryptographyEnumsTest {
                                 "Complete the operation before returning the response"),
                         contract(OperationExecutionMode.ASYNCHRONOUS, "asynchronous", "Asynchronous",
                                 "Return 202 Accepted with an operation tracking handle"),
+                        contract(SignatureInputMode.DATA, "data", "Data",
+                                "Each item is the data; a hash-then-sign algorithm computes its digest before signing"),
+                        contract(SignatureInputMode.PREHASHED_DIGEST, "prehashedDigest", "Prehashed digest",
+                                "Each item is already the digest the signature algorithm fixes; the connector signs it without hashing again"),
                         contract(OperationStatus.IN_PROGRESS, "inProgress", "In progress",
                                 "Operation is still running at the upstream system"),
                         contract(OperationStatus.COMPLETED, "completed", "Completed",
@@ -168,6 +173,9 @@ class CryptographyEnumsTest {
                                 .of(OperationEventType.values())
                                 .map(value -> wireContract(value, value.getCode(), OperationEventType.class)),
                         Stream
+                                .of(SignatureInputMode.values())
+                                .map(value -> wireContract(value, value.getCode(), SignatureInputMode.class)),
+                        Stream
                                 .of(SignatureActivationDecision.values())
                                 .map(value -> wireContract(value, value.getCode(), SignatureActivationDecision.class)))
                 .flatMap(stream -> stream);
@@ -195,6 +203,8 @@ class CryptographyEnumsTest {
                         named("execution mode",
                                 new UnknownWireCode(OperationExecutionMode.class, unknownCode,
                                         ValidationException.class)),
+                        named("signature input mode",
+                                new UnknownWireCode(SignatureInputMode.class, unknownCode, ValidationException.class)),
                         named("operation status",
                                 new UnknownWireCode(OperationStatus.class, unknownCode, ValidationException.class)),
                         named("unusable key reason",

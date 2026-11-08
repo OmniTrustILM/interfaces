@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.signatures.contentsigning.common;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.media.Discriminator;
@@ -27,8 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Generates the OpenAPI schema for the {@code computeDtbs} union and asserts it carries a {@code discriminator} stanza
- * with a complete {@code mapping}, and that the discriminator property appears in every {@code oneOf} subschema.
+ * Generates the OpenAPI schema for the {@code computeDtbs} request and asserts what a generated client keys off.
  *
  * <p>
  * Generation goes through swagger-core's {@code ModelConverters}, the resolver springdoc uses at runtime, because this
@@ -37,70 +37,29 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 class ComputeDtbsSchemaGenerationTest {
 
-    private static final String BASE = "ComputeDtbsRequest";
+    private static final String REQUEST = "ComputeDtbsRequest";
 
+    /** One request serves every family. */
     @Test
-    void theComputeDtbsUnionCarriesADiscriminatorWithMapping() {
-        Map<String, Schema> schemas = ModelConverters.getInstance().readAll(ComputeDtbsInterface.class);
+    void theComputeDtbsRequestIsOnePlainObject() {
+        Schema<?> request = computeDtbsRequest();
 
-        Schema<?> base = schemas.get(BASE);
-        assertNotNull(base, "expected a generated schema named " + BASE + "; found " + schemas.keySet());
-
-        Discriminator discriminator = base.getDiscriminator();
-        assertNotNull(discriminator, BASE + " must carry a discriminator stanza");
-        assertEquals("family", discriminator.getPropertyName());
-        assertEquals(
-                Map
-                        .of("pades", "#/components/schemas/PadesComputeDtbsRequestDto", "xades",
-                                "#/components/schemas/XadesComputeDtbsRequestDto", "cades",
-                                "#/components/schemas/CadesComputeDtbsRequestDto", "jades",
-                                "#/components/schemas/JadesComputeDtbsRequestDto"),
-                discriminator.getMapping(), "discriminator.mapping must name all four family schemas by wire code");
-    }
-
-    @Test
-    void everySubschemaDeclaresTheDiscriminatorProperty() {
-        Map<String, Schema> schemas = ModelConverters.getInstance().readAll(ComputeDtbsInterface.class);
-
-        for (String subtype : List
-                .of("PadesComputeDtbsRequestDto", "XadesComputeDtbsRequestDto", "CadesComputeDtbsRequestDto",
-                        "JadesComputeDtbsRequestDto")) {
-            assertArmDeclares(schemas, subtype, "family");
-        }
+        assertNull(request.getDiscriminator(), REQUEST + " must not carry a discriminator");
+        assertNull(request.getOneOf(), REQUEST + " must not be a oneOf");
+        assertEquals(Set
+                .of("family", "formattingAttributes", "document", "signerCertificateChain", "signingTime",
+                        "signatureAlgorithm", "signatureParameters"),
+                request.getProperties().keySet());
     }
 
     /**
-     * A subtype must also carry the fields the base declares, or a generated client would emit a request missing them.
+     * A generated client keys off the required mark. The algorithm resolves through a {@code $ref}, which can drop that
+     * mark silently.
      */
     @Test
-    void everySubschemaCarriesTheSharedRequestFields() {
-        Map<String, Schema> schemas = ModelConverters.getInstance().readAll(ComputeDtbsInterface.class);
-
-        for (String subtype : List
-                .of("PadesComputeDtbsRequestDto", "XadesComputeDtbsRequestDto", "CadesComputeDtbsRequestDto",
-                        "JadesComputeDtbsRequestDto")) {
-            for (String property : List
-                    .of("document", "signerCertificateChain", "signingTime", "signatureAlgorithm",
-                            "formattingAttributes")) {
-                assertArmDeclares(schemas, subtype, property);
-            }
-        }
-    }
-
-    /**
-     * Presence is not the part a generated client keys off: the algorithm resolves through a {@code $ref} and across
-     * the interface indirection, either of which can drop the requiredMode silently.
-     */
-    @Test
-    void everySubschemaMarksTheSignatureAlgorithmRequired() {
-        Map<String, Schema> schemas = ModelConverters.getInstance().readAll(ComputeDtbsInterface.class);
-
-        for (String subtype : List
-                .of("PadesComputeDtbsRequestDto", "XadesComputeDtbsRequestDto", "CadesComputeDtbsRequestDto",
-                        "JadesComputeDtbsRequestDto")) {
-            assertTrue(declaresRequired(schemas.get(subtype), "signatureAlgorithm"),
-                    subtype + " does not publish signatureAlgorithm as required");
-        }
+    void theComputeDtbsRequestMarksTheSignatureAlgorithmRequired() {
+        assertTrue(declaresRequired(computeDtbsRequest(), "signatureAlgorithm"),
+                REQUEST + " does not publish signatureAlgorithm as required");
     }
 
     /**
@@ -155,10 +114,10 @@ class ComputeDtbsSchemaGenerationTest {
     void thePublishedEnumOffersEveryAlgorithmThePlatformKnows() {
         Schema<?> component = ModelConverters
                 .getInstance()
-                .readAll(ComputeDtbsInterface.class)
+                .readAll(ComputeDtbsRequestDto.class)
                 .get("SignatureAlgorithm");
 
-        assertNotNull(component, "SignatureAlgorithm is not published as a component of the computeDtbs union");
+        assertNotNull(component, "SignatureAlgorithm is not published as a component of the computeDtbs request");
         assertEquals(Arrays.stream(SignatureAlgorithm.values()).map(SignatureAlgorithm::getCode).toList(),
                 component.getEnum(), "the published algorithm list is not the enum");
     }
@@ -169,11 +128,11 @@ class ComputeDtbsSchemaGenerationTest {
      */
     @Test
     void documentTransferIsPublishedIdenticallyFromEveryEntryPoint() {
-        Schema<?> viaCompute = openApi31Schemas(ComputeDtbsInterface.class).get("DocumentTransfer");
+        Schema<?> viaCompute = openApi31Schemas(ComputeDtbsRequestDto.class).get("DocumentTransfer");
         Schema<?> viaSignedDocument = openApi31Schemas(SignedDocumentRequestDto.class).get("DocumentTransfer");
         Schema<?> standalone = openApi31Schemas(DocumentTransferDto.class).get("DocumentTransfer");
 
-        assertNotNull(viaCompute, "DocumentTransfer not reached from the computeDtbs union");
+        assertNotNull(viaCompute, "DocumentTransfer not reached from the computeDtbs request");
         assertNotNull(viaSignedDocument, "DocumentTransfer not reached from SignedDocumentRequestDto");
         assertNotNull(standalone, "DocumentTransfer not generated on its own");
 
@@ -181,7 +140,7 @@ class ComputeDtbsSchemaGenerationTest {
         assertFalse(standalone.getDescription().isBlank(), "DocumentTransfer publishes a blank description");
 
         assertEquals(Json31.pretty(standalone), Json31.pretty(viaCompute),
-                "DocumentTransfer is published differently when reached through the computeDtbs union");
+                "DocumentTransfer is published differently when reached through the computeDtbs request");
         assertEquals(Json31.pretty(standalone), Json31.pretty(viaSignedDocument),
                 "DocumentTransfer is published differently when reached through SignedDocumentRequestDto");
     }
@@ -307,6 +266,13 @@ class ComputeDtbsSchemaGenerationTest {
         assertTrue(declaresProperty(schema, property), arm + " does not declare property '" + property + "'");
     }
 
+    private static Schema<?> computeDtbsRequest() {
+        Map<String, Schema> schemas = ModelConverters.getInstance().readAll(ComputeDtbsRequestDto.class);
+        Schema<?> request = schemas.get(REQUEST);
+        assertNotNull(request, "expected a generated schema named " + REQUEST + "; found " + schemas.keySet());
+        return request;
+    }
+
     private static boolean declaresProperty(Schema<?> schema, String property) {
         return schema != null && schema.getProperties() != null && schema.getProperties().containsKey(property);
     }
@@ -319,7 +285,7 @@ class ComputeDtbsSchemaGenerationTest {
     private static String signatureAlgorithmDescription() {
         Schema<?> component = ModelConverters
                 .getInstance()
-                .readAll(ComputeDtbsInterface.class)
+                .readAll(ComputeDtbsRequestDto.class)
                 .get("SignatureAlgorithm");
         if (component == null || component.getDescription() == null) {
             return fail("the SignatureAlgorithm component publishes no description");
@@ -327,7 +293,7 @@ class ComputeDtbsSchemaGenerationTest {
         return component.getDescription();
     }
 
-    /** The digest algorithm an algorithm's signatures carry, or {@code null} when the platform can name none. */
+    /** The digest algorithm the platform pairs with an algorithm, or {@code null} when the platform can name none. */
     private static DigestAlgorithm committedDigestOrNull(SignatureAlgorithm algorithm) {
         try {
             return DigestAlgorithm.findByOid(algorithm.getDigestAlgorithmIdentifier().getAlgorithm().getId());

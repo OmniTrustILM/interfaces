@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -236,14 +237,13 @@ class ContentSigningFormattingControllerContractTest {
                 "ContentSigningFormattingOperation codes and the controller's POST routes disagree");
     }
 
-    /** The one discriminated request; every other operation takes a concrete family-invariant type. */
+    /** One body shape serves every family code. */
     @Test
-    void onlyComputeDtbsTakesThePolymorphicRequest() {
+    void everyOperationTakesAConcreteRequest() {
         for (String name : EXPECTED_POST_PATHS.keySet()) {
             Class<?> body = method(name).getParameterTypes()[0];
-            boolean isPolymorphic = Modifier.isAbstract(body.getModifiers());
-            assertEquals("computeDtbs".equals(name), isPolymorphic,
-                    name + " takes " + body.getSimpleName() + "; only computeDtbs may take an abstract request");
+            assertFalse(Modifier.isAbstract(body.getModifiers()),
+                    name + " takes " + body.getSimpleName() + ", which is abstract");
         }
     }
 
