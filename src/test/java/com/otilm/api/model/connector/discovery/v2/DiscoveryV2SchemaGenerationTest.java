@@ -243,6 +243,25 @@ class DiscoveryV2SchemaGenerationTest {
     }
 
     /**
+     * The same guard for {@code DiscoveryDeliveryMode}: the run detail and the initiate response both reference it,
+     * each with its own description, and neither may replace the component's.
+     */
+    @Test
+    void neitherReferenceRewritesTheDeliveryModeComponent() {
+        String ownDescription = DiscoveryDeliveryMode.class
+                .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                .description();
+        for (Class<?> root : new Class<?>[]{DiscoveryDetailDto.class, DiscoveryInitiateResponseDto.class}) {
+            Schema<?> reached = ModelConverters.getInstance().readAll(root).get("DiscoveryDeliveryMode");
+            assertNotNull(reached, root.getSimpleName() + " no longer emits the DiscoveryDeliveryMode component");
+            assertEquals(ownDescription, reached.getDescription(),
+                    "reaching DiscoveryDeliveryMode through " + root.getSimpleName() + " must not change its "
+                            + "description. A description on the referencing field gets hoisted onto it, because "
+                            + "OpenAPI 3.0 cannot carry one beside a $ref.");
+        }
+    }
+
+    /**
      * The other half of the rule above: each referencing field carries its own description through {@code ALL_OF_REF}.
      * swagger-core resolves no javadoc on this classpath, and a plain {@code ALL_OF} drops the description silently.
      */
@@ -256,6 +275,8 @@ class DiscoveryV2SchemaGenerationTest {
                         new Field(AuthorityInstanceDto.class, "AuthorityInstanceDto", "connectorInterface"),
                         new Field(VaultInstanceDto.class, "VaultInstanceDto", "connectorInterface"),
                         new Field(DiscoveryDetailDto.class, "DiscoveryDetailDto", "progress"),
+                        new Field(DiscoveryDetailDto.class, "DiscoveryDetailDto", "deliveryMode"),
+                        new Field(DiscoveryInitiateResponseDto.class, "DiscoveryInitiateResponseDto", "deliveryMode"),
                         new Field(DiscoveryStatusResponseDto.class, "DiscoveryStatusResponseDto", "progress"),
                         new Field(DiscoveryItemDto.class, "DiscoveryItemDto", "inventory"),
                         // @ArraySchema, so the description sits on the array rather than the item. Needed here and

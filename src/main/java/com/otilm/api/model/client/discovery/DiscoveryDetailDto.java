@@ -130,8 +130,9 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean stoppable;
 
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
     @Schema(description = "How this v2 run's results travel from its connector. Absent for v1 runs.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryDeliveryMode deliveryMode;
 }

@@ -33,7 +33,9 @@ public class DiscoveryInitiateResponseDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean stoppable;
 
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
     @Schema(description = "The delivery mode this run uses from this call on; one of the offered modes. Absent means "
-            + "buffered.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "buffered.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     private DiscoveryDeliveryMode deliveryMode;
 }
