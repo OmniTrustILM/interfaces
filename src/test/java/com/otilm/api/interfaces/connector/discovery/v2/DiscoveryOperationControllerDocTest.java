@@ -286,6 +286,7 @@ class DiscoveryOperationControllerDocTest {
         assertTrue(offer.contains("a call without it comes from a Core"), offer);
         assertTrue(offer.contains("An empty list offers no mode"), offer);
         assertTrue(results.contains("does not offer checkpointed"), results);
+        assertTrue(results.contains("comes from a Core that does not drive checkpointed runs"), results);
         assertTrue(results.contains("a Core that offers checkpointed can take the retry"), results);
     }
 
@@ -337,6 +338,7 @@ class DiscoveryOperationControllerDocTest {
         assertTrue(stop.contains("no status or results call"), stop);
         assertFalse(stop.contains("does not call the connector"), stop);
         assertFalse(stop.contains("last page"), stop);
+        assertTrue(stop.contains("A stop past the point of no return is still refused with 422"), stop);
     }
 
     private static String schemaDescription(Class<?> type, String field) throws NoSuchFieldException {

@@ -111,9 +111,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
                     + "- A connector too busy to take the call answers 503 with errorCode SERVICE_UNAVAILABLE. Core calls "
                     + "again shortly and counts it as a failure only once the run has received nothing but 503s for "
                     + "30 minutes by default.\n"
-                    + "- A drain whose deliveryModes does not offer checkpointed comes from a Core that would not store "
-                    + "the page's checkpoint. Answer it 503 with errorCode SERVICE_UNAVAILABLE, so a Core that offers "
-                    + "checkpointed can take the retry.\n"
+                    + "- A drain whose deliveryModes does not offer checkpointed comes from a Core that does not drive "
+                    + "checkpointed runs, such as an older one that would not store the page's checkpoint. Answer it "
+                    + "503 with errorCode SERVICE_UNAVAILABLE, so a Core that offers checkpointed can take the retry.\n"
                     + "- Bound the work so the call answers within 20 seconds; Core's default call timeout is 30 "
                     + "seconds.\n"
                     + "- When afterSequence and the replayed checkpoint disagree, answer 404 with errorCode "
@@ -147,9 +147,9 @@ public interface DiscoveryOperationController extends AuthProtectedConnectorCont
             + "In buffered delivery, return a best-effort checkpoint, which MUST preserve the item sequence so a "
             + "resume continues numbering where the run stopped. Items not yet drained stay drainable while the "
             + "run is stopped.\n\n"
-            + "In checkpointed delivery, answer without a checkpoint: Core keeps the checkpoint it holds. Core "
-            + "discards a results page that arrives after the stop and sends no status or results call until the run "
-            + "is resumed.")
+            + "In checkpointed delivery, answer without a checkpoint: Core keeps the checkpoint it holds. A stop "
+            + "past the point of no return is still refused with 422. Core discards a results page that arrives "
+            + "after the stop and sends no status or results call until the run is resumed.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Run stopped; in buffered delivery, checkpoint carries the handle to resume from"),
