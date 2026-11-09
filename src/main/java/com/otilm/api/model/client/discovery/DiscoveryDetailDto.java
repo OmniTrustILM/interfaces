@@ -131,7 +131,8 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     private Boolean stoppable;
 
     // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
-    @Schema(description = "How this v2 run's results travel from its connector. Absent for v1 runs.",
+    @Schema(description = "How this v2 run's results travel from its connector. Absent for v1 runs. A v2 run whose "
+            + "connector chose no mode, including one whose initiate was refused or never answered, shows buffered.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryDeliveryMode deliveryMode;

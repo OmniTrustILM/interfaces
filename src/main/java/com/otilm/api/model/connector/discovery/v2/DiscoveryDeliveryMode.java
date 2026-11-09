@@ -8,7 +8,10 @@ import com.otilm.api.model.common.enums.IPlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
-@Schema(enumAsRef = true, description = "How a run's discovered items and position travel between connector and Core.")
+@Schema(enumAsRef = true, description = "How a run's discovered items and position travel between connector and Core. "
+        + "`buffered`: the connector holds the items it has not handed over between calls, and the run's position "
+        + "moves only at stop. `checkpointed`: the connector holds nothing between calls; every results page carries "
+        + "the run's position after its items.")
 public enum DiscoveryDeliveryMode implements IPlatformEnum {
 
     BUFFERED("buffered", "Buffered"),

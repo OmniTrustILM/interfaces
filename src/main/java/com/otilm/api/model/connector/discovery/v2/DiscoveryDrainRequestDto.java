@@ -40,8 +40,9 @@ public class DiscoveryDrainRequestDto extends DiscoveryV2ScopedRequestDto {
 
     @Schema(description = "Maximum serialized size, in bytes, of the returned items: at most 10 MiB (" + MAX_BYTES_CAP
             + " bytes), the transport's limit, and a larger response fails the run. In checkpointed delivery Core asks "
-            + "for at most 10 MiB less 128 KB (" + CHECKPOINTED_RESPONSE_RESERVE + " bytes), which leaves room for "
-            + "the page's checkpoint (at most 64 KB) and the rest of the response. When omitted, the connector MUST "
+            + "for at most " + (MAX_BYTES_CAP - CHECKPOINTED_RESPONSE_RESERVE) + " bytes: 10 MiB less a 128 KB ("
+            + CHECKPOINTED_RESPONSE_RESERVE + "-byte) reserve, which leaves room for the page's checkpoint (at most "
+            + "64 KB) and the rest of the response. When omitted, the connector MUST "
             + "apply its own bound, leaving the same room in checkpointed delivery.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1", maximum = "" + MAX_BYTES_CAP)
     @Min(1)

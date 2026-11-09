@@ -1,7 +1,9 @@
 package com.otilm.api.interfaces.connector.discovery.v2;
 
+import com.otilm.api.model.client.discovery.DiscoveryDetailDto;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDeliveryMode;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryDrainRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryResultsResponseDto;
@@ -123,8 +125,9 @@ class DiscoveryOperationControllerDocTest {
 
     /**
      * {@code checkpoint} is declared on {@link DiscoveryV2ScopedRequestDto}, so every operation whose request body
-     * extends that base replays it. The two responses that mint it must name all of them, initiate excepted: that is
-     * the call it comes back from.
+     * extends that base replays it. The initiate and stop responses must name all of them, initiate excepted: that is
+     * the call it comes back from. The results response mints a checkpoint only in checkpointed delivery, and says
+     * instead that Core replays it on the next call.
      */
     @Test
     void handleMintingResponsesNameEveryOperationThatReplaysTheCheckpoint() throws NoSuchFieldException {
@@ -338,12 +341,20 @@ class DiscoveryOperationControllerDocTest {
         String maxBytes = schemaDescription(DiscoveryDrainRequestDto.class, "maxBytes");
         String checkpoint = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
         assertEquals(131_072L, DiscoveryDrainRequestDto.CHECKPOINTED_RESPONSE_RESERVE);
-        assertTrue(maxBytes
-                .contains("10 MiB less 128 KB (" + DiscoveryDrainRequestDto.CHECKPOINTED_RESPONSE_RESERVE + " bytes)"),
-                maxBytes);
+        assertTrue(maxBytes.contains("at most 10354688 bytes: 10 MiB less a 128 KB (131072-byte) reserve"), maxBytes);
         assertTrue(maxBytes.contains("the page's checkpoint (at most 64 KB) and the rest of the response"), maxBytes);
         assertTrue(maxBytes.contains("leaving the same room"), maxBytes);
         assertTrue(checkpoint.contains("does not count against maxBytes"), checkpoint);
+    }
+
+    @Test
+    void deliveryModesAreDefinedWhereTheyArePublished() throws NoSuchFieldException {
+        String modes = DiscoveryDeliveryMode.class.getAnnotation(Schema.class).description();
+        String detail = schemaDescription(DiscoveryDetailDto.class, "deliveryMode");
+        assertTrue(modes.contains("`buffered`: the connector holds"), modes);
+        assertTrue(modes.contains("`checkpointed`: the connector holds nothing"), modes);
+        assertTrue(detail.contains("Absent for v1 runs."), detail);
+        assertTrue(detail.contains("whose initiate was refused or never answered, shows buffered"), detail);
     }
 
     @Test
