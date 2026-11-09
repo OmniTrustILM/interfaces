@@ -1,6 +1,7 @@
 package com.otilm.api.model.client.discovery;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDeliveryMode;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryProgressDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryResourceProgressDto;
 import com.otilm.api.model.core.auth.Resource;
@@ -170,5 +171,13 @@ class DiscoveryDetailDtoTest {
         assertTrue(json.contains("\"message\":null"), json);
         assertTrue(json.contains("\"startTime\":null"), json);
         assertTrue(json.contains("\"endTime\":null"), json);
+    }
+
+    @Test
+    void deliveryModeReadsAndIsOmittedWhenAbsent() throws Exception {
+        DiscoveryDetailDto back = mapper.readValue("{\"deliveryMode\":\"checkpointed\"}", DiscoveryDetailDto.class);
+        assertEquals(DiscoveryDeliveryMode.CHECKPOINTED, back.getDeliveryMode());
+
+        assertFalse(mapper.writeValueAsString(v1Run()).contains("deliveryMode"));
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDeliveryMode;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryProgressDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
@@ -128,4 +129,11 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
             + "the point of no return.", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean stoppable;
+
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "How this v2 run's results travel from its connector. Absent for v1 runs. A v2 run whose "
+            + "connector chose no mode, including one whose initiate was refused or never answered, shows buffered.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private DiscoveryDeliveryMode deliveryMode;
 }

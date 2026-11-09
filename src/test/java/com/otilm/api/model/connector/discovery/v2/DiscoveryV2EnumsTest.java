@@ -26,6 +26,17 @@ class DiscoveryV2EnumsTest {
     }
 
     @Test
+    void deliveryModeWireCodes() throws Exception {
+        assertEquals("\"checkpointed\"", mapper.writeValueAsString(DiscoveryDeliveryMode.CHECKPOINTED));
+        assertEquals(DiscoveryDeliveryMode.BUFFERED, mapper.readValue("\"buffered\"", DiscoveryDeliveryMode.class));
+    }
+
+    @Test
+    void deliveryModeUnknownCodeIsRefused() {
+        assertThrows(Exception.class, () -> mapper.readValue("\"streamed\"", DiscoveryDeliveryMode.class));
+    }
+
+    @Test
     void discoveryStatusGainsStoppedAndCancelled() {
         assertEquals("stopped", DiscoveryStatus.STOPPED.getCode());
         assertEquals("cancelled", DiscoveryStatus.CANCELLED.getCode());
