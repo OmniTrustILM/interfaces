@@ -16,7 +16,7 @@ import lombok.Data;
  * </p>
  *
  * <p>
- * {@code RAW_SIGNING} carries no additional properties — use {@link RawSigningWorkflowRequestDto} (body:
+ * {@code RAW_SIGNING} carries the certificate-purpose constraints — use {@link RawSigningWorkflowRequestDto} (body:
  * {@code {"type":"raw_signing"}}) to make the workflow type explicit. The {@code workflow} field on the Signing Profile
  * request must never be {@code null}.
  * </p>

@@ -10,6 +10,7 @@ import com.otilm.api.model.client.connector.v2.ConnectorVersion;
 import com.otilm.api.model.client.connector.v2.FeatureFlag;
 import com.otilm.api.model.client.cryptography.key.KeyCompromiseReason;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.client.signing.profile.record.SigningRecordPersistenceMode;
 import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningType;
 import com.otilm.api.model.client.signing.profile.scheme.SigningScheme;
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
@@ -30,6 +31,16 @@ import com.otilm.api.model.common.enums.cryptography.RsaEncryptionScheme;
 import com.otilm.api.model.common.enums.cryptography.RsaSignatureScheme;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.signature.SignatureParameterGroup;
+import com.otilm.api.model.common.signature.parameters.pades.CommitmentType;
+import com.otilm.api.model.common.signature.parameters.pades.HorizontalAlignment;
+import com.otilm.api.model.common.signature.parameters.pades.ImageScaling;
+import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureScope;
+import com.otilm.api.model.common.signature.parameters.pades.TextHorizontalAlignment;
+import com.otilm.api.model.common.signature.parameters.pades.TextPosition;
+import com.otilm.api.model.common.signature.parameters.pades.TextVerticalAlignment;
+import com.otilm.api.model.common.signature.parameters.pades.TextWrapping;
+import com.otilm.api.model.common.signature.parameters.pades.VerticalAlignment;
 import com.otilm.api.model.connector.cryptography.enums.TokenInstanceStatus;
 import com.otilm.api.model.connector.secrets.SecretType;
 import com.otilm.api.model.connector.secrets.content.KeyStoreType;
@@ -210,11 +221,24 @@ public enum PlatformEnum implements IPlatformEnum {
     QC_TYPE(QcType.class, "QC Type"),
     SIGNATURE_FAMILY(SignatureFamily.class, "Signature Family"),
     SIGNATURE_LEVEL(SignatureLevel.class, "Signature Level"),
+    SIGNATURE_PARAMETER_GROUP(SignatureParameterGroup.class, "Signature Parameter Group"),
     SIGNING_PROTOCOL(SigningProtocol.class, "Signing Protocol"),
+    SIGNING_RECORD_PERSISTENCE_MODE(SigningRecordPersistenceMode.class, "Signing Record Persistence Mode"),
     SIGNING_SCHEME(SigningScheme.class, "Signing Scheme"),
     SIGNING_WORKFLOW_TYPE(SigningWorkflowType.class, "Signing Workflow Type"),
     TIMESTAMP_SOURCE_TYPE(TimestampSourceType.class, "Timestamp Source Type"),
     TSP_AUTHENTICATION_METHOD(TspAuthenticationMethod.class, "TSP Authentication Method"),
+
+    // PAdES signature parameters
+    PADES_SIGNATURE_SCOPE(PadesSignatureScope.class, "PAdES Signature Scope"),
+    PADES_COMMITMENT_TYPE(CommitmentType.class, "PAdES Commitment Type"),
+    PADES_ANCHOR_HORIZONTAL_ALIGNMENT(HorizontalAlignment.class, "PAdES Anchor Horizontal Alignment"),
+    PADES_ANCHOR_VERTICAL_ALIGNMENT(VerticalAlignment.class, "PAdES Anchor Vertical Alignment"),
+    PADES_TEXT_WRAPPING(TextWrapping.class, "PAdES Text Wrapping"),
+    PADES_TEXT_POSITION(TextPosition.class, "PAdES Text Position"),
+    PADES_TEXT_HORIZONTAL_ALIGNMENT(TextHorizontalAlignment.class, "PAdES Text Horizontal Alignment"),
+    PADES_TEXT_VERTICAL_ALIGNMENT(TextVerticalAlignment.class, "PAdES Text Vertical Alignment"),
+    PADES_IMAGE_SCALING(ImageScaling.class, "PAdES Image Scaling"),
 
     // CBOM
     CBOM_ASSET_SYNC_STATE(CbomAssetSyncState.class, "CBOM asset sync state"),
@@ -243,7 +267,7 @@ public enum PlatformEnum implements IPlatformEnum {
 
     PlatformEnum(Class<? extends IPlatformEnum> enumClass, String label, String description) {
         this.enumClass = enumClass;
-        this.code = enumClass.getSimpleName();
+        this.code = openApiSchemaName(enumClass);
         this.label = label;
         this.description = description;
     }
@@ -284,5 +308,10 @@ public enum PlatformEnum implements IPlatformEnum {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("Unknown platform enum for class %s.", clazz)));
+    }
+
+    private static String openApiSchemaName(Class<? extends IPlatformEnum> enumClass) {
+        Schema schema = enumClass.getAnnotation(Schema.class);
+        return schema != null && !schema.name().isBlank() ? schema.name() : enumClass.getSimpleName();
     }
 }

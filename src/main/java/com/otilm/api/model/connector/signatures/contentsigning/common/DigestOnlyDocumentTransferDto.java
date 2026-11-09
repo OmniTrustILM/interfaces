@@ -3,6 +3,7 @@ package com.otilm.api.model.connector.signatures.contentsigning.common;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -10,8 +11,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * The digest-only arm of {@link DocumentTransferDto}: only the document's digest travels, so a detached format never
- * brings the customer document into the platform.
+ * The digest-only arm of {@link DocumentTransferDto}: only the document's digest travels, so the customer document
+ * never enters the platform.
  *
  * <p>
  * The digest and the algorithm that produced it are both required, because a digest cannot be interpreted without
@@ -19,8 +20,7 @@ import java.util.Objects;
  * </p>
  */
 @JsonIgnoreProperties(value = "transferMode", allowGetters = true)
-@Schema(name = "DigestOnlyDocumentTransfer",
-        description = "Document transport carrying only the document's digest, for detached formats")
+@Schema(name = "DigestOnlyDocumentTransfer", description = "Document transport carrying only the document's digest")
 public record DigestOnlyDocumentTransferDto(
         @NotNull(message = "documentDigest is required") @Schema(
                 description = "Digest of the document, where the "
@@ -28,9 +28,7 @@ public record DigestOnlyDocumentTransferDto(
                 requiredMode = Schema.RequiredMode.REQUIRED) byte[] documentDigest,
         @NotNull(message = "digestAlgorithm is required") @Schema(
                 description = "Algorithm that produced documentDigest. The enum spans every algorithm the platform "
-                        + "knows, including collision-broken ones. Where this transfer is the document of a "
-                        + "computeDtbs request, the platform pins it to the digest that request's signatureAlgorithm "
-                        + "commits to, and checks it before it calls.",
+                        + "knows, including collision-broken ones.",
                 requiredMode = Schema.RequiredMode.REQUIRED) DigestAlgorithm digestAlgorithm)
         implements
             DocumentTransferDto {

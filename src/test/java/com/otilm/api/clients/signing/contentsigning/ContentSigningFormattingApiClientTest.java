@@ -12,6 +12,7 @@ import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.signatures.contentsigning.common.CertificateChainDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
@@ -25,8 +26,6 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.InlineDocu
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
-import com.otilm.api.model.connector.signatures.contentsigning.jades.JadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.pades.PadesComputeDtbsRequestDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import java.time.OffsetDateTime;
@@ -126,24 +125,12 @@ class ContentSigningFormattingApiClientTest {
         assertArrayEquals(new byte[]{4, 5, 6}, result.getFormattingContext());
     }
 
-    /** Serialized against the abstract base, so the family would vanish if the discriminator were not a property. */
-    @Test
-    void computeDtbs_putsTheConcreteFamilyOnTheWire() throws ConnectorException {
-        stubPost(BASE + "/computeDtbs", "{ \"dtbs\": \"AQID\", \"formattingContext\": \"BAUG\" }");
-
-        client.computeDtbs(connector, padesRequest());
-
-        mockServer
-                .verify(WireMock
-                        .postRequestedFor(WireMock.urlEqualTo(BASE + "/computeDtbs"))
-                        .withRequestBody(WireMock.matchingJsonPath("$.family", WireMock.equalTo("pades"))));
-    }
-
     @Test
     void computeDtbs_carriesEachFamilyItIsGiven() throws ConnectorException {
         stubPost(BASE + "/computeDtbs", "{ \"dtbs\": \"AQID\", \"formattingContext\": \"BAUG\" }");
 
-        JadesComputeDtbsRequestDto request = new JadesComputeDtbsRequestDto();
+        ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
+        request.setFamily(SignatureFamily.JADES);
         request.setDocument(new InlineDocumentTransferDto(new byte[]{7, 7, 7}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
@@ -401,8 +388,9 @@ class ContentSigningFormattingApiClientTest {
         assertThrows(IllegalStateException.class, () -> client.computeDtbs(connector, padesRequest()));
     }
 
-    private static PadesComputeDtbsRequestDto padesRequest() {
-        PadesComputeDtbsRequestDto request = new PadesComputeDtbsRequestDto();
+    private static ComputeDtbsRequestDto padesRequest() {
+        ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
+        request.setFamily(SignatureFamily.PADES);
         request.setDocument(new InlineDocumentTransferDto(new byte[]{1, 2, 3}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));

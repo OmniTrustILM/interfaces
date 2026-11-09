@@ -3,6 +3,8 @@ package com.otilm.api.model.connector.signatures.contentsigning.common;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
+import com.otilm.api.model.common.signature.SignatureFamily;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -10,8 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * {@link DocumentTransferInterface}.
  *
  * <p>
- * Enveloped formats (PAdES, enveloped XAdES, ASiC) send the document itself. Detached formats send only its digest, so
- * the customer document never enters the platform at all.
+ * {@link SignatureFamily#accepts} names the modes each family can sign from.
  * </p>
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "transferMode")

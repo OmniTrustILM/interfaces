@@ -99,16 +99,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     + "digests it. A digestOnly transfer carries that digest already. The platform pins both to the "
                     + "digest signatureAlgorithm commits to, and checks that before it calls, so an algorithm whose "
                     + "paired digest is not a DigestAlgorithm value is never sent here. Either way the connector "
-                    + "MUST echo that digest in documentDigest. The platform compares that echo against the digest "
-                    + "the user authorized before it releases the signing key.",
+                    + "MUST echo that digest in documentDigest and its algorithm in documentDigestAlgorithm. The "
+                    + "platform compares that echo against the digest the user authorized before it releases the "
+                    + "signing key.",
             operationId = "computeDtbs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data-to-be-signed bytes computed"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST). This covers a family that is "
-                            + "absent, null, or outside the published signature families. It also covers a "
-                            + "transferMode that is absent, or is neither inline nor digestOnly. An entitlement "
-                            + "refusal is the 422 below instead.",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
+                            + "published signature families or a transferMode that is absent or neither inline nor "
+                            + "digestOnly. An entitlement refusal is the 422 below instead.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "413",
@@ -119,12 +119,13 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     description = "- `DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
                             + "`DOCUMENT_SIGNING_FORBIDDEN` — the document forbids the requested signature, such as a "
                             + "certification of a document already signed.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
-                            + "by the connector.\n- "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family, a supplied parameter or the document's "
+                            + "transfer mode is unsupported by the connector.\n- "
                             + "`SIGNATURE_PLACEMENT_REJECTED` — the document cannot hold the visible signature at the "
                             + "requested place.\n- "
                             + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
-                            + "document or a digest transfer missing its algorithm.",
+                            + "family or document, a digest transfer missing its algorithm, or signatureParameters "
+                            + "of another family.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeDtbs", consumes = MediaType.APPLICATION_JSON_VALUE,

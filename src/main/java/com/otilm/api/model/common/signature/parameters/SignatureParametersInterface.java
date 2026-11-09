@@ -11,8 +11,7 @@ import java.io.Serializable;
  *
  * <p>
  * The discriminator is the required {@code family} property on each subtype, not a wrapper. OpenAPI's
- * {@code discriminator} needs a property present in every {@code oneOf} subschema, which is why the {@code computeDtbs}
- * request does the same.
+ * {@code discriminator} needs a property present in every {@code oneOf} subschema.
  * </p>
  */
 @Schema(name = "SignatureParameters",
