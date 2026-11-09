@@ -14,8 +14,8 @@ import java.util.Arrays;
  * one below it.
  *
  * <p>
- * Each format keeps its own vocabulary at its own edge; {@link #getFormatName(SignatureFamily)} is the translation the
- * platform renders beside the rung wherever an operator configures or reads a profile.
+ * Each format keeps its own vocabulary at its own edge. The platform shows the rung in that vocabulary, through
+ * {@link SignatureFamily#getLevelName(SignatureLevel)}, wherever an operator configures or reads a profile.
  * </p>
  */
 @Schema(enumAsRef = true,
@@ -23,12 +23,12 @@ import java.util.Arrays;
                 + "the one before it")
 public enum SignatureLevel implements IPlatformEnum {
 
-    SIGNED(Codes.SIGNED, "Signed", "A baseline signature", "B"),
+    SIGNED(Codes.SIGNED, "Signed", "A baseline signature"),
     TIMESTAMPED(Codes.TIMESTAMPED, "Timestamped",
-            "A signature timestamp proves the signature existed at a point in time", "T"),
+            "A signature timestamp proves the signature existed at a point in time"),
     LONG_TERM(Codes.LONG_TERM, "Long Term",
-            "Embedded validation material, so the signature validates offline without the issuers", "LT"),
-    ARCHIVAL(Codes.ARCHIVAL, "Archival", "An archive timestamp extends validity past the algorithms' lifetime", "LTA");
+            "Embedded validation material, so the signature validates offline without the issuers"),
+    ARCHIVAL(Codes.ARCHIVAL, "Archival", "An archive timestamp extends validity past the algorithms' lifetime");
 
     public static class Codes {
 
@@ -50,13 +50,11 @@ public enum SignatureLevel implements IPlatformEnum {
     private final String code;
     private final String label;
     private final String description;
-    private final String baselineSuffix;
 
-    SignatureLevel(String code, String label, String description, String baselineSuffix) {
+    SignatureLevel(String code, String label, String description) {
         this.code = code;
         this.label = label;
         this.description = description;
-        this.baselineSuffix = baselineSuffix;
     }
 
     @Override
@@ -73,17 +71,6 @@ public enum SignatureLevel implements IPlatformEnum {
     @Override
     public String getDescription() {
         return this.description;
-    }
-
-    /**
-     * The ETSI baseline name this rung carries in the given family, for example {@code PAdES-B-LT} for
-     * {@link #LONG_TERM} in {@link SignatureFamily#PADES}.
-     */
-    public String getFormatName(SignatureFamily family) {
-        if (family == null) {
-            throw new IllegalArgumentException("Signature family must be provided");
-        }
-        return family.getFormatPrefix() + "-B-" + this.baselineSuffix;
     }
 
     /**
