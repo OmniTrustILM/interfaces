@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface SignatureParameterController extends AuthProtectedController {
 
     @Operation(operationId = "listSignatureParameterGroups", summary = "List signature parameter groups",
-            description = "Returns the signature parameter groups of each signature family and the request fields "
-                    + "that belong to each group. A signing request may set a field only when its Signing Profile "
-                    + "allows the field's group. Any authenticated user may read it.")
+            description = "Returns, for each signature family that has signature parameters, its signature parameter "
+                    + "groups and the request fields each group governs. A signing request may set a field only when "
+                    + "its Signing Profile allows the field's group. Any authenticated user may call this operation.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Signature parameter groups retrieved")})
     @GetMapping(path = "/groups", produces = MediaType.APPLICATION_JSON_VALUE)
     List<SignatureFamilyParameterGroupsDto> listSignatureParameterGroups();

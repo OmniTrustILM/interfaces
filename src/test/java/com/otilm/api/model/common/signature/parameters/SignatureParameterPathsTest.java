@@ -7,6 +7,7 @@ import com.otilm.api.model.common.signature.SignatureParameterGroup;
 import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureParametersDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignatureDto;
 import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignaturePlacementDto;
+import com.otilm.api.model.common.signature.parameters.pades.PadesVisibleSignatureStyleDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,17 +87,23 @@ class SignatureParameterPathsTest {
     }
 
     @Test
-    void namesANestedFieldByItsDottedPath() {
+    void namesEachNestedFieldByItsDottedPathUnderItsGroup() {
         PadesVisibleSignaturePlacementDto placement = new PadesVisibleSignaturePlacementDto();
         placement.setPage(2);
+        PadesVisibleSignatureStyleDto style = new PadesVisibleSignatureStyleDto();
+        style.setDpi(300);
         PadesVisibleSignatureDto visibleSignature = new PadesVisibleSignatureDto();
+        visibleSignature.setVisible(true);
         visibleSignature.setPlacement(placement);
+        visibleSignature.setStyle(style);
         PadesSignatureParametersDto parameters = new PadesSignatureParametersDto();
         parameters.setVisibleSignature(visibleSignature);
 
-        assertEquals(
-                Map.of(SignatureParameterGroup.VISIBLE_SIGNATURE_PLACEMENT, List.of("visibleSignature.placement.page")),
-                SignatureParameterPaths.presentByGroup(parameters));
+        Map<SignatureParameterGroup, List<String>> eachFieldUnderItsGroup = Map
+                .of(SignatureParameterGroup.VISIBLE_SIGNATURE_CONTENT, List.of("visibleSignature.visible"),
+                        SignatureParameterGroup.VISIBLE_SIGNATURE_PLACEMENT, List.of("visibleSignature.placement.page"),
+                        SignatureParameterGroup.VISIBLE_SIGNATURE_STYLE, List.of("visibleSignature.style.dpi"));
+        assertEquals(eachFieldUnderItsGroup, SignatureParameterPaths.presentByGroup(parameters));
     }
 
     /** {@code describe()} reports the signature scope before the signed attributes, which the enum puts first. */
