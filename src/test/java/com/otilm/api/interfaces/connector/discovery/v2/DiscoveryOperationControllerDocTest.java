@@ -334,10 +334,14 @@ class DiscoveryOperationControllerDocTest {
     }
 
     @Test
-    void maxBytesCountsTheItemsAndCoreLeavesRoomForTheCheckpoint() throws NoSuchFieldException {
+    void maxBytesCountsTheItemsAndCoreLeavesRoomForTheCheckpointAndTheResponse() throws NoSuchFieldException {
         String maxBytes = schemaDescription(DiscoveryDrainRequestDto.class, "maxBytes");
         String checkpoint = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
-        assertTrue(maxBytes.contains("so the page's checkpoint always fits"), maxBytes);
+        assertEquals(131_072L, DiscoveryDrainRequestDto.CHECKPOINTED_RESPONSE_RESERVE);
+        assertTrue(maxBytes
+                .contains("10 MiB less 128 KB (" + DiscoveryDrainRequestDto.CHECKPOINTED_RESPONSE_RESERVE + " bytes)"),
+                maxBytes);
+        assertTrue(maxBytes.contains("the page's checkpoint (at most 64 KB) and the rest of the response"), maxBytes);
         assertTrue(maxBytes.contains("leaving the same room"), maxBytes);
         assertTrue(checkpoint.contains("does not count against maxBytes"), checkpoint);
     }

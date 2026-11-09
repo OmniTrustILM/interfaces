@@ -22,6 +22,12 @@ public class DiscoveryDrainRequestDto extends DiscoveryV2ScopedRequestDto {
      */
     public static final long MAX_BYTES_CAP = 10_485_760L;
 
+    /**
+     * Room a checkpointed results response keeps under {@link #MAX_BYTES_CAP} for what is not an item: the page's
+     * checkpoint (at most 64 KB) and the response's own fields. Core asks for no more than the cap less this.
+     */
+    public static final long CHECKPOINTED_RESPONSE_RESERVE = 131_072L;
+
     @Schema(description = "Return items with a sequence greater than this; 0 starts from the beginning of the run.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "0", defaultValue = "0")
     @PositiveOrZero
@@ -34,10 +40,10 @@ public class DiscoveryDrainRequestDto extends DiscoveryV2ScopedRequestDto {
 
     @Schema(description = "Maximum serialized size, in bytes, of the returned items: at most 10 MiB (" + MAX_BYTES_CAP
             + " bytes), the transport's limit, and a larger response fails the run. In checkpointed delivery Core asks "
-            + "for at most 10 MiB less the 64 KB a checkpoint may take, so the page's checkpoint always fits. When "
-            + "omitted, the connector MUST apply its own bound, leaving the same room for a checkpoint in "
-            + "checkpointed delivery.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1",
-            maximum = "" + MAX_BYTES_CAP)
+            + "for at most 10 MiB less 128 KB (" + CHECKPOINTED_RESPONSE_RESERVE + " bytes), which leaves room for "
+            + "the page's checkpoint (at most 64 KB) and the rest of the response. When omitted, the connector MUST "
+            + "apply its own bound, leaving the same room in checkpointed delivery.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1", maximum = "" + MAX_BYTES_CAP)
     @Min(1)
     @Max(value = MAX_BYTES_CAP, message = "maxBytes must not exceed the 10 MiB transport cap")
     private Long maxBytes;
