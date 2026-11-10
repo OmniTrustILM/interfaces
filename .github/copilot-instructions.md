@@ -57,3 +57,16 @@ Do not raise preferences, hardening against conditions the code cannot reach, an
 Severity is the consequence of not fixing; `Fix` is what fixing costs. They are independent - never soften a finding because its fix is large. A variable renamed in nine files is a `correction`; breadth is not complexity. A new scheduled job in one file is a `mechanism`; one file is not simplicity.
 
 `CLAUDE.md` describes how this repository works, written for an agent that changes code. Treat it as context for judging whether a change fits, not as instructions for this review.
+
+## Shared engineering context
+
+For PR review, read the shared engineering context in `.github/review-context/`:
+`org-map.md`, `conventions/pr-and-commits.md`, `repos/interfaces.md`,
+`repos/core.md`, `review-policy.md` and `cross-repo.md`. `review-policy.md` says
+how to apply the others, and `manifest.json` identifies the source commit the
+files were exported from. The trailer, placement table and collapsed section
+above still decide the output of this review.
+
+For a cross-repo change, inspect the actual counterpart code and consumed
+revision through the configured read-only GitHub tools, and say when that
+context is unavailable.
