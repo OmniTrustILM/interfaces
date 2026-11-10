@@ -17,4 +17,8 @@ public class PlatformSettingsDto implements SettingsDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private BrandingSettingsDto branding;
 
+    @Schema(description = "Signing settings shared by every Signing Profile",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SigningSettingsDto signing;
+
 }

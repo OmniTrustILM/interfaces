@@ -1,6 +1,7 @@
 package com.otilm.api.model.connector.discovery.v2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +32,16 @@ public class DiscoveryResultsResponseDto {
     @PositiveOrZero(message = "highestSequence must not be negative")
     private Long highestSequence;
 
-    @Schema(description = "Whether more items remain beyond this page", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "true means more is ready and Core calls again now; false means nothing more is ready now. "
+            + "Whether the run has finished comes from status.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "more is required")
     private Boolean more;
+
+    // Excluded from toString: opaque, no logging value, up to 64 KB.
+    @Schema(description = "Checkpointed delivery only: the run's handle after this page's items, on every results "
+            + "page. Core stores it with its cursor and replays it on the next call. At most 64 KB serialized; a "
+            + "larger one fails the run. It does not count against maxBytes: Core leaves room for it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @ToString.Exclude
+    private List<MetadataAttribute> checkpoint;
 }

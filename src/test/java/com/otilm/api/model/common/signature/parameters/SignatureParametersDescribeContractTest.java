@@ -1,13 +1,11 @@
 package com.otilm.api.model.common.signature.parameters;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureParameterGroup;
 import jakarta.validation.Valid;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -18,7 +16,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -33,13 +30,13 @@ class SignatureParametersDescribeContractTest {
 
     @Test
     void theUnionRegistersAtLeastOneSubtype() {
-        assertFalse(registeredSubtypes().isEmpty());
+        assertFalse(ParameterTreeFixture.registeredSubtypes().isEmpty());
     }
 
     @Test
     void everyFieldIsReportedByDescribeUnderAGroupThatAppliesToItsFamily() {
         List<String> problems = new ArrayList<>();
-        for (Class<? extends SignatureParametersDto> subtype : registeredSubtypes()) {
+        for (Class<? extends SignatureParametersDto> subtype : ParameterTreeFixture.registeredSubtypes()) {
             SignatureParametersDto root = ParameterTreeFixture.populated(subtype);
             sweep(root, root.getFamily(), subtype.getSimpleName(), problems,
                     EnumSet.noneOf(SignatureParameterGroup.class));
@@ -50,7 +47,7 @@ class SignatureParametersDescribeContractTest {
     @Test
     void everyGroupThatAppliesToAFamilyIsPopulatedByThatFamilysParameters() {
         List<String> problems = new ArrayList<>();
-        for (Class<? extends SignatureParametersDto> subtype : registeredSubtypes()) {
+        for (Class<? extends SignatureParametersDto> subtype : ParameterTreeFixture.registeredSubtypes()) {
             SignatureParametersDto root = ParameterTreeFixture.populated(subtype);
             Set<SignatureParameterGroup> used = EnumSet.noneOf(SignatureParameterGroup.class);
             sweep(root, root.getFamily(), subtype.getSimpleName(), problems, used);
@@ -67,7 +64,7 @@ class SignatureParametersDescribeContractTest {
 
     @Test
     void theDiscriminatorIsNotReportedAsAParameter() {
-        for (Class<? extends SignatureParametersDto> subtype : registeredSubtypes()) {
+        for (Class<? extends SignatureParametersDto> subtype : ParameterTreeFixture.registeredSubtypes()) {
             assertFalse(
                     RecordingSink
                             .of(ParameterTreeFixture.populated(subtype))
@@ -241,16 +238,6 @@ class SignatureParametersDescribeContractTest {
             return element;
         }
         return null;
-    }
-
-    private static List<Class<? extends SignatureParametersDto>> registeredSubtypes() {
-        JsonSubTypes subTypes = SignatureParametersDto.class.getAnnotation(JsonSubTypes.class);
-        assertNotNull(subTypes, "SignatureParametersDto must register its subtypes with @JsonSubTypes");
-        return Arrays
-                .stream(subTypes.value())
-                .map(JsonSubTypes.Type::value)
-                .<Class<? extends SignatureParametersDto>>map(type -> type.asSubclass(SignatureParametersDto.class))
-                .toList();
     }
 
     static final class ForgetfulFixture implements SignatureParameterContainer {
