@@ -48,6 +48,18 @@ class CmpBaseExceptionTest {
         assertEquals(raisedWith, errorDetails);
     }
 
+    @Test
+    void returnsAFixedDetail_whenBuiltFromANonCmpFailureAlone() {
+        // given
+        var connectorFailure = new ConnectorException(ECHOED_SECRET);
+
+        // when
+        String errorDetails = new CmpBaseException(connectorFailure).getErrorDetails();
+
+        // then
+        assertEquals("system failure", errorDetails);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static Stream<Named<Supplier<CmpBaseException>>> cmpFailures() {

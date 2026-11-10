@@ -28,7 +28,7 @@ public class CmpBaseException extends Exception implements PlatformException {
             this.errorDetails = ((CmpBaseException) ex).errorDetails;
         } else {
             this.failureInfo = PKIFailureInfo.systemFailure;
-            this.errorDetails = ex.getLocalizedMessage();
+            this.errorDetails = "system failure";
         }
     }
 
@@ -59,8 +59,8 @@ public class CmpBaseException extends Exception implements PlatformException {
     }
 
     /**
-     * The details the {@link PKIBody} of {@link #toPKIBody()} carries, as the code raising the exception wrote them.
-     * {@link #getMessage()} repeats its cause's message instead, which a connector may have written.
+     * The details of the error as the raising code wrote them, or as the CMP exception it wraps did. Unlike
+     * {@link #getMessage()}, which repeats the message of its cause, they never take a non-CMP cause's text.
      *
      * @return the details of the error
      */
