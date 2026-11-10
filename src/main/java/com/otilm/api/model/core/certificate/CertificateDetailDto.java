@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.certificate;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.core.auth.Resource;
@@ -18,13 +19,19 @@ import lombok.EqualsAndHashCode;
 @Data
 public class CertificateDetailDto extends CertificateDto {
 
-    @Schema(description = "Extended key usages", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Deprecated(since = "2.21.0")
+    @Schema(deprecated = true, description = "Extended key usages. Deprecated, use `typeDetails` instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<String> extendedKeyUsage;
 
-    @Schema(description = "Key usages", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Deprecated(since = "2.21.0")
+    @Schema(deprecated = true, description = "Key usages. Deprecated, use `typeDetails` instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<CertificateKeyUsage> keyUsage;
 
-    @Schema(description = "Certificate subject type", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Deprecated(since = "2.21.0")
+    @Schema(deprecated = true, description = "Certificate subject type. Deprecated, use `typeDetails` instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateSubjectType subjectType;
 
     @Schema(description = "Certificate metadata", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -33,7 +40,9 @@ public class CertificateDetailDto extends CertificateDto {
     @Schema(description = "Base64 encoded Certificate content", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String certificateContent;
 
-    @Schema(description = "Subject alternative names", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Deprecated(since = "2.21.0")
+    @Schema(deprecated = true, description = "Subject alternative names. Deprecated, use `typeDetails` instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<String, List<String>> subjectAlternativeNames;
 
     @Schema(description = "Locations associated to the Certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -64,7 +73,10 @@ public class CertificateDetailDto extends CertificateDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean keystoreAvailable;
 
-    @Schema(description = "Alternative Key Pair of the certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Deprecated(since = "2.21.0")
+    @Schema(deprecated = true,
+            description = "Alternative Key Pair of the certificate. Deprecated, use `typeDetails` instead.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyDto altKey;
 
     @Schema(description = "Certificate request data", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -109,7 +121,17 @@ public class CertificateDetailDto extends CertificateDto {
     @Schema(description = "Information about protocol used to issue the certificate")
     private CertificateProtocolDto protocolInfo;
 
-    @Schema(description = "Parsed ETSI QCStatements extension (RFC 3739 / ETSI EN 319 412-5). "
-            + "Absent when the extension is not present in the certificate.")
+    @Deprecated(since = "2.21.0")
+    @Schema(deprecated = true, description = "Parsed ETSI QCStatements extension (RFC 3739 / ETSI EN 319 412-5). "
+            + "Absent when the extension is not present in the certificate. Deprecated, use `typeDetails` instead.")
     private CertificateQcStatementsDto qcStatements;
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "certificateType")
+    @Schema(description = "Details specific to the certificate type, selected by certificateType",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateTypeDetailsDto typeDetails;
+
+    @Schema(description = "Operations the certificate supports: what its type supports combined with what its "
+            + "authority supports", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<CertificateOperation> supportedOperations = new ArrayList<>();
 }
