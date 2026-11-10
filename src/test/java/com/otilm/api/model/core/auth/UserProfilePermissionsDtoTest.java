@@ -83,13 +83,22 @@ class UserProfilePermissionsDtoTest {
     /** Asserted on the prose deliberately: rewording is allowed, dropping a constraint has to be said here first. */
     @Test
     void documentsTheConstraintsAClientCannotInferFromTheTypes() {
-        String description = property(PROFILE_SCHEMA, "allowedActions").getDescription();
+        assertDocuments("allowedActions", "resource-level grants only", "Object-scoped grants are excluded",
+                "/objects/allowed-actions", "omitted rather than reported with an empty list",
+                "not derivable from allowedListings");
+        assertDocuments("allowedListings", "granted to every user by default",
+                "holds the members action on at least one group", "Certificate, Cryptographic Key, Secret",
+                "does not follow that group rule", "holds the create action on it", "owns at least one",
+                "holds the members action on a group one of its objects is assigned to",
+                "in no group on which the action is denied", "not listed for a user who has none of these");
+    }
 
-        for (String constraint : List
-                .of("resource-level grants only", "Object-scoped grants are excluded",
-                        "omitted rather than reported with an empty list", "not derivable from allowedListings")) {
-            assertTrue(description.contains(constraint),
-                    "the published description no longer states: " + constraint + "\ngot: " + description);
+    private static void assertDocuments(String propertyName, String... constraints) {
+        String description = property(PROFILE_SCHEMA, propertyName).getDescription();
+
+        for (String constraint : constraints) {
+            assertTrue(description.contains(constraint), "the published " + propertyName
+                    + " description no longer states: " + constraint + "\ngot: " + description);
         }
     }
 }
