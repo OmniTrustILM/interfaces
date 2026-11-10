@@ -16,4 +16,9 @@ public class PlatformSettingsUpdateDto implements SettingsDto {
     @Schema(description = "Settings applicable to all certificates in inventory by default")
     private CertificateSettingsUpdateDto certificates;
 
+    @Valid
+    @Schema(description = "Signing settings shared by every Signing Profile; stored as sent when present, so a value "
+            + "left out returns to the platform default")
+    private SigningSettingsDto signing;
+
 }
