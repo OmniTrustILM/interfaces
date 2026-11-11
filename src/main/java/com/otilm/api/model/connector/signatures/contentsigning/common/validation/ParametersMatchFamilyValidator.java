@@ -27,6 +27,6 @@ public class ParametersMatchFamilyValidator
     /** An absent family is left to its own {@code @NotNull} constraint. */
     private static boolean familiesConflict(ComputeDtbsRequestDto value) {
         SignatureParametersDto parameters = value.getSignatureParameters();
-        return parameters != null && value.getFamily() != null && parameters.getFamily() != value.getFamily();
+        return parameters != null && value.getFamily() != null && !value.getFamily().equals(parameters.getFamily());
     }
 }

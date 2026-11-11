@@ -51,7 +51,7 @@ class ContentSigningFormattingControllerContractTest {
     private static final Map<String, String> EXPECTED_POST_PATHS = allPostPaths();
 
     private static final Map<String, String> EXPECTED_GET_PATHS = Map
-            .of("listFormattingAttributes", "/{operation}/attributes");
+            .of("listFormattingAttributes", "/{operation}/attributes", "getContentSigningDeclaration", "/declaration");
 
     /** Cancellation answers 204 with no body, so it is the one route that produces nothing. */
     private static final Set<String> BODYLESS_RESPONSES = Set.of("cancelExtendToLevel");

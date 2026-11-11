@@ -51,7 +51,7 @@ public abstract class SignatureParametersDto implements SignatureParametersInter
      * Refuses to repoint the discriminator.
      */
     public void setFamily(SignatureFamily family) {
-        if (family != this.family) {
+        if (!this.family.equals(family)) {
             throw new IllegalArgumentException("family is fixed to " + this.family + " by " + getClass().getSimpleName()
                     + " and cannot be set to " + family + "; construct the subtype for the family you want");
         }

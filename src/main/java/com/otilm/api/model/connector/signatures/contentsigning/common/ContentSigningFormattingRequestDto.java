@@ -17,21 +17,14 @@ import lombok.ToString;
  * to produce, and the attribute values the operator fixed on the Signing Profile. Nothing is looked up from a previous
  * call.
  * </p>
- *
- * <p>
- * {@code family} is both the format selector and the entitlement guard. A connector image serves only the families its
- * advertised interface codes entitle it to, and answers 422 for any other — it never narrows the request to a family it
- * does support.
- * </p>
  */
 @Getter
 @Setter
 @ToString
 public abstract class ContentSigningFormattingRequestDto {
 
-    @Schema(description = "Signature family this request targets. A connector that is not entitled to serve this family "
-            + "rejects the request with 422 and errorCode PARAMETER_UNSUPPORTED.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Signature family this request targets; a connector rejects a family its declaration does "
+            + "not list with 422 (errorCode `PARAMETER_UNSUPPORTED`)", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "family is required")
     private SignatureFamily family;
 
