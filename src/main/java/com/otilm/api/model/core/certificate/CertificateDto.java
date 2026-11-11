@@ -40,12 +40,12 @@ public class CertificateDto implements Loggable, AttributeProjectable {
     @Schema(description = "Certificate issuer common name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerCommonName;
 
-    @Schema(description = "Issuer DN of the Certificate. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Issuer DN of the Certificate. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerDn;
 
-    @Schema(description = "Subject DN of the Certificate. Absent for certificate types without a distinguished name."
-            + " Also in `typeDetails` of the certificate detail.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Subject DN of the Certificate. Absent for certificate types without a distinguished name.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
     @Schema(description = "Certificate validity start date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -58,19 +58,18 @@ public class CertificateDto implements Loggable, AttributeProjectable {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKeyAlgorithm;
 
-    @Schema(description = "Alternative Public key algorithm. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Alternative Public key algorithm. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altPublicKeyAlgorithm;
 
     @Schema(description = "Certificate signature algorithm", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String signatureAlgorithm;
 
-    @Schema(description = "Certificate alternative signature algorithm. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Certificate alternative signature algorithm. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altSignatureAlgorithm;
 
-    @Schema(description = "Indicator whether the certificate is hybrid. False for types without a hybrid form."
-            + " Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Indicator whether the certificate is hybrid. False for types without a hybrid form.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean hybridCertificate;
 
@@ -78,7 +77,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer keySize;
 
-    @Schema(description = "Certificate key size of the alternative key. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Certificate key size of the alternative key. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer altKeySize;
 
@@ -106,7 +105,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
     @Schema(description = "Certificate type", requiredMode = Schema.RequiredMode.REQUIRED)
     private CertificateType certificateType;
 
-    @Schema(description = "Serial number of the issuer. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Serial number of the issuer. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerSerialNumber;
 
@@ -175,7 +174,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
 
     @Override
     public Serializable toLogData() {
-        return new NameAndUuidDto(this.uuid, this.subjectDn);
+        return new NameAndUuidDto(this.uuid, this.subjectDn != null ? this.subjectDn : this.displayName);
     }
 
     @Override

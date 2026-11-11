@@ -28,14 +28,14 @@ public class CertificateSimpleDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String commonName;
 
-    @Schema(description = "Subject distinguished name. Absent for certificate types without a distinguished name."
-            + " Also in `typeDetails` of the certificate detail.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Subject distinguished name. Absent for certificate types without a distinguished name.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
     @Schema(description = "Issuer common name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerCommonName;
 
-    @Schema(description = "Issuer distinguished name. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Issuer distinguished name. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerDn;
 
@@ -49,14 +49,14 @@ public class CertificateSimpleDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKeyAlgorithm;
 
-    @Schema(description = "Alternative public key algorithm. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Alternative public key algorithm. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altPublicKeyAlgorithm;
 
     @Schema(description = "Signature algorithm", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String signatureAlgorithm;
 
-    @Schema(description = "Alternative signature algorithm. X.509 only. Kept for the list, and also in `typeDetails` of the certificate detail.",
+    @Schema(description = "Alternative signature algorithm. X.509 only; absent for other types.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altSignatureAlgorithm;
 
