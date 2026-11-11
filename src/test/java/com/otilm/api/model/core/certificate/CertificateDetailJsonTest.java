@@ -1,6 +1,5 @@
 package com.otilm.api.model.core.certificate;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
@@ -13,35 +12,35 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class CertificateTypeDetailsJsonTest {
+class CertificateDetailJsonTest {
 
-    // the wire mapper of Core, which leaves a missing typeDetails empty instead of failing on the type id
-    private final ObjectMapper mapper = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY);
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void writesTheTypeDetailsNextToTheCertificateTypeProperty_whenTheCertificateIsX509() throws Exception {
+    void writesTheX509FieldsFlatAtTheTopLevel_whenTheCertificateIsX509() throws Exception {
         // given
-        CertificateDetailDto detail = x509Detail();
+        CertificateDetail detail = x509Detail();
 
         // when
         JsonNode json = mapper.readTree(mapper.writeValueAsString(detail));
 
         // then
         assertEquals("X.509", json.get("certificateType").asText());
-        assertEquals("CN=holder", json.get("typeDetails").get("subjectDn").asText());
-        assertEquals("digitalSignature", json.get("typeDetails").get("keyUsage").get(0).asText());
+        assertEquals("CN=holder", json.get("subjectDn").asText());
+        assertEquals("digitalSignature", json.get("keyUsage").get(0).asText());
+        assertFalse(json.has("typeDetails"));
     }
 
     @Test
-    void writesTheCertificateTypePropertyOnce_whenTheCertificateHasTypeDetails() throws Exception {
+    void writesTheCertificateTypePropertyOnce_whenTheCertificateIsX509() throws Exception {
         // given
-        CertificateDetailDto detail = x509Detail();
+        CertificateDetail detail = x509Detail();
 
         // when
         String json = mapper.writeValueAsString(detail);
@@ -51,57 +50,61 @@ class CertificateTypeDetailsJsonTest {
     }
 
     @Test
-    void readsTheX509Subtype_whenTheJsonCarriesTheX509CertificateType() throws Exception {
+    void readsTheX509Subclass_whenTheJsonCarriesTheX509CertificateType() throws Exception {
         // given
         String json = mapper.writeValueAsString(x509Detail());
 
         // when
-        CertificateDetailDto read = mapper.readValue(json, CertificateDetailDto.class);
+        CertificateDetail read = mapper.readValue(json, CertificateDetail.class);
 
         // then
-        X509CertificateTypeDetailsDto details = assertInstanceOf(X509CertificateTypeDetailsDto.class,
-                read.getTypeDetails());
-        assertEquals("CN=holder", details.getSubjectDn());
-        assertEquals(List.of(CertificateKeyUsage.DIGITAL_SIGNATURE), details.getKeyUsage());
-        assertTrue(details.isHybridCertificate());
-        assertEquals("ML-DSA-65", details.getAltSignatureAlgorithm());
+        X509CertificateDetail x509 = assertInstanceOf(X509CertificateDetail.class, read);
+        assertEquals("CN=holder", x509.getSubjectDn());
+        assertEquals(List.of(CertificateKeyUsage.DIGITAL_SIGNATURE), x509.getKeyUsage());
+        assertTrue(x509.isHybridCertificate());
+        assertEquals("ML-DSA-65", x509.getAltSignatureAlgorithm());
     }
 
     @Test
-    void leavesTypeDetailsEmpty_whenAnOlderResponseHasNone() throws Exception {
-        // given
-        String olderResponse = "{\"uuid\":\"u\",\"certificateType\":\"X.509\",\"subjectDn\":\"CN=holder\"}";
+    void readsAResponseOfBefore_whenItCarriesTheFlatX509Fields() throws Exception {
+        // given — the shape the certificate detail had before the type became a subclass
+        String olderResponse = """
+                {"uuid":"u","certificateType":"X.509","subjectDn":"CN=holder","keyUsage":["digitalSignature"],
+                 "extendedKeyUsage":["1.3.6.1.5.5.7.3.1"],"subjectAlternativeNames":{"dnsName":["holder.example"]},
+                 "keystoreAvailable":false}
+                """;
 
         // when
-        CertificateDetailDto read = mapper.readValue(olderResponse, CertificateDetailDto.class);
+        CertificateDetail read = mapper.readValue(olderResponse, CertificateDetail.class);
 
         // then
-        assertNull(read.getTypeDetails());
-        assertEquals("CN=holder", read.getSubjectDn());
-        assertTrue(read.getSupportedOperations().isEmpty());
+        X509CertificateDetail x509 = assertInstanceOf(X509CertificateDetail.class, read);
+        assertEquals(List.of(CertificateKeyUsage.DIGITAL_SIGNATURE), x509.getKeyUsage());
+        assertEquals(List.of("1.3.6.1.5.5.7.3.1"), x509.getExtendedKeyUsage());
+        assertEquals(List.of("holder.example"), x509.getSubjectAlternativeNames().get("dnsName"));
+        assertTrue(x509.getSupportedOperations().isEmpty());
     }
 
     @Test
-    void readsTheRequestTypeDetails_whenTheRequestIsX509() throws Exception {
+    void readsTheX509RequestSubclass_whenTheRequestIsX509() throws Exception {
         // given
-        String json = "{\"certificateType\":\"X.509\",\"typeDetails\":{\"subjectDn\":\"CN=holder\"}}";
+        String json = "{\"certificateType\":\"X.509\",\"subjectDn\":\"CN=holder\"}";
 
         // when
-        CertificateRequestDto read = mapper.readValue(json, CertificateRequestDto.class);
+        CertificateRequestDetail read = mapper.readValue(json, CertificateRequestDetail.class);
 
         // then
-        X509CertificateRequestTypeDetailsDto details = assertInstanceOf(X509CertificateRequestTypeDetailsDto.class,
-                read.getTypeDetails());
-        assertEquals("CN=holder", details.getSubjectDn());
+        X509CertificateRequestDetail x509 = assertInstanceOf(X509CertificateRequestDetail.class, read);
+        assertEquals("CN=holder", x509.getSubjectDn());
     }
 
     @Test
-    void readsNoSignatureAlgorithm_whenARequestOfATypeWithoutSignedRequestsOmitsIt() throws Exception {
+    void readsNoSignatureAlgorithm_whenARequestOmitsIt() throws Exception {
         // given
-        String json = "{\"certificateType\":\"SSH\",\"displayName\":\"ssh-key-id\"}";
+        String json = "{\"certificateType\":\"X.509\",\"displayName\":\"holder\"}";
 
         // when
-        CertificateRequestDto read = mapper.readValue(json, CertificateRequestDto.class);
+        CertificateRequestDetail read = mapper.readValue(json, CertificateRequestDetail.class);
 
         // then
         assertNull(read.getSignatureAlgorithm());
@@ -181,7 +184,7 @@ class CertificateTypeDetailsJsonTest {
     @Test
     void roundTripsTheOperationCode_whenWritingTheSupportedOperations() throws Exception {
         // given
-        CertificateDetailDto detail = x509Detail();
+        CertificateDetail detail = x509Detail();
         detail.setSupportedOperations(List.of(CertificateOperation.REVOKE, CertificateOperation.ENROLL_ACME));
 
         // when
@@ -202,17 +205,15 @@ class CertificateTypeDetailsJsonTest {
         assertThrows(IllegalArgumentException.class, () -> CertificateOperation.fromCode(unknownCode));
     }
 
-    private static CertificateDetailDto x509Detail() {
-        X509CertificateTypeDetailsDto details = new X509CertificateTypeDetailsDto();
-        details.setSubjectDn("CN=holder");
-        details.setHybridCertificate(true);
-        details.setAltSignatureAlgorithm("ML-DSA-65");
-        details.setKeyUsage(List.of(CertificateKeyUsage.DIGITAL_SIGNATURE));
-        details.setSubjectAlternativeNames(Map.of("dnsName", List.of("holder.example")));
-        CertificateDetailDto detail = new CertificateDetailDto();
+    private static CertificateDetail x509Detail() {
+        X509CertificateDetail detail = new X509CertificateDetail();
         detail.setUuid("u");
         detail.setCertificateType(CertificateType.X509);
-        detail.setTypeDetails(details);
+        detail.setSubjectDn("CN=holder");
+        detail.setHybridCertificate(true);
+        detail.setAltSignatureAlgorithm("ML-DSA-65");
+        detail.setKeyUsage(List.of(CertificateKeyUsage.DIGITAL_SIGNATURE));
+        detail.setSubjectAlternativeNames(Map.of("dnsName", List.of("holder.example")));
         return detail;
     }
 }

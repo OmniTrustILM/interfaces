@@ -20,7 +20,7 @@ import com.otilm.api.model.client.raprofile.RaProfileScepDetailResponseDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.core.certificate.CertificateDetailDto;
+import com.otilm.api.model.core.certificate.CertificateDetail;
 import com.otilm.api.model.core.raprofile.RaProfileCertificateRequestAttributesUpdateDto;
 import com.otilm.api.model.core.raprofile.RaProfileCertificateValidationSettingsUpdateDto;
 import com.otilm.api.model.core.raprofile.RaProfileDto;
@@ -501,7 +501,7 @@ public interface RAProfileManagementController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @GetMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/caCertificates",
             produces = {"application/json"})
-    List<CertificateDetailDto> getAuthorityCertificateChain(
+    List<CertificateDetail> getAuthorityCertificateChain(
             @Parameter(description = "Authority instance UUID") @PathVariable String authorityUuid,
             @Parameter(description = "RA profile UUID") @PathVariable String raProfileUuid)
             throws ConnectorException, CertificateException, NoSuchAlgorithmException, NotFoundException;
