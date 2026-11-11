@@ -35,6 +35,8 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -109,6 +111,17 @@ class ContentSigningFormattingApiClientTest {
 
         assertEquals("Connector returned an invalid content-signing declaration: families[0].levels: must run up from "
                 + "SIGNED without a gap, but TIMESTAMPED comes where SIGNED belongs", fault.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{}", "{ \"families\": [] }"})
+    void getDeclaration_reportsADeclarationWithoutFamiliesAsAConnectorFault(String familiesless) {
+        stubGet(BASE + "/declaration", familiesless);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+
+        assertEquals("Connector returned an invalid content-signing declaration: families: must not be empty",
+                fault.getMessage());
     }
 
     @Test

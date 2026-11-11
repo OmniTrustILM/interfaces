@@ -43,9 +43,6 @@ public class ContentSigningFormattingApiClient extends BaseApiClient implements 
         this.declarationValidator = new ContentSigningDeclarationValidator(validator);
     }
 
-    /**
-     * The declaration is read while connecting, where only a {@link ConnectorException} counts as a connector fault.
-     */
     @Override
     public ContentSigningDeclarationDto getDeclaration(ApiClientConnectorInfo connector) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);

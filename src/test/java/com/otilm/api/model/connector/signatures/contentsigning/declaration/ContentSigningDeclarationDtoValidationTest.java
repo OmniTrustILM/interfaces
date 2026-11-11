@@ -34,12 +34,17 @@ class ContentSigningDeclarationDtoValidationTest {
         assertEquals(List.of(), violations(declarationOf(mrtd())));
     }
 
-    @Test
-    void aDeclarationWithoutFamiliesIsInvalid() {
-        ContentSigningDeclarationDto withoutFamilies = declarationOf();
-        withoutFamilies.setFamilies(null);
+    @ParameterizedTest
+    @NullAndEmptySource
+    void aDeclarationWithoutFamiliesIsInvalid(List<SignatureFamilyDeclarationDto> noFamilies) {
+        ContentSigningDeclarationDto withoutFamilies = new ContentSigningDeclarationDto(noFamilies);
 
-        assertEquals(List.of("families: must not be null"), violations(withoutFamilies));
+        assertEquals(List.of("families: must not be empty"), violations(withoutFamilies));
+    }
+
+    @Test
+    void anEmptyDeclarationObjectIsInvalid() {
+        assertEquals(List.of("families: must not be empty"), violations(new ContentSigningDeclarationDto()));
     }
 
     @Test
