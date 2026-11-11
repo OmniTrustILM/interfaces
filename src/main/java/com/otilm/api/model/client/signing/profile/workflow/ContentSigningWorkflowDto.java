@@ -56,11 +56,6 @@ public class ContentSigningWorkflowDto extends WorkflowDto {
             + "Set when maxLevel is TIMESTAMPED or higher.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TimestampSourceDto timestampSource;
 
-    @Schema(description = "Largest document accepted for signing, in bytes. Enforced when an ILM-managed "
-            + "signing request arrives. Null when no profile-level cap applies.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "5242880")
-    private Long documentSizeCap;
-
     @Schema(description = "Demand the nonRepudiation key-usage bit specifically, for commitment-grade profiles. "
             + "Applies to ILM-managed signing only; delegated profile gets always false.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "false")
