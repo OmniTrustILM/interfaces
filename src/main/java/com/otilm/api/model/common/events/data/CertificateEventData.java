@@ -13,10 +13,16 @@ public class CertificateEventData implements EventData {
     @Schema(description = "SHA256 fingerprint of the Certificate", requiredMode = Schema.RequiredMode.REQUIRED)
     private String fingerprint;
 
-    @Schema(description = "Certificate serial number", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Name to show for the certificate: the common name of an X.509 certificate, the "
+            + "identifier of a certificate type without one", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String displayName;
+
+    @Schema(description = "Certificate serial number. Absent for certificate types without one, and for a "
+            + "certificate that is registered and not yet issued", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String serialNumber;
 
-    @Schema(description = "Subject DN of the Certificate", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Subject DN of the Certificate. Absent for certificate types without a distinguished name",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
     @Schema(description = "Issuer DN of the Certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -24,8 +30,8 @@ public class CertificateEventData implements EventData {
 
     @Override
     public String toString() {
-        return "Certificate: {certificateUuid=%s, fingerprint='%s', serialNumber='%s', subjectDn='%s', issuerDn='%s'}"
-                .formatted(certificateUuid, fingerprint, serialNumber, subjectDn, issuerDn);
+        return "Certificate: {certificateUuid=%s, fingerprint='%s', displayName='%s', serialNumber='%s', subjectDn='%s', issuerDn='%s'}"
+                .formatted(certificateUuid, fingerprint, displayName, serialNumber, subjectDn, issuerDn);
     }
 
 }
