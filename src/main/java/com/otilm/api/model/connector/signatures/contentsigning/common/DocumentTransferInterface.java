@@ -13,10 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * {@link DiscoveredItemPayloadInterface}.
  * </p>
  */
-@Schema(name = "DocumentTransfer", description = "Document transport for a formatting operation. The required "
-        + "transferMode property is the discriminator selecting the transport: the document inline, or only "
-        + "its digest for a signature family that can sign from one. An inline document is bounded by the size cap "
-        + "configured on the Signing Profile, which always stays below the platform's 16 MiB request ceiling.",
+@Schema(name = "DocumentTransfer",
+        description = "Document transport for a formatting operation. The required "
+                + "transferMode property is the discriminator selecting the transport: the document inline, or only "
+                + "its digest for a signature family that can sign from one.",
         type = "object", discriminatorProperty = "transferMode",
         discriminatorMapping = {
                 @DiscriminatorMapping(value = DocumentTransferMode.Codes.INLINE,

@@ -39,6 +39,6 @@ public class ComputeDtbsResponseDto {
     @NotNull(message = "formattingContext is required")
     @Schema(description = "Whatever the connector needs to complete this signature once the signature value comes "
             + "back, base64-encoded in JSON. The platform replays it verbatim to embedSignatureValue and never stores "
-            + "it, and it counts toward the request size ceiling.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "it.", requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] formattingContext;
 }
