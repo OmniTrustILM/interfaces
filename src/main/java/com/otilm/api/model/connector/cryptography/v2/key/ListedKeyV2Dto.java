@@ -25,8 +25,9 @@ import lombok.ToString;
 @Schema(implementation = ListedKeyV2Dto.OpenApiView.class)
 public abstract sealed class ListedKeyV2Dto permits ListedSecretKeyV2Dto, ListedKeyPairV2Dto {
 
-    @Schema(description = "Label the token keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private String label;
+    @Schema(description = "Name the token shows for the key, such as a PKCS#11 label, a keystore alias or a KMS "
+            + "key name; it may be absent or shared by several keys", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String storageName;
 
     public abstract KeyRequestType getKeyRequestType();
 
@@ -41,11 +42,11 @@ public abstract sealed class ListedKeyV2Dto permits ListedSecretKeyV2Dto, Listed
                     @DiscriminatorMapping(value = KeyRequestType.Codes.SECRET, schema = ListedSecretKeyV2Dto.class),
                     @DiscriminatorMapping(value = KeyRequestType.Codes.KEY_PAIR, schema = ListedKeyPairV2Dto.class)},
             oneOf = {ListedSecretKeyV2Dto.class, ListedKeyPairV2Dto.class})
-    @JsonPropertyOrder({"keyRequestType", "label"})
+    @JsonPropertyOrder({"keyRequestType", "storageName"})
     interface OpenApiView {
 
         KeyRequestType getKeyRequestType();
 
-        String getLabel();
+        String getStorageName();
     }
 }

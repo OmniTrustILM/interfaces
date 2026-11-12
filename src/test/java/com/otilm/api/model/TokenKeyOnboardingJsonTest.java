@@ -128,6 +128,18 @@ class TokenKeyOnboardingJsonTest {
                 statuses);
     }
 
+    @Test
+    void anEntryNamesItsKeyByTheStorageName() throws Exception {
+        // given
+        String json = "{\"storageName\":\"signer\",\"status\":\"onboardable\"}";
+
+        // when
+        TokenKeyDto entry = mapper.readValue(json, TokenKeyDto.class);
+
+        // then
+        assertEquals("signer", mapper.valueToTree(entry).path("storageName").asText());
+    }
+
     private static List<Object> dataOf(MetadataAttribute attribute) {
         List<? extends AttributeContent> content = attribute.getContent();
         return content.stream().<Object>map(AttributeContent::getData).toList();

@@ -50,7 +50,7 @@ class ListKeysResponseValidationTest {
 
     private static UnusableKeyV2Dto unusable(UnusableKeyReason reason) {
         UnusableKeyV2Dto key = new UnusableKeyV2Dto();
-        key.setLabel("shared");
+        key.setStorageName("shared");
         key.setReason(reason);
         key.setKeyData(validPrivateKeyDataResponse().getKeyData());
         return key;
@@ -65,7 +65,7 @@ class ListKeysResponseValidationTest {
     private static ListedKeyPairV2Dto listed(String keyId) {
         ListedKeyPairV2Dto pair = new ListedKeyPairV2Dto();
         pair.setKeyPairMeta(handle(keyId));
-        pair.setLabel("signer " + keyId);
+        pair.setStorageName("signer " + keyId);
         pair.setPrivateKeyData(validPrivateKeyDataResponse());
         pair.setPublicKeyData(validPublicKeyDataResponse());
         return pair;
@@ -74,7 +74,7 @@ class ListKeysResponseValidationTest {
     private static ListedSecretKeyV2Dto listedSecretKey(String keyId) {
         ListedSecretKeyV2Dto key = new ListedSecretKeyV2Dto();
         key.setKeyMeta(handle(keyId));
-        key.setLabel("wrapping " + keyId);
+        key.setStorageName("wrapping " + keyId);
         key.setKeyData(validSecretKeyData());
         return key;
     }
