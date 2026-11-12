@@ -13,7 +13,7 @@ public class CertificateContentDto {
             + "identifier of a certificate type without one", requiredMode = Schema.RequiredMode.REQUIRED)
     private String displayName;
 
-    @Schema(description = "Certificate common name. Absent for certificate types without a common name",
+    @Schema(description = "Certificate common name. Absent when the certificate has no common name: its type has none, or the subject of an X.509 certificate has none (a registration with only alternative names)",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String commonName;
 

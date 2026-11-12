@@ -24,11 +24,11 @@ public class CertificateSimpleDto {
             + "identifier of a certificate type without one", requiredMode = Schema.RequiredMode.REQUIRED)
     private String displayName;
 
-    @Schema(description = "Common name. Absent for certificate types without a common name",
+    @Schema(description = "Common name. Absent when the certificate has no common name: its type has none, or the subject of an X.509 certificate has none (a registration with only alternative names)",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String commonName;
 
-    @Schema(description = "Subject distinguished name. Absent for certificate types without a distinguished name.",
+    @Schema(description = "Subject distinguished name. Absent when the certificate has no subject distinguished name: its type has none, or an X.509 certificate was registered with only alternative names.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
@@ -45,7 +45,7 @@ public class CertificateSimpleDto {
     @Schema(description = "Certificate fingerprint", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
 
-    @Schema(description = "Public key algorithm. Absent for certificate types without a public key",
+    @Schema(description = "Public key algorithm. Absent when the certificate has no public key: its type has none, or the certificate is registered and not yet issued",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKeyAlgorithm;
 

@@ -30,7 +30,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
             + "identifier of a certificate type without one", requiredMode = Schema.RequiredMode.REQUIRED)
     private String displayName;
 
-    @Schema(description = "Certificate common name. Absent for certificate types without a common name",
+    @Schema(description = "Certificate common name. Absent when the certificate has no common name: its type has none, or the subject of an X.509 certificate has none (a registration with only alternative names)",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String commonName;
 
@@ -44,7 +44,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerDn;
 
-    @Schema(description = "Subject DN of the Certificate. Absent for certificate types without a distinguished name.",
+    @Schema(description = "Subject DN of the Certificate. Absent when the certificate has no subject distinguished name: its type has none, or an X.509 certificate was registered with only alternative names.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
@@ -54,7 +54,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
     @Schema(description = "Certificate expiration date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Date notAfter;
 
-    @Schema(description = "Public key algorithm. Absent for certificate types without a public key",
+    @Schema(description = "Public key algorithm. Absent when the certificate has no public key: its type has none, or the certificate is registered and not yet issued",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKeyAlgorithm;
 
@@ -73,7 +73,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean hybridCertificate;
 
-    @Schema(description = "Certificate key size. Absent for certificate types without a public key",
+    @Schema(description = "Certificate key size. Absent when the certificate has no public key: its type has none, or the certificate is registered and not yet issued",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer keySize;
 
@@ -179,7 +179,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
 
     @Override
     public List<String> toLogResourceObjectsNames() {
-        return List.of(serialNumber);
+        return List.of(serialNumber != null ? serialNumber : displayName);
     }
 
     @Override

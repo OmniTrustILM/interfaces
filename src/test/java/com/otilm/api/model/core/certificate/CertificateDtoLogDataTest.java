@@ -2,6 +2,7 @@ package com.otilm.api.model.core.certificate;
 
 import com.otilm.api.model.common.NameAndUuidDto;
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -37,5 +38,18 @@ class CertificateDtoLogDataTest {
 
         // then
         assertEquals("ssh-key-id", assertInstanceOf(NameAndUuidDto.class, logData).getName());
+    }
+
+    @Test
+    void namesTheCertificateByDisplayNameInTheResourceNames_whenItHasNoSerialNumber() {
+        // given
+        CertificateDto certificate = new CertificateDto();
+        certificate.setDisplayName("ssh-key-id");
+
+        // when
+        List<String> names = certificate.toLogResourceObjectsNames();
+
+        // then
+        assertEquals(List.of("ssh-key-id"), names);
     }
 }
