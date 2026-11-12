@@ -30,9 +30,9 @@ public class ClientCertificateRenewRequestDto {
     @Schema(description = "Certificate signing request encoded as Base64 string. If not provided, Existing CSR will be used")
     private String request;
 
-    @Schema(description = "Certificate signing request format", defaultValue = "pkcs10")
-    @Builder.Default
-    private CertificateRequestFormat format = CertificateRequestFormat.PKCS10;
+    @Schema(description = "Format of the request, which says how to read it. When absent, the default format of the "
+            + "certificate type applies: pkcs10 for X.509", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestFormat format;
 
     @Schema(description = "Renew-specific dynamic attributes, as listed by "
             + "GET /v2/operations/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/attributes/renew. "

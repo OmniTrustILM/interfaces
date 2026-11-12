@@ -29,7 +29,7 @@ class CertificateRegistrationDetailDtoTest {
     @Test
     void certificateDetailExposesRegistrationBlock() {
         CertificateRegistrationDetailDto reg = new CertificateRegistrationDetailDto();
-        CertificateDetailDto detail = new CertificateDetailDto();
+        CertificateDetail detail = new X509CertificateDetail();
         detail.setRegistration(reg);
         assertSame(reg, detail.getRegistration());
     }

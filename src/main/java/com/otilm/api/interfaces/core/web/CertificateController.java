@@ -28,7 +28,7 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.core.certificate.CertificateChainDownloadResponseDto;
 import com.otilm.api.model.core.certificate.CertificateChainResponseDto;
 import com.otilm.api.model.core.certificate.CertificateContentDto;
-import com.otilm.api.model.core.certificate.CertificateDetailDto;
+import com.otilm.api.model.core.certificate.CertificateDetail;
 import com.otilm.api.model.core.certificate.CertificateDownloadResponseDto;
 import com.otilm.api.model.core.certificate.CertificateEventHistoryDto;
 import com.otilm.api.model.core.certificate.CertificateFormat;
@@ -110,7 +110,7 @@ public interface CertificateController extends AuthProtectedController {
     @Operation(summary = "Get Certificate Details")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Certificate detail retrieved")})
     @GetMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    CertificateDetailDto getCertificate(@Parameter(description = "Certificate UUID") @PathVariable UUID uuid)
+    CertificateDetail getCertificate(@Parameter(description = "Certificate UUID") @PathVariable UUID uuid)
             throws NotFoundException, CertificateException, IOException;
 
     @Operation(summary = "Download Certificate")
@@ -348,7 +348,7 @@ public interface CertificateController extends AuthProtectedController {
                     description = "Certificate request submit, certificate created and ready to be issued")})
     @PostMapping(path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    CertificateDetailDto submitCertificateRequest(@RequestBody ClientCertificateRequestDto request)
+    CertificateDetail submitCertificateRequest(@RequestBody ClientCertificateRequestDto request)
             throws ValidationException, ConnectorException, CertificateException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, NoSuchProviderException, AttributeException, CertificateRequestException,
             NotFoundException;
