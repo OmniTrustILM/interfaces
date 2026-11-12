@@ -13,7 +13,7 @@ import com.otilm.api.model.client.certificate.CancelPendingCertificateRequestDto
 import com.otilm.api.model.client.certificate.ManuallyIssueCertificateRequestDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.core.certificate.CertificateDetailDto;
+import com.otilm.api.model.core.certificate.CertificateDetail;
 import com.otilm.api.model.core.v2.AvailableOperationsDto;
 import com.otilm.api.model.core.v2.ClientCertificateDataResponseDto;
 import com.otilm.api.model.core.v2.ClientCertificateIssueRequestDto;
@@ -330,7 +330,7 @@ public interface ClientOperationController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/certificates/{certificateUuid}/issue/finalize", consumes = {"application/json"},
             produces = {"application/json"})
-    CertificateDetailDto manuallyIssueCertificate(
+    CertificateDetail manuallyIssueCertificate(
             @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
             @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
             @Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,
@@ -374,7 +374,7 @@ public interface ClientOperationController extends AuthProtectedController {
                                     value = "[\"Certificate is not in a pending state\",\"Authority refused to cancel: CA does not support cancellation\"]")}))})
     @PostMapping(path = "/certificates/{certificateUuid}/cancel", consumes = {"application/json"},
             produces = {"application/json"})
-    CertificateDetailDto cancelPendingCertificateOperation(
+    CertificateDetail cancelPendingCertificateOperation(
             @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
             @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
             @Parameter(description = "Certificate UUID") @PathVariable String certificateUuid,

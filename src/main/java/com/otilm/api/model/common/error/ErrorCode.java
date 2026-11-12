@@ -44,8 +44,6 @@ public enum ErrorCode {
     // Document handling — raised by the content-signing formatting contract.
     DOCUMENT_MALFORMED(ProblemTypeCategory.CONNECTOR, null, "Document cannot be parsed as the declared format",
             HttpStatus.UNPROCESSABLE_CONTENT, false),
-    DOCUMENT_TOO_LARGE(ProblemTypeCategory.CONNECTOR, null, "Document exceeds the size the connector accepts",
-            HttpStatus.CONTENT_TOO_LARGE, false),
     SIGNATURE_NOT_FOUND(ProblemTypeCategory.CONNECTOR, null, "Document contains no signature this operation can act on",
             HttpStatus.UNPROCESSABLE_CONTENT, false),
     PARAMETER_UNSUPPORTED(ProblemTypeCategory.CONNECTOR, null,

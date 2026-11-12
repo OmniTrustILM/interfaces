@@ -502,15 +502,6 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
-    void aDelegatedProfileCarryingADocumentSizeCapIsAccepted() {
-        ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setDocumentSizeCap(1L);
-
-        assertFalse(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)),
-                "workflow.documentSizeCap"));
-    }
-
-    @Test
     void aManagedProfileAtSignedNeedsNoTimestampSource() {
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(managedScheme(), contentSigningWorkflow(SignatureLevel.SIGNED)));
@@ -539,27 +530,5 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(delegatedScheme(), workflow));
 
         assertTrue(hasViolationWithMessage(violations, "timestampSource must be omitted for delegated signing"));
-    }
-
-    @Test
-    void aNonPositiveDocumentSizeCapIsRejected() {
-        ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(SignatureLevel.SIGNED);
-        workflow.setDocumentSizeCap(0L);
-
-        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
-                .validate(profileRequest(managedScheme(), workflow));
-
-        assertTrue(hasViolationOn(violations, "workflow.documentSizeCap"));
-    }
-
-    @Test
-    void aPositiveDocumentSizeCapIsAccepted() {
-        ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(SignatureLevel.SIGNED);
-        workflow.setDocumentSizeCap(1L);
-
-        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
-                .validate(profileRequest(managedScheme(), workflow));
-
-        assertFalse(hasViolationOn(violations, "workflow.documentSizeCap"));
     }
 }

@@ -123,10 +123,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             + "digestOnly. An entitlement refusal is the 422 below instead.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
                             + "`DOCUMENT_SIGNING_FORBIDDEN` — the document forbids the requested signature, such as a "
@@ -163,10 +159,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Replayed formattingContext exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `DOCUMENT_MALFORMED` — the replayed formattingContext cannot be interpreted.\n- "
                             + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
@@ -189,10 +181,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "400",
                     description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
                             + "code",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -219,10 +207,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to attach the timestamp "
                             + "to.\n- `DOCUMENT_MALFORMED` — the document or token cannot be parsed.\n- "
@@ -247,10 +231,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to timestamp.\n- "
                             + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
@@ -273,10 +253,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "400",
                     description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
                             + "code",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -317,10 +293,6 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "400",
                     description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
                             + "code",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
