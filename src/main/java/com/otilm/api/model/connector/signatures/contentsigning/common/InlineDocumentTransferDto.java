@@ -11,11 +11,11 @@ import java.util.Arrays;
  */
 @JsonIgnoreProperties(value = "transferMode", allowGetters = true)
 @Schema(name = "InlineDocumentTransfer", description = "Document transport carrying the document itself")
-public record InlineDocumentTransferDto(@NotNull(message = "document is required") @Schema(
-        description = "The document itself. Base64-encoded in JSON. "
-                + "Bounded by the Signing Profile's document size cap; a connector that receives a larger document "
-                + "answers 413 with errorCode DOCUMENT_TOO_LARGE rather than attempting to format it.",
-        requiredMode = Schema.RequiredMode.REQUIRED) byte[] document) implements DocumentTransferDto {
+public record InlineDocumentTransferDto(
+        @NotNull(message = "document is required") @Schema(description = "The document itself. Base64-encoded in JSON.",
+                requiredMode = Schema.RequiredMode.REQUIRED) byte[] document)
+        implements
+            DocumentTransferDto {
 
     @Override
     public DocumentTransferMode getTransferMode() {
