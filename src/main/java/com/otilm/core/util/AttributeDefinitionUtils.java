@@ -678,6 +678,9 @@ public class AttributeDefinitionUtils {
     private static void validateFloatRangeConstraint(List<? extends AttributeContent> contents,
             List<ValidationError> errors, String label, RangeAttributeConstraintData constraintData,
             String errorMessage) {
+        if (hasNoBounds(constraintData)) {
+            return;
+        }
         Integer from = constraintData.getFrom();
         Integer to = constraintData.getTo();
         for (AttributeContent value : contents) {
@@ -691,6 +694,9 @@ public class AttributeDefinitionUtils {
     private static void validateIntegerRangeConstraint(List<? extends AttributeContent> contents,
             List<ValidationError> errors, String label, RangeAttributeConstraintData constraintData,
             String errorMessage) {
+        if (hasNoBounds(constraintData)) {
+            return;
+        }
         Integer from = constraintData.getFrom();
         Integer to = constraintData.getTo();
         for (AttributeContent value : contents) {
@@ -699,6 +705,11 @@ public class AttributeDefinitionUtils {
                 errors.add(rangeViolation(number, label, from, to, errorMessage));
             }
         }
+    }
+
+    /** A range that states no bound restricts nothing, so the content is left unread and is never cast. */
+    private static boolean hasNoBounds(RangeAttributeConstraintData constraintData) {
+        return constraintData == null || (constraintData.getFrom() == null && constraintData.getTo() == null);
     }
 
     /** Range bounds are inclusive; the constraint's own error message, when set, explains the violation. */

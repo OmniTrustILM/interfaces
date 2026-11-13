@@ -633,6 +633,11 @@ class AttributeDefinitionUtilsTest {
         RangeAttributeConstraintData data = new RangeAttributeConstraintData();
         data.setFrom(from);
         data.setTo(to);
+        return rangeErrors(contentType, data, errorMessage, List.of(content));
+    }
+
+    private static List<String> rangeErrors(AttributeContentType contentType, RangeAttributeConstraintData data,
+            String errorMessage, List<BaseAttributeContentV2<?>> contents) {
         RangeAttributeConstraint constraint = new RangeAttributeConstraint();
         constraint.setData(data);
         constraint.setErrorMessage(errorMessage);
@@ -647,7 +652,7 @@ class AttributeDefinitionUtilsTest {
         definition.setConstraints(List.of(constraint));
 
         return AttributeDefinitionUtils
-                .validateConstraints(definition, List.of(content))
+                .validateConstraints(definition, contents)
                 .stream()
                 .map(ValidationError::getErrorDescription)
                 .toList();
@@ -699,6 +704,21 @@ class AttributeDefinitionUtilsTest {
         Assertions
                 .assertEquals(List.of("Value 101 of attribute Parallel executions must be between 1 and 100"),
                         rangeErrors(AttributeContentType.INTEGER, 1, 100, " ", new IntegerAttributeContentV2(101)));
+    }
+
+    @Test
+    void testValidateConstraints_RangeWithoutBoundsDoesNotCastContent() {
+        RangeAttributeConstraintData noBounds = new RangeAttributeConstraintData();
+        List<BaseAttributeContentV2<?>> doubleContent = List.of(new BaseAttributeContentV2<Double>(null, 1.5d));
+
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.FLOAT, noBounds, null, doubleContent));
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.INTEGER, noBounds, null, doubleContent));
+    }
+
+    @Test
+    void testValidateConstraints_RangeWithoutDataAndWithoutContent() {
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.FLOAT, null, null, List.of()));
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.INTEGER, null, null, List.of()));
     }
 
     @Test
