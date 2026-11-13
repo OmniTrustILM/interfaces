@@ -134,7 +134,7 @@ class ContentSigningDeclarationDtoValidationTest {
         SignatureFamilyDeclarationDto unsignable = pades(SignatureLevel.SIGNED);
         unsignable.setSignatureAlgorithms(Set.of());
 
-        assertEquals(List.of("families[0].signatureAlgorithms: size must be between 1 and 2147483647"),
+        assertEquals(List.of("families[0].signatureAlgorithms: must not be empty when present"),
                 violations(declarationOf(unsignable)));
     }
 

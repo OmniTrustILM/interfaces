@@ -12,7 +12,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Set;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,8 +23,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Schema(name = "SignatureFamilyDeclaration", description = "Signature family a formatting connector serves")
 public class SignatureFamilyDeclarationDto {
 
@@ -52,7 +55,7 @@ public class SignatureFamilyDeclarationDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<@NotNull DocumentTransferMode> transferModes;
 
-    @Size(min = 1)
+    @Size(min = 1, message = "must not be empty when present")
     @Schema(description = "Signature algorithms the family supports, at least one; absent when the family accepts "
             + "every algorithm the platform can sign with", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Set<@NotNull SignatureAlgorithm> signatureAlgorithms;

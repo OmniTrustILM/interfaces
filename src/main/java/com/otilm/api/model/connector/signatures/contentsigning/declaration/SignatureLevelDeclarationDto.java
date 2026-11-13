@@ -19,7 +19,9 @@ import lombok.ToString;
 public class SignatureLevelDeclarationDto {
 
     @NotNull
-    @Schema(description = "Level reached", requiredMode = Schema.RequiredMode.REQUIRED)
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "Level reached", requiredMode = Schema.RequiredMode.REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
     private SignatureLevel level;
 
     @NotBlank

@@ -308,7 +308,7 @@ public interface SigningProfileController extends AuthProtectedController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listContentSigningFormattingConnectorAttributes(
             @Parameter(description = "Signature Formatting Provider UUID") @PathVariable UUID connectorUuid,
-            @Parameter(description = "Signature family the Signing Profile produces",
+            @Parameter(description = "Signature family the Signing Profile produces: a code this connector declares",
                     in = ParameterIn.QUERY) @RequestParam SignatureFamily family,
             @Parameter(description = "Highest signature level the Signing Profile may reach",
                     in = ParameterIn.QUERY) @RequestParam SignatureLevel maxLevel,
