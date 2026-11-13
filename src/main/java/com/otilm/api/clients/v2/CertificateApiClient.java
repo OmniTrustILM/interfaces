@@ -2,6 +2,7 @@ package com.otilm.api.clients.v2;
 
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.clients.BaseApiClient;
+import com.otilm.api.clients.CancelResponses;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.interfaces.client.v2.CertificateSyncApiClient;
@@ -178,13 +179,13 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
             CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        processRequest(r -> r
+        ResponseEntity<Void> response = processRequest(r -> r
                 .uri(connector.getUrl() + CERTIFICATE_ISSUE_CANCEL_CONTEXT, authorityUuid)
                 .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
                 .retrieve()
-                .toEntity(Void.class)
-                .block()
-                .getBody(), request, connector);
+                .toBodilessEntity()
+                .block(), request, connector);
+        CancelResponses.requireConfirmed(response);
     }
 
     @Override
@@ -192,13 +193,13 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
             CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        processRequest(r -> r
+        ResponseEntity<Void> response = processRequest(r -> r
                 .uri(connector.getUrl() + CERTIFICATE_REVOKE_CANCEL_CONTEXT, authorityUuid)
                 .body(Mono.just(requestDto), CertificateOperationCancelRequestDto.class)
                 .retrieve()
-                .toEntity(Void.class)
-                .block()
-                .getBody(), request, connector);
+                .toBodilessEntity()
+                .block(), request, connector);
+        CancelResponses.requireConfirmed(response);
     }
 
     @Override

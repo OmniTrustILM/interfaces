@@ -11,11 +11,13 @@ import com.otilm.api.model.client.approvalprofile.ApprovalProfileDto;
 import com.otilm.api.model.client.compliance.SimplifiedComplianceProfileDto;
 import com.otilm.api.model.client.raprofile.ActivateAcmeForRaProfileRequestDto;
 import com.otilm.api.model.client.raprofile.ActivateCmpForRaProfileRequestDto;
+import com.otilm.api.model.client.raprofile.ActivateEstForRaProfileRequestDto;
 import com.otilm.api.model.client.raprofile.ActivateScepForRaProfileRequestDto;
 import com.otilm.api.model.client.raprofile.AddRaProfileRequestDto;
 import com.otilm.api.model.client.raprofile.EditRaProfileRequestDto;
 import com.otilm.api.model.client.raprofile.RaProfileAcmeDetailResponseDto;
 import com.otilm.api.model.client.raprofile.RaProfileCmpDetailResponseDto;
+import com.otilm.api.model.client.raprofile.RaProfileEstDetailResponseDto;
 import com.otilm.api.model.client.raprofile.RaProfileScepDetailResponseDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
@@ -367,6 +369,47 @@ public interface RAProfileManagementController extends AuthProtectedController {
             produces = {"application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deactivateCmpForRaProfile(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+            @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid) throws NotFoundException;
+
+    @Operation(operationId = "getEstForRaProfile", summary = "Get EST details for RA Profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "EST details retrieved"),
+            @ApiResponse(responseCode = "404", description = "RA Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/protocols/est",
+            produces = {"application/json"})
+    RaProfileEstDetailResponseDto getEstForRaProfile(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+            @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid) throws NotFoundException;
+
+    @Operation(operationId = "activateEstForRaProfile", summary = "Activate EST for RA Profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "EST activated"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")})),
+            @ApiResponse(responseCode = "404", description = "RA Profile or EST Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @PatchMapping(
+            path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/protocols/est/activate/{estProfileUuid}",
+            consumes = {"application/json"}, produces = {"application/json"})
+    RaProfileEstDetailResponseDto activateEstForRaProfile(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+            @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid,
+            @Parameter(description = "EST Profile UUID") @PathVariable String estProfileUuid,
+            @RequestBody @Valid ActivateEstForRaProfileRequestDto request)
+            throws ConnectorException, AttributeException, NotFoundException;
+
+    @Operation(operationId = "deactivateEstForRaProfile", summary = "Deactivate EST for RA Profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "EST deactivated"),
+            @ApiResponse(responseCode = "404", description = "RA Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @PatchMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/protocols/est/deactivate",
+            produces = {"application/json"})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deactivateEstForRaProfile(
             @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
             @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid) throws NotFoundException;
 

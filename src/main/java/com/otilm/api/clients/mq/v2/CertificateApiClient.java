@@ -1,6 +1,7 @@
 package com.otilm.api.clients.mq.v2;
 
 import com.otilm.api.clients.ApiClientConnectorInfo;
+import com.otilm.api.clients.CancelResponses;
 import com.otilm.api.clients.mq.ProxyClient;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ValidationException;
@@ -133,14 +134,18 @@ public class CertificateApiClient implements CertificateSyncApiClient {
     public void cancelIssueCertificate(ApiClientConnectorInfo connector, String authorityUuid,
             CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
         String path = authorityPath(authorityUuid, PATH_ISSUE_CANCEL);
-        proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+        ResponseEntity<Void> response = proxyClient
+                .sendRequestForEntity(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+        CancelResponses.requireConfirmed(response);
     }
 
     @Override
     public void cancelRevokeCertificate(ApiClientConnectorInfo connector, String authorityUuid,
             CertificateOperationCancelRequestDto requestDto) throws ValidationException, ConnectorException {
         String path = authorityPath(authorityUuid, PATH_REVOKE_CANCEL);
-        proxyClient.sendRequest(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+        ResponseEntity<Void> response = proxyClient
+                .sendRequestForEntity(connector, path, HTTP_METHOD_POST, requestDto, Void.class);
+        CancelResponses.requireConfirmed(response);
     }
 
     @Override
