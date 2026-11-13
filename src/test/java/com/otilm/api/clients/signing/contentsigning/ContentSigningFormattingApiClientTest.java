@@ -26,13 +26,17 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.InlineDocu
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
+import jakarta.validation.Validation;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +63,8 @@ class ContentSigningFormattingApiClientTest {
 
     @BeforeEach
     void setUp() {
-        client = new ContentSigningFormattingApiClient(BaseApiClient.prepareWebClient(), null);
+        client = new ContentSigningFormattingApiClient(BaseApiClient.prepareWebClient(), null,
+                Validation.buildDefaultValidatorFactory().getValidator());
 
         mockServer = new WireMockServer(options().dynamicPort());
         mockServer.start();
@@ -74,6 +79,49 @@ class ContentSigningFormattingApiClientTest {
     @AfterEach
     void tearDown() {
         mockServer.stop();
+    }
+
+    @Test
+    void getDeclaration_readsTheDeclarationRoute() throws ConnectorException {
+        stubGet(BASE + "/declaration", """
+                { "families": [ { "code": "pades", "label": "PAdES",
+                  "levels": [ { "level": "signed", "name": "PAdES-B-B" } ], "transferModes": [ "inline" ] } ] }
+                """);
+
+        ContentSigningDeclarationDto result = client.getDeclaration(connector);
+
+        assertEquals(SignatureFamily.PADES, result.getFamilies().get(0).getCode());
+    }
+
+    @Test
+    void getDeclaration_reportsAnEmptyBodyAsAConnectorFault() {
+        stubGet(BASE + "/declaration", "");
+
+        assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+    }
+
+    @Test
+    void getDeclaration_reportsADeclarationBreakingItsRulesAsAConnectorFault() {
+        stubGet(BASE + "/declaration", """
+                { "families": [ { "code": "pades", "label": "PAdES",
+                  "levels": [ { "level": "timestamped", "name": "PAdES-B-T" } ], "transferModes": [ "inline" ] } ] }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+
+        assertEquals("Connector returned an invalid content-signing declaration: families[0].levels: must run up from "
+                + "SIGNED without a gap, but TIMESTAMPED comes where SIGNED belongs", fault.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{}", "{ \"families\": [] }"})
+    void getDeclaration_reportsADeclarationWithoutFamiliesAsAConnectorFault(String familiesless) {
+        stubGet(BASE + "/declaration", familiesless);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+
+        assertEquals("Connector returned an invalid content-signing declaration: families: must not be empty",
+                fault.getMessage());
     }
 
     @Test

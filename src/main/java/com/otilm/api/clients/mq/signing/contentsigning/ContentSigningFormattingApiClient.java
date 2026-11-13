@@ -2,6 +2,7 @@ package com.otilm.api.clients.mq.signing.contentsigning;
 
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.clients.mq.ProxyClient;
+import com.otilm.api.clients.signing.contentsigning.ContentSigningDeclarationValidator;
 import com.otilm.api.clients.signing.contentsigning.ContentSigningFormattingPaths;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.interfaces.client.v1.signing.contentsigning.ContentSigningFormattingSyncApiClient;
@@ -18,6 +19,8 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
+import jakarta.validation.Validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,9 +37,19 @@ public class ContentSigningFormattingApiClient implements ContentSigningFormatti
     private static final String HTTP_METHOD_POST = "POST";
 
     private final ProxyClient proxyClient;
+    private final ContentSigningDeclarationValidator declarationValidator;
 
-    public ContentSigningFormattingApiClient(ProxyClient proxyClient) {
+    public ContentSigningFormattingApiClient(ProxyClient proxyClient, Validator validator) {
         this.proxyClient = Objects.requireNonNull(proxyClient, "proxyClient is required");
+        this.declarationValidator = new ContentSigningDeclarationValidator(validator);
+    }
+
+    @Override
+    public ContentSigningDeclarationDto getDeclaration(ApiClientConnectorInfo connector) throws ConnectorException {
+        ContentSigningDeclarationDto result = proxyClient
+                .sendRequest(connector, ContentSigningFormattingPaths.DECLARATION, HTTP_METHOD_GET, null,
+                        ContentSigningDeclarationDto.class);
+        return declarationValidator.requireValid(result, connector);
     }
 
     @Override

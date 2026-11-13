@@ -29,7 +29,6 @@ import com.otilm.api.model.common.enums.cryptography.KeyFormat;
 import com.otilm.api.model.common.enums.cryptography.KeyType;
 import com.otilm.api.model.common.enums.cryptography.RsaEncryptionScheme;
 import com.otilm.api.model.common.enums.cryptography.RsaSignatureScheme;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.common.signature.SignatureParameterGroup;
 import com.otilm.api.model.common.signature.parameters.pades.CommitmentType;
@@ -219,7 +218,6 @@ public enum PlatformEnum implements IPlatformEnum {
     // Signing
     MANAGED_SIGNING_TYPE(ManagedSigningType.class, "Managed Signing Type"),
     QC_TYPE(QcType.class, "QC Type"),
-    SIGNATURE_FAMILY(SignatureFamily.class, "Signature Family"),
     SIGNATURE_LEVEL(SignatureLevel.class, "Signature Level"),
     SIGNATURE_PARAMETER_GROUP(SignatureParameterGroup.class, "Signature Parameter Group"),
     SIGNING_PROTOCOL(SigningProtocol.class, "Signing Protocol"),

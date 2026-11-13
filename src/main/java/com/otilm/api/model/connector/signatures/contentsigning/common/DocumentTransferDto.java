@@ -4,16 +4,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.common.signature.DocumentTransferMode;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * How a document reaches the formatting connector: inline, or as a digest only. The schema it publishes is
  * {@link DocumentTransferInterface}.
- *
- * <p>
- * {@link SignatureFamily#accepts} names the modes each family can sign from.
- * </p>
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "transferMode")
 @JsonSubTypes({

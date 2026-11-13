@@ -19,6 +19,7 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.common.validation.OidFormat;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureFamilyDeclarationDto;
 import com.otilm.api.model.core.certificate.CertificateDto;
 import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
 import com.otilm.api.model.core.signing.SigningProtocol;
@@ -237,6 +238,24 @@ public interface SigningProfileController extends AuthProtectedController {
             @Parameter(description = "Certificate UUID") @PathVariable UUID certificateUuid)
             throws NotFoundException, ConnectorException;
 
+    @Operation(operationId = "listSignatureFormattingConnectorDeclarations",
+            summary = "List formatting connector declarations",
+            description = "Returns the family declarations of the formatting connector, as Core stored them when it "
+                    + "last connected or reconnected the connector; the list is empty for a connector serving no "
+                    + "content signing. The signingProfileUuid parameter is used for authorization only and does not "
+                    + "affect the returned declarations.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Declarations retrieved"),
+            @ApiResponse(responseCode = "404", description = "Signature Formatting Provider not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/signatureFormattingConnectors/{connectorUuid}/declarations",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SignatureFamilyDeclarationDto> listSignatureFormattingConnectorDeclarations(
+            @Parameter(description = "Signature Formatting Provider UUID") @PathVariable UUID connectorUuid,
+            @Parameter(description = "Signing Profile UUID — used for authorization purposes only",
+                    in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid)
+            throws NotFoundException;
+
     @Operation(operationId = "listSignatureFormattingConnectorAttributes",
             summary = "Get formatting attribute descriptors from a Signature Formatting Provider",
             description = "Queries the Signature Formatting Provider for its available formatting attribute descriptors with connector default values. "
@@ -289,7 +308,7 @@ public interface SigningProfileController extends AuthProtectedController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<BaseAttribute> listContentSigningFormattingConnectorAttributes(
             @Parameter(description = "Signature Formatting Provider UUID") @PathVariable UUID connectorUuid,
-            @Parameter(description = "Signature family the Signing Profile produces",
+            @Parameter(description = "Signature family the Signing Profile produces: a code this connector declares",
                     in = ParameterIn.QUERY) @RequestParam SignatureFamily family,
             @Parameter(description = "Highest signature level the Signing Profile may reach",
                     in = ParameterIn.QUERY) @RequestParam SignatureLevel maxLevel,

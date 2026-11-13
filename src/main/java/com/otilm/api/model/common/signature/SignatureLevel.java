@@ -14,8 +14,8 @@ import java.util.Arrays;
  * one below it.
  *
  * <p>
- * Each format keeps its own vocabulary at its own edge. The platform shows the rung in that vocabulary, through
- * {@link SignatureFamily#getLevelName(SignatureLevel)}, wherever an operator configures or reads a profile.
+ * A formatting connector declares the name its family gives each rung. The platform shows that name wherever an
+ * operator configures or reads a profile.
  * </p>
  */
 @Schema(enumAsRef = true,
