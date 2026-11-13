@@ -77,6 +77,7 @@ import com.otilm.api.model.core.discovery.DiscoveryMessageSeverity;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.enums.CertificateProtocol;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
+import com.otilm.api.model.core.est.EstAuthenticationPolicy;
 import com.otilm.api.model.core.logging.enums.ActorType;
 import com.otilm.api.model.core.logging.enums.AuthMethod;
 import com.otilm.api.model.core.logging.enums.Module;
@@ -173,6 +174,7 @@ public enum PlatformEnum implements IPlatformEnum {
 
     // Protocols
     PROTOCOL_CHALLENGE_SOURCE(ProtocolChallengeSource.class, "Protocol challenge source"),
+    EST_AUTHENTICATION_POLICY(EstAuthenticationPolicy.class, "EST authentication policy"),
     ACME_IDENTIFIER_MATCH_TYPE(AcmeIdentifierMatchType.class, "ACME identifier match type"),
     ACME_IDENTIFIER_AUTHORIZATION_MODE(AcmeIdentifierAuthorizationMode.class, "ACME identifier authorization mode"),
 

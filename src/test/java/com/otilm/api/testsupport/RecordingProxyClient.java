@@ -13,7 +13,7 @@ public final class RecordingProxyClient implements ProxyClient {
 
     private Object response;
     private ResponseEntity<?> entityResponse;
-    private RuntimeException failure;
+    private Exception failure;
     private Invocation invocation;
 
     public void respondWith(Object response) {
@@ -25,6 +25,10 @@ public final class RecordingProxyClient implements ProxyClient {
     }
 
     public void failWith(RuntimeException failure) {
+        this.failure = failure;
+    }
+
+    public void failWith(ConnectorException failure) {
         this.failure = failure;
     }
 
@@ -58,9 +62,12 @@ public final class RecordingProxyClient implements ProxyClient {
         invocation = new Invocation(connector, path, method, body, responseType, entityResponse);
     }
 
-    private void throwFailure() {
-        if (failure != null) {
-            throw failure;
+    private void throwFailure() throws ConnectorException {
+        if (failure instanceof RuntimeException runtimeFailure) {
+            throw runtimeFailure;
+        }
+        if (failure instanceof ConnectorException connectorFailure) {
+            throw connectorFailure;
         }
     }
 
