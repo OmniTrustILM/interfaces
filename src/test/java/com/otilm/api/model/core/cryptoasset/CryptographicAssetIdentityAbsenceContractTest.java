@@ -14,6 +14,8 @@ import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
 import com.otilm.api.model.core.cbom.CbomContributedAssetDto;
 import com.otilm.api.model.core.cbom.CbomDto;
+import com.otilm.api.model.core.cbom.CbomIngestFindingDto;
+import com.otilm.api.model.core.cbom.CbomIngestFindingKind;
 import com.otilm.api.model.core.cbom.CbomSyncSkipDto;
 import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,7 +70,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
                     CryptographicAssetEvidenceDto.class, CryptographicAssetOidDto.class,
                     CryptographicAssetPqcExplanationDto.class, PqcExplanationStepDto.class, PqcReferencedAssetDto.class,
                     CryptographicAssetStatisticsDto.class, CryptographicAssetSyncCompletenessDto.class, CbomDto.class,
-                    CbomSyncSkipDto.class, CbomContributedAssetDto.class);
+                    CbomSyncSkipDto.class, CbomContributedAssetDto.class, CbomIngestFindingDto.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -97,7 +99,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
         }
         sweepTag(CbomController.class, problems);
         for (Method method : CbomController.class.getDeclaredMethods()) {
-            if (method.getName().equals("listCbomAssets")) {
+            if (method.getName().equals("listCbomAssets") || method.getName().equals("listCbomIngestFindings")) {
                 sweepOperation(method, problems);
             }
         }
@@ -112,6 +114,7 @@ class CryptographicAssetIdentityAbsenceContractTest {
         sweepEnum(PqcExplanationStepOutcome.class, problems);
         sweepEnum(CbomAssetSyncState.class, problems);
         sweepEnum(CbomSyncSkipState.class, problems);
+        sweepEnum(CbomIngestFindingKind.class, problems);
         assertTrue(problems.isEmpty(), String.join("\n", problems));
     }
 

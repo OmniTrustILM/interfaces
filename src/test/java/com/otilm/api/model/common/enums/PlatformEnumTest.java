@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
+import com.otilm.api.model.core.cbom.CbomIngestFindingKind;
 import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
@@ -127,6 +128,14 @@ class PlatformEnumTest {
         assertNotNull(entry);
         assertEquals(CbomSyncSkipState.class, entry.getEnumClass());
         assertEquals("CbomSyncSkipState", entry.getCode());
+    }
+
+    @Test
+    void cbomIngestFindingKindIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(CbomIngestFindingKind.class);
+        assertNotNull(entry);
+        assertEquals(CbomIngestFindingKind.class, entry.getEnumClass());
+        assertEquals("CbomIngestFindingKind", entry.getCode());
     }
 
     @Test
