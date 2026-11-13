@@ -15,6 +15,7 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
@@ -23,6 +24,8 @@ import org.springframework.http.ResponseEntity;
  * connector is stateless, so every call carries what that operation needs.
  */
 public interface ContentSigningFormattingSyncApiClient {
+
+    ContentSigningDeclarationDto getDeclaration(ApiClientConnectorInfo connector) throws ConnectorException;
 
     /** The attribute schema configuring one operation. */
     List<BaseAttribute> listFormattingAttributes(ApiClientConnectorInfo connector,
