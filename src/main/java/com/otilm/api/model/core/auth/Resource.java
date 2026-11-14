@@ -26,6 +26,7 @@ public enum Resource implements IPlatformEnum {
     ATTRIBUTE(Codes.ATTRIBUTE, "Attribute", true),
     SCHEDULED_JOB("jobs", "Scheduled job"),
     PROXY(Codes.PROXY, "Proxy", true),
+    AI_MODEL(Codes.AI_MODEL, "AI Model", true),
 
     // AUTH
     USER(Codes.USER, "User", false, true, true, false),
@@ -249,6 +250,7 @@ public enum Resource implements IPlatformEnum {
     }
 
     public static class Codes {
+        public static final String AI_MODEL = "aiModels";
         public static final String AUTHORITY = "authorities";
         public static final String APPROVAL = "approvals";
         public static final String APPROVAL_PROFILE = "approvalProfiles";

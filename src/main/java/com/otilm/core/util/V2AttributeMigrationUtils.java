@@ -283,7 +283,7 @@ public class V2AttributeMigrationUtils {
             oldCredentialAttributeValue = AttributeDefinitionUtils
                     .deserialize(mapper.writeValueAsString(credentialData.get("attributes")));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.warn("Credential attributes could not be migrated.");
         }
         if (oldCredentialAttributeValue == null) {
             oldCredentialAttributeValue = new ArrayList<>();
