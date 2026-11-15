@@ -27,3 +27,5 @@ The following interfaces are available:
 
 - [CMP interface](src/main/java/com/otilm/api/interfaces/core/cmp/CmpController.java)
 - [RA Profile CMP interface](src/main/java/com/otilm/api/interfaces/core/cmp/CmpRaProfileController.java)
+
+- [EST interface](src/main/java/com/otilm/api/interfaces/core/est/EstController.java)

@@ -6,14 +6,14 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Base controller for unauthenticated binary protocol endpoints that convey every outcome in-band rather than via
- * REST-style HTTP error codes.
+ * Base controller for unauthenticated binary protocol endpoints that document their own responses.
  *
  * <p>
  * Unlike {@link NoAuthController}, this base deliberately declares no {@code @ApiResponses}: protocols such as RFC 3161
  * TSP and RFC 4210 CMP answer both success and failure with the same HTTP 200 response, encoding the result inside the
- * protocol payload (e.g. {@code PKIStatus} / a CMP error {@code PKIBody}). Declaring generic 400/404/500 responses here
- * would misrepresent that contract, so each endpoint documents its own responses instead.
+ * protocol payload (e.g. {@code PKIStatus} / a CMP error {@code PKIBody}), while RFC 7030 EST uses HTTP status codes.
+ * Declaring generic 400/404/500 responses here would misrepresent either contract, so each endpoint documents its own
+ * responses instead.
  * </p>
  *
  * @see NoAuthController
