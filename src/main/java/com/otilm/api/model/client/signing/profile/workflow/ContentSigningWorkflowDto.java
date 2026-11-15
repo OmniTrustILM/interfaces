@@ -5,8 +5,6 @@ import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSo
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
-import com.otilm.api.model.common.signature.SignatureParameterGroup;
-import com.otilm.api.model.common.signature.parameters.SignatureParametersDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -36,10 +34,10 @@ public class ContentSigningWorkflowDto extends WorkflowDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private NameAndUuidDto signatureFormattingConnector;
 
-    @Schema(description = "Attributes configured on the Signature Formatting Provider that control DTBS construction "
-            + "for the content signing workflow. Applicable only when ILM-managed signing is used. These attributes "
-            + "carry operator-only settings; a request supplies signature parameters only in the groups that "
-            + "allowedRequestParameterGroups lists.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Values of the Signature Formatting Provider's profile attributes and request attributes, "
+            + "which control DTBS construction for the content-signing workflow; a request attribute's value here is "
+            + "the one a signing request inherits. Applicable only when ILM-managed signing is used.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ResponseAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
     @Schema(description = "Signature family this profile produces. "
@@ -66,19 +64,11 @@ public class ContentSigningWorkflowDto extends WorkflowDto {
             + "usage. Applies to ILM-managed signing only.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Set<String> requiredExtendedKeyUsageOids = new LinkedHashSet<>();
 
-    @Schema(description = "Signature parameter groups which a signing request may supply. Empty for delegated signing. "
-            + "Membership is the only permission mechanism. A request carrying any field of a group absent from this "
-            + "list is rejected, even when the value matches the profile's own. An empty list accepts no "
-            + "request-supplied group. Independent of defaultSignatureParameters: a group may be allowed with no "
-            + "default (pure pass-through), or carry a default without being allowed (operator-fixed).",
+    @Schema(description = "Names of the request-attribute groups and ungrouped request attributes a signing request "
+            + "may set; a request setting any other request attribute is refused, even when its value matches the "
+            + "profile value. Empty allows none and is always empty for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Set<SignatureParameterGroup> allowedRequestParameterGroups = new LinkedHashSet<>();
-
-    @Schema(description = "Signature parameters this profile applies when a request does not override them. Null for "
-            + "delegated signing. Merged field by field with the request winning; list-typed fields, and a placement "
-            + "in a different addressing mode, replace the default wholesale.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SignatureParametersDto defaultSignatureParameters;
+    private Set<String> allowedRequestAttributes = new LinkedHashSet<>();
 
     public ContentSigningWorkflowDto() {
         super(SigningWorkflowType.CONTENT_SIGNING);

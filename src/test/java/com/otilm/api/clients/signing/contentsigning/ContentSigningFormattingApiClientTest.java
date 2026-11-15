@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.otilm.api.clients.BaseApiClient;
 import com.otilm.api.exception.ConnectorException;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.common.signature.SignatureFamily;
@@ -14,6 +13,7 @@ import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.signatures.contentsigning.common.CertificateChainDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -44,7 +44,6 @@ import org.springframework.http.ResponseEntity;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -90,7 +89,7 @@ class ContentSigningFormattingApiClientTest {
 
         ContentSigningDeclarationDto result = client.getDeclaration(connector);
 
-        assertEquals(SignatureFamily.PADES, result.getFamilies().get(0).getCode());
+        assertEquals(new SignatureFamily("pades"), result.getFamilies().get(0).getCode());
     }
 
     @Test
@@ -125,40 +124,60 @@ class ContentSigningFormattingApiClientTest {
     }
 
     @Test
-    void listFormattingAttributes_readsTheOperationsOwnRoute() throws ConnectorException {
+    void listFormattingAttributes_readsBothListsFromTheOperationsOwnRoute() throws ConnectorException {
         String json = """
-                [
-                  { "uuid": "11111111-1111-1111-1111-111111111111", "name": "signaturePacking", "type": "data", "contentType": "string", "version": 2 }
-                ]
+                {
+                  "profileAttributes": [
+                    { "uuid": "11111111-1111-1111-1111-111111111111", "name": "signaturePacking", "type": "data",
+                      "contentType": "string", "version": 3 }
+                  ],
+                  "requestAttributes": [
+                    { "uuid": "22222222-2222-2222-2222-222222222222", "name": "reason", "type": "data",
+                      "contentType": "string", "version": 3 }
+                  ]
+                }
                 """;
         stubGet(BASE + "/computeDtbs/attributes", json);
 
-        List<BaseAttribute> result = client
+        ContentSigningFormattingAttributesDto result = client
                 .listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS);
 
-        assertEquals(1, result.size());
-        assertEquals("signaturePacking", result.get(0).getName());
+        assertEquals("signaturePacking", result.getProfileAttributes().getFirst().getName());
+        assertEquals("reason", result.getRequestAttributes().getFirst().getName());
     }
 
     @Test
     void listFormattingAttributes_bindsTheOperationWireCodeIntoThePath() throws ConnectorException {
-        stubGet(BASE + "/embedArchiveTimestamp/attributes", "[]");
+        stubGet(BASE + "/embedArchiveTimestamp/attributes", """
+                { "profileAttributes": [], "requestAttributes": [] }
+                """);
 
-        List<BaseAttribute> result = client
+        ContentSigningFormattingAttributesDto result = client
                 .listFormattingAttributes(connector, ContentSigningFormattingOperation.EMBED_ARCHIVE_TIMESTAMP);
 
-        assertEquals(0, result.size());
+        assertEquals(List.of(), result.getProfileAttributes());
     }
 
-    /** The array is wrapped by this client, so the wrapper — not Jackson — decides mutability. */
     @Test
-    void listFormattingAttributes_returnsAMutableList() throws ConnectorException {
-        stubGet(BASE + "/computeDtbs/attributes", "[]");
+    void listFormattingAttributes_reportsAnEmptyBodyAsAConnectorFault() {
+        stubGet(BASE + "/computeDtbs/attributes", "");
 
-        List<BaseAttribute> result = client
-                .listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS);
+        assertThrows(ConnectorException.class,
+                () -> client.listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS));
+    }
 
-        assertDoesNotThrow(() -> result.add(null));
+    /** A Go connector serializes an unset list as null. The client reports that as a connector fault. */
+    @Test
+    void listFormattingAttributes_reportsANullListAsAConnectorFault() {
+        stubGet(BASE + "/embedSignatureValue/attributes", """
+                { "profileAttributes": [], "requestAttributes": null }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client
+                .listFormattingAttributes(connector, ContentSigningFormattingOperation.EMBED_SIGNATURE_VALUE));
+
+        assertEquals("Connector returned an invalid formatting attribute listing: requestAttributes: must not be null",
+                fault.getMessage());
     }
 
     @Test
@@ -178,7 +197,7 @@ class ContentSigningFormattingApiClientTest {
         stubPost(BASE + "/computeDtbs", "{ \"dtbs\": \"AQID\", \"formattingContext\": \"BAUG\" }");
 
         ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
-        request.setFamily(SignatureFamily.JADES);
+        request.setFamily(new SignatureFamily("jades"));
         request.setDocument(new InlineDocumentTransferDto(new byte[]{7, 7, 7}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
@@ -381,7 +400,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ExtendToLevelRequestDto validExtendToLevel() {
         ExtendToLevelRequestDto request = new ExtendToLevelRequestDto();
-        request.setFamily(SignatureFamily.PADES);
+        request.setFamily(new SignatureFamily("pades"));
         request.setFormattingAttributes(List.of());
         request.setSignedDocument(new byte[]{9});
         request.setTargetLevel(SignatureLevel.LONG_TERM);
@@ -395,7 +414,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ExtendOperationScopedRequestDto scopedRequest() {
         ExtendOperationScopedRequestDto request = new ExtendOperationScopedRequestDto();
-        request.setFamily(SignatureFamily.PADES);
+        request.setFamily(new SignatureFamily("pades"));
         request.setFormattingAttributes(List.of());
         request.setOperationMeta(validMetadata());
         return request;
@@ -438,7 +457,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ComputeDtbsRequestDto padesRequest() {
         ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
-        request.setFamily(SignatureFamily.PADES);
+        request.setFamily(new SignatureFamily("pades"));
         request.setDocument(new InlineDocumentTransferDto(new byte[]{1, 2, 3}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));

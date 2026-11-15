@@ -49,7 +49,7 @@ class ContentSigningDeclarationDtoJsonTest {
         // then
         SignatureFamilyDeclarationDto family = read.getFamilies().getFirst();
         assertEquals(1, read.getFamilies().size());
-        assertEquals(SignatureFamily.PADES, family.getCode());
+        assertEquals(new SignatureFamily("pades"), family.getCode());
         assertEquals("PAdES", family.getLabel());
         assertEquals("PDF Advanced Electronic Signatures, ETSI EN 319 142", family.getDescription());
         assertEquals(List.of("SIGNED PAdES-B-B", "TIMESTAMPED PAdES-B-T"), levelsOf(family));
@@ -60,7 +60,7 @@ class ContentSigningDeclarationDtoJsonTest {
     private static SignatureFamilyDeclarationDto padesUpToTimestamped() {
         return SignatureFamilyDeclarationDto
                 .builder()
-                .code(SignatureFamily.PADES)
+                .code(new SignatureFamily("pades"))
                 .label("PAdES")
                 .description("PDF Advanced Electronic Signatures, ETSI EN 319 142")
                 .levels(PADES_LEVELS)

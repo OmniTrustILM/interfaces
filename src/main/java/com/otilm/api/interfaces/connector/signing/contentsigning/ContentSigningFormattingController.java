@@ -1,10 +1,10 @@
 package com.otilm.api.interfaces.connector.signing.contentsigning;
 
 import com.otilm.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,8 +54,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
                 + "are refetch, not replay.\n\nThe connector MUST NOT read its own clock for anything that enters "
                 + "signature content. The platform supplies signingTime, and the connector uses that value.\n\nEvery "
                 + "operation has an attribute schema that configures it, read from that operation's route plus "
-                + "/attributes. The platform collects those schemas when a Signing Profile is configured, and replays "
-                + "the operator's chosen values in formattingAttributes on every call.\n\nA Signing Profile holds one "
+                + "/attributes. It lists profile attributes and request attributes. The platform collects those "
+                + "schemas when a Signing Profile is configured and replays the operator's values in "
+                + "formattingAttributes on every call; computeDtbs also receives the signing request's values in "
+                + "requestAttributes.\n\nA Signing Profile holds one "
                 + "flat set of attribute values, not one set per operation. The platform merges the schemas of every "
                 + "operation that profile can reach into a single set, keyed by attribute name. It sends that whole "
                 + "set to every operation. Which operations are reachable depends on the level the profile is "
@@ -82,11 +83,17 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     ContentSigningDeclarationDto getContentSigningDeclaration();
 
     @Operation(summary = "List the attributes configuring an operation",
-            description = "Returns the attribute schema configuring how this connector performs the named operation. A "
-                    + "value the operator fixes once per Signing Profile belongs here. A value that varies per signing "
-                    + "request is a field on that operation's request instead. The platform collects these schemas "
-                    + "when a Signing Profile is configured. It replays the operator's chosen values in "
-                    + "formattingAttributes on every call to that operation.",
+            description = "Returns the attribute definitions configuring how this connector performs the named "
+                    + "operation, split into profile attributes and request attributes. The operator alone sets a "
+                    + "profile attribute on the Signing Profile; a signing request may override a request "
+                    + "attribute's profile value where the profile allows it. Only computeDtbs lists request "
+                    + "attributes; every other operation returns an empty `requestAttributes`. A request attribute's "
+                    + "`properties.group` names its permission group: a Signing Profile allows a group as a whole, or "
+                    + "an ungrouped request attribute on its own. Every request attribute must be a data attribute "
+                    + "whose name appears only in `requestAttributes` across all operations, and no group may share "
+                    + "a request attribute's name; the platform refuses a listing that breaks one of these rules. The "
+                    + "platform collects these definitions when a Signing Profile is configured and replays the "
+                    + "operator's values in `formattingAttributes` on every call to that operation.",
             operationId = "listContentSigningFormattingAttributes")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Attribute schema retrieved"),
@@ -95,13 +102,13 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @GetMapping(path = "/{operation}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listFormattingAttributes(@Parameter(
+    ContentSigningFormattingAttributesDto listFormattingAttributes(@Parameter(
             description = "Operation, identified by its wire code (e.g. \"computeDtbs\")") @PathVariable ContentSigningFormattingOperation operation);
 
     @Operation(summary = "Compute data-to-be-signed bytes",
             description = "Builds the signature structure for the requested family and returns the bytes to be signed. "
                     + "It also returns the formattingContext needed to complete the signature once the signature value "
-                    + "comes back. This is the only operation whose request varies by family.\n\n**Signing time.** "
+                    + "comes back.\n\n**Signing time.** "
                     + "The connector MUST put the supplied signingTime into the signature, not its own "
                     + "clock.\n\n**Signature algorithm.** The platform also supplies signatureAlgorithm, from the "
                     + "signer it resolved for this request. Only the platform sees both that key and the padding "
@@ -113,7 +120,10 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     + "paired digest is not a DigestAlgorithm value is never sent here. Either way the connector "
                     + "MUST echo that digest in documentDigest and its algorithm in documentDigestAlgorithm. The "
                     + "platform compares that echo against the digest the user authorized before it releases the "
-                    + "signing key.",
+                    + "signing key.\n\n**Request attributes.** `requestAttributes` carries the values the signing "
+                    + "request sets, each allowed by the Signing Profile. The connector MUST merge them over the "
+                    + "profile values in `formattingAttributes`, the request winning, and MUST refuse an incomplete "
+                    + "or contradictory merged result (errorCode `ATTRIBUTES_REJECTED`).",
             operationId = "computeDtbs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data-to-be-signed bytes computed"),
@@ -124,7 +134,9 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "- `DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
+                    description = "- `ATTRIBUTES_REJECTED` — the request attributes, merged over the profile values, "
+                            + "are incomplete or contradictory; the detail names the attributes.\n- "
+                            + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
                             + "`DOCUMENT_SIGNING_FORBIDDEN` — the document forbids the requested signature, such as a "
                             + "certification of a document already signed.\n- "
                             + "`PARAMETER_UNSUPPORTED` — the requested family, a supplied parameter or the document's "
@@ -132,8 +144,7 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             + "`SIGNATURE_PLACEMENT_REJECTED` — the document cannot hold the visible signature at the "
                             + "requested place.\n- "
                             + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
-                            + "family or document, a digest transfer missing its algorithm, or signatureParameters "
-                            + "of another family.",
+                            + "family or document, or a digest transfer missing its algorithm.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeDtbs", consumes = MediaType.APPLICATION_JSON_VALUE,

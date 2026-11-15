@@ -1,5 +1,6 @@
 package com.otilm.api.interfaces.connector.signing.contentsigning;
 
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -123,6 +124,35 @@ class ContentSigningFormattingControllerContractTest {
 
         assertTrue(forbidden.substring(0, forbidden.indexOf("\n")).contains("certif"),
                 "the DOCUMENT_SIGNING_FORBIDDEN entry does not cover certifying an already signed document");
+    }
+
+    /** The split decides which values a signing request may set. A bare array would lose it. */
+    @Test
+    void theListingReturnsProfileAndRequestAttributesApart() {
+        assertEquals(ContentSigningFormattingAttributesDto.class, method("listFormattingAttributes").getReturnType());
+    }
+
+    /** The platform refuses a listing that breaks these rules. A connector author finds them only here. */
+    @Test
+    void theListingStatesTheRulesThePlatformChecks() {
+        String description = operationDescription("listFormattingAttributes");
+
+        assertTrue(description.contains("`properties.group` names its permission group"),
+                "the listing does not say how a request attribute names its group");
+        assertTrue(
+                description
+                        .contains("Every request attribute must be a data attribute whose name appears only in "
+                                + "`requestAttributes` across all operations"),
+                "the listing does not confine a request attribute to data attributes and to requestAttributes");
+        assertTrue(description.contains("no group may share a request attribute's name"),
+                "the listing does not keep group names apart from request-attribute names");
+    }
+
+    /** A connector author learns from this list which code refuses request attributes that fail to merge. */
+    @Test
+    void computeDtbsDocumentsTheAttributeRefusalAmongItsUnprocessableCodes() {
+        assertTrue(unprocessableDescription("computeDtbs").contains("`ATTRIBUTES_REJECTED`"),
+                "computeDtbs does not document ATTRIBUTES_REJECTED as a 422 code");
     }
 
     private static String unprocessableDescription(String methodName) {

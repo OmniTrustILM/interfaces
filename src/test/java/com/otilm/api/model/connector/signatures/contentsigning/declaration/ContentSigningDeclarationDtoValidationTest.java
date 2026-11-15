@@ -193,7 +193,7 @@ class ContentSigningDeclarationDtoValidationTest {
 
     private static SignatureFamilyDeclarationDto pades(SignatureLevel highest) {
         SignatureFamilyDeclarationDto family = familyUpTo(highest);
-        family.setCode(SignatureFamily.PADES);
+        family.setCode(new SignatureFamily("pades"));
         family.setLabel("PAdES");
         family.getLevels().forEach(level -> level.setName("PAdES " + level.getLevel().name()));
         return family;

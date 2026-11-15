@@ -136,6 +136,14 @@ class ErrorCodeTest {
     }
 
     @Test
+    void connectorAttributesRejectedEntry() {
+        assertEquals(ProblemTypeCategory.CONNECTOR, ErrorCode.ATTRIBUTES_REJECTED.getCategory());
+        assertNull(ErrorCode.ATTRIBUTES_REJECTED.getInterfaceCode());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.ATTRIBUTES_REJECTED.getStatus());
+        assertFalse(ErrorCode.ATTRIBUTES_REJECTED.isRetryable());
+    }
+
+    @Test
     void retryableTrueOnlyForTransientCodes() {
         // Transient infrastructure / rate-limit recovery → retryable
         assertTrue(ErrorCode.REQUEST_TIMEOUT.isRetryable());

@@ -63,7 +63,7 @@ class SigningProfileConstraintValidatorsTest {
     private ContentSigningWorkflowRequestDto contentSigningWorkflow(SignatureLevel maxLevel) {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
         workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
-        workflow.setFamily(SignatureFamily.PADES);
+        workflow.setFamily(new SignatureFamily("pades"));
         workflow.setMaxLevel(maxLevel);
         return workflow;
     }
@@ -398,7 +398,7 @@ class SigningProfileConstraintValidatorsTest {
     @Test
     void aDelegatedProfileCarryingASignatureFamilyIsRejected() {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setFamily(SignatureFamily.PADES);
+        workflow.setFamily(new SignatureFamily("pades"));
 
         assertTrue(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)), "workflow.family"));
     }

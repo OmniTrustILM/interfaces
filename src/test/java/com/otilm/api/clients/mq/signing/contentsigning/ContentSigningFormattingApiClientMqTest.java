@@ -11,6 +11,7 @@ import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -99,26 +100,18 @@ class ContentSigningFormattingApiClientMqTest {
 
     @Test
     void listFormattingAttributes_delegatesGetToTheOperationsAttributeRoute() throws ConnectorException {
-        BaseAttribute attribute = new InfoAttributeV3();
-        proxyClient.syncResponse = new BaseAttribute[]{attribute};
+        List<BaseAttribute> profileAttributes = List.of(new InfoAttributeV3());
+        ContentSigningFormattingAttributesDto listing = new ContentSigningFormattingAttributesDto(profileAttributes,
+                List.of());
+        proxyClient.syncResponse = listing;
 
-        List<BaseAttribute> result = client
+        ContentSigningFormattingAttributesDto result = client
                 .listFormattingAttributes(connector, ContentSigningFormattingOperation.EXTEND_TO_LEVEL);
 
-        Assertions.assertEquals(List.of(attribute), result);
+        Assertions.assertSame(listing, result);
         proxyClient
                 .assertCalled(connector, ContentSigningFormattingPaths.BASE + "/extendToLevel/attributes", "GET", null,
-                        BaseAttribute[].class);
-    }
-
-    @Test
-    void listFormattingAttributes_returnsAMutableList() throws ConnectorException {
-        proxyClient.syncResponse = new BaseAttribute[0];
-
-        List<BaseAttribute> result = client
-                .listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS);
-
-        Assertions.assertDoesNotThrow(() -> result.add(new InfoAttributeV3()));
+                        ContentSigningFormattingAttributesDto.class);
     }
 
     @Test
@@ -278,6 +271,20 @@ class ContentSigningFormattingApiClientMqTest {
     }
 
     @Test
+    void aListingBreakingItsRulesIsRejected() {
+        proxyClient.syncResponse = new ContentSigningFormattingAttributesDto(new ArrayList<>(), null);
+
+        ConnectorException fault = Assertions
+                .assertThrows(ConnectorException.class, () -> client
+                        .listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS));
+
+        Assertions
+                .assertEquals(
+                        "Connector returned an invalid formatting attribute listing: requestAttributes: must not be null",
+                        fault.getMessage());
+    }
+
+    @Test
     void anAbsentAttributeBodyIsRejected() {
         proxyClient.syncResponse = null;
 
@@ -294,7 +301,7 @@ class ContentSigningFormattingApiClientMqTest {
 
     private static ContentSigningDeclarationDto declarationUpTo(SignatureLevel highest) {
         SignatureFamilyDeclarationDto pades = new SignatureFamilyDeclarationDto();
-        pades.setCode(SignatureFamily.PADES);
+        pades.setCode(new SignatureFamily("pades"));
         pades.setLabel("PAdES");
         pades
                 .setLevels(Arrays

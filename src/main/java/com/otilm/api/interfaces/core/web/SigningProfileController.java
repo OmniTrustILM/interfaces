@@ -19,6 +19,7 @@ import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.common.validation.OidFormat;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureFamilyDeclarationDto;
 import com.otilm.api.model.core.certificate.CertificateDto;
 import com.otilm.api.model.core.search.SearchFieldDataByGroupDto;
@@ -281,14 +282,14 @@ public interface SigningProfileController extends AuthProtectedController {
 
     @Operation(operationId = "listContentSigningFormattingConnectorAttributes",
             summary = "Get content signing formatting attribute descriptors from a Signature Formatting Provider",
-            description = """
-                    Returns the formatting attribute descriptors a content signing Signing Profile can reach,
-                    merged by name into one flat set carrying the connector's default values.
-                    family and maxLevel together name the workflow the Signing Profile will run, and the connector
-                    must be able to serve it; the descriptor set follows from maxLevel,
-                    so family does not narrow the returned descriptors.
-                    The signingProfileUuid parameter is used for authorization only and does not affect the
-                    returned descriptors.""")
+            description = "Returns the formatting attribute descriptors a content-signing Signing Profile can reach, "
+                    + "merged by name across operations and split into profile attributes and request attributes, "
+                    + "with the connector's default values. A request attribute's `properties.group` names its "
+                    + "permission group, which the Signing Profile's `allowedRequestAttributes` may list. family and "
+                    + "maxLevel together name the workflow the Signing Profile will run, and the connector must be "
+                    + "able to serve it; the descriptor set follows from maxLevel, so family does not narrow the "
+                    + "returned descriptors. The signingProfileUuid parameter is used for authorization only and does "
+                    + "not affect the returned descriptors.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "502", description = "Connector Error",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
@@ -306,7 +307,7 @@ public interface SigningProfileController extends AuthProtectedController {
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @GetMapping(path = "/signatureFormattingConnectors/{connectorUuid}/contentSigningFormattingAttributes",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listContentSigningFormattingConnectorAttributes(
+    ContentSigningFormattingAttributesDto listContentSigningFormattingConnectorAttributes(
             @Parameter(description = "Signature Formatting Provider UUID") @PathVariable UUID connectorUuid,
             @Parameter(description = "Signature family the Signing Profile produces: a code this connector declares",
                     in = ParameterIn.QUERY) @RequestParam SignatureFamily family,
