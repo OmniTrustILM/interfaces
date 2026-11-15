@@ -17,6 +17,8 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
+import jakarta.validation.Validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,9 +34,25 @@ import reactor.core.publisher.Mono;
  */
 public class ContentSigningFormattingApiClient extends BaseApiClient implements ContentSigningFormattingSyncApiClient {
 
-    public ContentSigningFormattingApiClient(WebClient webClient, TrustManager[] defaultTrustManagers) {
+    private final ContentSigningDeclarationValidator declarationValidator;
+
+    public ContentSigningFormattingApiClient(WebClient webClient, TrustManager[] defaultTrustManagers,
+            Validator validator) {
         this.webClient = webClient;
         this.defaultTrustManagers = defaultTrustManagers;
+        this.declarationValidator = new ContentSigningDeclarationValidator(validator);
+    }
+
+    @Override
+    public ContentSigningDeclarationDto getDeclaration(ApiClientConnectorInfo connector) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
+
+        ResponseEntity<ContentSigningDeclarationDto> response = processRequest(r -> r
+                .uri(connector.getUrl() + ContentSigningFormattingPaths.DECLARATION)
+                .retrieve()
+                .toEntity(ContentSigningDeclarationDto.class)
+                .block(), request, connector);
+        return declarationValidator.requireValid(response == null ? null : response.getBody(), connector);
     }
 
     /**

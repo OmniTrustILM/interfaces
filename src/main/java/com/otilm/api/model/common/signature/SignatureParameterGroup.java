@@ -7,8 +7,6 @@ import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.common.enums.IPlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -28,25 +26,24 @@ public enum SignatureParameterGroup implements IPlatformEnum {
 
     SIGNATURE_CONTEXT(Codes.SIGNATURE_CONTEXT, "Signature context",
             "The reason, location and contact information recorded in the signature dictionary",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+            Set.of(SignatureFamily.PADES)),
     SIGNER_IDENTITY(Codes.SIGNER_IDENTITY, "Signer identity",
             "The signer name shown in the signature, which a request may otherwise not contradict",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+            Set.of(SignatureFamily.PADES)),
     SIGNED_ATTRIBUTES(Codes.SIGNED_ATTRIBUTES, "Signed attributes",
             "Commitment type and claimed roles, cryptographically bound into the signature",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+            Set.of(SignatureFamily.PADES)),
     SIGNATURE_SCOPE(Codes.SIGNATURE_SCOPE, "Signature scope",
-            "Whether the signature certifies the document or approves a revision of it",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+            "Whether the signature certifies the document or approves a revision of it", Set.of(SignatureFamily.PADES)),
     VISIBLE_SIGNATURE_PLACEMENT(Codes.VISIBLE_SIGNATURE_PLACEMENT, "Visible signature placement",
             "Where the visible signature lands: a named field, coordinates, or an anchor",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+            Set.of(SignatureFamily.PADES)),
     VISIBLE_SIGNATURE_CONTENT(Codes.VISIBLE_SIGNATURE_CONTENT, "Visible signature content",
             "What the visible signature shows: whether it is drawn at all, its caption, and its image",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES))),
+            Set.of(SignatureFamily.PADES)),
     VISIBLE_SIGNATURE_STYLE(Codes.VISIBLE_SIGNATURE_STYLE, "Visible signature style",
             "How the visible signature is drawn: colours, padding, caption layout, image scaling and resolution",
-            Collections.unmodifiableSet(EnumSet.of(SignatureFamily.PADES)));
+            Set.of(SignatureFamily.PADES));
 
     public static class Codes {
 

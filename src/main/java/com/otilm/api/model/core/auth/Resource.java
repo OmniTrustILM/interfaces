@@ -44,6 +44,9 @@ public enum Resource implements IPlatformEnum {
     // CMP
     CMP_PROFILE(Codes.CMP_PROFILE, "CMP Profile", true, true),
 
+    // EST
+    EST_PROFILE(Codes.EST_PROFILE, "EST Profile", true, true),
+
     // CERTIFICATES
     AUTHORITY(Codes.AUTHORITY, "Authority", true, true),
     RA_PROFILE(Codes.RA_PROFILE, "RA Profile", true, true),
@@ -130,7 +133,7 @@ public enum Resource implements IPlatformEnum {
                     Resource.APPROVAL, Resource.RA_PROFILE, Resource.VAULT_PROFILE, Resource.COMPLIANCE_PROFILE,
                     Resource.APPROVAL_PROFILE, Resource.NOTIFICATION_PROFILE, Resource.SIGNING_PROFILE,
                     Resource.TOKEN_PROFILE, Resource.ACME_PROFILE, Resource.SCEP_PROFILE, Resource.CMP_PROFILE,
-                    Resource.TSP_PROFILE);
+                    Resource.TSP_PROFILE, Resource.EST_PROFILE);
 
     static {
         VALUES = values();
@@ -262,6 +265,7 @@ public enum Resource implements IPlatformEnum {
         public static final String ACME_PROFILE = "acmeProfiles";
         public static final String ATTRIBUTE = "attributes";
         public static final String CMP_PROFILE = "cmpProfiles";
+        public static final String EST_PROFILE = "estProfiles";
         public static final String COMPLIANCE_PROFILE = "complianceProfiles";
         public static final String CONNECTOR = "connectors";
         public static final String CREDENTIAL = "credentials";

@@ -2,17 +2,15 @@ package com.otilm.api.model.common.signature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.exception.ValidationException;
-import com.otilm.api.model.client.connector.v2.ConnectorInterface;
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SignatureFamilyTest {
 
@@ -20,28 +18,10 @@ class SignatureFamilyTest {
 
     @Test
     void wireCodesArePinned() {
-        assertEquals("pades", SignatureFamily.PADES.getCode());
-        assertEquals("xades", SignatureFamily.XADES.getCode());
-        assertEquals("cades", SignatureFamily.CADES.getCode());
-        assertEquals("jades", SignatureFamily.JADES.getCode());
-    }
-
-    @Test
-    void findByCodeRoundTripsAllValues() {
-        for (SignatureFamily family : SignatureFamily.values()) {
-            assertEquals(family, SignatureFamily.findByCode(family.getCode()), family.name());
-        }
-    }
-
-    @Test
-    void unknownCodeIsRejected() {
-        assertThrows(ValidationException.class, () -> SignatureFamily.findByCode("pkcs7"));
-    }
-
-    @Test
-    void serializesAsItsWireCode() throws Exception {
-        assertEquals("\"cades\"", mapper.writeValueAsString(SignatureFamily.CADES));
-        assertEquals(SignatureFamily.CADES, mapper.readValue("\"cades\"", SignatureFamily.class));
+        assertEquals("pades", SignatureFamily.PADES.code());
+        assertEquals("xades", SignatureFamily.XADES.code());
+        assertEquals("cades", SignatureFamily.CADES.code());
+        assertEquals("jades", SignatureFamily.JADES.code());
     }
 
     /**
@@ -56,70 +36,38 @@ class SignatureFamilyTest {
         assertEquals("jades", SignatureFamily.Codes.JADES);
     }
 
-    /** Labels are what an operator picks a family by in the UI, so each must read as the family's proper name. */
-    @Test
-    void labelsAreTheFamilyNames() {
-        assertEquals("PAdES", SignatureFamily.PADES.getLabel());
-        assertEquals("XAdES", SignatureFamily.XADES.getLabel());
-        assertEquals("CAdES", SignatureFamily.CADES.getLabel());
-        assertEquals("JAdES", SignatureFamily.JADES.getLabel());
+    @ParameterizedTest
+    @MethodSource("constants")
+    void deserializesToTheConstantOfTheSameCode(SignatureFamily constant) throws Exception {
+        String wireCode = mapper.writeValueAsString(constant.code());
+        assertEquals(constant, mapper.readValue(wireCode, SignatureFamily.class));
     }
 
     @Test
-    void everyFamilyIsDescribed() {
-        for (SignatureFamily family : SignatureFamily.values()) {
-            assertTrue(family.getDescription() != null && !family.getDescription().isBlank(),
-                    family.name() + " has no description");
-        }
+    void familiesWithTheSameCodeAreEqual() {
+        assertEquals(SignatureFamily.PADES, new SignatureFamily("pades"));
     }
 
-    /** An operator reads the level name beside the rung. */
+    /** Any well-formed code names a family. A connector may declare one that interfaces does not type. */
     @Test
-    void everyFamilyNamesEveryLevelInEtsiBaselineTerms() {
-        assertEquals("PAdES-B-B", SignatureFamily.PADES.getLevelName(SignatureLevel.SIGNED));
-        assertEquals("PAdES-B-T", SignatureFamily.PADES.getLevelName(SignatureLevel.TIMESTAMPED));
-        assertEquals("PAdES-B-LT", SignatureFamily.PADES.getLevelName(SignatureLevel.LONG_TERM));
-        assertEquals("PAdES-B-LTA", SignatureFamily.PADES.getLevelName(SignatureLevel.ARCHIVAL));
-        assertEquals("CAdES-B-LT", SignatureFamily.CADES.getLevelName(SignatureLevel.LONG_TERM));
-        assertEquals("XAdES-B-T", SignatureFamily.XADES.getLevelName(SignatureLevel.TIMESTAMPED));
-        assertEquals("JAdES-B-LTA", SignatureFamily.JADES.getLevelName(SignatureLevel.ARCHIVAL));
-    }
-
-    /** Core refuses a document sent in a mode its family cannot sign from. */
-    @Test
-    void onlyPadesRefusesADigestOnlyDocument() {
-        assertFalse(SignatureFamily.PADES.accepts(DocumentTransferMode.DIGEST_ONLY));
-        assertTrue(SignatureFamily.XADES.accepts(DocumentTransferMode.DIGEST_ONLY));
-        assertTrue(SignatureFamily.CADES.accepts(DocumentTransferMode.DIGEST_ONLY));
-        assertTrue(SignatureFamily.JADES.accepts(DocumentTransferMode.DIGEST_ONLY));
+    void acceptsAFamilyOnlyAConnectorDeclares() {
+        assertEquals("mrtd", new SignatureFamily("mrtd").code());
     }
 
     @ParameterizedTest
-    @EnumSource(SignatureFamily.class)
-    void everyFamilyAcceptsAnInlineDocument(SignatureFamily family) {
-        assertTrue(family.accepts(DocumentTransferMode.INLINE));
+    @NullAndEmptySource
+    @ValueSource(strings = {"PAdES", "1pades", "pa des", "pades_b", "-pades", "pkcs#7"})
+    void malformedCodeIsRejected(String malformed) {
+        assertThrows(ValidationException.class, () -> new SignatureFamily(malformed));
     }
 
     @Test
-    void namingAnAbsentLevelIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> SignatureFamily.PADES.getLevelName(null));
+    void serializesAsItsWireCode() throws Exception {
+        assertEquals("\"cades\"", mapper.writeValueAsString(SignatureFamily.CADES));
+        assertEquals(SignatureFamily.CADES, mapper.readValue("\"cades\"", SignatureFamily.class));
     }
 
-    /**
-     * Each family is advertised by its own connector interface code, which is what lets an image serve one family and
-     * reject the rest. A family with no code could never be advertised at all.
-     */
-    @Test
-    void everyFamilyHasAConnectorInterfaceCode() {
-        Map<SignatureFamily, ConnectorInterface> expected = Map
-                .of(SignatureFamily.PADES, ConnectorInterface.PADES_FORMATTING, SignatureFamily.XADES,
-                        ConnectorInterface.XADES_FORMATTING, SignatureFamily.CADES, ConnectorInterface.CADES_FORMATTING,
-                        SignatureFamily.JADES, ConnectorInterface.JADES_FORMATTING);
-
-        assertEquals(List.of(SignatureFamily.values()).size(), expected.size(),
-                "a family was added without a connector interface code");
-        expected
-                .forEach((family, code) -> assertEquals(family.getCode() + "Formatting", code.getCode(),
-                        family.name() + " and " + code.name() + " disagree on the wire name"));
+    private static Stream<SignatureFamily> constants() {
+        return Stream.of(SignatureFamily.PADES, SignatureFamily.XADES, SignatureFamily.CADES, SignatureFamily.JADES);
     }
 }

@@ -1,6 +1,7 @@
 package com.otilm.api.model.core.signing.parameters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureParameterGroup;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.ArrayList;
@@ -23,10 +24,12 @@ class SignatureParameterGroupTableSchemaGenerationTest {
     private static final String REF = "#/components/schemas/";
 
     @Test
-    void familyAndGroupArePublishedAsTheSharedEnums() {
+    void familyIsPublishedAsAPatternedCodeAndGroupAsTheSharedEnum() {
         Map<String, Schema> schemas = openApi31Schemas(SignatureFamilyParameterGroupsDto.class);
 
-        assertEquals(REF + "SignatureFamily", property(schemas, FAMILY_GROUPS, "family").get$ref());
+        Schema<?> family = property(schemas, FAMILY_GROUPS, "family");
+        assertEquals(Set.of("string"), family.getTypes());
+        assertEquals(SignatureFamily.CODE_PATTERN, family.getPattern());
         assertEquals(REF + "SignatureParameterGroup", property(schemas, GROUP_FIELDS, "group").get$ref());
         assertEquals(REF + GROUP_FIELDS, property(schemas, FAMILY_GROUPS, "groups").getItems().get$ref());
     }

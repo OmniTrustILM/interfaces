@@ -129,7 +129,7 @@ class SignatureParametersDescribeContractTest {
                 EnumSet.noneOf(SignatureParameterGroup.class));
 
         assertEquals(1, problems.size(), String.join("\n", problems));
-        assertTrue(problems.get(0).contains("does not apply to XADES"), problems.get(0));
+        assertTrue(problems.get(0).contains("does not apply to xades"), problems.get(0));
     }
 
     private static List<String> sweepFixture(SignatureParameterContainer fixture) {

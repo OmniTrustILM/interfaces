@@ -55,13 +55,17 @@ class ComputeDtbsRequestDtoTest {
                 .map(type -> type.value().asSubclass(SignatureParametersDto.class));
     }
 
+    private static Stream<SignatureFamily> adesFamilies() {
+        return Stream.of(SignatureFamily.PADES, SignatureFamily.XADES, SignatureFamily.CADES, SignatureFamily.JADES);
+    }
+
     private static SignatureFamily anyFamilyOtherThan(SignatureFamily family) {
-        return Arrays.stream(SignatureFamily.values()).filter(other -> other != family).findFirst().orElseThrow();
+        return adesFamilies().filter(other -> !other.equals(family)).findFirst().orElseThrow();
     }
 
     @Test
     void everyFamilyRoundTripsThroughTheOneRequest() throws Exception {
-        for (SignatureFamily family : SignatureFamily.values()) {
+        for (SignatureFamily family : adesFamilies().toList()) {
             ComputeDtbsRequestDto original = requestFor(family);
 
             ComputeDtbsRequestDto decoded = mapper
@@ -74,8 +78,8 @@ class ComputeDtbsRequestDtoTest {
     }
 
     @Test
-    void anUnknownFamilyIsRejected() {
-        String json = "{\"family\":\"pkcs7\",\"formattingAttributes\":[]}";
+    void aMalformedFamilyIsRejected() {
+        String json = "{\"family\":\"PKCS#7\",\"formattingAttributes\":[]}";
         assertThrows(JsonMappingException.class, () -> mapper.readValue(json, ComputeDtbsRequestDto.class));
     }
 
@@ -134,6 +138,16 @@ class ComputeDtbsRequestDtoTest {
     void parametersOfTheRequestsFamilyPassValidation(Class<? extends SignatureParametersDto> subtype) throws Exception {
         SignatureParametersDto parameters = subtype.getDeclaredConstructor().newInstance();
         ComputeDtbsRequestDto request = requestFor(parameters.getFamily());
+        request.setSignatureParameters(parameters);
+
+        assertEquals(Set.of(), VALIDATOR.validate(request));
+    }
+
+    @ParameterizedTest
+    @MethodSource("everyParametersSubtype")
+    void parametersMatchAnEqualFamilyInstance(Class<? extends SignatureParametersDto> subtype) throws Exception {
+        SignatureParametersDto parameters = subtype.getDeclaredConstructor().newInstance();
+        ComputeDtbsRequestDto request = requestFor(new SignatureFamily(parameters.getFamily().code()));
         request.setSignatureParameters(parameters);
 
         assertEquals(Set.of(), VALIDATOR.validate(request));

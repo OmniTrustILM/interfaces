@@ -6,6 +6,9 @@ import com.otilm.api.clients.signing.contentsigning.ContentSigningFormattingPath
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
+import com.otilm.api.model.common.signature.SignatureFamily;
+import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
@@ -18,11 +21,20 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureFamilyDeclarationDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureLevelDeclarationDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +47,8 @@ import org.springframework.http.ResponseEntity;
  */
 class ContentSigningFormattingApiClientMqTest {
 
+    private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
+
     private RecordingProxyClient proxyClient;
     private ConnectorDto connector;
     private ContentSigningFormattingApiClient client;
@@ -44,7 +58,43 @@ class ContentSigningFormattingApiClientMqTest {
         proxyClient = new RecordingProxyClient();
         connector = new ConnectorDto();
         connector.setUrl("http://localhost");
-        client = new ContentSigningFormattingApiClient(proxyClient);
+        client = new ContentSigningFormattingApiClient(proxyClient, VALIDATOR);
+    }
+
+    @Test
+    void getDeclaration_delegatesGetToTheDeclarationRoute() throws ConnectorException {
+        ContentSigningDeclarationDto declaration = declarationUpTo(SignatureLevel.SIGNED);
+        proxyClient.syncResponse = declaration;
+
+        ContentSigningDeclarationDto result = client.getDeclaration(connector);
+
+        Assertions.assertSame(declaration, result);
+        proxyClient
+                .assertCalled(connector, ContentSigningFormattingPaths.BASE + "/declaration", "GET", null,
+                        ContentSigningDeclarationDto.class);
+    }
+
+    @Test
+    void anAbsentDeclarationIsRejected() {
+        proxyClient.syncResponse = null;
+
+        Assertions.assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+    }
+
+    @Test
+    void aDeclarationBreakingItsRulesIsRejected() {
+        ContentSigningDeclarationDto fromTimestamped = declarationUpTo(SignatureLevel.TIMESTAMPED);
+        fromTimestamped.getFamilies().getFirst().getLevels().removeFirst();
+        proxyClient.syncResponse = fromTimestamped;
+
+        ConnectorException fault = Assertions
+                .assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+
+        Assertions
+                .assertEquals(
+                        "Connector returned an invalid content-signing declaration: families[0].levels: must run "
+                                + "up from SIGNED without a gap, but TIMESTAMPED comes where SIGNED belongs",
+                        fault.getMessage());
     }
 
     @Test
@@ -238,7 +288,22 @@ class ContentSigningFormattingApiClientMqTest {
 
     @Test
     void theProxyIsRequired() {
-        Assertions.assertThrows(NullPointerException.class, () -> new ContentSigningFormattingApiClient(null));
+        Assertions
+                .assertThrows(NullPointerException.class, () -> new ContentSigningFormattingApiClient(null, VALIDATOR));
+    }
+
+    private static ContentSigningDeclarationDto declarationUpTo(SignatureLevel highest) {
+        SignatureFamilyDeclarationDto pades = new SignatureFamilyDeclarationDto();
+        pades.setCode(SignatureFamily.PADES);
+        pades.setLabel("PAdES");
+        pades
+                .setLevels(Arrays
+                        .stream(SignatureLevel.values())
+                        .filter(level -> level.compareTo(highest) <= 0)
+                        .map(level -> new SignatureLevelDeclarationDto(level, "PAdES " + level.name()))
+                        .collect(Collectors.toCollection(ArrayList::new)));
+        pades.setTransferModes(Set.of(DocumentTransferMode.INLINE));
+        return new ContentSigningDeclarationDto(new ArrayList<>(List.of(pades)));
     }
 
     /** Named {@code seenConnector}: reusing the test's own field name would make {@code assertCalled} tautological. */

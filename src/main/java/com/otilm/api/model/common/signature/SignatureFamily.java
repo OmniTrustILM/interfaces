@@ -4,35 +4,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.otilm.api.exception.ValidationError;
 import com.otilm.api.exception.ValidationException;
-import com.otilm.api.model.client.connector.v2.ConnectorInterface;
-import com.otilm.api.model.common.enums.IPlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.regex.Pattern;
 
 /**
- * The signature family a signature belongs to. v1 ships the four AdES families; future content kinds arrive as
- * additional families rather than as a separate workflow type.
+ * Open code of a family a formatting connector declares, such as {@code pades} or {@code mrtd}. Constants cover the
+ * AdES families to support the typed parameters.
  */
-@Schema(enumAsRef = true, description = "Signature family, naming the standard and document format a signature follows")
-public enum SignatureFamily implements IPlatformEnum {
+@Schema(name = "SignatureFamily", type = "string",
+        description = "Code of a signature family, naming the standard and document format a signature follows",
+        pattern = SignatureFamily.CODE_PATTERN, example = SignatureFamily.Codes.PADES)
+public record SignatureFamily(String code) implements Serializable {
 
-    PADES(Codes.PADES, "PAdES", "PDF Advanced Electronic Signatures, ETSI EN 319 142",
-            ConnectorInterface.PADES_FORMATTING, EnumSet.of(DocumentTransferMode.INLINE),
-            SignatureLevelNames.etsiBaseline("PAdES")),
-    XADES(Codes.XADES, "XAdES", "XML Advanced Electronic Signatures, ETSI EN 319 132",
-            ConnectorInterface.XADES_FORMATTING,
-            EnumSet.of(DocumentTransferMode.INLINE, DocumentTransferMode.DIGEST_ONLY),
-            SignatureLevelNames.etsiBaseline("XAdES")),
-    CADES(Codes.CADES, "CAdES", "CMS Advanced Electronic Signatures, ETSI EN 319 122",
-            ConnectorInterface.CADES_FORMATTING,
-            EnumSet.of(DocumentTransferMode.INLINE, DocumentTransferMode.DIGEST_ONLY),
-            SignatureLevelNames.etsiBaseline("CAdES")),
-    JADES(Codes.JADES, "JAdES", "JSON Advanced Electronic Signatures, ETSI TS 119 182",
-            ConnectorInterface.JADES_FORMATTING,
-            EnumSet.of(DocumentTransferMode.INLINE, DocumentTransferMode.DIGEST_ONLY),
-            SignatureLevelNames.etsiBaseline("JAdES"));
+    public static final String CODE_PATTERN = "^[a-z][a-z0-9-]*$";
+
+    private static final Pattern WELL_FORMED_CODE = Pattern.compile(CODE_PATTERN);
 
     public static class Codes {
 
@@ -45,73 +32,28 @@ public enum SignatureFamily implements IPlatformEnum {
         public static final String JADES = "jades";
     }
 
-    private static final SignatureFamily[] VALUES;
+    public static final SignatureFamily PADES = new SignatureFamily(Codes.PADES);
+    public static final SignatureFamily XADES = new SignatureFamily(Codes.XADES);
+    public static final SignatureFamily CADES = new SignatureFamily(Codes.CADES);
+    public static final SignatureFamily JADES = new SignatureFamily(Codes.JADES);
 
-    static {
-        VALUES = values();
-    }
-
-    private final String code;
-    private final String label;
-    private final String description;
-    private final ConnectorInterface connectorInterface;
-    private final Set<DocumentTransferMode> transferModes;
-    private final SignatureLevelNames levelNames;
-
-    SignatureFamily(String code, String label, String description, ConnectorInterface connectorInterface,
-            Set<DocumentTransferMode> transferModes, SignatureLevelNames levelNames) {
-        this.code = code;
-        this.label = label;
-        this.description = description;
-        this.connectorInterface = connectorInterface;
-        this.transferModes = transferModes;
-        this.levelNames = levelNames;
-    }
-
-    /** A connector advertises this interface to serve the family. */
-    public ConnectorInterface getConnectorInterface() {
-        return this.connectorInterface;
-    }
-
-    /**
-     * True when this family can sign a document sent in this mode. A family that writes its signature into the
-     * document, as PAdES does, needs the document inline.
-     */
-    public boolean accepts(DocumentTransferMode mode) {
-        return this.transferModes.contains(mode);
-    }
-
-    /** How this family writes the level, such as {@code PAdES-B-T} for {@link SignatureLevel#TIMESTAMPED}. */
-    public String getLevelName(SignatureLevel level) {
-        if (level == null) {
-            throw new IllegalArgumentException("Signature level must be provided");
+    /** The code appears in URLs and in stored rows. */
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public SignatureFamily {
+        if (code == null || !WELL_FORMED_CODE.matcher(code).matches()) {
+            throw new ValidationException(
+                    ValidationError.create("Signature family code {} must match {}", code, CODE_PATTERN));
         }
-        return this.levelNames.nameOf(level);
     }
 
     @Override
     @JsonValue
-    public String getCode() {
-        return this.code;
+    public String code() {
+        return code;
     }
 
     @Override
-    public String getLabel() {
-        return this.label;
-    }
-
-    @Override
-    public String getDescription() {
-        return this.description;
-    }
-
-    @JsonCreator
-    public static SignatureFamily findByCode(String code) {
-        return Arrays
-                .stream(VALUES)
-                .filter(k -> k.code.equals(code))
-                .findFirst()
-                .orElseThrow(
-                        () -> new ValidationException(ValidationError.create("Unknown signature family {}", code)));
+    public String toString() {
+        return code;
     }
 }

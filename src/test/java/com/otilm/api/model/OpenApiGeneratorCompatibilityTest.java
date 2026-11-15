@@ -17,6 +17,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyResultRequestV
 import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMaterialV2Dto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveredItemPayloadInterface;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceDetailDto;
 import com.otilm.api.model.core.cryptography.tokenprofile.TokenProfileDetailDto;
@@ -50,9 +51,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Holds the key-transfer schemas to what an OpenAPI generator can consume without hand edits: an untyped property, a
- * dangling reference or a name two schemas claim becomes broken generated code rather than a build failure here.
- * Running the generators themselves needs the assembled document; {@code scripts/openapi-generator-check.sh} does that.
+ * Holds the key-transfer and content-signing declaration schemas to what an OpenAPI generator can consume without hand
+ * edits: an untyped property, a dangling reference or a name two schemas claim becomes broken generated code rather
+ * than a build failure here. Running the generators themselves needs the assembled document;
+ * {@code scripts/openapi-generator-check.sh} does that.
  *
  * <p>
  * {@link #noChildOfAPublishedUnionComposesTheUnionItBelongsTo()} is the one invariant here not scoped to those roots:
@@ -68,7 +70,7 @@ class OpenApiGeneratorCompatibilityTest {
                     KeyExportRequestDto.class, InspectionRequestDto.class, InspectionResponseDto.class,
                     CertificateImportRequestDto.class, CertificateImportResponseDto.class,
                     CertificateKeystoreRequestDto.class, KeyItemDetailDto.class, TokenInstanceDetailDto.class,
-                    TokenProfileDetailDto.class);
+                    TokenProfileDetailDto.class, ContentSigningDeclarationDto.class);
 
     /**
      * {@code ResponseMetadata} binds its version subtypes under "2" and "3" while both the published mapping and the
@@ -86,7 +88,8 @@ class OpenApiGeneratorCompatibilityTest {
                     "InspectionRequestDto", "InspectionResponseDto", "CertificateImportRequestDto",
                     "CertificateImportEntryDto", "CertificateImportResponseDto", "CertificateImportResultDto",
                     "InspectedEntryDto", "CertificateEntryKeyDestinationDto", "CertificateKeystoreRequestDto",
-                    "KeyTransferAvailabilityDto", "KeyTransferCapabilityDto");
+                    "KeyTransferAvailabilityDto", "KeyTransferCapabilityDto", "ContentSigningDeclaration",
+                    "SignatureFamilyDeclaration", "SignatureLevelDeclaration");
 
     private static Map<String, Schema> resolveAll() {
         Map<String, Schema> all = new TreeMap<>();

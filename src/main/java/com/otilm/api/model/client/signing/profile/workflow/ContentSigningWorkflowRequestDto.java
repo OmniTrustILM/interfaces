@@ -46,8 +46,8 @@ public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
             + "allowedRequestParameterGroups lists.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
-    @Schema(description = "Signature family this profile produces. "
-            + "Required for ILM-managed signing; must be omitted for delegated signing.",
+    @Schema(description = "Signature family this profile produces: a code the selected formatting connector "
+            + "declares. Required for ILM-managed signing; must be omitted for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private SignatureFamily family;
 

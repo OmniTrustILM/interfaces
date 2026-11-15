@@ -15,6 +15,7 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,10 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/v1/signatureProvider/contentSigning")
 @Tag(name = "Content Signing Formatting",
-        description = "Formatting of content signatures. v1 serves four AdES families: PAdES, XAdES, CAdES and JAdES. "
-                + "Future content kinds arrive as additional families on this same contract. Every content-signing "
-                + "formatting connector implements this contract. The family interface codes it advertises on /v2/info "
-                + "say which families it is entitled to serve. It MUST reject any other family with 422.\n\nThe seven "
+        description = "Formatting of content signatures in the families a connector declares. Every content-signing "
+                + "formatting connector implements this contract and advertises the contentSigningFormatting interface "
+                + "on /v2/info. Its declaration route lists the families it serves. It MUST reject any other family "
+                + "with 422 (errorCode `PARAMETER_UNSUPPORTED`).\n\nThe ladder "
                 + "operations form three compute/embed pairs plus the fused extendToLevel. A pair exists wherever the "
                 + "connector needs something only the platform can produce. That is a signature value, because private "
                 + "keys never leave the platform. It is also a timestamp token, because timestamps are issued "
@@ -68,6 +69,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
                 + "limitation. An imprint computed under one digest algorithm must be embedded expecting the same one, "
                 + "and a single shared attribute makes that true by construction.")
 public interface ContentSigningFormattingController extends AuthProtectedConnectorController {
+
+    @Operation(summary = "Get the content-signing declaration",
+            description = "Returns the families this connector serves. Each family states the levels it reaches, "
+                    + "the transfer modes it signs from and the signature algorithms it supports. The platform reads "
+                    + "the declaration when it connects or reconnects the connector, and refuses the connector when "
+                    + "a family breaks a rule its fields state. A changed declaration takes effect at the next "
+                    + "reconnect.",
+            operationId = "getContentSigningDeclaration")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Declaration retrieved")})
+    @GetMapping(path = "/declaration", produces = MediaType.APPLICATION_JSON_VALUE)
+    ContentSigningDeclarationDto getContentSigningDeclaration();
 
     @Operation(summary = "List the attributes configuring an operation",
             description = "Returns the attribute schema configuring how this connector performs the named operation. A "
@@ -106,8 +118,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data-to-be-signed bytes computed"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families or a transferMode that is absent or neither inline nor "
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family code "
+                            + "or a transferMode that is absent or neither inline nor "
                             + "digestOnly. An entitlement refusal is the 422 below instead.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
@@ -143,8 +155,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "200",
                     description = "Signature value embedded; the signed document is at SIGNED level"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
+                            + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -167,8 +179,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Imprint computed"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
+                            + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -191,8 +203,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "200",
                     description = "Timestamp embedded; the signed document is at TIMESTAMPED level"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
+                            + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -215,8 +227,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Imprint computed"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
+                            + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -239,8 +251,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "200",
                     description = "Timestamp embedded; the signed document is at ARCHIVAL level"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
+                            + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
@@ -270,7 +282,7 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     + "as untrusted.\n\nThe operation carries an execution-mode envelope for a future asynchronous "
                     + "path. The platform always sends SYNCHRONOUS today, and treats a 202 as a contract violation. "
                     + "The capability flag that will gate the asynchronous path is not published yet. A connector that "
-                    + "does not advertise LEVEL_LONG_TERM does not implement this operation at all and answers 422.",
+                    + "does not declare LONG_TERM for the family does not implement this operation at all.",
             operationId = "extendToLevel")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -279,13 +291,13 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             @ApiResponse(responseCode = "202",
                     description = "Extension accepted asynchronously; the body carries the tracking handle and no document"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a malformed family "
+                            + "code",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "- `PARAMETER_UNSUPPORTED` — the connector never advertised LEVEL_LONG_TERM, so it "
-                            + "does not implement the extension.\n- `PARAMETER_UNSUPPORTED` — the target level asked "
+                    description = "- `PARAMETER_UNSUPPORTED` — the connector does not declare LONG_TERM for the family, "
+                            + "so it does not implement the extension.\n- `PARAMETER_UNSUPPORTED` — the target level asked "
                             + "for is one this connector does not reach.\n- `SIGNATURE_NOT_FOUND` — the document "
                             + "carries no signature to extend.\n- `DOCUMENT_MALFORMED` — the document cannot be "
                             + "parsed.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule, such as "
