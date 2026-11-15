@@ -7,6 +7,7 @@ import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestD
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -72,20 +73,23 @@ public class BaseEstProfileRequestDto {
     private List<RequestAttribute> keyRecoveryKeyAttributes = new ArrayList<>();
 
     @Min(0)
-    @Schema(description = "Seconds that enroll and reenroll wait for the certificate before answering 202. 0 answers "
-            + "at once. The wait holds the HTTP request, so it must stay below the timeout of the gateway in front of "
-            + "the platform", minimum = "0", defaultValue = "10")
+    @Max(300)
+    @Schema(description = "Seconds that enroll and reenroll wait for the certificate before answering 202, at most "
+            + "300. 0 answers at once. The wait holds the HTTP request, so it must stay below the timeout of the "
+            + "gateway in front of the platform", minimum = "0", maximum = "300", defaultValue = "10")
     private int issueWaitTimeout = 10;
 
     @Min(1)
-    @Schema(description = "Seconds a client is told to wait, as Retry-After, before it asks again after a 202",
-            minimum = "1", defaultValue = "30")
+    @Max(86400)
+    @Schema(description = "Seconds a client is told to wait, as Retry-After, before it asks again after a 202, at "
+            + "most 86400 (one day)", minimum = "1", maximum = "86400", defaultValue = "30")
     private int retryAfter = 30;
 
     @Min(1)
+    @Max(300)
     @Schema(description = "Seconds that /serverkeygen waits for the certificate before answering that it could not "
-            + "be issued in time. The wait holds the HTTP request, so it must stay below the timeout of the gateway "
-            + "in front of the platform", minimum = "1", defaultValue = "30")
+            + "be issued in time, at most 300. The wait holds the HTTP request, so it must stay below the timeout of "
+            + "the gateway in front of the platform", minimum = "1", maximum = "300", defaultValue = "30")
     private int serverKeyGenerationTimeout = 30;
 
     @Schema(description = "Attributes to issue certificates through the EST Profile's own RA Profile")

@@ -169,8 +169,9 @@ public interface EstController extends InBandResponseController {
                     type = "string") byte[] request);
 
     @Operation(operationId = "estServerKeyGeneration", summary = "Enroll with a server-generated key",
-            description = "The certificate request supplies the subject and requested extensions; its public key and "
-                    + "signature are ignored. The private key is returned without additional encryption. The "
+            description = "The certificate request supplies the subject and requested extensions. Without keyRecovery "
+                    + "the generated key has the type and size of the request's public key; with keyRecovery the EST "
+                    + "Profile's key attributes decide. The key value and the signature are ignored. The private key is returned without additional encryption. The "
                     + "operation never answers 202: it waits for the certificate and answers 503 when it is not "
                     + "issued in time",
             externalDocs = @ExternalDocumentation(description = "RFC 7030, section 4.4",

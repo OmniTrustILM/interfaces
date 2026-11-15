@@ -224,6 +224,26 @@ class EstProfileRequestDtoValidationTest {
     }
 
     @Test
+    void timingAtItsMaximumsIsValid() {
+        EstProfileRequestDto dto = valid(EstAuthenticationPolicy.RA_MTLS);
+        dto.setIssueWaitTimeout(300);
+        dto.setRetryAfter(86400);
+        dto.setServerKeyGenerationTimeout(300);
+        assertNoViolations(VALIDATOR.validate(dto));
+    }
+
+    @Test
+    void timingAboveItsMaximumsIsInvalid() {
+        EstProfileRequestDto dto = valid(EstAuthenticationPolicy.RA_MTLS);
+        dto.setIssueWaitTimeout(301);
+        dto.setRetryAfter(86401);
+        dto.setServerKeyGenerationTimeout(301);
+        List<String> paths = VALIDATOR.validate(dto).stream().map(v -> v.getPropertyPath().toString()).toList();
+        assertTrue(paths.containsAll(List.of("issueWaitTimeout", "retryAfter", "serverKeyGenerationTimeout")),
+                paths::toString);
+    }
+
+    @Test
     void editRequestAppliesTheSameRules() {
         EstProfileEditRequestDto dto = new EstProfileEditRequestDto();
         dto.setAuthenticationPolicy(EstAuthenticationPolicy.VENDOR_MTLS);

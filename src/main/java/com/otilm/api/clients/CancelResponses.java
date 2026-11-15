@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 
 /**
  * Checks a connector's answer to a cancel request. Both the REST and the MQ clients raise errors for 4xx and 5xx only,
- * so a bodiless 3xx returns normally and would otherwise read as a cancellation the connector performed.
+ * so a bodiless 3xx returns normally and would otherwise read as a cancellation the connector performed. This holds for
+ * the direct path. Through a proxy a 3xx does not reach the check: the proxy relies on its HTTP client, which follows
+ * redirects, to return the final response, so a redirect that ends on a 2xx reads as confirmed.
  */
 public final class CancelResponses {
 
