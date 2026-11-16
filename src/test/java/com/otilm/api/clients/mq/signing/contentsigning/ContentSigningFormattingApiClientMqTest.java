@@ -18,9 +18,12 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendOper
 import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendOperationStatusResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLevelRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLevelResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ProfileAttributeErrorDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureFamilyDeclarationDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureLevelDeclarationDto;
@@ -111,6 +114,54 @@ class ContentSigningFormattingApiClientMqTest {
         proxyClient
                 .assertCalled(connector, ContentSigningFormattingPaths.BASE + "/extendToLevel/attributes", "GET", null,
                         ContentSigningFormattingAttributesDto.class);
+    }
+
+    @Test
+    void validateProfile_delegatesPostToTheProfileRoute() throws ConnectorException {
+        ValidateProfileRequestDto request = new ValidateProfileRequestDto();
+        ValidateProfileResponseDto expected = new ValidateProfileResponseDto(List.of(),
+                Set.of(DocumentTransferMode.INLINE));
+        proxyClient.syncResponse = expected;
+
+        ValidateProfileResponseDto result = client.validateProfile(connector, request);
+
+        Assertions.assertSame(expected, result);
+        proxyClient
+                .assertCalled(connector, ContentSigningFormattingPaths.BASE + "/validateProfile", "POST", request,
+                        ValidateProfileResponseDto.class);
+    }
+
+    @Test
+    void validateProfile_returnsTheProblemsTheConnectorFound() throws ConnectorException {
+        proxyClient.syncResponse = new ValidateProfileResponseDto(
+                List.of(new ProfileAttributeErrorDto("font", "The font file cannot be parsed")), Set.of());
+
+        ValidateProfileResponseDto result = client.validateProfile(connector, new ValidateProfileRequestDto());
+
+        Assertions.assertEquals("font", result.getErrors().getFirst().getAttributeName());
+    }
+
+    @Test
+    void anAbsentProfileValidationResultIsRejected() {
+        proxyClient.syncResponse = null;
+
+        Assertions
+                .assertThrows(ConnectorException.class,
+                        () -> client.validateProfile(connector, new ValidateProfileRequestDto()));
+    }
+
+    @Test
+    void aValidProfileWithoutTransferModesIsRejected() {
+        proxyClient.syncResponse = new ValidateProfileResponseDto(List.of(), Set.of());
+
+        ConnectorException fault = Assertions
+                .assertThrows(ConnectorException.class,
+                        () -> client.validateProfile(connector, new ValidateProfileRequestDto()));
+
+        Assertions
+                .assertEquals("Connector returned an invalid profile validation result: "
+                        + "transferModeNamedForValidProfile: transferModes must name at least one mode when errors "
+                        + "is empty", fault.getMessage());
     }
 
     @Test

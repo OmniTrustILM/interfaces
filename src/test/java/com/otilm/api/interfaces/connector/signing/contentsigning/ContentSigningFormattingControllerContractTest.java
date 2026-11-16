@@ -49,6 +49,8 @@ class ContentSigningFormattingControllerContractTest {
     private static final Map<String, String> EXPECTED_COMPANION_PATHS = Map
             .of("getExtendToLevelStatus", "/extendToLevel/status", "cancelExtendToLevel", "/extendToLevel/cancel");
 
+    private static final Map<String, String> EXPECTED_PROFILE_PATHS = Map.of("validateProfile", "/validateProfile");
+
     private static final Map<String, String> EXPECTED_POST_PATHS = allPostPaths();
 
     private static final Map<String, String> EXPECTED_GET_PATHS = Map
@@ -66,6 +68,7 @@ class ContentSigningFormattingControllerContractTest {
     private static Map<String, String> allPostPaths() {
         Map<String, String> paths = new HashMap<>(EXPECTED_OPERATION_PATHS);
         paths.putAll(EXPECTED_COMPANION_PATHS);
+        paths.putAll(EXPECTED_PROFILE_PATHS);
         return Map.copyOf(paths);
     }
 
@@ -73,6 +76,7 @@ class ContentSigningFormattingControllerContractTest {
         Map<String, String> codes = new HashMap<>();
         EXPECTED_OPERATION_PATHS.keySet().forEach(name -> codes.put(name, "200"));
         EXPECTED_GET_PATHS.keySet().forEach(name -> codes.put(name, "200"));
+        EXPECTED_PROFILE_PATHS.keySet().forEach(name -> codes.put(name, "200"));
         codes.put("getExtendToLevelStatus", "200");
         codes.put("cancelExtendToLevel", "204");
         return Map.copyOf(codes);
@@ -185,6 +189,23 @@ class ContentSigningFormattingControllerContractTest {
             assertTrue(unprocessableEntry(methodName, "PARAMETER_UNSUPPORTED").contains("ARCHIVAL"),
                     methodName + " does not refuse a family the connector declares no ARCHIVAL level for");
         }
+    }
+
+    /** A connector reports an unusable profile as errors in its 200 answer. */
+    @Test
+    void validateProfileRefusesOnlyARequestItCannotProcess() {
+        assertTrue(unprocessableEntry("validateProfile", "PARAMETER_UNSUPPORTED").contains("family"));
+        assertTrue(unprocessableEntry("validateProfile", "VALIDATION_FAILED").contains("allowedRequestAttributes"));
+        assertFalse(unprocessableDescription("validateProfile").contains("ATTRIBUTES_REJECTED"),
+                "validateProfile refuses a profile's values instead of reporting them as errors");
+        assertTrue(operationDescription("validateProfile").contains("errors in a 200"));
+    }
+
+    /** The platform stores the modes with the profile and enforces them on every signing request. */
+    @Test
+    void validateProfileBoundsItsTransferModesByTheDeclaration() {
+        assertTrue(operationDescription("validateProfile")
+                .contains("every transfer mode it names MUST be among the transfer modes the family declares"));
     }
 
     /** The body reads a malformed family code as a string, so bean validation refuses it as a field rule. */

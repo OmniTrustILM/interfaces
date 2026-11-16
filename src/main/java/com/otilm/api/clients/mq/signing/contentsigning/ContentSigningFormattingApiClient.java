@@ -19,6 +19,8 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import jakarta.validation.Validator;
 import java.util.Objects;
@@ -56,6 +58,15 @@ public class ContentSigningFormattingApiClient implements ContentSigningFormatti
                 .sendRequest(connector, ContentSigningFormattingPaths.attributes(operation), HTTP_METHOD_GET, null,
                         ContentSigningFormattingAttributesDto.class);
         return responseValidator.requireValidListing(result, connector);
+    }
+
+    @Override
+    public ValidateProfileResponseDto validateProfile(ApiClientConnectorInfo connector,
+            ValidateProfileRequestDto request) throws ConnectorException {
+        ValidateProfileResponseDto result = proxyClient
+                .sendRequest(connector, ContentSigningFormattingPaths.VALIDATE_PROFILE, HTTP_METHOD_POST, request,
+                        ValidateProfileResponseDto.class);
+        return responseValidator.requireValidProfileValidation(result, connector);
     }
 
     @Override

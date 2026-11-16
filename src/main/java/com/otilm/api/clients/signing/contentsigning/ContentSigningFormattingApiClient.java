@@ -17,6 +17,8 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import jakarta.validation.Validator;
 import javax.net.ssl.TrustManager;
@@ -63,6 +65,20 @@ public class ContentSigningFormattingApiClient extends BaseApiClient implements 
                 .toEntity(ContentSigningFormattingAttributesDto.class)
                 .block(), request, connector);
         return responseValidator.requireValidListing(response == null ? null : response.getBody(), connector);
+    }
+
+    @Override
+    public ValidateProfileResponseDto validateProfile(ApiClientConnectorInfo connector,
+            ValidateProfileRequestDto requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        ResponseEntity<ValidateProfileResponseDto> response = processRequest(r -> r
+                .uri(connector.getUrl() + ContentSigningFormattingPaths.VALIDATE_PROFILE)
+                .body(Mono.just(requestDto), ValidateProfileRequestDto.class)
+                .retrieve()
+                .toEntity(ValidateProfileResponseDto.class)
+                .block(), request, connector);
+        return responseValidator.requireValidProfileValidation(response == null ? null : response.getBody(), connector);
     }
 
     @Override

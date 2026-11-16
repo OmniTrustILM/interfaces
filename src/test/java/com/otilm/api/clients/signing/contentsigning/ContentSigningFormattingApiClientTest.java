@@ -4,8 +4,11 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.otilm.api.clients.BaseApiClient;
 import com.otilm.api.exception.ConnectorException;
+import com.otilm.api.model.client.attribute.RequestAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
@@ -25,13 +28,17 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.InlineDocu
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import jakarta.validation.Validation;
 import java.time.OffsetDateTime;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
+import java.util.Set;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,28 +62,33 @@ class ContentSigningFormattingApiClientTest {
 
     private static final String BASE = "/v1/signatureProvider/contentSigning";
 
+    private static WireMockServer mockServer;
+
     private ContentSigningFormattingApiClient client;
     private ConnectorDto connector;
-    private WireMockServer mockServer;
 
-    @BeforeEach
-    void setUp() {
-        client = new ContentSigningFormattingApiClient(BaseApiClient.prepareWebClient(), null,
-                Validation.buildDefaultValidatorFactory().getValidator());
-
+    @BeforeAll
+    static void startMockServer() {
         mockServer = new WireMockServer(options().dynamicPort());
         mockServer.start();
         WireMock.configureFor("localhost", mockServer.port());
+    }
+
+    @AfterAll
+    static void stopMockServer() {
+        mockServer.stop();
+    }
+
+    @BeforeEach
+    void setUp() {
+        mockServer.resetAll();
+        client = new ContentSigningFormattingApiClient(BaseApiClient.prepareWebClient(), null,
+                Validation.buildDefaultValidatorFactory().getValidator());
 
         connector = new ConnectorDto();
         connector.setName("ades-connector-under-test");
         connector.setUrl("http://localhost:" + mockServer.port());
         connector.setStatus(ConnectorStatus.CONNECTED);
-    }
-
-    @AfterEach
-    void tearDown() {
-        mockServer.stop();
     }
 
     @Test
@@ -177,6 +189,113 @@ class ContentSigningFormattingApiClientTest {
 
         assertEquals("Connector returned an invalid formatting attribute listing: requestAttributes: must not be null",
                 fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_postsTheProfileToItsOwnRoute() throws ConnectorException {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [], "transferModes": [ "inline" ] }
+                """);
+
+        ValidateProfileResponseDto result = client.validateProfile(connector, validateProfileRequest());
+
+        assertEquals(Set.of(DocumentTransferMode.INLINE), result.getTransferModes());
+        mockServer
+                .verify(WireMock
+                        .postRequestedFor(WireMock.urlEqualTo(BASE + "/validateProfile"))
+                        .withRequestBody(WireMock.matchingJsonPath("$.family", WireMock.equalTo("pades")))
+                        .withRequestBody(WireMock
+                                .matchingJsonPath("$.allowedRequestAttributes[0]",
+                                        WireMock.equalTo("signatureContext"))));
+    }
+
+    /** A Go connector decodes only v3 attributes. A Java connector or WireMock accepts both versions. */
+    @Test
+    void validateProfile_sendsTheProfileValuesAsV3Attributes() throws ConnectorException {
+        stubPost(BASE + "/validateProfile", "{ \"errors\": [], \"transferModes\": [ \"inline\" ] }");
+        ValidateProfileRequestDto request = validateProfileRequest();
+        RequestAttributeV3 font = new RequestAttributeV3();
+        font.setName("font");
+        font.setContent(List.of(new StringAttributeContentV3("DejaVuSans")));
+        request.setFormattingAttributes(List.of(font));
+
+        client.validateProfile(connector, request);
+
+        mockServer
+                .verify(WireMock
+                        .postRequestedFor(WireMock.urlEqualTo(BASE + "/validateProfile"))
+                        .withRequestBody(
+                                WireMock.matchingJsonPath("$.formattingAttributes[0].version", WireMock.equalTo("v3")))
+                        .withRequestBody(
+                                WireMock.matchingJsonPath("$.formattingAttributes[0].content[0].contentType")));
+    }
+
+    @Test
+    void validateProfile_returnsTheProblemsTheConnectorFound() throws ConnectorException {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [ { "attributeName": "font", "reason": "The font file cannot be parsed" } ],
+                  "transferModes": [] }
+                """);
+
+        ValidateProfileResponseDto result = client.validateProfile(connector, validateProfileRequest());
+
+        assertEquals("font", result.getErrors().getFirst().getAttributeName());
+        assertEquals("The font file cannot be parsed", result.getErrors().getFirst().getReason());
+    }
+
+    @Test
+    void validateProfile_reportsAnEmptyBodyAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", "");
+
+        assertThrows(ConnectorException.class, () -> client.validateProfile(connector, validateProfileRequest()));
+    }
+
+    @Test
+    void validateProfile_reportsAValidProfileWithoutTransferModesAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", "{ \"errors\": [], \"transferModes\": [] }");
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: transferModeNamedForValidProfile: "
+                + "transferModes must name at least one mode when errors is empty", fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_reportsAnOmittedErrorListAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", "{ \"transferModes\": [ \"inline\" ] }");
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: errors: "
+                + "errors may be an empty list, but must be present", fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_reportsAnOmittedTransferModeSetAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [ { "attributeName": "font", "reason": "The font file cannot be parsed" } ] }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: transferModes: "
+                + "transferModes may be an empty set, but must be present", fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_reportsAnErrorWithoutItsAttributeAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [ { "reason": "The font file cannot be parsed" } ], "transferModes": [] }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: errors[0].attributeName: "
+                + "attributeName is required", fault.getMessage());
     }
 
     @Test
@@ -462,6 +581,14 @@ class ContentSigningFormattingApiClientTest {
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
         request.setSignatureAlgorithm(SignatureAlgorithm.SHA256_WITH_RSA_PSS);
         request.setFormattingAttributes(List.of());
+        return request;
+    }
+
+    private static ValidateProfileRequestDto validateProfileRequest() {
+        ValidateProfileRequestDto request = new ValidateProfileRequestDto();
+        request.setFamily("pades");
+        request.setFormattingAttributes(List.of());
+        request.setAllowedRequestAttributes(Set.of("signatureContext"));
         return request;
     }
 
