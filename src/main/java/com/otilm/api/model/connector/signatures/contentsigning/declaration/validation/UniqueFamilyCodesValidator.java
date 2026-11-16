@@ -1,6 +1,5 @@
 package com.otilm.api.model.connector.signatures.contentsigning.declaration.validation;
 
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureFamilyDeclarationDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -18,7 +17,7 @@ public class UniqueFamilyCodesValidator
             return true;
         }
         boolean valid = true;
-        Map<SignatureFamily, Integer> firstIndexByCode = new HashMap<>();
+        Map<String, Integer> firstIndexByCode = new HashMap<>();
         for (int index = 0; index < families.size(); index++) {
             SignatureFamilyDeclarationDto family = families.get(index);
             if (family == null || family.getCode() == null) {

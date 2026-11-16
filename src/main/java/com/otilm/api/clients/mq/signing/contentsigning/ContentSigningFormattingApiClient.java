@@ -2,13 +2,13 @@ package com.otilm.api.clients.mq.signing.contentsigning;
 
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.clients.mq.ProxyClient;
-import com.otilm.api.clients.signing.contentsigning.ContentSigningDeclarationValidator;
 import com.otilm.api.clients.signing.contentsigning.ContentSigningFormattingPaths;
+import com.otilm.api.clients.signing.contentsigning.ContentSigningResponseValidator;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.interfaces.client.v1.signing.contentsigning.ContentSigningFormattingSyncApiClient;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -21,9 +21,6 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocu
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import jakarta.validation.Validator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 
@@ -37,11 +34,11 @@ public class ContentSigningFormattingApiClient implements ContentSigningFormatti
     private static final String HTTP_METHOD_POST = "POST";
 
     private final ProxyClient proxyClient;
-    private final ContentSigningDeclarationValidator declarationValidator;
+    private final ContentSigningResponseValidator responseValidator;
 
     public ContentSigningFormattingApiClient(ProxyClient proxyClient, Validator validator) {
         this.proxyClient = Objects.requireNonNull(proxyClient, "proxyClient is required");
-        this.declarationValidator = new ContentSigningDeclarationValidator(validator);
+        this.responseValidator = new ContentSigningResponseValidator(validator);
     }
 
     @Override
@@ -49,16 +46,16 @@ public class ContentSigningFormattingApiClient implements ContentSigningFormatti
         ContentSigningDeclarationDto result = proxyClient
                 .sendRequest(connector, ContentSigningFormattingPaths.DECLARATION, HTTP_METHOD_GET, null,
                         ContentSigningDeclarationDto.class);
-        return declarationValidator.requireValid(result, connector);
+        return responseValidator.requireValidDeclaration(result, connector);
     }
 
     @Override
-    public List<BaseAttribute> listFormattingAttributes(ApiClientConnectorInfo connector,
+    public ContentSigningFormattingAttributesDto listFormattingAttributes(ApiClientConnectorInfo connector,
             ContentSigningFormattingOperation operation) throws ConnectorException {
-        BaseAttribute[] result = proxyClient
+        ContentSigningFormattingAttributesDto result = proxyClient
                 .sendRequest(connector, ContentSigningFormattingPaths.attributes(operation), HTTP_METHOD_GET, null,
-                        BaseAttribute[].class);
-        return new ArrayList<>(Arrays.asList(requireBody(result, "listFormattingAttributes", connector)));
+                        ContentSigningFormattingAttributesDto.class);
+        return responseValidator.requireValidListing(result, connector);
     }
 
     @Override

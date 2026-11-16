@@ -54,6 +54,9 @@ public enum ErrorCode {
             false),
     DOCUMENT_SIGNING_FORBIDDEN(ProblemTypeCategory.CONNECTOR, null, "Document forbids the requested signature",
             HttpStatus.UNPROCESSABLE_CONTENT, false),
+    ATTRIBUTES_REJECTED(ProblemTypeCategory.CONNECTOR, null,
+            "Request attribute is undeclared or invalid, or the merged values are incomplete or contradictory",
+            HttpStatus.UNPROCESSABLE_CONTENT, false),
 
     // Replayed-context divergence. Distinct from VALIDATION_FAILED: the body is well formed, so no field
     // rule is what failed. It says the platform's own state moved between a compute step and the embed

@@ -1,9 +1,10 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
-import com.otilm.api.model.common.signature.SignatureFamily;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,9 +25,11 @@ import lombok.ToString;
 public abstract class ContentSigningFormattingRequestDto {
 
     @Schema(description = "Signature family this request targets; a connector rejects a family its declaration does "
-            + "not list with 422 (errorCode `PARAMETER_UNSUPPORTED`)", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "not list with 422 (errorCode `PARAMETER_UNSUPPORTED`)", requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "pades")
     @NotNull(message = "family is required")
-    private SignatureFamily family;
+    @Pattern(regexp = SignatureFamilyFormat.REGEX, message = SignatureFamilyFormat.MESSAGE)
+    private String family;
 
     @ToString.Exclude
     @Schema(description = "Attribute values the operator fixed on the Signing Profile, validated when the profile "

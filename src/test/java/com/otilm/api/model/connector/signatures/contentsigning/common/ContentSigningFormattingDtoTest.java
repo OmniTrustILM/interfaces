@@ -7,7 +7,6 @@ import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
@@ -65,6 +64,14 @@ class ContentSigningFormattingDtoTest {
         dto.setSignerCertificateChain(List.of());
 
         assertTrue(paths(VALIDATOR.validate(dto)).contains("signerCertificateChain"));
+    }
+
+    @Test
+    void computeDtbsRejectsAMalformedFamilyCode() {
+        ComputeDtbsRequestDto dto = validComputeDtbs();
+        dto.setFamily("PAdES");
+
+        assertTrue(paths(VALIDATOR.validate(dto)).contains("family"));
     }
 
     /**
@@ -125,7 +132,7 @@ class ContentSigningFormattingDtoTest {
     @Test
     void embedSignatureValueRoundTrips() throws Exception {
         EmbedSignatureValueRequestDto original = new EmbedSignatureValueRequestDto();
-        original.setFamily(SignatureFamily.XADES);
+        original.setFamily("xades");
         original.setFormattingAttributes(List.of());
         original.setSignatureValue(new byte[]{1, 2, 3});
         original.setSignatureAlgorithm(SignatureAlgorithm.SHA384_WITH_ECDSA);
@@ -134,7 +141,7 @@ class ContentSigningFormattingDtoTest {
         EmbedSignatureValueRequestDto deserialized = mapper
                 .readValue(mapper.writeValueAsString(original), EmbedSignatureValueRequestDto.class);
 
-        assertEquals(SignatureFamily.XADES, deserialized.getFamily());
+        assertEquals("xades", deserialized.getFamily());
         assertArrayEquals(original.getSignatureValue(), deserialized.getSignatureValue());
         assertEquals(SignatureAlgorithm.SHA384_WITH_ECDSA, deserialized.getSignatureAlgorithm());
         assertArrayEquals(original.getFormattingContext(), deserialized.getFormattingContext());
@@ -158,7 +165,7 @@ class ContentSigningFormattingDtoTest {
     @Test
     void aSignedDocumentRequestNeedsNoDetachedContent() {
         SignedDocumentRequestDto dto = new SignedDocumentRequestDto();
-        dto.setFamily(SignatureFamily.PADES);
+        dto.setFamily("pades");
         dto.setFormattingAttributes(List.of());
         dto.setSignedDocument(new byte[]{1, 2, 3});
 
@@ -173,7 +180,7 @@ class ContentSigningFormattingDtoTest {
     @Test
     void anEnvelopedRequestOmitsDetachedContentEntirely() throws Exception {
         SignedDocumentRequestDto dto = new SignedDocumentRequestDto();
-        dto.setFamily(SignatureFamily.PADES);
+        dto.setFamily("pades");
         dto.setFormattingAttributes(List.of());
         dto.setSignedDocument(new byte[]{1, 2, 3});
 
@@ -184,7 +191,7 @@ class ContentSigningFormattingDtoTest {
     @Test
     void anEnvelopedTimestampRequestOmitsDetachedContentEntirely() throws Exception {
         EmbedTimestampRequestDto dto = new EmbedTimestampRequestDto();
-        dto.setFamily(SignatureFamily.PADES);
+        dto.setFamily("pades");
         dto.setFormattingAttributes(List.of());
         dto.setSignedDocument(new byte[]{1, 2, 3});
         dto.setTimestampToken(new byte[]{4, 5, 6});
@@ -196,7 +203,7 @@ class ContentSigningFormattingDtoTest {
     @Test
     void aDetachedRequestStillCarriesItsDetachedContent() throws Exception {
         SignedDocumentRequestDto dto = new SignedDocumentRequestDto();
-        dto.setFamily(SignatureFamily.CADES);
+        dto.setFamily("cades");
         dto.setFormattingAttributes(List.of());
         dto.setSignedDocument(new byte[]{1, 2, 3});
         DigestOnlyDocumentTransferDto detached = new DigestOnlyDocumentTransferDto(SHA256_DIGEST,
@@ -212,7 +219,7 @@ class ContentSigningFormattingDtoTest {
     @Test
     void detachedContentIsValidatedWhenSupplied() {
         SignedDocumentRequestDto dto = new SignedDocumentRequestDto();
-        dto.setFamily(SignatureFamily.CADES);
+        dto.setFamily("cades");
         dto.setFormattingAttributes(List.of());
         dto.setSignedDocument(new byte[]{1, 2, 3});
         dto.setDetachedContent(new InlineDocumentTransferDto(null));
@@ -376,7 +383,7 @@ class ContentSigningFormattingDtoTest {
 
     private static ExtendToLevelRequestDto validExtendToLevel() {
         ExtendToLevelRequestDto dto = new ExtendToLevelRequestDto();
-        dto.setFamily(SignatureFamily.CADES);
+        dto.setFamily("cades");
         dto.setFormattingAttributes(List.of());
         dto.setSignedDocument(new byte[]{1, 2, 3});
         dto.setTargetLevel(SignatureLevel.LONG_TERM);
@@ -659,8 +666,9 @@ class ContentSigningFormattingDtoTest {
 
     private static ComputeDtbsRequestDto validComputeDtbs() {
         ComputeDtbsRequestDto dto = new ComputeDtbsRequestDto();
-        dto.setFamily(SignatureFamily.CADES);
+        dto.setFamily("cades");
         dto.setFormattingAttributes(List.of());
+        dto.setRequestAttributes(List.of());
         dto.setSignerCertificateChain(List.of(new byte[]{4, 5, 6}));
         dto.setSigningTime(OffsetDateTime.parse("2026-08-11T09:30:00Z"));
         dto.setSignatureAlgorithm(SignatureAlgorithm.SHA256_WITH_RSA);

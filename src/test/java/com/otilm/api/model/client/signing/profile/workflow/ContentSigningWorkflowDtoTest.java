@@ -5,19 +5,12 @@ import com.otilm.api.model.client.signing.profile.workflow.timestamp.InternalTim
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.InternalTimestampSourceRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSourceType;
 import com.otilm.api.model.common.NameAndUuidDto;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
-import com.otilm.api.model.common.signature.SignatureParameterGroup;
-import com.otilm.api.model.common.signature.parameters.pades.PadesSignatureParametersDto;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AutoClose;
@@ -40,7 +33,7 @@ class ContentSigningWorkflowDtoTest {
     private ContentSigningWorkflowRequestDto fullyConfiguredRequest() {
         ContentSigningWorkflowRequestDto dto = new ContentSigningWorkflowRequestDto();
         dto.setSignatureFormattingConnectorUuid(UUID.randomUUID());
-        dto.setFamily(SignatureFamily.PADES);
+        dto.setFamily("pades");
         dto.setMaxLevel(SignatureLevel.ARCHIVAL);
         dto.setTimestampSource(new InternalTimestampSourceRequestDto(UUID.randomUUID()));
         dto.setRequireNonRepudiation(true);
@@ -48,148 +41,47 @@ class ContentSigningWorkflowDtoTest {
         return dto;
     }
 
-    private static PadesSignatureParametersDto padesDefaults() {
-        PadesSignatureParametersDto parameters = new PadesSignatureParametersDto();
-        parameters.setReason("Contract approval");
-        parameters.setLocation("Prague");
-        return parameters;
-    }
-
-    /**
-     * The allow-list and the defaults are orthogonal, so the round-trip carries a group with no default and vice versa.
-     */
     @Test
-    void theRequestRoundTripsTheAllowListAndTheTypedDefaults() throws Exception {
+    void theRequestRoundTripsTheAllowList() throws Exception {
         ContentSigningWorkflowRequestDto original = fullyConfiguredRequest();
-        original
-                .setAllowedRequestParameterGroups(
-                        new LinkedHashSet<>(Set.of(SignatureParameterGroup.VISIBLE_SIGNATURE_CONTENT)));
-        original.setDefaultSignatureParameters(padesDefaults());
+        original.setAllowedRequestAttributes(new LinkedHashSet<>(List.of("signatureContext", "reason")));
 
         String json = mapper.writeValueAsString(original);
         WorkflowRequestDto decoded = mapper.readValue(json, WorkflowRequestDto.class);
 
         ContentSigningWorkflowRequestDto workflow = assertInstanceOf(ContentSigningWorkflowRequestDto.class, decoded);
-        assertEquals(Set.of(SignatureParameterGroup.VISIBLE_SIGNATURE_CONTENT),
-                workflow.getAllowedRequestParameterGroups());
-        PadesSignatureParametersDto defaults = assertInstanceOf(PadesSignatureParametersDto.class,
-                workflow.getDefaultSignatureParameters());
-        assertEquals(SignatureFamily.PADES, defaults.getFamily());
-        assertEquals("Contract approval", defaults.getReason());
-        assertEquals("Prague", defaults.getLocation());
+        assertEquals(Set.of("signatureContext", "reason"), workflow.getAllowedRequestAttributes());
     }
 
     @Test
-    void theResponseRoundTripsTheAllowListAndTheTypedDefaults() throws Exception {
+    void theResponseRoundTripsTheAllowList() throws Exception {
         ContentSigningWorkflowDto original = new ContentSigningWorkflowDto();
-        original
-                .setAllowedRequestParameterGroups(
-                        new LinkedHashSet<>(Set.of(SignatureParameterGroup.SIGNATURE_CONTEXT)));
-        original.setDefaultSignatureParameters(padesDefaults());
+        original.setAllowedRequestAttributes(new LinkedHashSet<>(List.of("signatureContext")));
 
         String json = mapper.writeValueAsString(original);
         WorkflowDto decoded = mapper.readValue(json, WorkflowDto.class);
 
         ContentSigningWorkflowDto workflow = assertInstanceOf(ContentSigningWorkflowDto.class, decoded);
-        assertEquals(Set.of(SignatureParameterGroup.SIGNATURE_CONTEXT), workflow.getAllowedRequestParameterGroups());
-        PadesSignatureParametersDto defaults = assertInstanceOf(PadesSignatureParametersDto.class,
-                workflow.getDefaultSignatureParameters());
-        assertEquals(SignatureFamily.PADES, defaults.getFamily());
-        assertEquals("Contract approval", defaults.getReason());
-        assertEquals("Prague", defaults.getLocation());
+        assertEquals(Set.of("signatureContext"), workflow.getAllowedRequestAttributes());
     }
 
     @Test
-    void theValidCascadeAppliesTheRequestFieldCapsToTheDefaults() {
+    void aBlankNameInTheAllowListIsRejected() {
         ContentSigningWorkflowRequestDto request = fullyConfiguredRequest();
-        PadesSignatureParametersDto defaults = new PadesSignatureParametersDto();
-        defaults.setReason("x".repeat(513));
-        request.setDefaultSignatureParameters(defaults);
-
-        Set<ConstraintViolation<ContentSigningWorkflowRequestDto>> violations = VALIDATOR.validate(request);
-
-        assertFalse(violations.isEmpty(), "an over-long default reason passed the cascade");
-        assertTrue(
-                violations
-                        .stream()
-                        .anyMatch(v -> "defaultSignatureParameters.reason".equals(v.getPropertyPath().toString())),
-                "the violation does not point at the offending default field");
-    }
-
-    @Test
-    void theRequestCarryingTypedDefaultsSurvivesJavaSerialization() throws Exception {
-        ContentSigningWorkflowRequestDto original = fullyConfiguredRequest();
-        original
-                .setAllowedRequestParameterGroups(
-                        new LinkedHashSet<>(Set.of(SignatureParameterGroup.SIGNATURE_CONTEXT)));
-        original.setDefaultSignatureParameters(padesDefaults());
-
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-            out.writeObject(original);
-        }
-        ContentSigningWorkflowRequestDto restored;
-        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-            restored = assertInstanceOf(ContentSigningWorkflowRequestDto.class, in.readObject());
-        }
-
-        assertEquals(Set.of(SignatureParameterGroup.SIGNATURE_CONTEXT), restored.getAllowedRequestParameterGroups());
-        assertEquals("Contract approval",
-                assertInstanceOf(PadesSignatureParametersDto.class, restored.getDefaultSignatureParameters())
-                        .getReason());
-    }
-
-    @Test
-    void theResponseCarryingTypedDefaultsSurvivesJavaSerialization() throws Exception {
-        ContentSigningWorkflowDto original = new ContentSigningWorkflowDto();
-        original.setFamily(SignatureFamily.PADES);
-        original.setMaxLevel(SignatureLevel.ARCHIVAL);
-        original.setSignatureFormattingConnector(new NameAndUuidDto(UUID.randomUUID(), "Formatter"));
-        original.setTimestampSource(new InternalTimestampSourceDto(new NameAndUuidDto(UUID.randomUUID(), "TSA")));
-        original
-                .setAllowedRequestParameterGroups(
-                        new LinkedHashSet<>(Set.of(SignatureParameterGroup.SIGNATURE_CONTEXT)));
-        original.setDefaultSignatureParameters(padesDefaults());
-
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-            out.writeObject(original);
-        }
-        ContentSigningWorkflowDto restored;
-        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-            restored = assertInstanceOf(ContentSigningWorkflowDto.class, in.readObject());
-        }
-
-        assertEquals(Set.of(SignatureParameterGroup.SIGNATURE_CONTEXT), restored.getAllowedRequestParameterGroups());
-        assertEquals("Contract approval",
-                assertInstanceOf(PadesSignatureParametersDto.class, restored.getDefaultSignatureParameters())
-                        .getReason());
-    }
-
-    @Test
-    void aNullGroupInTheAllowListIsRejected() {
-        ContentSigningWorkflowRequestDto request = fullyConfiguredRequest();
-        request
-                .setAllowedRequestParameterGroups(
-                        new LinkedHashSet<>(Arrays.asList(SignatureParameterGroup.SIGNATURE_CONTEXT, null)));
+        request.setAllowedRequestAttributes(new LinkedHashSet<>(List.of("signatureContext", " ")));
 
         Set<ConstraintViolation<ContentSigningWorkflowRequestDto>> violations = VALIDATOR.validate(request);
 
         assertEquals(1, violations.size(), violations.toString());
-        assertEquals("allowedRequestParameterGroups[].<iterable element>",
-                violations.iterator().next().getPropertyPath().toString());
+        ConstraintViolation<ContentSigningWorkflowRequestDto> violation = violations.iterator().next();
+        assertEquals("allowedRequestAttributes[].<iterable element>", violation.getPropertyPath().toString());
+        assertEquals("allowedRequestAttributes must not contain blank names", violation.getMessage());
     }
 
     @Test
     void theAllowListStartsEmptyRatherThanNullOnBothSurfaces() {
-        assertEquals(Set.of(), new ContentSigningWorkflowRequestDto().getAllowedRequestParameterGroups());
-        assertEquals(Set.of(), new ContentSigningWorkflowDto().getAllowedRequestParameterGroups());
-    }
-
-    @Test
-    void theTypedDefaultsStartNullOnBothSurfaces() {
-        assertNull(new ContentSigningWorkflowRequestDto().getDefaultSignatureParameters());
-        assertNull(new ContentSigningWorkflowDto().getDefaultSignatureParameters());
+        assertEquals(Set.of(), new ContentSigningWorkflowRequestDto().getAllowedRequestAttributes());
+        assertEquals(Set.of(), new ContentSigningWorkflowDto().getAllowedRequestAttributes());
     }
 
     @Test
@@ -201,7 +93,7 @@ class ContentSigningWorkflowDtoTest {
 
         ContentSigningWorkflowRequestDto workflow = assertInstanceOf(ContentSigningWorkflowRequestDto.class, decoded);
         assertEquals(SigningWorkflowType.CONTENT_SIGNING, workflow.getType());
-        assertEquals(SignatureFamily.PADES, workflow.getFamily());
+        assertEquals("pades", workflow.getFamily());
         assertEquals(SignatureLevel.ARCHIVAL, workflow.getMaxLevel());
         assertEquals(TimestampSourceType.INTERNAL, workflow.getTimestampSource().getType());
         assertEquals(original.getTimestampSource(), workflow.getTimestampSource());
@@ -212,14 +104,14 @@ class ContentSigningWorkflowDtoTest {
     @Test
     void theResponseRoundTripsThroughTheWorkflowUnion() throws Exception {
         ContentSigningWorkflowDto original = new ContentSigningWorkflowDto();
-        original.setFamily(SignatureFamily.XADES);
+        original.setFamily("xades");
         original.setMaxLevel(SignatureLevel.TIMESTAMPED);
         original.setTimestampSource(new InternalTimestampSourceDto(new NameAndUuidDto(UUID.randomUUID(), "tsa")));
 
         WorkflowDto decoded = mapper.readValue(mapper.writeValueAsString(original), WorkflowDto.class);
 
         ContentSigningWorkflowDto workflow = assertInstanceOf(ContentSigningWorkflowDto.class, decoded);
-        assertEquals(SignatureFamily.XADES, workflow.getFamily());
+        assertEquals("xades", workflow.getFamily());
         assertEquals(SignatureLevel.TIMESTAMPED, workflow.getMaxLevel());
         assertEquals(TimestampSourceType.INTERNAL, workflow.getTimestampSource().getType());
         assertEquals(original.getTimestampSource(), workflow.getTimestampSource());

@@ -8,8 +8,8 @@ import com.otilm.api.model.client.signing.profile.workflow.ContentSigningWorkflo
 import com.otilm.api.model.client.signing.profile.workflow.RawSigningWorkflowRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.TimestampingWorkflowRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.InternalTimestampSourceRequestDto;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -63,7 +63,7 @@ class SigningProfileConstraintValidatorsTest {
     private ContentSigningWorkflowRequestDto contentSigningWorkflow(SignatureLevel maxLevel) {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
         workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
-        workflow.setFamily(SignatureFamily.PADES);
+        workflow.setFamily("pades");
         workflow.setMaxLevel(maxLevel);
         return workflow;
     }
@@ -341,6 +341,17 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
+    void aManagedProfileWithAMalformedFamilyIsRejected() {
+        ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(SignatureLevel.SIGNED);
+        workflow.setFamily("PAdES");
+
+        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
+                .validate(profileRequest(managedScheme(), workflow));
+
+        assertTrue(hasViolationWithMessage(violations, SignatureFamilyFormat.MESSAGE));
+    }
+
+    @Test
     void aManagedProfileWithoutAMaxLevelIsRejected() {
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(managedScheme(), contentSigningWorkflow(null)));
@@ -398,7 +409,7 @@ class SigningProfileConstraintValidatorsTest {
     @Test
     void aDelegatedProfileCarryingASignatureFamilyIsRejected() {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setFamily(SignatureFamily.PADES);
+        workflow.setFamily("pades");
 
         assertTrue(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)), "workflow.family"));
     }

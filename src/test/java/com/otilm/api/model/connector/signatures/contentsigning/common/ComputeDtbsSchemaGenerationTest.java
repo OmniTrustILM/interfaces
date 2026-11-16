@@ -48,7 +48,7 @@ class ComputeDtbsSchemaGenerationTest {
         assertNull(request.getOneOf(), REQUEST + " must not be a oneOf");
         assertEquals(Set
                 .of("family", "formattingAttributes", "document", "signerCertificateChain", "signingTime",
-                        "signatureAlgorithm", "signatureParameters"),
+                        "signatureAlgorithm", "requestAttributes"),
                 request.getProperties().keySet());
     }
 
@@ -60,6 +60,13 @@ class ComputeDtbsSchemaGenerationTest {
     void theComputeDtbsRequestMarksTheSignatureAlgorithmRequired() {
         assertTrue(declaresRequired(computeDtbsRequest(), "signatureAlgorithm"),
                 REQUEST + " does not publish signatureAlgorithm as required");
+    }
+
+    /** A generated client sends an empty list only when the list is marked required. */
+    @Test
+    void theComputeDtbsRequestMarksTheRequestAttributesRequired() {
+        assertTrue(declaresRequired(computeDtbsRequest(), "requestAttributes"),
+                REQUEST + " does not publish requestAttributes as required");
     }
 
     /**

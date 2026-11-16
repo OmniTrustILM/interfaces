@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.common.signature.DocumentTransferMode;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +48,7 @@ class ContentSigningDeclarationDtoJsonTest {
         // then
         SignatureFamilyDeclarationDto family = read.getFamilies().getFirst();
         assertEquals(1, read.getFamilies().size());
-        assertEquals(SignatureFamily.PADES, family.getCode());
+        assertEquals("pades", family.getCode());
         assertEquals("PAdES", family.getLabel());
         assertEquals("PDF Advanced Electronic Signatures, ETSI EN 319 142", family.getDescription());
         assertEquals(List.of("SIGNED PAdES-B-B", "TIMESTAMPED PAdES-B-T"), levelsOf(family));
@@ -60,7 +59,7 @@ class ContentSigningDeclarationDtoJsonTest {
     private static SignatureFamilyDeclarationDto padesUpToTimestamped() {
         return SignatureFamilyDeclarationDto
                 .builder()
-                .code(SignatureFamily.PADES)
+                .code("pades")
                 .label("PAdES")
                 .description("PDF Advanced Electronic Signatures, ETSI EN 319 142")
                 .levels(PADES_LEVELS)
