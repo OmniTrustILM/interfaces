@@ -50,7 +50,7 @@ class ResolveKeysResponseValidationTest {
     private static ListedKeyPairV2Dto listed(String keyId) {
         ListedKeyPairV2Dto pair = new ListedKeyPairV2Dto();
         pair.setKeyPairMeta(handle(keyId));
-        pair.setLabel("signer " + keyId);
+        pair.setStorageName("signer " + keyId);
         pair.setPrivateKeyData(validPrivateKeyDataResponse());
         pair.setPublicKeyData(validPublicKeyDataResponse());
         return pair;
@@ -59,7 +59,7 @@ class ResolveKeysResponseValidationTest {
     private static ListedSecretKeyV2Dto listedSecretKey(String keyId) {
         ListedSecretKeyV2Dto key = new ListedSecretKeyV2Dto();
         key.setKeyMeta(handle(keyId));
-        key.setLabel("wrapping " + keyId);
+        key.setStorageName("wrapping " + keyId);
         key.setKeyData(validSecretKeyData());
         return key;
     }
