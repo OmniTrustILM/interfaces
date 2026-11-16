@@ -18,8 +18,9 @@ import lombok.ToString;
         additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public class UnusableKeyV2Dto {
 
-    @Schema(description = "Label the token keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private String label;
+    @Schema(description = "Name the token shows for the key, such as a PKCS#11 label, a keystore alias or a KMS "
+            + "key name; it may be absent or shared by several keys", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String storageName;
 
     @Schema(description = "Reason the platform cannot onboard the key", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "reason is required")

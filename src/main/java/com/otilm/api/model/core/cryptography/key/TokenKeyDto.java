@@ -26,8 +26,9 @@ public class TokenKeyDto {
             + "key pair.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> keyPairMeta;
 
-    @Schema(description = "Label the key storage keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private String label;
+    @Schema(description = "Name the key storage shows for the key, such as a PKCS#11 label, a keystore alias or a KMS "
+            + "key name; it may be absent or shared by several keys", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String storageName;
 
     @Schema(description = "Algorithm of the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyAlgorithm keyAlgorithm;

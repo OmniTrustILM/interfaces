@@ -793,7 +793,7 @@ class KeyApiClientTest {
         // then
         assertEquals(2L, result.getTotalItems());
         assertEquals(2, result.getItems().size());
-        assertEquals("signer", result.getItems().get(0).getLabel());
+        assertEquals("signer", result.getItems().get(0).getStorageName());
         assertNotNull(((ListedKeyPairV2Dto) result.getItems().get(0)).getPublicKeyData());
         assertNull(((ListedKeyPairV2Dto) result.getItems().get(1)).getPublicKeyData());
         RequestPatternBuilder request = tokenProfileRequest(LIST_PATH)
@@ -877,7 +877,7 @@ class KeyApiClientTest {
                       "key": {
                         "keyRequestType": "keyPair",
                         "keyPairMeta": [%3$s],
-                        "label": "signer",
+                        "storageName": "signer",
                         "privateKeyData": {
                           "keyMeta": [%1$s],
                           "keyData": {"type":"Private","algorithm":"RSA","length":2048}
@@ -909,7 +909,7 @@ class KeyApiClientTest {
                     {
                       "keyRequestType": "keyPair",
                       "keyPairMeta": [%3$s],
-                      "label": "signer",
+                      "storageName": "signer",
                       "privateKeyData": {
                         "keyMeta": [%1$s],
                         "keyData": {"type":"Private","algorithm":"RSA","length":2048}

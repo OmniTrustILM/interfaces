@@ -67,7 +67,7 @@ class CryptographyKeySchemaTest {
                                         Map
                                                 .of("secret", "#/components/schemas/ListedSecretKeyV2Dto", "keyPair",
                                                         "#/components/schemas/ListedKeyPairV2Dto"),
-                                        Set.of("keyRequestType", "label"),
+                                        Set.of("keyRequestType", "storageName"),
                                         Set.of("ListedSecretKeyV2Dto", "ListedKeyPairV2Dto"))));
     }
 
