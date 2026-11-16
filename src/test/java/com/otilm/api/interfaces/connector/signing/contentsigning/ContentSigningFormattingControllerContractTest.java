@@ -142,7 +142,7 @@ class ContentSigningFormattingControllerContractTest {
         assertTrue(
                 description
                         .contains("Every request attribute must be a data attribute whose name appears only in "
-                                + "`requestAttributes` across all operations"),
+                                + "`requestAttributes` across the operations a Signing Profile reaches"),
                 "the listing does not confine a request attribute to data attributes and to requestAttributes");
         assertTrue(description.contains("no group may share a request attribute's name"),
                 "the listing does not keep group names apart from request-attribute names");
@@ -155,13 +155,68 @@ class ContentSigningFormattingControllerContractTest {
                 "computeDtbs does not document ATTRIBUTES_REJECTED as a 422 code");
     }
 
+    /** A request-side fault and a merge fault share one code, so a connector author learns both from this entry. */
+    @Test
+    void computeDtbsRefusesAnUndeclaredRequestAttributeAsAnAttributeRefusal() {
+        assertTrue(unprocessableEntry("computeDtbs", "ATTRIBUTES_REJECTED").contains("undeclared"),
+                "the ATTRIBUTES_REJECTED entry does not cover a request attribute the listing does not declare");
+    }
+
+    /** A stamp the connector cannot draw names no single attribute to fix. */
+    @Test
+    void computeDtbsRefusesAVisibleSignatureItCannotDrawAsUnsupported() {
+        assertTrue(unprocessableEntry("computeDtbs", "PARAMETER_UNSUPPORTED").contains("visible signature"),
+                "the PARAMETER_UNSUPPORTED entry does not cover a visible signature the connector cannot draw");
+    }
+
+    /** Document permissions bind a timestamp revision as they bind a signature. */
+    @Test
+    void theSignatureTimestampPairDocumentsTheDocumentsRefusal() {
+        for (String methodName : List.of("computeSignatureTimestampImprint", "embedSignatureTimestamp")) {
+            assertTrue(unprocessableDescription(methodName).contains("`DOCUMENT_SIGNING_FORBIDDEN`"),
+                    methodName + " does not document DOCUMENT_SIGNING_FORBIDDEN as a 422 code");
+        }
+    }
+
+    /** A connector without ARCHIVAL answers the archive pair as it answers extendToLevel without LONG_TERM. */
+    @Test
+    void theArchiveTimestampPairDocumentsTheUndeclaredLevel() {
+        for (String methodName : List.of("computeArchiveTimestampImprint", "embedArchiveTimestamp")) {
+            assertTrue(unprocessableEntry(methodName, "PARAMETER_UNSUPPORTED").contains("ARCHIVAL"),
+                    methodName + " does not refuse a family the connector declares no ARCHIVAL level for");
+        }
+    }
+
+    /** The body reads a malformed family code as a string, so bean validation refuses it as a field rule. */
+    @Test
+    void everyOperationRefusesAMalformedFamilyAsAFieldRule() {
+        for (String methodName : EXPECTED_POST_PATHS.keySet()) {
+            assertFalse(responseDescription(methodName, "400").contains("family"),
+                    methodName + " documents a malformed family as an unreadable body");
+            assertTrue(unprocessableDescription(methodName).contains("malformed family"),
+                    methodName + " does not document a malformed family as a field rule");
+        }
+    }
+
+    private static String unprocessableEntry(String methodName, String errorCode) {
+        String description = unprocessableDescription(methodName);
+        int start = description.indexOf("`" + errorCode + "`");
+        assertTrue(start >= 0, methodName + " does not document " + errorCode + " as a 422 code");
+        int end = description.indexOf("\n", start);
+        return end < 0 ? description.substring(start) : description.substring(start, end);
+    }
+
     private static String unprocessableDescription(String methodName) {
+        return responseDescription(methodName, "422");
+    }
+
+    private static String responseDescription(String methodName, String responseCode) {
         return Arrays
                 .stream(method(methodName).getAnnotation(ApiResponses.class).value())
-                .filter(response -> "422".equals(response.responseCode()))
+                .filter(response -> responseCode.equals(response.responseCode()))
                 .map(ApiResponse::description)
                 .findFirst()
-                .orElseThrow(() -> new AssertionError(methodName + " documents no 422 at all"));
+                .orElseThrow(() -> new AssertionError(methodName + " documents no " + responseCode + " at all"));
     }
 
     private static String operationDescription(String methodName) {

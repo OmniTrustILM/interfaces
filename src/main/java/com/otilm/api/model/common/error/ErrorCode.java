@@ -55,7 +55,7 @@ public enum ErrorCode {
     DOCUMENT_SIGNING_FORBIDDEN(ProblemTypeCategory.CONNECTOR, null, "Document forbids the requested signature",
             HttpStatus.UNPROCESSABLE_CONTENT, false),
     ATTRIBUTES_REJECTED(ProblemTypeCategory.CONNECTOR, null,
-            "Request attributes merged over the profile values are incomplete or contradictory",
+            "Request attribute is undeclared or invalid, or the merged values are incomplete or contradictory",
             HttpStatus.UNPROCESSABLE_CONTENT, false),
 
     // Replayed-context divergence. Distinct from VALIDATION_FAILED: the body is well formed, so no field
