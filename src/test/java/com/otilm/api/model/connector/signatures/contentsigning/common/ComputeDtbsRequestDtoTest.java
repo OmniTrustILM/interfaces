@@ -1,6 +1,5 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -9,7 +8,6 @@ import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -24,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ComputeDtbsRequestDtoTest {
 
@@ -34,7 +31,7 @@ class ComputeDtbsRequestDtoTest {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private static ComputeDtbsRequestDto requestFor(SignatureFamily family) {
+    private static ComputeDtbsRequestDto requestFor(String family) {
         ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
         request.setFamily(family);
         request.setDocument(new InlineDocumentTransferDto(new byte[]{1, 2, 3}));
@@ -46,13 +43,13 @@ class ComputeDtbsRequestDtoTest {
         return request;
     }
 
-    private static Stream<SignatureFamily> families() {
-        return Stream.of(new SignatureFamily("pades"), new SignatureFamily("mrtd"));
+    private static Stream<String> families() {
+        return Stream.of("pades", "mrtd");
     }
 
     @Test
     void everyFamilyRoundTripsThroughTheOneRequest() throws Exception {
-        for (SignatureFamily family : families().toList()) {
+        for (String family : families().toList()) {
             ComputeDtbsRequestDto original = requestFor(family);
 
             ComputeDtbsRequestDto decoded = mapper
@@ -62,12 +59,6 @@ class ComputeDtbsRequestDtoTest {
             assertEquals(original.getSigningTime(), decoded.getSigningTime());
             assertEquals(original.getDocument(), decoded.getDocument());
         }
-    }
-
-    @Test
-    void aMalformedFamilyIsRejected() {
-        String json = "{\"family\":\"PKCS#7\",\"formattingAttributes\":[]}";
-        assertThrows(JsonMappingException.class, () -> mapper.readValue(json, ComputeDtbsRequestDto.class));
     }
 
     @Test
@@ -82,7 +73,7 @@ class ComputeDtbsRequestDtoTest {
 
     @Test
     void theRequestAttributesRoundTrip() throws Exception {
-        ComputeDtbsRequestDto request = requestFor(new SignatureFamily("pades"));
+        ComputeDtbsRequestDto request = requestFor("pades");
         request.setRequestAttributes(List.of(reason("Contract approval")));
 
         ComputeDtbsRequestDto decoded = mapper
@@ -96,7 +87,7 @@ class ComputeDtbsRequestDtoTest {
 
     @Test
     void aMissingRequestAttributesListFailsValidation() {
-        ComputeDtbsRequestDto request = requestFor(new SignatureFamily("pades"));
+        ComputeDtbsRequestDto request = requestFor("pades");
         request.setRequestAttributes(null);
 
         Set<ConstraintViolation<ComputeDtbsRequestDto>> violations = VALIDATOR.validate(request);
@@ -109,7 +100,7 @@ class ComputeDtbsRequestDtoTest {
 
     @Test
     void aNullRequestAttributeIsRejected() {
-        ComputeDtbsRequestDto request = requestFor(new SignatureFamily("pades"));
+        ComputeDtbsRequestDto request = requestFor("pades");
         List<RequestAttribute> withNull = new ArrayList<>();
         withNull.add(null);
         request.setRequestAttributes(withNull);
@@ -123,7 +114,7 @@ class ComputeDtbsRequestDtoTest {
     /** A signing request's values can be personal, such as a signer's reason or contact. They stay out of logs. */
     @Test
     void toStringOmitsTheRequestAttributes() {
-        ComputeDtbsRequestDto request = requestFor(new SignatureFamily("pades"));
+        ComputeDtbsRequestDto request = requestFor("pades");
         request.setRequestAttributes(List.of(reason("private-reason-value")));
 
         String rendered = request.toString();

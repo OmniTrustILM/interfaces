@@ -7,7 +7,6 @@ import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.v3.InfoAttributeV3;
 import com.otilm.api.model.common.signature.DocumentTransferMode;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
@@ -301,7 +300,7 @@ class ContentSigningFormattingApiClientMqTest {
 
     private static ContentSigningDeclarationDto declarationUpTo(SignatureLevel highest) {
         SignatureFamilyDeclarationDto pades = new SignatureFamilyDeclarationDto();
-        pades.setCode(new SignatureFamily("pades"));
+        pades.setCode("pades");
         pades.setLabel("PAdES");
         pades
                 .setLevels(Arrays

@@ -5,7 +5,6 @@ import com.otilm.api.model.client.signing.profile.workflow.timestamp.InternalTim
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.InternalTimestampSourceRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSourceType;
 import com.otilm.api.model.common.NameAndUuidDto;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
@@ -34,7 +33,7 @@ class ContentSigningWorkflowDtoTest {
     private ContentSigningWorkflowRequestDto fullyConfiguredRequest() {
         ContentSigningWorkflowRequestDto dto = new ContentSigningWorkflowRequestDto();
         dto.setSignatureFormattingConnectorUuid(UUID.randomUUID());
-        dto.setFamily(new SignatureFamily("pades"));
+        dto.setFamily("pades");
         dto.setMaxLevel(SignatureLevel.ARCHIVAL);
         dto.setTimestampSource(new InternalTimestampSourceRequestDto(UUID.randomUUID()));
         dto.setRequireNonRepudiation(true);
@@ -94,7 +93,7 @@ class ContentSigningWorkflowDtoTest {
 
         ContentSigningWorkflowRequestDto workflow = assertInstanceOf(ContentSigningWorkflowRequestDto.class, decoded);
         assertEquals(SigningWorkflowType.CONTENT_SIGNING, workflow.getType());
-        assertEquals(new SignatureFamily("pades"), workflow.getFamily());
+        assertEquals("pades", workflow.getFamily());
         assertEquals(SignatureLevel.ARCHIVAL, workflow.getMaxLevel());
         assertEquals(TimestampSourceType.INTERNAL, workflow.getTimestampSource().getType());
         assertEquals(original.getTimestampSource(), workflow.getTimestampSource());
@@ -105,14 +104,14 @@ class ContentSigningWorkflowDtoTest {
     @Test
     void theResponseRoundTripsThroughTheWorkflowUnion() throws Exception {
         ContentSigningWorkflowDto original = new ContentSigningWorkflowDto();
-        original.setFamily(new SignatureFamily("xades"));
+        original.setFamily("xades");
         original.setMaxLevel(SignatureLevel.TIMESTAMPED);
         original.setTimestampSource(new InternalTimestampSourceDto(new NameAndUuidDto(UUID.randomUUID(), "tsa")));
 
         WorkflowDto decoded = mapper.readValue(mapper.writeValueAsString(original), WorkflowDto.class);
 
         ContentSigningWorkflowDto workflow = assertInstanceOf(ContentSigningWorkflowDto.class, decoded);
-        assertEquals(new SignatureFamily("xades"), workflow.getFamily());
+        assertEquals("xades", workflow.getFamily());
         assertEquals(SignatureLevel.TIMESTAMPED, workflow.getMaxLevel());
         assertEquals(TimestampSourceType.INTERNAL, workflow.getTimestampSource().getType());
         assertEquals(original.getTimestampSource(), workflow.getTimestampSource());

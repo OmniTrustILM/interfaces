@@ -2,13 +2,14 @@ package com.otilm.api.model.connector.signatures.contentsigning.declaration;
 
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.common.signature.DocumentTransferMode;
-import com.otilm.api.model.common.signature.SignatureFamily;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.validation.LevelLadder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +31,9 @@ import lombok.ToString;
 public class SignatureFamilyDeclarationDto {
 
     @NotNull
-    @Schema(description = "Code of the family", requiredMode = Schema.RequiredMode.REQUIRED)
-    private SignatureFamily code;
+    @Pattern(regexp = SignatureFamilyFormat.REGEX, message = SignatureFamilyFormat.MESSAGE)
+    @Schema(description = "Code of the family", requiredMode = Schema.RequiredMode.REQUIRED, example = "pades")
+    private String code;
 
     @NotBlank
     @Schema(description = "Name of the family shown to an operator", requiredMode = Schema.RequiredMode.REQUIRED,

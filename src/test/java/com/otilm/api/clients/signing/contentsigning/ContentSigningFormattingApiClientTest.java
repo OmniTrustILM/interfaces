@@ -6,7 +6,6 @@ import com.otilm.api.clients.BaseApiClient;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
@@ -89,7 +88,7 @@ class ContentSigningFormattingApiClientTest {
 
         ContentSigningDeclarationDto result = client.getDeclaration(connector);
 
-        assertEquals(new SignatureFamily("pades"), result.getFamilies().get(0).getCode());
+        assertEquals("pades", result.getFamilies().get(0).getCode());
     }
 
     @Test
@@ -197,7 +196,7 @@ class ContentSigningFormattingApiClientTest {
         stubPost(BASE + "/computeDtbs", "{ \"dtbs\": \"AQID\", \"formattingContext\": \"BAUG\" }");
 
         ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
-        request.setFamily(new SignatureFamily("jades"));
+        request.setFamily("jades");
         request.setDocument(new InlineDocumentTransferDto(new byte[]{7, 7, 7}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
@@ -400,7 +399,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ExtendToLevelRequestDto validExtendToLevel() {
         ExtendToLevelRequestDto request = new ExtendToLevelRequestDto();
-        request.setFamily(new SignatureFamily("pades"));
+        request.setFamily("pades");
         request.setFormattingAttributes(List.of());
         request.setSignedDocument(new byte[]{9});
         request.setTargetLevel(SignatureLevel.LONG_TERM);
@@ -414,7 +413,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ExtendOperationScopedRequestDto scopedRequest() {
         ExtendOperationScopedRequestDto request = new ExtendOperationScopedRequestDto();
-        request.setFamily(new SignatureFamily("pades"));
+        request.setFamily("pades");
         request.setFormattingAttributes(List.of());
         request.setOperationMeta(validMetadata());
         return request;
@@ -457,7 +456,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ComputeDtbsRequestDto padesRequest() {
         ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
-        request.setFamily(new SignatureFamily("pades"));
+        request.setFamily("pades");
         request.setDocument(new InlineDocumentTransferDto(new byte[]{1, 2, 3}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));

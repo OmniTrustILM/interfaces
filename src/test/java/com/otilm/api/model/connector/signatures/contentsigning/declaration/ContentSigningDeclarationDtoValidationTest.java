@@ -2,8 +2,8 @@ package com.otilm.api.model.connector.signatures.contentsigning.declaration;
 
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
 import com.otilm.api.model.common.signature.DocumentTransferMode;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.util.ArrayList;
@@ -62,6 +62,24 @@ class ContentSigningDeclarationDtoValidationTest {
         codeless.setCode(null);
 
         assertEquals(List.of("families[0].code: must not be null"), violations(declarationOf(codeless)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"m", "cose-sign1"})
+    void aFamilyWithAWellFormedCodeIsValid(String code) {
+        SignatureFamilyDeclarationDto family = mrtd();
+        family.setCode(code);
+
+        assertEquals(List.of(), violations(declarationOf(family)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "PAdES", "1pades", "-pades", "pa des", "pades_b", "pkcs#7"})
+    void aFamilyWithAMalformedCodeIsInvalid(String malformed) {
+        SignatureFamilyDeclarationDto family = mrtd();
+        family.setCode(malformed);
+
+        assertEquals(List.of("families[0].code: " + SignatureFamilyFormat.MESSAGE), violations(declarationOf(family)));
     }
 
     @Test
@@ -193,7 +211,7 @@ class ContentSigningDeclarationDtoValidationTest {
 
     private static SignatureFamilyDeclarationDto pades(SignatureLevel highest) {
         SignatureFamilyDeclarationDto family = familyUpTo(highest);
-        family.setCode(new SignatureFamily("pades"));
+        family.setCode("pades");
         family.setLabel("PAdES");
         family.getLevels().forEach(level -> level.setName("PAdES " + level.getLevel().name()));
         return family;
@@ -201,7 +219,7 @@ class ContentSigningDeclarationDtoValidationTest {
 
     private static SignatureFamilyDeclarationDto mrtd() {
         SignatureFamilyDeclarationDto family = familyUpTo(SignatureLevel.SIGNED);
-        family.setCode(new SignatureFamily("mrtd"));
+        family.setCode("mrtd");
         family.setLabel("Machine-readable travel document");
         family.getLevels().getFirst().setName("ICAO 9303");
         return family;

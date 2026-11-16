@@ -16,9 +16,9 @@ import com.otilm.api.model.common.BulkActionMessageDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.PaginationResponseDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.common.validation.OidFormat;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.SignatureFamilyDeclarationDto;
 import com.otilm.api.model.core.certificate.CertificateDto;
@@ -310,7 +310,9 @@ public interface SigningProfileController extends AuthProtectedController {
     ContentSigningFormattingAttributesDto listContentSigningFormattingConnectorAttributes(
             @Parameter(description = "Signature Formatting Provider UUID") @PathVariable UUID connectorUuid,
             @Parameter(description = "Signature family the Signing Profile produces: a code this connector declares",
-                    in = ParameterIn.QUERY) @RequestParam SignatureFamily family,
+                    in = ParameterIn.QUERY,
+                    example = "pades") @RequestParam @Pattern(regexp = SignatureFamilyFormat.REGEX,
+                            message = SignatureFamilyFormat.MESSAGE) String family,
             @Parameter(description = "Highest signature level the Signing Profile may reach",
                     in = ParameterIn.QUERY) @RequestParam SignatureLevel maxLevel,
             @Parameter(description = "Signing Profile UUID — used for authorization purposes only",

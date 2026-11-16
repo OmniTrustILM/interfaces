@@ -3,9 +3,10 @@ package com.otilm.api.model.client.signing.profile.workflow;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSourceDto;
 import com.otilm.api.model.common.NameAndUuidDto;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,8 +43,9 @@ public class ContentSigningWorkflowDto extends WorkflowDto {
 
     @Schema(description = "Signature family this profile produces. "
             + "Present only when ILM-managed signing is used; null for delegated signing.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SignatureFamily family;
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "pades")
+    @Pattern(regexp = SignatureFamilyFormat.REGEX, message = SignatureFamilyFormat.MESSAGE)
+    private String family;
 
     @Schema(description = "Highest signature level a request may ask for. A request asking for more is rejected. "
             + "Present only when ILM-managed signing is used; null for delegated signing.",
