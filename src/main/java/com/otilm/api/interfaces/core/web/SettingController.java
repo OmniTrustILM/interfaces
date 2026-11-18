@@ -2,6 +2,7 @@ package com.otilm.api.interfaces.core.web;
 
 import com.otilm.api.exception.NotFoundException;
 import com.otilm.api.interfaces.AuthProtectedController;
+import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.core.settings.BrandingSettingsDto;
 import com.otilm.api.model.core.settings.BrandingSettingsUpdateDto;
 import com.otilm.api.model.core.settings.EventSettingsDto;
@@ -15,18 +16,24 @@ import com.otilm.api.model.core.settings.authentication.OAuth2ProviderSettingsUp
 import com.otilm.api.model.core.settings.logging.LoggingSettingsDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -109,16 +116,33 @@ public interface SettingController extends AuthProtectedController {
     void updateAuthenticationSettings(@Valid @RequestBody AuthenticationSettingsUpdateDto authenticationSettingsDto);
 
     @Operation(summary = "Get OAuth2 Provider settings")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OAuth2 Provider settings retrieved")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OAuth2 Provider settings retrieved",
+                    headers = @Header(name = HttpHeaders.ETAG,
+                            description = """
+                                    Strong entity tag of the stored provider settings. Send it as `If-Match` on the update to refuse \
+                                    the update when the provider changed since this read. The client secret does not contribute to \
+                                    the tag.""",
+                            schema = @Schema(type = "string")))})
     @GetMapping(path = "/authentication/oauth2Providers/{providerName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    OAuth2ProviderSettingsResponseDto getOAuth2ProviderSettings(
+    ResponseEntity<OAuth2ProviderSettingsResponseDto> getOAuth2ProviderSettings(
             @Parameter(description = "OAuth2 Provider Name") @PathVariable String providerName);
 
-    @Operation(summary = "Update OAuth2 Provider settings")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Setting updated")})
+    @Operation(summary = "Update OAuth2 Provider settings",
+            description = """
+                    With `If-Match`, the update is refused with 412 when the tag no longer matches the stored provider settings; \
+                    `*` matches any existing provider. Without the header the update applies unconditionally.""")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Setting updated"),
+            @ApiResponse(responseCode = "412",
+                    description = "`If-Match` does not match the stored provider settings, "
+                            + "or names a provider that does not exist",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PutMapping(path = "/authentication/oauth2Providers/{providerName}", consumes = MediaType.APPLICATION_JSON_VALUE)
     void updateOAuth2ProviderSettings(
             @Parameter(description = "OAuth2 Provider Name") @PathVariable String providerName,
+            @Parameter(description = "Entity tag from the provider's read") @RequestHeader(name = HttpHeaders.IF_MATCH,
+                    required = false) String ifMatch,
             @Valid @RequestBody OAuth2ProviderSettingsUpdateDto oauth2SettingsDto);
 
     @Operation(summary = "Remove OAuth2 Provider")
