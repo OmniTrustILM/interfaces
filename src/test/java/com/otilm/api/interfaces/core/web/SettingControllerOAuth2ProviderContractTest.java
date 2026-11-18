@@ -1,5 +1,6 @@
 package com.otilm.api.interfaces.core.web;
 
+import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.core.settings.authentication.OAuth2ProviderSettingsResponseDto;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Pins the optimistic concurrency contract of a single OAuth2 provider's read and update: the read carries an
@@ -75,7 +75,7 @@ class SettingControllerOAuth2ProviderContractTest {
         ApiResponse preconditionFailed = documentedResponse(update, "412");
 
         // then
-        assertNotNull(preconditionFailed.content()[0].schema().implementation());
+        assertEquals(ErrorMessageDto.class, preconditionFailed.content()[0].schema().implementation());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
