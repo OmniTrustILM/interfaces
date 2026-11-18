@@ -134,8 +134,9 @@ public interface SettingController extends AuthProtectedController {
                     `*` matches any existing provider. Without the header the update applies unconditionally.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Setting updated"),
-            @ApiResponse(responseCode = "412", description = """
-                    `If-Match` does not match the stored provider settings, or names a provider that does not exist""",
+            @ApiResponse(responseCode = "412",
+                    description = "`If-Match` does not match the stored provider settings, "
+                            + "or names a provider that does not exist",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PutMapping(path = "/authentication/oauth2Providers/{providerName}", consumes = MediaType.APPLICATION_JSON_VALUE)
     void updateOAuth2ProviderSettings(
