@@ -11,6 +11,7 @@ import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyHandles;
 import com.otilm.api.model.core.cryptography.key.TokenKeyDto;
+import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingOutcome;
 import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingResultDto;
 import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
 import java.util.List;
@@ -64,15 +65,54 @@ class TokenKeyOnboardingJsonTest {
     void aResultSaysWhenTheKeyPairJoinedAnExistingKey() {
         // given
         TokenKeyOnboardingResultDto result = new TokenKeyOnboardingResultDto();
-        result.setOnboarded(true);
-        result.setIntoExistingKey(true);
+        result.setOutcome(TokenKeyOnboardingOutcome.JOINED_EXISTING_KEY);
 
         // when
         JsonNode json = mapper.valueToTree(result);
 
         // then
-        assertTrue(json.path("onboarded").asBoolean());
-        assertTrue(json.path("intoExistingKey").asBoolean());
+        assertEquals("joinedExistingKey", json.path("outcome").asText());
+    }
+
+    @Test
+    void theOutcomesOfOnboardingHaveCodesOfTheirOwn() {
+        // when
+        List<TokenKeyOnboardingOutcome> outcomes = Stream
+                .of("onboarded", "joinedExistingKey", "nameTaken", "blocked", "failed")
+                .map(TokenKeyOnboardingOutcome::findByCode)
+                .toList();
+
+        // then
+        assertEquals(List.of(TokenKeyOnboardingOutcome.values()), outcomes);
+    }
+
+    @Test
+    void aBlockedResultCarriesItsStatusAndTheConnectorsDiagnostic() {
+        // given
+        TokenKeyOnboardingResultDto result = new TokenKeyOnboardingResultDto();
+        result.setOutcome(TokenKeyOnboardingOutcome.BLOCKED);
+        result.setStatus(TokenKeyStatus.REFUSED);
+        result.setDiagnostic("The signature activation module holds this key.");
+
+        // when
+        JsonNode json = mapper.valueToTree(result);
+
+        // then
+        assertEquals("blocked", json.path("outcome").asText());
+        assertEquals("refused", json.path("status").asText());
+        assertEquals("The signature activation module holds this key.", json.path("diagnostic").asText());
+    }
+
+    @Test
+    void anEntryCarriesTheConnectorsDiagnostic() throws Exception {
+        // given
+        String json = "{\"status\":\"unreadable\",\"diagnostic\":\"CKR_ATTRIBUTE_SENSITIVE\"}";
+
+        // when
+        TokenKeyDto entry = mapper.readValue(json, TokenKeyDto.class);
+
+        // then
+        assertEquals("CKR_ATTRIBUTE_SENSITIVE", entry.getDiagnostic());
     }
 
     @Test
@@ -117,14 +157,14 @@ class TokenKeyOnboardingJsonTest {
     void theStatusesOfUnusableKeysHaveCodesOfTheirOwn() {
         // when
         List<TokenKeyStatus> statuses = Stream
-                .of("noUsableId", "unsupportedKeyType", "unreadable", "gone")
+                .of("unaddressable", "unsupportedKeyType", "unreadable", "gone", "refused", "publicKeyUnavailable")
                 .map(TokenKeyStatus::findByCode)
                 .toList();
 
         // then
         assertEquals(List
-                .of(TokenKeyStatus.NO_USABLE_ID, TokenKeyStatus.UNSUPPORTED_KEY_TYPE, TokenKeyStatus.UNREADABLE,
-                        TokenKeyStatus.GONE),
+                .of(TokenKeyStatus.UNADDRESSABLE, TokenKeyStatus.UNSUPPORTED_KEY_TYPE, TokenKeyStatus.UNREADABLE,
+                        TokenKeyStatus.GONE, TokenKeyStatus.REFUSED, TokenKeyStatus.PUBLIC_KEY_UNAVAILABLE),
                 statuses);
     }
 

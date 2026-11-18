@@ -23,10 +23,10 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyEntryStatus;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyHandleV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationStatusResponseV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
@@ -513,8 +513,10 @@ class KeyApiClientMqTest {
     void resolveKeys_delegatesPostAndReturnsTheResults() throws ConnectorException {
         // given
         ResolveKeysRequestV2Dto request = resolveKeysRequest();
-        ResolveKeysResponseV2Dto response = new ResolveKeysResponseV2Dto(
-                List.of(new KeyResolutionV2Dto("0", KeyResolutionOutcome.NOT_FOUND, null)));
+        KeyResolutionV2Dto notFound = new KeyResolutionV2Dto();
+        notFound.setIdentifier("0");
+        notFound.setStatus(KeyEntryStatus.NOT_FOUND);
+        ResolveKeysResponseV2Dto response = new ResolveKeysResponseV2Dto(List.of(notFound));
         proxyClient.respondWith(response);
 
         // when
