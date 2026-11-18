@@ -2,6 +2,8 @@ package com.otilm.api.interfaces.core.web;
 
 import com.otilm.api.interfaces.NoAuthController;
 import com.otilm.api.model.core.auth.ProtectedResourceMetadataDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.servers.Server;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -31,5 +33,14 @@ class ProtectedResourceMetadataControllerContractTest {
         assertEquals(0, mapping.path().length);
         assertArrayEquals(new String[]{MediaType.APPLICATION_JSON_VALUE}, mapping.produces());
         assertEquals(ProtectedResourceMetadataDto.class, read.getReturnType());
+    }
+
+    @Test
+    void theOperationIsDocumentedAtTheOriginRatherThanUnderTheApiBase() throws Exception {
+        Method read = ProtectedResourceMetadataController.class.getMethod("getProtectedResourceMetadata");
+        Server[] servers = read.getAnnotation(Operation.class).servers();
+
+        assertEquals(1, servers.length);
+        assertEquals("https://demo.otilm.com", servers[0].url());
     }
 }
