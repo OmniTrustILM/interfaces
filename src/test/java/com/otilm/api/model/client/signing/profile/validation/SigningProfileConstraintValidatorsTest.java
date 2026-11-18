@@ -60,11 +60,11 @@ class SigningProfileConstraintValidatorsTest {
         return scheme;
     }
 
-    private ContentSigningWorkflowRequestDto contentSigningWorkflow(SignatureLevel maxLevel) {
+    private ContentSigningWorkflowRequestDto contentSigningWorkflow(SignatureLevel level) {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
         workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
         workflow.setFamily("pades");
-        workflow.setMaxLevel(maxLevel);
+        workflow.setLevel(level);
         return workflow;
     }
 
@@ -304,6 +304,8 @@ class SigningProfileConstraintValidatorsTest {
                     .validate(profileRequest(managedScheme(), contentSigningWorkflow(level)));
 
             assertTrue(hasViolationOn(violations, "workflow.timestampSource"), level.name() + " was accepted");
+            assertTrue(hasViolationWithMessage(violations,
+                    "timestampSource is required when level is TIMESTAMPED or higher"), level.name());
         }
     }
 
@@ -352,15 +354,15 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
-    void aManagedProfileWithoutAMaxLevelIsRejected() {
+    void aManagedProfileWithoutALevelIsRejected() {
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(managedScheme(), contentSigningWorkflow(null)));
 
-        assertTrue(hasViolationOn(violations, "workflow.maxLevel"));
+        assertTrue(hasViolationOn(violations, "workflow.level"));
     }
 
     @Test
-    void aManagedProfileMissingBothFamilyAndMaxLevelReportsBoth() {
+    void aManagedProfileMissingBothFamilyAndLevelReportsBoth() {
         ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(null);
         workflow.setFamily(null);
 
@@ -368,7 +370,7 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(managedScheme(), workflow));
 
         assertTrue(hasViolationOn(violations, "workflow.family"));
-        assertTrue(hasViolationOn(violations, "workflow.maxLevel"));
+        assertTrue(hasViolationOn(violations, "workflow.level"));
     }
 
     @Test
@@ -391,18 +393,18 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(delegatedScheme(), workflow));
 
         assertFalse(hasViolationOn(violations, "workflow.family"));
-        assertFalse(hasViolationOn(violations, "workflow.maxLevel"));
+        assertFalse(hasViolationOn(violations, "workflow.level"));
     }
 
     @Test
     void aDelegatedProfileCarryingAManagedLevelIsRejectedAtThatField() {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setMaxLevel(SignatureLevel.TIMESTAMPED);
+        workflow.setLevel(SignatureLevel.TIMESTAMPED);
 
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(delegatedScheme(), workflow));
 
-        assertTrue(hasViolationOn(violations, "workflow.maxLevel"));
+        assertTrue(hasViolationOn(violations, "workflow.level"));
         assertFalse(hasViolationOn(violations, "workflow.timestampSource"));
     }
 
@@ -529,7 +531,7 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(managedScheme(), workflow));
 
         assertTrue(hasViolationOn(violations, "workflow.timestampSource"));
-        assertTrue(hasViolationWithMessage(violations, "timestampSource must be omitted when maxLevel is SIGNED"));
+        assertTrue(hasViolationWithMessage(violations, "timestampSource must be omitted when level is SIGNED"));
     }
 
     @Test

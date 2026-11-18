@@ -286,8 +286,8 @@ public interface SigningProfileController extends AuthProtectedController {
                     + "merged by name across operations and split into profile attributes and request attributes, "
                     + "with the connector's default values. A request attribute's `properties.group` names its "
                     + "permission group, which the Signing Profile's `allowedRequestAttributes` may list. family and "
-                    + "maxLevel together name the workflow the Signing Profile will run, and the connector must be "
-                    + "able to serve it; the descriptor set follows from maxLevel, so family does not narrow the "
+                    + "level together name the workflow the Signing Profile will run, and the connector must be "
+                    + "able to serve it; the descriptor set follows from level, so family does not narrow the "
                     + "returned descriptors. The signingProfileUuid parameter is used for authorization only and does "
                     + "not affect the returned descriptors.")
     @ApiResponses(value = {
@@ -313,8 +313,8 @@ public interface SigningProfileController extends AuthProtectedController {
                     in = ParameterIn.QUERY,
                     example = "pades") @RequestParam @Pattern(regexp = SignatureFamilyFormat.REGEX,
                             message = SignatureFamilyFormat.MESSAGE) String family,
-            @Parameter(description = "Highest signature level the Signing Profile may reach",
-                    in = ParameterIn.QUERY) @RequestParam SignatureLevel maxLevel,
+            @Parameter(description = "Signature level the Signing Profile produces",
+                    in = ParameterIn.QUERY) @RequestParam SignatureLevel level,
             @Parameter(description = "Signing Profile UUID — used for authorization purposes only",
                     in = ParameterIn.QUERY) @RequestParam(required = false) UUID signingProfileUuid)
             throws AttributeException, ConnectorException, NotFoundException;
