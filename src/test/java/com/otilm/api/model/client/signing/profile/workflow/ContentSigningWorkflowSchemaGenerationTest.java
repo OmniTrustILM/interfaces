@@ -50,7 +50,7 @@ class ContentSigningWorkflowSchemaGenerationTest {
         assertEquals(
                 Set
                         .of("type", "signatureFormattingConnectorUuid", "signatureFormattingConnectorAttributes",
-                                "family", "maxLevel", "timestampSource", "requireNonRepudiation",
+                                "family", "level", "timestampSource", "requireNonRepudiation",
                                 "requiredExtendedKeyUsageOids", "allowedRequestAttributes"),
                 generate(ContentSigningWorkflowRequestDto.class).keySet());
     }
@@ -58,8 +58,8 @@ class ContentSigningWorkflowSchemaGenerationTest {
     @Test
     void theResponsePublishesItsConfigurationFields() {
         assertEquals(Set
-                .of("type", "signatureFormattingConnector", "signatureFormattingConnectorAttributes", "family",
-                        "maxLevel", "timestampSource", "requireNonRepudiation", "requiredExtendedKeyUsageOids",
+                .of("type", "signatureFormattingConnector", "signatureFormattingConnectorAttributes", "family", "level",
+                        "timestampSource", "requireNonRepudiation", "requiredExtendedKeyUsageOids",
                         "allowedRequestAttributes"),
                 generate(ContentSigningWorkflowDto.class).keySet());
     }

@@ -95,23 +95,35 @@ class SigningProfileControllerContractTest {
      * back on and must not invent one.
      */
     @Test
-    void familyAndMaxLevelAreRequiredQueryParameters() {
+    void familyAndLevelAreRequiredQueryParameters() {
         // given
         Method contentSigning = method("listContentSigningFormattingConnectorAttributes");
 
         // when
         RequestParam family = parameterOfType(contentSigning, String.class).getAnnotation(RequestParam.class);
-        RequestParam maxLevel = parameterOfType(contentSigning, SignatureLevel.class).getAnnotation(RequestParam.class);
+        RequestParam level = parameterOfType(contentSigning, SignatureLevel.class).getAnnotation(RequestParam.class);
 
         // then
         assertNotNull(family, "family must be a request parameter");
-        assertNotNull(maxLevel, "maxLevel must be a request parameter");
+        assertNotNull(level, "level must be a request parameter");
         assertTrue(family.required(), "family must be required");
-        assertTrue(maxLevel.required(), "maxLevel must be required");
+        assertTrue(level.required(), "level must be required");
         assertEquals(ValueConstants.DEFAULT_NONE, family.defaultValue(),
                 "a default would make family omittable, which is the invented value this endpoint must not have");
-        assertEquals(ValueConstants.DEFAULT_NONE, maxLevel.defaultValue(),
-                "a default would make maxLevel omittable, which is the invented value this endpoint must not have");
+        assertEquals(ValueConstants.DEFAULT_NONE, level.defaultValue(),
+                "a default would make level omittable, which is the invented value this endpoint must not have");
+    }
+
+    @Test
+    void theLevelIsPublishedAsTheLevelQueryParameter() {
+        // given
+        Method contentSigning = method("listContentSigningFormattingConnectorAttributes");
+
+        // when
+        Parameter level = parameterOfType(contentSigning, SignatureLevel.class);
+
+        // then
+        assertEquals("level", level.getName());
     }
 
     @Test
@@ -149,8 +161,8 @@ class SigningProfileControllerContractTest {
 
     /**
      * Discovery reuses the save-time aggregation, so the rejections a form can provoke — a name declared twice with two
-     * definitions, an unadvertised family, a maxLevel above the connector's ceiling, and a maxLevel this platform
-     * version cannot execute — reach the caller as the 422 that profile save produces.
+     * definitions, an unadvertised family, a level the connector does not declare, and a level this platform version
+     * cannot execute — reach the caller as the 422 that profile save produces.
      */
     @Test
     void contentSigningDiscoveryDocumentsTheSaveTimeRejection() {
