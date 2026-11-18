@@ -48,14 +48,14 @@ public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
     @Pattern(regexp = SignatureFamilyFormat.REGEX, message = SignatureFamilyFormat.MESSAGE)
     private String family;
 
-    @Schema(description = "Highest signature level a request may ask for. A request asking for more is rejected. "
-            + "Required for ILM-managed signing; must be omitted for delegated signing.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SignatureLevel maxLevel;
+    @Schema(description = "Signature level at which the profile signs every document: a level the selected "
+            + "formatting connector declares for the family. Required for ILM-managed signing; must be omitted for "
+            + "delegated signing.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SignatureLevel level;
 
     @Valid
     @Schema(description = "Source of the timestamps embedded at level TIMESTAMPED and above. "
-            + "Required when maxLevel is TIMESTAMPED or higher, and must be omitted when maxLevel is SIGNED, "
+            + "Required when level is TIMESTAMPED or higher, and must be omitted when level is SIGNED, "
             + "which embeds no timestamp. Must be omitted for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TimestampSourceRequestDto timestampSource;

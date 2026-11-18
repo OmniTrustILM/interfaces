@@ -89,4 +89,8 @@ public class OAuth2ProviderSettingsUpdateDto implements Serializable {
             defaultValue = "client_id", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String delegateClaim = "client_id";
 
+    @Schema(description = "Sign-in for applications through this provider. Not set means disabled.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private OAuth2ApplicationSettingsDto applications;
+
 }
