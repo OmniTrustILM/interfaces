@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -178,6 +179,20 @@ class TokenKeyOnboardingJsonTest {
 
         // then
         assertEquals("signer", mapper.valueToTree(entry).path("storageName").asText());
+    }
+
+    @Test
+    void theConnectorsDiagnosticStaysOutOfTheTextOfAKeyAndOfAResult() {
+        // given
+        String diagnostic = "CKR_PIN_INCORRECT";
+        TokenKeyDto entry = TokenKeyDto.builder().diagnostic(diagnostic).build();
+        TokenKeyOnboardingResultDto result = TokenKeyOnboardingResultDto.builder().diagnostic(diagnostic).build();
+
+        // when
+        String rendered = entry + " " + result;
+
+        // then
+        assertFalse(rendered.contains(diagnostic), rendered);
     }
 
     private static List<Object> dataOf(MetadataAttribute attribute) {

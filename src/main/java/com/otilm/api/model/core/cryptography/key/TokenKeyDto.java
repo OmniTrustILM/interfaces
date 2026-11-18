@@ -66,5 +66,6 @@ public class TokenKeyDto {
     @Schema(description = "Text of the token instance's connector naming the cause behind the status and how to fix "
             + "it, alongside the platform's `reason`. Clients display it and never parse it.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, maxLength = KeyEntryV2Dto.MAX_DIAGNOSTIC_LENGTH)
+    @ToString.Exclude
     private String diagnostic;
 }
