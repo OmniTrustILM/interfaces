@@ -48,7 +48,7 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private DiscoveryWindowDto window;
 
-    @Schema(description = "The instant the run discovered from, resolved from the window when it started. Absent for a "
+    @Schema(description = "The instant the run discovered from, resolved from the window when it started. Null for a "
             + "full discovery.", nullable = true)
     private OffsetDateTime discoverSince;
 
