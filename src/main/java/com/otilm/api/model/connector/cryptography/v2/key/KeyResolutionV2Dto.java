@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/** The connector's report for one requested handle identified by its name. */
+/** The connector's report for one requested handle, answered under the handle's identifier. */
 @Getter
 @Setter
 @ToString(callSuper = true)
