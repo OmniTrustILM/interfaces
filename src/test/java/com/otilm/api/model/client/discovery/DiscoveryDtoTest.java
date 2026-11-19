@@ -158,4 +158,27 @@ class DiscoveryDtoTest {
         assertFalse(json.contains("\"kind\""), json);
         assertTrue(VALIDATOR.validate(dto).isEmpty(), "a v2 request without a kind must violate no constraint");
     }
+
+    @Test
+    void acceptsDiscoveryWithoutWindow() {
+        DiscoveryDto dto = assertDoesNotThrow(() -> mapper.readValue(V1_ONLY_PAYLOAD, DiscoveryDto.class));
+
+        assertNull(dto.getWindow());
+        assertTrue(VALIDATOR.validate(dto).isEmpty());
+    }
+
+    @Test
+    void cascadesWindowValidation() {
+        DiscoveryDto dto = new DiscoveryDto();
+        DiscoveryWindowDto window = new DiscoveryWindowDto();
+        window.setMode(DiscoveryWindowMode.LOOKBACK);
+        dto.setWindow(window);
+
+        Set<ConstraintViolation<DiscoveryDto>> violations = VALIDATOR.validate(dto);
+
+        assertEquals(1, violations.size(), violations.toString());
+        assertTrue(violations.iterator().next().getPropertyPath().toString().startsWith("window"),
+                violations.toString());
+        assertTrue(dto.toString().contains("window"), dto.toString());
+    }
 }

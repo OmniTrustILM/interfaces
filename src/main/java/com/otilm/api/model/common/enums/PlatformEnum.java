@@ -10,6 +10,7 @@ import com.otilm.api.model.client.connector.v2.ConnectorVersion;
 import com.otilm.api.model.client.connector.v2.FeatureFlag;
 import com.otilm.api.model.client.cryptography.key.KeyCompromiseReason;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.client.discovery.DiscoveryWindowMode;
 import com.otilm.api.model.client.signing.profile.record.SigningRecordPersistenceMode;
 import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningType;
 import com.otilm.api.model.client.signing.profile.scheme.SigningScheme;
@@ -129,6 +130,7 @@ public enum PlatformEnum implements IPlatformEnum {
     CERTIFICATE_REQUEST_FORMAT(CertificateRequestFormat.class, "Certificate request format"),
     DISCOVERY_STATUS(DiscoveryStatus.class, "Discovery status"),
     DISCOVERY_MESSAGE_SEVERITY(DiscoveryMessageSeverity.class, "Discovery run message severity"),
+    DISCOVERY_WINDOW_MODE(DiscoveryWindowMode.class, "Discovery window mode"),
     PROTOCOL(CertificateProtocol.class, "Protocol used to issue certificate"),
     CERTIFICATE_SUBJECT_TYPE(CertificateSubjectType.class, "Subject Type of certificate"),
     CERTIFICATE_KEY_USAGE(CertificateKeyUsage.class, "Key Usage of Certificate"),

@@ -5,6 +5,7 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.core.auth.Resource;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -58,6 +59,12 @@ public class DiscoveryDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<Resource, List<RequestAttribute>> resourceAttributes;
 
+    @Schema(description = "Which part of the target to discover. Absent means a full discovery.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Valid
+    private DiscoveryWindowDto window;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -68,6 +75,7 @@ public class DiscoveryDto {
                 .append("interfaceUuid", interfaceUuid)
                 .append("kind", kind)
                 .append("resources", resources)
+                .append("window", window)
                 // resourceAttributes left out: it repeats the attribute payload once per resource.
                 .toString();
     }
