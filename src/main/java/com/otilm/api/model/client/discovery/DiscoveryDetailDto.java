@@ -43,6 +43,15 @@ public class DiscoveryDetailDto extends NameAndUuidDto {
     @Schema(description = "When the discovery finished", nullable = true)
     private OffsetDateTime endTime;
 
+    @Schema(description = "The window the discovery was asked to cover. Absent means a full discovery.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private DiscoveryWindowDto window;
+
+    @Schema(description = "The instant the run discovered from, resolved from the window when it started. Null for a "
+            + "full discovery.", nullable = true)
+    private OffsetDateTime discoverSince;
+
     @Schema(description = "Certificates this discovery found and saved", defaultValue = "0")
     private Integer totalCertificatesDiscovered;
 

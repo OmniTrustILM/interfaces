@@ -10,6 +10,7 @@ import com.otilm.api.model.client.connector.v2.ConnectorVersion;
 import com.otilm.api.model.client.connector.v2.FeatureFlag;
 import com.otilm.api.model.client.cryptography.key.KeyCompromiseReason;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.client.discovery.DiscoveryWindowMode;
 import com.otilm.api.model.client.signing.profile.record.SigningRecordPersistenceMode;
 import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningType;
 import com.otilm.api.model.client.signing.profile.scheme.SigningScheme;
@@ -62,6 +63,7 @@ import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.cryptography.key.KeyState;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
+import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingOutcome;
 import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
 import com.otilm.api.model.core.discovery.DiscoveryMessageSeverity;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
@@ -128,6 +130,7 @@ public enum PlatformEnum implements IPlatformEnum {
     CERTIFICATE_REQUEST_FORMAT(CertificateRequestFormat.class, "Certificate request format"),
     DISCOVERY_STATUS(DiscoveryStatus.class, "Discovery status"),
     DISCOVERY_MESSAGE_SEVERITY(DiscoveryMessageSeverity.class, "Discovery run message severity"),
+    DISCOVERY_WINDOW_MODE(DiscoveryWindowMode.class, "Discovery window mode"),
     PROTOCOL(CertificateProtocol.class, "Protocol used to issue certificate"),
     CERTIFICATE_SUBJECT_TYPE(CertificateSubjectType.class, "Subject Type of certificate"),
     CERTIFICATE_KEY_USAGE(CertificateKeyUsage.class, "Key Usage of Certificate"),
@@ -145,6 +148,7 @@ public enum PlatformEnum implements IPlatformEnum {
     KEY_USAGE(KeyUsage.class, "Key usage"),
     KEY_REQUEST_TYPE(KeyRequestType.class, "Key request type"),
     TOKEN_KEY_STATUS(TokenKeyStatus.class, "Status of a key found on a token"),
+    TOKEN_KEY_ONBOARDING_OUTCOME(TokenKeyOnboardingOutcome.class, "Outcome of onboarding a key found on a token"),
     KEY_COMPROMISE_REASON(KeyCompromiseReason.class, "Key compromise reason"),
     TOKEN_STATUS(TokenInstanceStatus.class, "Token instance status"),
     DIGEST_ALGORITHM(DigestAlgorithm.class, "Digest algorithm"),

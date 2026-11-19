@@ -113,6 +113,21 @@ class FeatureFlagTest {
     }
 
     @Test
+    void findsDiscoveryIncremental_byCode() {
+        // given
+        var discoveryIncrementalCode = "discoveryIncremental";
+
+        // when
+        FeatureFlag flag = FeatureFlag.findByCode(discoveryIncrementalCode);
+
+        // then
+        assertEquals(FeatureFlag.DISCOVERY_INCREMENTAL, flag);
+        assertEquals("Incremental Discovery", flag.getLabel());
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
+        assertEquals(List.of(ConnectorInterface.DISCOVERY), flag.getApplicableInterfaces());
+    }
+
+    @Test
     void findByCodeRoundTripsAllEntries() {
         for (FeatureFlag f : FeatureFlag.values()) {
             assertEquals(f, FeatureFlag.findByCode(f.getCode()));

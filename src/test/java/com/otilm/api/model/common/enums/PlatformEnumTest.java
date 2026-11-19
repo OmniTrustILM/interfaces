@@ -1,6 +1,7 @@
 package com.otilm.api.model.common.enums;
 
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.otilm.api.model.client.discovery.DiscoveryWindowMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
@@ -8,6 +9,7 @@ import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
+import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingOutcome;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
 import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
@@ -50,6 +52,14 @@ class PlatformEnumTest {
                 PlatformEnum.findByClass(AcmeIdentifierAuthorizationMode.class));
         assertEquals("AcmeIdentifierAuthorizationMode",
                 PlatformEnum.findByClass(AcmeIdentifierAuthorizationMode.class).getCode());
+    }
+
+    @Test
+    void discoveryWindowModeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(DiscoveryWindowMode.class);
+        assertEquals(PlatformEnum.DISCOVERY_WINDOW_MODE, entry);
+        assertEquals(DiscoveryWindowMode.class, entry.getEnumClass());
+        assertEquals("DiscoveryWindowMode", entry.getCode());
     }
 
     @Test
@@ -135,6 +145,14 @@ class PlatformEnumTest {
         assertEquals(PlatformEnum.SCHEDULED_JOB_SCHEDULE_STATE, entry);
         assertEquals(ScheduledJobScheduleState.class, entry.getEnumClass());
         assertEquals("ScheduledJobScheduleState", entry.getCode());
+    }
+
+    @Test
+    void tokenKeyOnboardingOutcomeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(TokenKeyOnboardingOutcome.class);
+        assertEquals(PlatformEnum.TOKEN_KEY_ONBOARDING_OUTCOME, entry);
+        assertEquals(TokenKeyOnboardingOutcome.class, entry.getEnumClass());
+        assertEquals("TokenKeyOnboardingOutcome", entry.getCode());
     }
 
     private static String openApiSchemaNameOf(Class<?> enumClass) {

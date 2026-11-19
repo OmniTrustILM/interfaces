@@ -457,4 +457,18 @@ class DiscoveryV2SchemaGenerationTest {
                 "the offer's items must be strings: " + items);
         assertNotNull(offer.getDescription(), "the offer must keep its description");
     }
+
+    /** An optional instant: a generated client must see a date-time it need not send. */
+    @Test
+    void discoverSinceIsAnOptionalDateTime() {
+        Schema<?> request = openApi31Schemas(DiscoveryInitiateRequestDto.class).get("DiscoveryInitiateRequestDto");
+        Schema<?> discoverSince = (Schema<?>) request.getProperties().get("discoverSince");
+
+        assertNotNull(discoverSince, "DiscoveryInitiateRequestDto publishes no discoverSince");
+        assertTrue(discoverSince.getTypes() != null && discoverSince.getTypes().contains("string"),
+                "discoverSince must be a string: " + discoverSince);
+        assertEquals("date-time", discoverSince.getFormat());
+        assertNotNull(discoverSince.getDescription(), "discoverSince must keep its description");
+        assertRequired(DiscoveryInitiateRequestDto.class, "discoverSince", false);
+    }
 }
