@@ -15,6 +15,8 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,15 +55,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
                 + "storing what each step returned. extendToLevel is the exception. It fetches, so its retry semantics "
                 + "are refetch, not replay.\n\nThe connector MUST NOT read its own clock for anything that enters "
                 + "signature content. The platform supplies signingTime, and the connector uses that value.\n\nEvery "
-                + "operation has an attribute schema that configures it, read from that operation's route plus "
+                + "ladder operation has an attribute schema that configures it, read from that operation's route plus "
                 + "/attributes. It lists profile attributes and request attributes. The platform collects those "
                 + "schemas when a Signing Profile is configured and replays the operator's values in "
                 + "formattingAttributes on every call; computeDtbs also receives the signing request's values in "
-                + "requestAttributes.\n\nA Signing Profile holds one "
+                + "requestAttributes. The platform sends the operator's values to validateProfile before it saves a "
+                + "profile. The connector judges them there as a whole.\n\nA Signing Profile holds one "
                 + "flat set of attribute values, not one set per operation. The platform merges the schemas of every "
                 + "operation that profile can reach into a single set, keyed by attribute name. It sends that whole "
                 + "set to every operation. Which operations are reachable depends on the level the profile is "
-                + "configured up to.\n\nTwo consequences bind a connector. First, an operation MUST ignore any "
+                + "configured up to.\n\nTwo consequences bind a connector. First, a ladder operation MUST ignore any "
                 + "attribute name its own schema does not declare, rather than rejecting it: that name belongs to a "
                 + "sibling operation. The platform has already refused, at profile save, any name no reachable "
                 + "operation declares. Second, an attribute declared by more than one operation MUST carry an "
@@ -104,6 +107,33 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @GetMapping(path = "/{operation}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
     ContentSigningFormattingAttributesDto listFormattingAttributes(@Parameter(
             description = "Operation, identified by its wire code (e.g. \"computeDtbs\")") @PathVariable ContentSigningFormattingOperation operation);
+
+    @Operation(summary = "Validate a Signing Profile",
+            description = "Returns the connector's judgement of a Signing Profile's attribute values taken as a whole: "
+                    + "the problems it finds, each naming one attribute, and the document transfer modes the values "
+                    + "allow. The platform calls it before it saves a profile and refuses the save while any error "
+                    + "remains. It stores the transfer modes with the profile and holds every signing request under "
+                    + "that profile to them.\n\n`allowedRequestAttributes` names what a signing request may set, so "
+                    + "the connector can tell a value the profile leaves to the request from one no request can "
+                    + "supply. The connector MUST answer a profile it cannot use with errors in a 200, keeping 422 for "
+                    + "a request it cannot process, and every transfer mode it names MUST be among the transfer modes "
+                    + "the family declares.",
+            operationId = "validateContentSigningProfile")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "Profile judged; `errors` lists its problems and is empty for a valid profile"),
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "- `PARAMETER_UNSUPPORTED` — the requested family is unsupported by the "
+                            + "connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule, such "
+                            + "as an absent or malformed family or an absent `allowedRequestAttributes`.",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+    @PostMapping(path = "/validateProfile", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ValidateProfileResponseDto validateProfile(@Valid @RequestBody ValidateProfileRequestDto request);
 
     @Operation(summary = "Compute data-to-be-signed bytes",
             description = "Builds the signature structure for the requested family and returns the bytes to be signed. "

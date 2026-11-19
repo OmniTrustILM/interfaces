@@ -537,7 +537,7 @@ class ContentSigningFormattingDtoTest {
         for (ContentSigningFormattingRequestDto dto : List
                 .of(new ComputeDtbsRequestDto(), new EmbedSignatureValueRequestDto(), new SignedDocumentRequestDto(),
                         new EmbedTimestampRequestDto(), new ExtendToLevelRequestDto(),
-                        new ExtendOperationScopedRequestDto())) {
+                        new ExtendOperationScopedRequestDto(), new ValidateProfileRequestDto())) {
             dto.setFormattingAttributes(List.of(attribute));
 
             String rendered = dto.toString();
@@ -559,6 +559,7 @@ class ContentSigningFormattingDtoTest {
         assertTrue(paths(VALIDATOR.validate(new EmbedSignatureValueRequestDto())).contains("family"));
         assertTrue(paths(VALIDATOR.validate(new SignedDocumentRequestDto())).contains("family"));
         assertTrue(paths(VALIDATOR.validate(new ExtendToLevelRequestDto())).contains("family"));
+        assertTrue(paths(VALIDATOR.validate(new ValidateProfileRequestDto())).contains("family"));
     }
 
     /**

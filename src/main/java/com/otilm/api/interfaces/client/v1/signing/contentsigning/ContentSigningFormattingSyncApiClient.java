@@ -15,6 +15,8 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import org.springframework.http.ResponseEntity;
 
@@ -29,6 +31,10 @@ public interface ContentSigningFormattingSyncApiClient {
     /** The attribute schema configuring one operation. */
     ContentSigningFormattingAttributesDto listFormattingAttributes(ApiClientConnectorInfo connector,
             ContentSigningFormattingOperation operation) throws ConnectorException;
+
+    /** A profile's problems arrive as errors in the response. */
+    ValidateProfileResponseDto validateProfile(ApiClientConnectorInfo connector, ValidateProfileRequestDto request)
+            throws ConnectorException;
 
     ComputeDtbsResponseDto computeDtbs(ApiClientConnectorInfo connector, ComputeDtbsRequestDto request)
             throws ConnectorException;

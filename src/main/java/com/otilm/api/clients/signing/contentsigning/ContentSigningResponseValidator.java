@@ -3,6 +3,7 @@ package com.otilm.api.clients.signing.contentsigning;
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -27,6 +28,11 @@ public final class ContentSigningResponseValidator {
     public ContentSigningFormattingAttributesDto requireValidListing(ContentSigningFormattingAttributesDto listing,
             ApiClientConnectorInfo connector) throws ConnectorException {
         return requireValid(listing, "listFormattingAttributes", "formatting attribute listing", connector);
+    }
+
+    public ValidateProfileResponseDto requireValidProfileValidation(ValidateProfileResponseDto result,
+            ApiClientConnectorInfo connector) throws ConnectorException {
+        return requireValid(result, "validateProfile", "profile validation result", connector);
     }
 
     private <T> T requireValid(T response, String operation, String subject, ApiClientConnectorInfo connector)

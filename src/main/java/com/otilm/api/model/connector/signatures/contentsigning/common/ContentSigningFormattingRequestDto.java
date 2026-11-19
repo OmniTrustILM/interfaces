@@ -32,11 +32,10 @@ public abstract class ContentSigningFormattingRequestDto {
     private String family;
 
     @ToString.Exclude
-    @Schema(description = "Attribute values the operator fixed on the Signing Profile, validated when the profile "
-            + "was saved and replayed here on every call. This is the profile's whole set, not this operation's share "
-            + "of it, so it may carry names declared by sibling operations; this operation reads the names its own "
-            + "schema declares and ignores the rest. May be an empty list, but must be present.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Attribute values the operator set on the Signing Profile, each checked against its "
+            + "definition before the platform sends it. The list carries the profile's whole set: validateProfile "
+            + "judges all of it, and an operation with an attribute listing reads only the names its own listing "
+            + "declares. May be an empty list, but must be present.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "formattingAttributes may be an empty list, but must be present")
     private List<@NotNull(
             message = "formattingAttributes must not contain null items") RequestAttribute> formattingAttributes;

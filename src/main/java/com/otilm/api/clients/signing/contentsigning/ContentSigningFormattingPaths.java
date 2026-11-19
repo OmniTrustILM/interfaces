@@ -19,6 +19,9 @@ public final class ContentSigningFormattingPaths {
 
     public static final String EXTEND_TO_LEVEL_CANCEL = BASE + "/extendToLevel/cancel";
 
+    /** Profile-wide route, spanning every operation the profile reaches. */
+    public static final String VALIDATE_PROFILE = BASE + "/validateProfile";
+
     private ContentSigningFormattingPaths() {
     }
 

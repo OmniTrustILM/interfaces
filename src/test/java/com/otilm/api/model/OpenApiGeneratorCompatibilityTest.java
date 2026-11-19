@@ -17,6 +17,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyResultRequestV
 import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMaterialV2Dto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveredItemPayloadInterface;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import com.otilm.api.model.core.cryptography.key.KeyItemDetailDto;
 import com.otilm.api.model.core.cryptography.token.TokenInstanceDetailDto;
@@ -70,7 +72,8 @@ class OpenApiGeneratorCompatibilityTest {
                     KeyExportRequestDto.class, InspectionRequestDto.class, InspectionResponseDto.class,
                     CertificateImportRequestDto.class, CertificateImportResponseDto.class,
                     CertificateKeystoreRequestDto.class, KeyItemDetailDto.class, TokenInstanceDetailDto.class,
-                    TokenProfileDetailDto.class, ContentSigningDeclarationDto.class);
+                    TokenProfileDetailDto.class, ContentSigningDeclarationDto.class, ValidateProfileRequestDto.class,
+                    ValidateProfileResponseDto.class);
 
     /**
      * {@code ResponseMetadata} binds its version subtypes under "2" and "3" while both the published mapping and the
@@ -89,7 +92,8 @@ class OpenApiGeneratorCompatibilityTest {
                     "CertificateImportEntryDto", "CertificateImportResponseDto", "CertificateImportResultDto",
                     "InspectedEntryDto", "CertificateEntryKeyDestinationDto", "CertificateKeystoreRequestDto",
                     "KeyTransferAvailabilityDto", "KeyTransferCapabilityDto", "ContentSigningDeclaration",
-                    "SignatureFamilyDeclaration", "SignatureLevelDeclaration");
+                    "SignatureFamilyDeclaration", "SignatureLevelDeclaration", "ValidateProfileRequest",
+                    "ValidateProfileResponse", "ProfileAttributeError");
 
     private static Map<String, Schema> resolveAll() {
         Map<String, Schema> all = new TreeMap<>();
