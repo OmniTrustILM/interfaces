@@ -15,7 +15,9 @@ import java.util.Arrays;
 public enum DiscoveryWindowMode implements IPlatformEnum {
     FULL("full", "Full", "Discover everything the target holds"),
     SINCE_LAST_SUCCESSFUL_RUN("sinceLastSuccessfulRun", "Since the last successful run",
-            "Discover what was created or changed since the scheduled job's last successful run; available when scheduling"),
+            "Discover what was created or changed since the scheduled job's last successful run; available when "
+                    + "scheduling. A run that ended with warnings counts as successful, so what it missed waits for a "
+                    + "full run"),
     LOOKBACK("lookback", "Lookback",
             "Discover what was created or changed within the configured duration before the run starts");
 
