@@ -14,6 +14,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyAttributesRequ
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportKeyResultRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyEntryV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateIssuedResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.CertificateRequestCreationResponseV2Dto;
@@ -108,7 +110,9 @@ class CryptographyDtoClosedContractTest {
                         dto("certificate request response", CertificateRequestCreationResponseV2Dto.class),
                         dto("certificate issued request", CertificateIssuedRequestV2Dto.class),
                         dto("certificate issued response", CertificateIssuedResponseV2Dto.class),
-                        dto("operation event", OperationEventV2Dto.class));
+                        dto("operation event", OperationEventV2Dto.class),
+                        dto("listed key entry", ListedKeyEntryV2Dto.class),
+                        dto("key resolution", KeyResolutionV2Dto.class));
     }
 
     private static Named<DtoContract> dto(String name, Class<?> type) {

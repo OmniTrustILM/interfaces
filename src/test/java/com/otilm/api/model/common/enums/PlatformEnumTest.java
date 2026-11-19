@@ -8,6 +8,7 @@ import com.otilm.api.model.core.cbom.CbomSyncSkipState;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
+import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingOutcome;
 import com.otilm.api.model.core.notification.NotificationDataCategory;
 import com.otilm.api.model.core.protocol.ProtocolChallengeSource;
 import com.otilm.api.model.core.scheduler.ScheduledJobScheduleState;
@@ -135,6 +136,14 @@ class PlatformEnumTest {
         assertEquals(PlatformEnum.SCHEDULED_JOB_SCHEDULE_STATE, entry);
         assertEquals(ScheduledJobScheduleState.class, entry.getEnumClass());
         assertEquals("ScheduledJobScheduleState", entry.getCode());
+    }
+
+    @Test
+    void tokenKeyOnboardingOutcomeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(TokenKeyOnboardingOutcome.class);
+        assertEquals(PlatformEnum.TOKEN_KEY_ONBOARDING_OUTCOME, entry);
+        assertEquals(TokenKeyOnboardingOutcome.class, entry.getEnumClass());
+        assertEquals("TokenKeyOnboardingOutcome", entry.getCode());
     }
 
     private static String openApiSchemaNameOf(Class<?> enumClass) {

@@ -19,7 +19,7 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString(callSuper = true)
+@ToString
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Schema(name = "ListedKeyPairV2Dto", description = """
         A key pair the token holds. Any later request accepts its metadata exactly like metadata returned at
@@ -36,7 +36,7 @@ public final class ListedKeyPairV2Dto extends ListedKeyV2Dto {
 
     @Schema(description = "Connector-defined metadata for the pair as a whole. It must identify the pair durably. "
             + "The key resolution takes it back as the key's handle. Each metadata name appears once, and "
-            + "every content item carries data. A key that cannot meet this is reported in `unusableKeys`.",
+            + "every content item carries data. A key that cannot meet this is listed as `unaddressable`.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyPairMeta is required and must not be empty")
     private List<@NotNull(
