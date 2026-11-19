@@ -225,7 +225,7 @@ public interface DiscoveryController extends AuthProtectedController {
                             + "job that has already run",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
     @PostMapping(path = "/schedule", consumes = {"application/json"}, produces = {"application/json"})
-    ResponseEntity<?> scheduleDiscovery(@RequestBody ScheduleDiscoveryDto scheduleDiscoveryDto)
+    ResponseEntity<?> scheduleDiscovery(@Valid @RequestBody ScheduleDiscoveryDto scheduleDiscoveryDto)
             throws AlreadyExistException, CertificateException, InterruptedException, ConnectorException,
             SchedulerException, AttributeException, NotFoundException;
 

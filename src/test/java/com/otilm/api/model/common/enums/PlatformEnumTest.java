@@ -1,6 +1,7 @@
 package com.otilm.api.model.common.enums;
 
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.otilm.api.model.client.discovery.DiscoveryWindowMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
@@ -50,6 +51,14 @@ class PlatformEnumTest {
                 PlatformEnum.findByClass(AcmeIdentifierAuthorizationMode.class));
         assertEquals("AcmeIdentifierAuthorizationMode",
                 PlatformEnum.findByClass(AcmeIdentifierAuthorizationMode.class).getCode());
+    }
+
+    @Test
+    void discoveryWindowModeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(DiscoveryWindowMode.class);
+        assertEquals(PlatformEnum.DISCOVERY_WINDOW_MODE, entry);
+        assertEquals(DiscoveryWindowMode.class, entry.getEnumClass());
+        assertEquals("DiscoveryWindowMode", entry.getCode());
     }
 
     @Test
