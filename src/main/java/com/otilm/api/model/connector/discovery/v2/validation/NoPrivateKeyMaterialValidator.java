@@ -34,6 +34,15 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
             valid = false;
         }
 
+        if (value.getPublicKeyFormat() == KeyFormat.ALGORITHM_IDENTIFIER) {
+            context.disableDefaultConstraintViolation();
+            context
+                    .buildConstraintViolationWithTemplate("publicKeyFormat must be a public-key format")
+                    .addPropertyNode("publicKeyFormat")
+                    .addConstraintViolation();
+            valid = false;
+        }
+
         if (value.getType() != null && TYPES_WITHOUT_A_PUBLIC_PART.contains(value.getType())) {
             // One violation per offending field, so the caller is pointed at the field at fault.
             if (value.getPublicKey() != null) {

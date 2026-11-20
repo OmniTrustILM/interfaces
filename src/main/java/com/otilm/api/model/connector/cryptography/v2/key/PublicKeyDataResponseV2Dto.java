@@ -31,7 +31,7 @@ public final class PublicKeyDataResponseV2Dto {
 
     @Valid
     @NotNull(message = "public key data is required")
-    @Schema(description = "Public-key descriptor, optionally carrying the public key as SPKI",
+    @Schema(description = "Public-key descriptor carrying the public key as DER SubjectPublicKeyInfo",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private PublicKeyDataV2Dto keyData;
 

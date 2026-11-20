@@ -86,7 +86,7 @@ class CryptographyKeySchemaTest {
         assertNull(union.getAdditionalProperties(), "union parent must allow properties declared by its arms");
         assertNull(union.getRequired(), "concrete key-data arms own their required properties");
         assertNotNull(union.getProperties(), "union parent properties must be generated from its getters");
-        assertEquals(Set.of("type", "algorithm", "length", "metadata"), union.getProperties().keySet());
+        assertEquals(Set.of("type", "algorithm", "metadata"), union.getProperties().keySet());
         assertTrue(schemas.containsKey("KeyTypeV2"), "KeyTypeV2 enum schema must be generated");
         assertFalse(schemas.containsKey("KeyRoleV2"), "legacy KeyRoleV2 enum schema must not be generated");
         assertEquals(Set.of("SecretKeyDataV2Dto", "PublicKeyDataV2Dto", "PrivateKeyDataV2Dto"), oneOfReferences(union));
@@ -94,8 +94,9 @@ class CryptographyKeySchemaTest {
             assertTrue(resolvesRequiredProperty(schemas.get(subtype), "type", schemas), subtype + " requires type");
             assertTrue(resolvesRequiredProperty(schemas.get(subtype), "algorithm", schemas),
                     subtype + " requires algorithm");
-            assertFalse(resolvesRequiredProperty(schemas.get(subtype), "length", schemas),
-                    subtype + " must allow omission of length for PQC and Unknown");
+            assertEquals("SecretKeyDataV2Dto".equals(subtype),
+                    resolvesRequiredProperty(schemas.get(subtype), "length", schemas),
+                    subtype + ": length is required on SecretKeyDataV2Dto alone");
             assertEquals(Boolean.FALSE, schemas.get(subtype).getAdditionalProperties(),
                     subtype + " must publish additionalProperties=false");
         }
@@ -115,6 +116,48 @@ class CryptographyKeySchemaTest {
         assertEquals("string", spki.getType());
         assertEquals("byte", spki.getFormat());
         assertTrue(resolvesRequiredProperty(publicKey, "publicKeySpki", schemas));
+    }
+
+    @Test
+    void privateKeySchema_publishesByteFormattedAlgorithmIdentifierAndLength() {
+        // given
+        Map<String, Schema> schemas = openApi31Schemas(PrivateKeyDataV2Dto.class);
+        Schema<?> privateKey = schemas.get("PrivateKeyDataV2Dto");
+
+        // when
+        Schema<?> algorithmIdentifier = resolvesProperty(privateKey, "algorithmIdentifier", schemas);
+
+        // then
+        assertNotNull(algorithmIdentifier, "algorithmIdentifier must be published");
+        assertEquals("string", algorithmIdentifier.getType());
+        assertEquals("byte", algorithmIdentifier.getFormat());
+        assertFalse(resolvesRequiredProperty(privateKey, "algorithmIdentifier", schemas));
+        assertNotNull(resolvesProperty(privateKey, "length", schemas), "length must be published");
+    }
+
+    @Test
+    void publicKeyResponseSchema_describesKeyDataAsCarryingTheSubjectPublicKeyInfo() {
+        // given
+        Map<String, Schema> schemas = openApi31Schemas(PublicKeyDataResponseV2Dto.class);
+
+        // when
+        Schema<?> keyData = resolvesProperty(schemas.get("PublicKeyDataResponseV2Dto"), "keyData", schemas);
+
+        // then
+        assertEquals("Public-key descriptor carrying the public key as DER SubjectPublicKeyInfo",
+                keyData.getDescription());
+    }
+
+    @Test
+    void publicKeySchema_omitsLength() {
+        // given
+        Map<String, Schema> schemas = openApi31Schemas(PublicKeyDataV2Dto.class);
+
+        // when
+        Schema<?> length = resolvesProperty(schemas.get("PublicKeyDataV2Dto"), "length", schemas);
+
+        // then
+        assertNull(length, "the SPKI states the public key's size");
     }
 
     @ParameterizedTest(name = "{0}")

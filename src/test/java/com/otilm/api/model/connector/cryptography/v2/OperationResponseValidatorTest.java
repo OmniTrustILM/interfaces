@@ -59,7 +59,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
@@ -1594,35 +1593,32 @@ class OperationResponseValidatorTest {
     }
 
     @Test
-    void validateExportedKeyDescriptor_rejectsAnotherAlgorithm() {
+    void validateExportedKeyDescriptor_rejectsASecretKeyOfAnotherAlgorithm() {
         // given
-        PublicKeyDataV2Dto expected = validPublicKeyData();
-        expected.setAlgorithm(KeyAlgorithm.ECDSA);
+        SecretKeyDataV2Dto reported = validSecretKeyData();
+        reported.setAlgorithm(KeyAlgorithm.UNKNOWN);
+        ExportKeyResponseV2Dto response = validExportKeyResponse();
+        response.setKeyData(reported);
 
         // when
         OperationValidationResult result = VALIDATOR
                 .keyTransfer()
-                .validateExportedKeyDescriptor(expected, validExportKeyResponse());
+                .validateExportedKeyDescriptor(validSecretKeyData(), response);
 
         // then
-        assertInvalid(result, "Connector exported a key with algorithm RSA; expected ECDSA");
+        assertInvalid(result, "Connector exported a key with algorithm UNKNOWN; expected AES");
     }
 
     @Test
-    void validateExportedKeyDescriptor_acceptsAnotherPublicLengthForTheSameSpki() throws Exception {
+    void validateExportedKeyDescriptor_acceptsThePublicKeyOnRecordUnderAnotherAlgorithm() {
         // given
-        PublicKeyDataV2Dto actual = validDistinctLengthKeyPairResponse(KeyAlgorithm.ECDSA)
-                .getPublicKeyData()
-                .getKeyData();
-        PublicKeyDataV2Dto expected = new PublicKeyDataV2Dto();
-        expected.setAlgorithm(KeyAlgorithm.ECDSA);
-        expected.setLength(256);
-        expected.setPublicKeySpki(actual.getPublicKeySpki());
         ExportKeyResponseV2Dto response = validExportKeyResponse();
-        response.setKeyData(actual);
+        response.getKeyData().setAlgorithm(KeyAlgorithm.UNKNOWN);
 
         // when
-        OperationValidationResult result = VALIDATOR.keyTransfer().validateExportedKeyDescriptor(expected, response);
+        OperationValidationResult result = VALIDATOR
+                .keyTransfer()
+                .validateExportedKeyDescriptor(validPublicKeyData(), response);
 
         // then
         assertValid(result);

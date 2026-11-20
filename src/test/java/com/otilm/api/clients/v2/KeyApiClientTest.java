@@ -743,7 +743,7 @@ class KeyApiClientTest {
         String responseWithoutReference = """
                 {
                   "material": {"encryptedPrivateKeyInfo": "%s"},
-                  "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%s"}
+                  "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%s"}
                 }
                 """.formatted(envelopeBase64(), publicKeySpkiBase64());
         stubJsonResponse(EXPORT_PATH, HttpStatus.OK, responseWithoutReference);
@@ -904,7 +904,7 @@ class KeyApiClientTest {
                         },
                         "publicKeyData": {
                           "keyMeta": [%1$s],
-                          "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                          "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%2$s"}
                         }
                       }
                     },
@@ -938,7 +938,7 @@ class KeyApiClientTest {
                         },
                         "publicKeyData": {
                           "keyMeta": [%1$s],
-                          "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                          "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%2$s"}
                         }
                       }
                     },
@@ -986,7 +986,7 @@ class KeyApiClientTest {
                 {
                   "material": {"encryptedPrivateKeyInfo": "%s"},
                   "keyReference": "%s",
-                  "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%s"}
+                  "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%s"}
                 }
                 """.formatted(envelopeBase64(), KEY_REFERENCE, publicKeySpkiBase64());
     }
