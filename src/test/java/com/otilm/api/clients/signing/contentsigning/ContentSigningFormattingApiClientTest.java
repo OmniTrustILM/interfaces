@@ -332,11 +332,12 @@ class ContentSigningFormattingApiClientTest {
 
     @Test
     void embedSignatureValue_postsAndReturnsTheSignedDocument() throws ConnectorException {
-        stubPost(BASE + "/embedSignatureValue", "{ \"signedDocument\": \"AQID\" }");
+        stubPost(BASE + "/embedSignatureValue", "{ \"signedDocument\": \"AQID\", \"mediaType\": \"application/pdf\" }");
 
         SignedDocumentResponseDto result = client.embedSignatureValue(connector, embedSignatureValueRequest());
 
         assertArrayEquals(new byte[]{1, 2, 3}, result.getSignedDocument());
+        assertEquals("application/pdf", result.getMediaType());
     }
 
     /**
@@ -390,11 +391,13 @@ class ContentSigningFormattingApiClientTest {
 
     @Test
     void embedSignatureTimestamp_postsToItsOwnRoute() throws ConnectorException {
-        stubPost(BASE + "/embedSignatureTimestamp", "{ \"signedDocument\": \"AQID\" }");
+        stubPost(BASE + "/embedSignatureTimestamp",
+                "{ \"signedDocument\": \"AQID\", \"mediaType\": \"application/pdf\" }");
 
         SignedDocumentResponseDto result = client.embedSignatureTimestamp(connector, timestampRequest());
 
         assertArrayEquals(new byte[]{1, 2, 3}, result.getSignedDocument());
+        assertEquals("application/pdf", result.getMediaType());
         mockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(BASE + "/embedSignatureTimestamp")));
     }
 
@@ -403,11 +406,13 @@ class ContentSigningFormattingApiClientTest {
      */
     @Test
     void embedArchiveTimestamp_postsToItsOwnRoute() throws ConnectorException {
-        stubPost(BASE + "/embedArchiveTimestamp", "{ \"signedDocument\": \"BAUG\" }");
+        stubPost(BASE + "/embedArchiveTimestamp",
+                "{ \"signedDocument\": \"BAUG\", \"mediaType\": \"application/pdf\" }");
 
         SignedDocumentResponseDto result = client.embedArchiveTimestamp(connector, timestampRequest());
 
         assertArrayEquals(new byte[]{4, 5, 6}, result.getSignedDocument());
+        assertEquals("application/pdf", result.getMediaType());
         mockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(BASE + "/embedArchiveTimestamp")));
     }
 
