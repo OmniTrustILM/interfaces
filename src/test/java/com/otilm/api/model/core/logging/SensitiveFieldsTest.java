@@ -1,10 +1,14 @@
 package com.otilm.api.model.core.logging;
 
+import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.client.auth.UserIdentificationRequestDto;
 import com.otilm.api.model.client.authority.ClientBaseEndEntityRequestDto;
 import com.otilm.api.model.client.authority.LegacyClientCertificateSignRequestDto;
 import com.otilm.api.model.client.cmp.BaseCmpProfileRequestDto;
 import com.otilm.api.model.client.scep.BaseScepProfileRequestDto;
+import com.otilm.api.model.client.signing.nativesigning.SignDocumentItemDto;
+import com.otilm.api.model.client.signing.nativesigning.SignDocumentRequestDto;
+import com.otilm.api.model.client.signing.nativesigning.SignDocumentResultDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialCreateRequestDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialUpdateRequestDto;
 import com.otilm.api.model.common.attribute.common.content.data.FileAttributeContentData;
@@ -28,6 +32,7 @@ import com.otilm.api.model.core.v2.ClientCertificateIssueRequestDto;
 import com.otilm.api.model.core.v2.ClientCertificateRegistrationDto;
 import com.otilm.api.model.core.v2.ClientCertificateRekeyRequestDto;
 import com.otilm.api.model.core.v2.ClientCertificateRenewRequestDto;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -74,7 +79,9 @@ class SensitiveFieldsTest {
                         Arguments.of(CertificateRegisteredEventData.class, "credential"),
                         Arguments.of(AcmeEabKeyDto.class, "key"),
                         Arguments.of(BaseEndEntityRequestDto.class, "password"),
-                        Arguments.of(ClientBaseEndEntityRequestDto.class, "password"));
+                        Arguments.of(ClientBaseEndEntityRequestDto.class, "password"),
+                        Arguments.of(SignDocumentItemDto.class, "document"),
+                        Arguments.of(SignDocumentResultDto.class, "output"));
     }
 
     @ParameterizedTest(name = "{0}.{1}")
@@ -130,6 +137,24 @@ class SensitiveFieldsTest {
         data.setMimeType("application/x-pkcs12");
 
         assertTrue(data.toString().contains("none"));
+    }
+
+    @Test
+    void nativeSigningPayloads_stayOutOfToString() {
+        SignDocumentRequestDto request = new SignDocumentRequestDto();
+        request.setItems(List.of(new SignDocumentItemDto("first", "document-bytes".getBytes(), null)));
+        request.setRequestAttributes(List.of(new RequestAttributeV3()));
+        SignDocumentResultDto result = new SignDocumentResultDto("first", null, "output-bytes".getBytes(),
+                "application/pdf");
+
+        String renderedRequest = request.toString();
+        String renderedResult = result.toString();
+
+        assertTrue(renderedRequest.contains("first"));
+        assertFalse(renderedRequest.contains("document="));
+        assertFalse(renderedRequest.contains("requestAttributes="));
+        assertTrue(renderedResult.contains("application/pdf"));
+        assertFalse(renderedResult.contains("output="));
     }
 
     @Test
