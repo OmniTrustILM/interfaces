@@ -21,8 +21,8 @@ public class ComputeDtbsResponseDto {
 
     @ToString.Exclude
     @NotNull(message = "dtbs is required")
-    @Schema(description = "The data-to-be-signed bytes, base64-encoded in JSON. They must embed the digest of the "
-            + "document the user authorized.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The data-to-be-signed bytes, base64-encoded in JSON. They must embed `documentDigest`.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] dtbs;
 
     @ToString.Exclude

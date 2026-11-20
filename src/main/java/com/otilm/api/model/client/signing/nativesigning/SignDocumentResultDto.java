@@ -22,9 +22,9 @@ public class SignDocumentResultDto implements IdentifiedDataV2Dto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String identifier;
 
-    @Schema(description = "UUID assigned to this item's signing record; present when the Signing Profile records "
-            + "signings. Whether the record is stored depends on the Signing Profile's recording mode.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "UUID of this item's signing record; absent when the Signing Profile's record policy "
+            + "disables recording, or when a `best_effort` record could not be staged. A `best_effort` record may "
+            + "still be lost after it is staged.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID signingRecordUuid;
 
     @Sensitive
