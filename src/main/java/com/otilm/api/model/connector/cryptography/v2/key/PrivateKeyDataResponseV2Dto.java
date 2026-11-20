@@ -23,8 +23,12 @@ import lombok.ToString;
 @Schema(name = "PrivateKeyDataResponseV2Dto", additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public final class PrivateKeyDataResponseV2Dto {
 
-    @Schema(description = "Connector-defined opaque private-key handle. Metadata must identify the key durably—it must "
-            + "remain valid across connector restarts and sessions; ephemeral handles must not be used.",
+    @Schema(description = "Connector-defined opaque handle of the private key, which must identify the key uniquely "
+            + "on the token and durably across connector restarts, sessions and token profiles. Each metadata name "
+            + "appears once, and every content item carries data. A private key listed without its public key has "
+            + "no fingerprint, so the platform recognises a duplicate by this metadata alone. Every "
+            + "response that returns the key, from creation or import to listing and resolution, must carry the "
+            + "same metadata names and content data, with each name's content items in the same order.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "private key metadata is required and must not be empty")
     private List<@NotNull @ValidMetadataAttribute MetadataAttribute> keyMeta;

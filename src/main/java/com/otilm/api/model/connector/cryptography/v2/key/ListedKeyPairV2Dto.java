@@ -22,8 +22,8 @@ import lombok.ToString;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Schema(name = "ListedKeyPairV2Dto", description = """
-        A key pair the token holds. Any later request accepts its metadata exactly like metadata returned at
-        creation.
+        A key pair the token holds, or its private key alone when the token lacks a public key object for it. Any
+        later request accepts its metadata exactly like metadata returned at creation.
         """, additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 public final class ListedKeyPairV2Dto extends ListedKeyV2Dto {
 
@@ -34,10 +34,10 @@ public final class ListedKeyPairV2Dto extends ListedKeyV2Dto {
         return KeyRequestType.KEY_PAIR;
     }
 
-    @Schema(description = "Connector-defined metadata for the pair as a whole. It must identify the pair durably. "
-            + "The key resolution takes it back as the key's handle. Each metadata name appears once, and "
-            + "every content item carries data. A key that cannot meet this is listed as `unaddressable`.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Connector-defined metadata for the pair as a whole, or for the private key listed alone. "
+            + "It must identify the key durably. The key resolution takes it back as the key's handle. Each "
+            + "metadata name appears once, and every content item carries data. A key that cannot meet this is "
+            + "listed as `unaddressable`.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyPairMeta is required and must not be empty")
     private List<@NotNull(
             message = "keyPairMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyPairMeta;
@@ -48,7 +48,9 @@ public final class ListedKeyPairV2Dto extends ListedKeyV2Dto {
     private PrivateKeyDataResponseV2Dto privateKeyData;
 
     @Schema(description = "Data of the public key, read from the public key object on the token. Absent when the "
-            + "token lacks a public key object for the pair.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "token lacks a public key object for the pair. The entry carrying the private key alone must then set "
+            + "its `status` to `available` only when the connector can sign or decrypt with it under the token "
+            + "profile of the request, and to `refused` otherwise.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Valid
     private PublicKeyDataResponseV2Dto publicKeyData;
 

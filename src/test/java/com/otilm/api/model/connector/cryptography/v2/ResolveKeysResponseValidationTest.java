@@ -226,6 +226,23 @@ class ResolveKeysResponseValidationTest {
     }
 
     @Test
+    void validateResolveKeys_refusesAFoundPrivateKeyWhosePrivateMetadataCannotServeAsAHandle() {
+        // given
+        ListedKeyPairV2Dto privateOnly = listed("0a");
+        privateOnly.setPublicKeyData(null);
+        List<MetadataAttribute> referenceOnly = handle("unused");
+        referenceOnly.get(0).setContent(List.of(new StringAttributeContentV3("signer-a", null)));
+        privateOnly.getPrivateKeyData().setKeyMeta(referenceOnly);
+        KeyResolutionV2Dto found = resolution("0", KeyEntryStatus.AVAILABLE, privateOnly);
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateResolveKeys(request("0"), response(found));
+
+        // then
+        assertInvalid(result, "Connector returned a key whose metadata cannot serve as a handle");
+    }
+
+    @Test
     void validateResolveKeys_refusesADescriptorOfAnotherType() {
         // given
         KeyResolutionV2Dto unaddressable = absent("0", KeyEntryStatus.UNADDRESSABLE);
