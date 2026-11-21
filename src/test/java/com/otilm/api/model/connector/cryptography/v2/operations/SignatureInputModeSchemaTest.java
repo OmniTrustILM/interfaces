@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Go connector models are generated from the published OpenAPI document, so a conformance rule for the prehashed input
- * mode that drops out of the schema text never reaches a Go connector.
+ * Go connector models are generated from the published OpenAPI document, so a conformance rule for the data digest
+ * input mode that drops out of the schema text never reaches a Go connector.
  */
 class SignatureInputModeSchemaTest {
 
@@ -23,7 +23,7 @@ class SignatureInputModeSchemaTest {
             .of("never hashed again", "RFC 8017 section 9.2", "explicit NULL",
                     "RSA PKCS#1 v1.5, RSA-PSS and ECDSA signature algorithm codes only", "PARAMETER_UNSUPPORTED",
                     "VALIDATION_FAILED", "any signatureInputMode it does not implement", "never ignores the field",
-                    "prehashedSigning");
+                    "dataDigestSigning");
 
     @Test
     void fieldSchemaCarriesTheConformanceRules() throws NoSuchFieldException {
@@ -43,7 +43,7 @@ class SignatureInputModeSchemaTest {
     }
 
     @Test
-    void signOperationDescribesThePrehashedRefusals() throws NoSuchMethodException {
+    void signOperationDescribesTheDataDigestRefusals() throws NoSuchMethodException {
         // given
         Method signData = CryptographicOperationsController.class.getMethod("signData", SignDataRequestV2Dto.class);
 
@@ -57,10 +57,10 @@ class SignatureInputModeSchemaTest {
 
         // then
         assertTrue(description
-                .contains("the connector does not implement the requested signatureInputMode, or prehashedDigest "
+                .contains("the connector does not implement the requested signatureInputMode, or dataDigest "
                         + "is not defined for the selected signatureAlgorithm (errorCode PARAMETER_UNSUPPORTED)"));
         assertTrue(description
-                .contains("a prehashedDigest item is not the length of the digest the "
+                .contains("a dataDigest item is not the length of the digest the "
                         + "signatureAlgorithm fixes (errorCode VALIDATION_FAILED)"));
     }
 }

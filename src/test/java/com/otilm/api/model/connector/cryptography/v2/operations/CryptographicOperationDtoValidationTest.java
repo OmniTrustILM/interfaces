@@ -639,12 +639,12 @@ class CryptographicOperationDtoValidationTest {
     }
 
     @Test
-    void prehashedInputModeRoundTrips() throws Exception {
+    void dataDigestInputModeRoundTrips() throws Exception {
         SignDataRequestV2Dto request = validSignRequest();
-        request.setSignatureInputMode(SignatureInputMode.PREHASHED_DIGEST);
+        request.setSignatureInputMode(SignatureInputMode.DATA_DIGEST);
         String json = mapper.writeValueAsString(request);
-        assertTrue(json.contains("\"signatureInputMode\":\"prehashedDigest\""));
-        assertEquals(SignatureInputMode.PREHASHED_DIGEST,
+        assertTrue(json.contains("\"signatureInputMode\":\"dataDigest\""));
+        assertEquals(SignatureInputMode.DATA_DIGEST,
                 mapper.readValue(json, SignDataRequestV2Dto.class).getSignatureInputMode());
         assertTrue(VALIDATOR.validate(request).isEmpty());
     }
