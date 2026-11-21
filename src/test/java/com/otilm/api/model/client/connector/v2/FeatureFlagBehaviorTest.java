@@ -25,6 +25,6 @@ class FeatureFlagBehaviorTest {
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.CERTIFICATE_STATUS_POLLING.getBehavior());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.KEY_IMPORT.getBehavior());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.KEY_EXPORT.getBehavior());
-        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.PREHASHED_SIGNING.getBehavior());
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, FeatureFlag.DATA_DIGEST_SIGNING.getBehavior());
     }
 }

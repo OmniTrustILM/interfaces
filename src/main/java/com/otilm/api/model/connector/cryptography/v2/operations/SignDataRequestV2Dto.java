@@ -35,16 +35,16 @@ public class SignDataRequestV2Dto extends KeyScopedRequestV2Dto {
 
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             description = "How the connector treats each data item. Absent means data, and callers omit the field for "
-                    + "data mode because released connectors refuse unknown properties. Under prehashedDigest each "
+                    + "data mode because released connectors refuse unknown properties. Under dataDigest each "
                     + "item is already the digest the selected signature algorithm fixes and is never hashed "
                     + "again: RSA PKCS#1 v1.5 wraps it in a DigestInfo per RFC 8017 section 9.2 with explicit NULL "
                     + "parameters; RSA-PSS and ECDSA sign it with the parameters the signature algorithm code "
-                    + "fixes. prehashedDigest is defined for RSA PKCS#1 v1.5, RSA-PSS and ECDSA signature "
+                    + "fixes. dataDigest is defined for RSA PKCS#1 v1.5, RSA-PSS and ECDSA signature "
                     + "algorithm codes only: any other code answers 422 PARAMETER_UNSUPPORTED, and an item whose "
                     + "length is not the output length of the fixed digest answers 422 VALIDATION_FAILED. A "
                     + "connector answers 422 PARAMETER_UNSUPPORTED to any signatureInputMode it does not implement "
-                    + "and never ignores the field; one that implements prehashedDigest advertises the "
-                    + "prehashedSigning feature flag.")
+                    + "and never ignores the field; one that implements dataDigest advertises the "
+                    + "dataDigestSigning feature flag.")
     private SignatureInputMode signatureInputMode;
 
     @Schema(description = "Batch-wide signature settings. Must include exactly one v3 string attribute named "
