@@ -161,6 +161,21 @@ class ContentSigningFormattingDtoTest {
         assertTrue(paths(VALIDATOR.validate(new SignedDocumentRequestDto())).contains("signedDocument"));
     }
 
+    @Test
+    void aSignedDocumentResponseRequiresAMediaType() {
+        SignedDocumentResponseDto dto = new SignedDocumentResponseDto();
+        dto.setSignedDocument(new byte[]{1});
+        assertEquals(Set.of("mediaType"), paths(VALIDATOR.validate(dto)));
+    }
+
+    @Test
+    void aSignedDocumentResponseRefusesABlankMediaType() {
+        SignedDocumentResponseDto dto = new SignedDocumentResponseDto();
+        dto.setSignedDocument(new byte[]{1});
+        dto.setMediaType(" ");
+        assertTrue(paths(VALIDATOR.validate(dto)).contains("mediaType"));
+    }
+
     /** Detached content is optional; requiring it would make every enveloped request carry a field it cannot fill. */
     @Test
     void aSignedDocumentRequestNeedsNoDetachedContent() {
