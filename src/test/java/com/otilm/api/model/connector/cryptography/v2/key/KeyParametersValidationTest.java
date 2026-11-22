@@ -277,7 +277,7 @@ class KeyParametersValidationTest {
     }
 
     @Test
-    void describesAListedPrivateKeyWithoutItsPublicHalfOnItsOwn() throws Exception {
+    void describesAListedPrivateKeyWithoutItsPublicHalfOnItsOwn() {
         // given
         ListedKeyPairV2Dto pair = listedKeyPair(null, privateKey(KeyAlgorithm.ECDSA, null, P256));
 

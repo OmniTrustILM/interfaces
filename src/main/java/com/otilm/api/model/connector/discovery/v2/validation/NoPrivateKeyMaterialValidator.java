@@ -10,6 +10,8 @@ import java.util.Set;
 
 public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPrivateKeyMaterial, DiscoveredKeyDto> {
 
+    private static final String PUBLIC_KEY_FORMAT = "publicKeyFormat";
+
     private static final Set<KeyFormat> PRIVATE_KEY_FORMATS = Set.of(KeyFormat.PRKI, KeyFormat.EPRKI);
 
     // Declared on the annotation beside its published wording, so the two cannot drift apart.
@@ -29,7 +31,7 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
                     .buildConstraintViolationWithTemplate(
                             "publicKeyFormat must never be a private-key format (PRKI/EPRKI); "
                                     + "key material never traverses discovery")
-                    .addPropertyNode("publicKeyFormat")
+                    .addPropertyNode(PUBLIC_KEY_FORMAT)
                     .addConstraintViolation();
             valid = false;
         }
@@ -38,7 +40,7 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
             context.disableDefaultConstraintViolation();
             context
                     .buildConstraintViolationWithTemplate("publicKeyFormat must be a public-key format")
-                    .addPropertyNode("publicKeyFormat")
+                    .addPropertyNode(PUBLIC_KEY_FORMAT)
                     .addConstraintViolation();
             valid = false;
         }
@@ -60,7 +62,7 @@ public class NoPrivateKeyMaterialValidator implements ConstraintValidator<NoPriv
                 context
                         .buildConstraintViolationWithTemplate(
                                 "publicKeyFormat must be absent when type is Private, Secret, or Split")
-                        .addPropertyNode("publicKeyFormat")
+                        .addPropertyNode(PUBLIC_KEY_FORMAT)
                         .addConstraintViolation();
                 valid = false;
             }
