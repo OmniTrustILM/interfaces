@@ -53,16 +53,16 @@ class FeatureFlagTest {
     }
 
     @Test
-    void prehashedSigningFlag_declaresCryptographyCapability() {
+    void dataDigestSigningFlag_declaresCryptographyCapability() {
         // given
-        var prehashedSigningCode = "prehashedSigning";
+        var dataDigestSigningCode = "dataDigestSigning";
 
         // when
-        FeatureFlag flag = FeatureFlag.findByCode(prehashedSigningCode);
+        FeatureFlag flag = FeatureFlag.findByCode(dataDigestSigningCode);
 
         // then
-        assertEquals(FeatureFlag.PREHASHED_SIGNING, flag);
-        assertEquals("Prehashed Signing", flag.getLabel());
+        assertEquals(FeatureFlag.DATA_DIGEST_SIGNING, flag);
+        assertEquals("Data Digest Signing", flag.getLabel());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
         assertEquals(List.of(ConnectorInterface.CRYPTOGRAPHY), flag.getApplicableInterfaces());
     }
