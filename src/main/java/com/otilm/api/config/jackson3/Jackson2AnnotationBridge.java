@@ -47,7 +47,9 @@ final class Jackson2AnnotationBridge extends NopAnnotationIntrospector {
                             OneTimeKeyManagedSigningDto.class),
                     ManagedSigningRequestDto.Deserializer.class,
                     new ManagedSigningDeserializer<>(ManagedSigningRequestDto.class,
-                            StaticKeyManagedSigningRequestDto.class, OneTimeKeyManagedSigningRequestDto.class));
+                            StaticKeyManagedSigningRequestDto.class, OneTimeKeyManagedSigningRequestDto.class),
+                    com.otilm.api.model.connector.discovery.v2.DiscoveryDeliveryModesDeserializer.class,
+                    new DiscoveryDeliveryModesDeserializer());
 
     /** Jackson 2 handlers that only spell out the default, which Jackson 3 applies on its own. */
     private static final Set<Class<?>> DEFAULTS = Set

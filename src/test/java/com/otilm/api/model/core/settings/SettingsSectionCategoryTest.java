@@ -24,6 +24,12 @@ class SettingsSectionCategoryTest {
         assertEquals("branding", SettingsSectionCategory.PLATFORM_BRANDING.getCode());
     }
 
+    /** Core stores the signing rows under this code. A rename would orphan them. */
+    @Test
+    void signingIsAddressedByItsOwnCode() {
+        assertEquals("signing", SettingsSectionCategory.PLATFORM_SIGNING.getCode());
+    }
+
     @ParameterizedTest
     @EnumSource(SettingsSectionCategory.class)
     void everyCategoryRoundTripsThroughItsCode(SettingsSectionCategory category) throws Exception {

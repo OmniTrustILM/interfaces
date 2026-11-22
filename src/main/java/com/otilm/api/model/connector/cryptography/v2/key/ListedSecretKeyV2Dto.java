@@ -16,7 +16,7 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString(callSuper = true)
+@ToString
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Schema(name = "ListedSecretKeyV2Dto", description = """
         A secret key the token holds. Any later request accepts its metadata exactly like metadata returned at
@@ -35,7 +35,7 @@ public final class ListedSecretKeyV2Dto extends ListedKeyV2Dto {
             + "the platform created it equals the metadata creation returned: a secret key has no public key, so the "
             + "platform recognises one it already holds by this metadata alone. The key resolution takes it back as "
             + "the key's handle. Each metadata name appears once, and every content item carries data. A key that "
-            + "cannot meet this is reported in `unusableKeys`.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "cannot meet this is listed as `unaddressable`.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyMeta is required and must not be empty")
     private List<@NotNull(
             message = "keyMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyMeta;

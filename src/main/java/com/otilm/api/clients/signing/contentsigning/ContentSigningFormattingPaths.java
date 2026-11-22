@@ -12,10 +12,15 @@ public final class ContentSigningFormattingPaths {
 
     public static final String BASE = "/v1/signatureProvider/contentSigning";
 
+    public static final String DECLARATION = BASE + "/declaration";
+
     /** The status and cancel companions of {@code extendToLevel}, which are not ladder operations of their own. */
     public static final String EXTEND_TO_LEVEL_STATUS = BASE + "/extendToLevel/status";
 
     public static final String EXTEND_TO_LEVEL_CANCEL = BASE + "/extendToLevel/cancel";
+
+    /** Profile-wide route, spanning every operation the profile reaches. */
+    public static final String VALIDATE_PROFILE = BASE + "/validateProfile";
 
     private ContentSigningFormattingPaths() {
     }

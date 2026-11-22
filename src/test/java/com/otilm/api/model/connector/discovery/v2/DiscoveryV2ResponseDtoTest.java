@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DiscoveryV2ResponseDtoTest {
@@ -546,6 +547,41 @@ class DiscoveryV2ResponseDtoTest {
 
         assertTrue(json.contains("\"meta\":[]"), json);
         assertTrue(mapper.readValue(json, DiscoveryStatusResponseDto.class).getMeta().isEmpty());
+    }
+
+    @Test
+    void initiateResponseCarriesChosenMode() throws Exception {
+        DiscoveryInitiateResponseDto back = mapper
+                .readValue("{\"deliveryMode\":\"checkpointed\"}", DiscoveryInitiateResponseDto.class);
+        assertEquals(DiscoveryDeliveryMode.CHECKPOINTED, back.getDeliveryMode());
+    }
+
+    @Test
+    void initiateResponseUnknownChosenModeIsRefused() {
+        assertThrows(Exception.class,
+                () -> mapper.readValue("{\"deliveryMode\":\"streamed\"}", DiscoveryInitiateResponseDto.class));
+    }
+
+    @Test
+    void resultsResponseWithoutCheckpointOmitsTheField() throws Exception {
+        DiscoveryResultsResponseDto dto = new DiscoveryResultsResponseDto();
+        dto.setItems(List.of());
+        dto.setHighestSequence(0L);
+        dto.setMore(false);
+        assertFalse(mapper.writeValueAsString(dto).contains("checkpoint"));
+    }
+
+    @Test
+    void resultsResponseCheckpointRoundTripsAndStaysOutOfToString() throws Exception {
+        DiscoveryResultsResponseDto dto = new DiscoveryResultsResponseDto();
+        dto.setItems(List.of());
+        dto.setHighestSequence(7L);
+        dto.setMore(true);
+        dto.setCheckpoint(List.of(metadataAttribute("cursor", "cp-after-7")));
+        DiscoveryResultsResponseDto back = mapper
+                .readValue(mapper.writeValueAsString(dto), DiscoveryResultsResponseDto.class);
+        assertEquals(1, back.getCheckpoint().size());
+        assertFalse(dto.toString().contains("cp-after-7"));
     }
 
     private MetadataAttribute metadataAttribute(String name, String value) {

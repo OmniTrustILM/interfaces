@@ -2,6 +2,7 @@ package com.otilm.api.model.core.v2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.otilm.api.model.client.attribute.RequestAttribute;
+import com.otilm.api.model.core.certificate.CertificateType;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
 import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,8 +37,13 @@ public class ClientCertificateIssueRequestDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String request;
 
-    @Schema(description = "Certificate signing request format", defaultValue = "pkcs10")
-    private CertificateRequestFormat format = CertificateRequestFormat.PKCS10;
+    @Schema(description = "Format of the request, which says how to read it. When absent, the default format of the "
+            + "certificate type applies: pkcs10 for X.509", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestFormat format;
+
+    @Schema(description = "Type of the certificate to issue. When absent, the certificate is X.509",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateType certificateType;
 
     // ------------------------------------------------------------------------------------------------------------------
     // Key Related Parameters

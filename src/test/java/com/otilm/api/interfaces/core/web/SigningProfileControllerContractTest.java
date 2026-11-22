@@ -1,15 +1,15 @@
 package com.otilm.api.interfaces.core.web;
 
 import com.otilm.api.model.common.ErrorMessageDto;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Pattern;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -79,16 +79,15 @@ class SigningProfileControllerContractTest {
     }
 
     @Test
-    void contentSigningDiscoveryReturnsAFlatBaseAttributeList() {
+    void contentSigningDiscoveryReturnsProfileAndRequestAttributesApart() {
         // given
         Method contentSigning = method("listContentSigningFormattingConnectorAttributes");
 
         // when
-        ParameterizedType returnType = (ParameterizedType) contentSigning.getGenericReturnType();
+        Class<?> returnType = contentSigning.getReturnType();
 
         // then
-        assertEquals(List.class, contentSigning.getReturnType());
-        assertEquals(BaseAttribute.class, returnType.getActualTypeArguments()[0]);
+        assertEquals(ContentSigningFormattingAttributesDto.class, returnType);
     }
 
     /**
@@ -96,23 +95,48 @@ class SigningProfileControllerContractTest {
      * back on and must not invent one.
      */
     @Test
-    void familyAndMaxLevelAreRequiredQueryParameters() {
+    void familyAndLevelAreRequiredQueryParameters() {
         // given
         Method contentSigning = method("listContentSigningFormattingConnectorAttributes");
 
         // when
-        RequestParam family = parameterOfType(contentSigning, SignatureFamily.class).getAnnotation(RequestParam.class);
-        RequestParam maxLevel = parameterOfType(contentSigning, SignatureLevel.class).getAnnotation(RequestParam.class);
+        RequestParam family = parameterOfType(contentSigning, String.class).getAnnotation(RequestParam.class);
+        RequestParam level = parameterOfType(contentSigning, SignatureLevel.class).getAnnotation(RequestParam.class);
 
         // then
         assertNotNull(family, "family must be a request parameter");
-        assertNotNull(maxLevel, "maxLevel must be a request parameter");
+        assertNotNull(level, "level must be a request parameter");
         assertTrue(family.required(), "family must be required");
-        assertTrue(maxLevel.required(), "maxLevel must be required");
+        assertTrue(level.required(), "level must be required");
         assertEquals(ValueConstants.DEFAULT_NONE, family.defaultValue(),
                 "a default would make family omittable, which is the invented value this endpoint must not have");
-        assertEquals(ValueConstants.DEFAULT_NONE, maxLevel.defaultValue(),
-                "a default would make maxLevel omittable, which is the invented value this endpoint must not have");
+        assertEquals(ValueConstants.DEFAULT_NONE, level.defaultValue(),
+                "a default would make level omittable, which is the invented value this endpoint must not have");
+    }
+
+    @Test
+    void theLevelIsPublishedAsTheLevelQueryParameter() {
+        // given
+        Method contentSigning = method("listContentSigningFormattingConnectorAttributes");
+
+        // when
+        Parameter level = parameterOfType(contentSigning, SignatureLevel.class);
+
+        // then
+        assertEquals("level", level.getName());
+    }
+
+    @Test
+    void familyIsCheckedAgainstTheFamilyCodeFormat() {
+        // given
+        Method contentSigning = method("listContentSigningFormattingConnectorAttributes");
+
+        // when
+        Pattern pattern = parameterOfType(contentSigning, String.class).getAnnotation(Pattern.class);
+
+        // then
+        assertNotNull(pattern, "family must carry the family code pattern");
+        assertEquals(SignatureFamilyFormat.REGEX, pattern.regexp());
     }
 
     @Test
@@ -137,8 +161,8 @@ class SigningProfileControllerContractTest {
 
     /**
      * Discovery reuses the save-time aggregation, so the rejections a form can provoke — a name declared twice with two
-     * definitions, an unadvertised family, a maxLevel above the connector's ceiling, and a maxLevel this platform
-     * version cannot execute — reach the caller as the 422 that profile save produces.
+     * definitions, an unadvertised family, a level the connector does not declare, and a level this platform version
+     * cannot execute — reach the caller as the 422 that profile save produces.
      */
     @Test
     void contentSigningDiscoveryDocumentsTheSaveTimeRejection() {

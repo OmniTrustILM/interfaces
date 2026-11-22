@@ -1,10 +1,10 @@
 package com.otilm.api.interfaces.connector.signing.contentsigning;
 
 import com.otilm.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -15,6 +15,9 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +26,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,10 +36,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/v1/signatureProvider/contentSigning")
 @Tag(name = "Content Signing Formatting",
-        description = "Formatting of content signatures. v1 serves four AdES families: PAdES, XAdES, CAdES and JAdES. "
-                + "Future content kinds arrive as additional families on this same contract. Every content-signing "
-                + "formatting connector implements this contract. The family interface codes it advertises on /v2/info "
-                + "say which families it is entitled to serve. It MUST reject any other family with 422.\n\nThe seven "
+        description = "Formatting of content signatures in the families a connector declares. Every content-signing "
+                + "formatting connector implements this contract and advertises the contentSigningFormatting interface "
+                + "on /v2/info. Its declaration route lists the families it serves. It MUST reject any other family "
+                + "with 422 (errorCode `PARAMETER_UNSUPPORTED`).\n\nThe ladder "
                 + "operations form three compute/embed pairs plus the fused extendToLevel. A pair exists wherever the "
                 + "connector needs something only the platform can produce. That is a signature value, because private "
                 + "keys never leave the platform. It is also a timestamp token, because timestamps are issued "
@@ -53,13 +55,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
                 + "storing what each step returned. extendToLevel is the exception. It fetches, so its retry semantics "
                 + "are refetch, not replay.\n\nThe connector MUST NOT read its own clock for anything that enters "
                 + "signature content. The platform supplies signingTime, and the connector uses that value.\n\nEvery "
-                + "operation has an attribute schema that configures it, read from that operation's route plus "
-                + "/attributes. The platform collects those schemas when a Signing Profile is configured, and replays "
-                + "the operator's chosen values in formattingAttributes on every call.\n\nA Signing Profile holds one "
+                + "ladder operation has an attribute schema that configures it, read from that operation's route plus "
+                + "/attributes. It lists profile attributes and request attributes. The platform collects those "
+                + "schemas when a Signing Profile is configured and replays the operator's values in "
+                + "formattingAttributes on every call; computeDtbs also receives the signing request's values in "
+                + "requestAttributes. The platform sends the operator's values to validateProfile before it saves a "
+                + "profile. The connector judges them there as a whole.\n\nA Signing Profile holds one "
                 + "flat set of attribute values, not one set per operation. The platform merges the schemas of every "
                 + "operation that profile can reach into a single set, keyed by attribute name. It sends that whole "
                 + "set to every operation. Which operations are reachable depends on the level the profile is "
-                + "configured up to.\n\nTwo consequences bind a connector. First, an operation MUST ignore any "
+                + "configured up to.\n\nTwo consequences bind a connector. First, a ladder operation MUST ignore any "
                 + "attribute name its own schema does not declare, rather than rejecting it: that name belongs to a "
                 + "sibling operation. The platform has already refused, at profile save, any name no reachable "
                 + "operation declares. Second, an attribute declared by more than one operation MUST carry an "
@@ -69,12 +74,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
                 + "and a single shared attribute makes that true by construction.")
 public interface ContentSigningFormattingController extends AuthProtectedConnectorController {
 
+    @Operation(summary = "Get the content-signing declaration",
+            description = "Returns the families this connector serves. Each family states the levels it reaches, "
+                    + "the transfer modes it signs from and the signature algorithms it supports. The platform reads "
+                    + "the declaration when it connects or reconnects the connector, and refuses the connector when "
+                    + "a family breaks a rule its fields state. A changed declaration takes effect at the next "
+                    + "reconnect.",
+            operationId = "getContentSigningDeclaration")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Declaration retrieved")})
+    @GetMapping(path = "/declaration", produces = MediaType.APPLICATION_JSON_VALUE)
+    ContentSigningDeclarationDto getContentSigningDeclaration();
+
     @Operation(summary = "List the attributes configuring an operation",
-            description = "Returns the attribute schema configuring how this connector performs the named operation. A "
-                    + "value the operator fixes once per Signing Profile belongs here. A value that varies per signing "
-                    + "request is a field on that operation's request instead. The platform collects these schemas "
-                    + "when a Signing Profile is configured. It replays the operator's chosen values in "
-                    + "formattingAttributes on every call to that operation.",
+            description = "Returns the attribute definitions configuring how this connector performs the named "
+                    + "operation, split into profile attributes and request attributes. The operator alone sets a "
+                    + "profile attribute on the Signing Profile; a signing request may override a request "
+                    + "attribute's profile value where the profile allows it. Only computeDtbs lists request "
+                    + "attributes; every other operation returns an empty `requestAttributes`. A request attribute's "
+                    + "`properties.group` names its permission group: a Signing Profile allows a group as a whole, or "
+                    + "an ungrouped request attribute on its own. Every request attribute must be a data attribute "
+                    + "whose name appears only in `requestAttributes` across the operations a Signing Profile reaches, "
+                    + "and no group may share a request attribute's name; the platform refuses a listing that breaks one of these rules. The "
+                    + "platform collects these definitions when a Signing Profile is configured and replays the "
+                    + "operator's values in `formattingAttributes` on every call to that operation.",
             operationId = "listContentSigningFormattingAttributes")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Attribute schema retrieved"),
@@ -83,13 +105,40 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @GetMapping(path = "/{operation}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<BaseAttribute> listFormattingAttributes(@Parameter(
+    ContentSigningFormattingAttributesDto listFormattingAttributes(@Parameter(
             description = "Operation, identified by its wire code (e.g. \"computeDtbs\")") @PathVariable ContentSigningFormattingOperation operation);
+
+    @Operation(summary = "Validate a Signing Profile",
+            description = "Returns the connector's judgement of a Signing Profile's attribute values taken as a whole: "
+                    + "the problems it finds, each naming one attribute, and the document transfer modes the values "
+                    + "allow. The platform calls it before it saves a profile and refuses the save while any error "
+                    + "remains. It stores the transfer modes with the profile and holds every signing request under "
+                    + "that profile to them.\n\n`allowedRequestAttributes` names what a signing request may set, so "
+                    + "the connector can tell a value the profile leaves to the request from one no request can "
+                    + "supply. The connector MUST answer a profile it cannot use with errors in a 200, keeping 422 for "
+                    + "a request it cannot process, and every transfer mode it names MUST be among the transfer modes "
+                    + "the family declares.",
+            operationId = "validateContentSigningProfile")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "Profile judged; `errors` lists its problems and is empty for a valid profile"),
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
+            @ApiResponse(responseCode = "422",
+                    description = "- `PARAMETER_UNSUPPORTED` — the requested family is unsupported by the "
+                            + "connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule, such "
+                            + "as an absent or malformed family or an absent `allowedRequestAttributes`.",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class)))})
+    @PostMapping(path = "/validateProfile", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ValidateProfileResponseDto validateProfile(@Valid @RequestBody ValidateProfileRequestDto request);
 
     @Operation(summary = "Compute data-to-be-signed bytes",
             description = "Builds the signature structure for the requested family and returns the bytes to be signed. "
                     + "It also returns the formattingContext needed to complete the signature once the signature value "
-                    + "comes back. This is the only operation whose request varies by family.\n\n**Signing time.** "
+                    + "comes back.\n\n**Signing time.** "
                     + "The connector MUST put the supplied signingTime into the signature, not its own "
                     + "clock.\n\n**Signature algorithm.** The platform also supplies signatureAlgorithm, from the "
                     + "signer it resolved for this request. Only the platform sees both that key and the padding "
@@ -99,33 +148,35 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     + "digests it. A digestOnly transfer carries that digest already. The platform pins both to the "
                     + "digest signatureAlgorithm commits to, and checks that before it calls, so an algorithm whose "
                     + "paired digest is not a DigestAlgorithm value is never sent here. Either way the connector "
-                    + "MUST echo that digest in documentDigest and its algorithm in documentDigestAlgorithm. The "
-                    + "platform compares that echo against the digest the user authorized before it releases the "
-                    + "signing key.",
+                    + "MUST echo that digest in documentDigest and its algorithm in documentDigestAlgorithm."
+                    + "\n\n**Request attributes.** `requestAttributes` carries the values the signing "
+                    + "request sets, each allowed by the Signing Profile. The connector MUST merge them over the "
+                    + "profile values in `formattingAttributes`, the request winning, and MUST refuse a request "
+                    + "attribute that is undeclared or invalid, or a merged result that is incomplete or "
+                    + "contradictory (errorCode `ATTRIBUTES_REJECTED`).",
             operationId = "computeDtbs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data-to-be-signed bytes computed"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST). This covers a family that is "
-                            + "absent, null, or outside the published signature families. It also covers a "
-                            + "transferMode that is absent, or is neither inline nor digestOnly. An entitlement "
-                            + "refusal is the 422 below instead.",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a transferMode that is "
+                            + "absent or neither inline nor digestOnly. An entitlement refusal is the 422 below "
+                            + "instead.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "- `DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
+                    description = "- `ATTRIBUTES_REJECTED` — a request attribute is undeclared or invalid, or the request "
+                            + "attributes merged over the profile values are incomplete or contradictory; the "
+                            + "detail names the attributes.\n- "
+                            + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
                             + "`DOCUMENT_SIGNING_FORBIDDEN` — the document forbids the requested signature, such as a "
                             + "certification of a document already signed.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
-                            + "by the connector.\n- "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family, the signatureAlgorithm, the document's "
+                            + "transfer mode or the requested visible signature is unsupported by the connector.\n- "
                             + "`SIGNATURE_PLACEMENT_REJECTED` — the document cannot hold the visible signature at the "
                             + "requested place.\n- "
                             + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
-                            + "document or a digest transfer missing its algorithm.",
+                            + "or malformed family, an absent document, or a digest transfer missing its "
+                            + "algorithm.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeDtbs", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -146,21 +197,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Signature value embedded; the signed document is at SIGNED level"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Replayed formattingContext exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `DOCUMENT_MALFORMED` — the replayed formattingContext cannot be interpreted.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or the signatureAlgorithm is unsupported "
                             + "by the connector.\n- `CONTEXT_MISMATCH` — the request contradicts the formattingContext "
                             + "it replays, such as a signatureAlgorithm that disagrees with the one that context "
-                            + "committed to.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule.",
+                            + "committed to.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule, "
+                            + "such as an absent or malformed family.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/embedSignatureValue", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -174,21 +220,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             operationId = "computeSignatureTimestampImprint")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Imprint computed"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to timestamp.\n- "
                             + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
-                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
-                            + "rule.",
+                            + "`DOCUMENT_SIGNING_FORBIDDEN` — the document's permissions forbid adding the timestamp.\n- "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or detachedContent is unsupported by "
+                            + "the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
+                            + "rule, such as an absent or malformed family.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeSignatureTimestampImprint", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -202,21 +243,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Timestamp embedded; the signed document is at TIMESTAMPED level"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to attach the timestamp "
                             + "to.\n- `DOCUMENT_MALFORMED` — the document or token cannot be parsed.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
-                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
-                            + "rule.",
+                            + "`DOCUMENT_SIGNING_FORBIDDEN` — the document's permissions forbid adding the timestamp.\n- "
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or detachedContent is unsupported by "
+                            + "the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
+                            + "rule, such as an absent or malformed family.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/embedSignatureTimestamp", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -230,21 +266,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
             operationId = "computeArchiveTimestampImprint")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Imprint computed"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to timestamp.\n- "
                             + "`DOCUMENT_MALFORMED` — the document cannot be parsed as the declared format.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
-                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
-                            + "rule.",
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or detachedContent is unsupported by "
+                            + "the connector, or the connector does not declare ARCHIVAL for the family.\n- "
+                            + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
+                            + "or malformed family.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/computeArchiveTimestampImprint", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -258,21 +289,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Timestamp embedded; the signed document is at ARCHIVAL level"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- `SIGNATURE_NOT_FOUND` — the document carries no signature to attach the timestamp "
                             + "to.\n- `DOCUMENT_MALFORMED` — the document or token cannot be parsed.\n- "
-                            + "`PARAMETER_UNSUPPORTED` — the requested family or a supplied parameter is unsupported "
-                            + "by the connector.\n- `VALIDATION_FAILED` — the body is readable but breaks a field "
-                            + "rule.",
+                            + "`PARAMETER_UNSUPPORTED` — the requested family or detachedContent is unsupported by "
+                            + "the connector, or the connector does not declare ARCHIVAL for the family.\n- "
+                            + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
+                            + "or malformed family.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/embedArchiveTimestamp", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -294,7 +320,7 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     + "as untrusted.\n\nThe operation carries an execution-mode envelope for a future asynchronous "
                     + "path. The platform always sends SYNCHRONOUS today, and treats a 202 as a contract violation. "
                     + "The capability flag that will gate the asynchronous path is not published yet. A connector that "
-                    + "does not advertise LEVEL_LONG_TERM does not implement this operation at all and answers 422.",
+                    + "does not declare LONG_TERM for the family does not implement this operation at all.",
             operationId = "extendToLevel")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -302,22 +328,16 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             + "and the fetch manifest accompanies it"),
             @ApiResponse(responseCode = "202",
                     description = "Extension accepted asynchronously; the body carries the tracking handle and no document"),
-            @ApiResponse(responseCode = "400",
-                    description = "Request body cannot be read (errorCode BAD_REQUEST), including a family value outside the "
-                            + "published signature families",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
-            @ApiResponse(responseCode = "413",
-                    description = "Signed document exceeds the size this connector accepts (errorCode DOCUMENT_TOO_LARGE)",
+            @ApiResponse(responseCode = "400", description = "Request body cannot be read (errorCode BAD_REQUEST)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "- `PARAMETER_UNSUPPORTED` — the connector never advertised LEVEL_LONG_TERM, so it "
-                            + "does not implement the extension.\n- `PARAMETER_UNSUPPORTED` — the target level asked "
-                            + "for is one this connector does not reach.\n- `SIGNATURE_NOT_FOUND` — the document "
+                    description = "- `PARAMETER_UNSUPPORTED` — the requested family or the target level is unsupported "
+                            + "by the connector, or the connector does not declare LONG_TERM for the family and so "
+                            + "does not implement the extension.\n- `SIGNATURE_NOT_FOUND` — the document "
                             + "carries no signature to extend.\n- `DOCUMENT_MALFORMED` — the document cannot be "
                             + "parsed.\n- `VALIDATION_FAILED` — the body is readable but breaks a field rule, such as "
-                            + "an absent chain.",
+                            + "an absent or malformed family or an absent chain.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/extendToLevel", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -338,8 +358,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
-                    description = "The body is readable but breaks a field rule, such as an absent tracking handle "
-                            + "(errorCode VALIDATION_FAILED)",
+                    description = "The body is readable but breaks a field rule, such as an absent or malformed family "
+                            + "or an absent tracking handle (errorCode VALIDATION_FAILED)",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/extendToLevel/status", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -362,8 +382,8 @@ public interface ContentSigningFormattingController extends AuthProtectedConnect
                             schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422",
                     description = "- The operation is already terminal, or past the point of no return.\n- "
-                            + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent "
-                            + "tracking handle.",
+                            + "`VALIDATION_FAILED` — the body is readable but breaks a field rule, such as an absent or "
+                            + "malformed family or an absent tracking handle.",
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailExtended.class)))})
     @PostMapping(path = "/extendToLevel/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)

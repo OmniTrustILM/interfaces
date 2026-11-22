@@ -2,17 +2,13 @@ package com.otilm.api.model.client.signing.profile.workflow;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSourceRequestDto;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
-import com.otilm.api.model.common.signature.SignatureParameterGroup;
-import com.otilm.api.model.common.signature.parameters.SignatureParametersDto;
 import com.otilm.api.model.common.validation.OidFormat;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,42 +29,36 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
 
-    /** Named so the element annotation fits a line; the formatter cannot break a type-use annotation. */
-    private static final String NO_NULL_GROUPS = "allowedRequestParameterGroups must not contain null items";
+    private static final String NO_BLANK_ALLOWED_NAMES = "allowedRequestAttributes must not contain blank names";
 
     @Schema(description = "UUID of the Signature Formatting Provider that constructs the data-to-be-signed (DTBS) for "
             + "Content signing. Required for ILM-managed signing; must be omitted for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID signatureFormattingConnectorUuid;
 
-    @Schema(description = "Attributes for the Signature Formatting Provider that control DTBS construction "
-            + "for the content signing workflow. Must be omitted for delegated signing. These attributes carry "
-            + "operator-only settings; a request supplies signature parameters only in the groups that "
-            + "allowedRequestParameterGroups lists.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Values of the Signature Formatting Provider's profile attributes and request attributes, "
+            + "which control DTBS construction for the content-signing workflow; a request attribute's value here is "
+            + "the one a signing request inherits. Must be omitted for delegated signing.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<RequestAttribute> signatureFormattingConnectorAttributes = new ArrayList<>();
 
-    @Schema(description = "Signature family this profile produces. "
-            + "Required for ILM-managed signing; must be omitted for delegated signing.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SignatureFamily family;
+    @Schema(description = "Signature family this profile produces: a code the selected formatting connector "
+            + "declares. Required for ILM-managed signing; must be omitted for delegated signing.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "pades")
+    @Pattern(regexp = SignatureFamilyFormat.REGEX, message = SignatureFamilyFormat.MESSAGE)
+    private String family;
 
-    @Schema(description = "Highest signature level a request may ask for. A request asking for more is rejected. "
-            + "Required for ILM-managed signing; must be omitted for delegated signing.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SignatureLevel maxLevel;
+    @Schema(description = "Signature level at which the profile signs every document: a level the selected "
+            + "formatting connector declares for the family. Required for ILM-managed signing; must be omitted for "
+            + "delegated signing.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private SignatureLevel level;
 
     @Valid
     @Schema(description = "Source of the timestamps embedded at level TIMESTAMPED and above. "
-            + "Required when maxLevel is TIMESTAMPED or higher, and must be omitted when maxLevel is SIGNED, "
+            + "Required when level is TIMESTAMPED or higher, and must be omitted when level is SIGNED, "
             + "which embeds no timestamp. Must be omitted for delegated signing.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TimestampSourceRequestDto timestampSource;
-
-    @Positive
-    @Schema(description = "Largest document accepted for signing, in bytes. Enforced when an ILM-managed "
-            + "signing request arrives. When omitted, no profile-level cap applies.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "5242880")
-    private Long documentSizeCap;
 
     @Schema(description = "Demand the nonRepudiation key-usage bit specifically, for commitment-grade profiles. "
             + "Applies to ILM-managed signing only. For delegated signing, omit it or send false; an echoed "
@@ -83,20 +73,11 @@ public class ContentSigningWorkflowRequestDto extends WorkflowRequestDto {
     private Set<@NotBlank @Pattern(regexp = OidFormat.REGEX,
             message = OidFormat.MESSAGE) String> requiredExtendedKeyUsageOids = new LinkedHashSet<>();
 
-    @Schema(description = "Signature parameter groups a signing request may supply; every group must apply to the "
-            + "profile's family. Must be omitted for delegated signing. Membership is the only permission mechanism. "
-            + "A request carrying any field of a group absent from this list is rejected, even when the value matches "
-            + "the profile's own. Omitted or empty means no request-supplied group is accepted. Allowing a group and "
-            + "defaulting it are separate decisions.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Set<@NotNull(
-            message = NO_NULL_GROUPS) SignatureParameterGroup> allowedRequestParameterGroups = new LinkedHashSet<>();
-
-    @Valid
-    @Schema(description = "Signature parameters this profile applies when a request does not override them; their "
-            + "family must match the profile's family. Must be omitted for delegated signing. Merged field by field "
-            + "with the request winning; list-typed fields, and a placement in a different addressing mode, replace "
-            + "the default wholesale.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private SignatureParametersDto defaultSignatureParameters;
+    @Schema(description = "Names of the request-attribute groups and ungrouped request attributes a signing request "
+            + "may set, each declared by the formatting connector; a request setting any other request attribute is "
+            + "refused, even when its value matches the profile value. Empty allows none; must be omitted for "
+            + "delegated signing.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Set<@NotBlank(message = NO_BLANK_ALLOWED_NAMES) String> allowedRequestAttributes = new LinkedHashSet<>();
 
     public ContentSigningWorkflowRequestDto() {
         super(SigningWorkflowType.CONTENT_SIGNING);

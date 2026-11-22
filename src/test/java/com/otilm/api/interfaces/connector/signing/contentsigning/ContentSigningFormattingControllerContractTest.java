@@ -1,5 +1,6 @@
 package com.otilm.api.interfaces.connector.signing.contentsigning;
 
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,10 +49,12 @@ class ContentSigningFormattingControllerContractTest {
     private static final Map<String, String> EXPECTED_COMPANION_PATHS = Map
             .of("getExtendToLevelStatus", "/extendToLevel/status", "cancelExtendToLevel", "/extendToLevel/cancel");
 
+    private static final Map<String, String> EXPECTED_PROFILE_PATHS = Map.of("validateProfile", "/validateProfile");
+
     private static final Map<String, String> EXPECTED_POST_PATHS = allPostPaths();
 
     private static final Map<String, String> EXPECTED_GET_PATHS = Map
-            .of("listFormattingAttributes", "/{operation}/attributes");
+            .of("listFormattingAttributes", "/{operation}/attributes", "getContentSigningDeclaration", "/declaration");
 
     /** Cancellation answers 204 with no body, so it is the one route that produces nothing. */
     private static final Set<String> BODYLESS_RESPONSES = Set.of("cancelExtendToLevel");
@@ -64,6 +68,7 @@ class ContentSigningFormattingControllerContractTest {
     private static Map<String, String> allPostPaths() {
         Map<String, String> paths = new HashMap<>(EXPECTED_OPERATION_PATHS);
         paths.putAll(EXPECTED_COMPANION_PATHS);
+        paths.putAll(EXPECTED_PROFILE_PATHS);
         return Map.copyOf(paths);
     }
 
@@ -71,6 +76,7 @@ class ContentSigningFormattingControllerContractTest {
         Map<String, String> codes = new HashMap<>();
         EXPECTED_OPERATION_PATHS.keySet().forEach(name -> codes.put(name, "200"));
         EXPECTED_GET_PATHS.keySet().forEach(name -> codes.put(name, "200"));
+        EXPECTED_PROFILE_PATHS.keySet().forEach(name -> codes.put(name, "200"));
         codes.put("getExtendToLevelStatus", "200");
         codes.put("cancelExtendToLevel", "204");
         return Map.copyOf(codes);
@@ -124,13 +130,114 @@ class ContentSigningFormattingControllerContractTest {
                 "the DOCUMENT_SIGNING_FORBIDDEN entry does not cover certifying an already signed document");
     }
 
+    /** The split decides which values a signing request may set. A bare array would lose it. */
+    @Test
+    void theListingReturnsProfileAndRequestAttributesApart() {
+        assertEquals(ContentSigningFormattingAttributesDto.class, method("listFormattingAttributes").getReturnType());
+    }
+
+    /** The platform refuses a listing that breaks these rules. A connector author finds them only here. */
+    @Test
+    void theListingStatesTheRulesThePlatformChecks() {
+        String description = operationDescription("listFormattingAttributes");
+
+        assertTrue(description.contains("`properties.group` names its permission group"),
+                "the listing does not say how a request attribute names its group");
+        assertTrue(
+                description
+                        .contains("Every request attribute must be a data attribute whose name appears only in "
+                                + "`requestAttributes` across the operations a Signing Profile reaches"),
+                "the listing does not confine a request attribute to data attributes and to requestAttributes");
+        assertTrue(description.contains("no group may share a request attribute's name"),
+                "the listing does not keep group names apart from request-attribute names");
+    }
+
+    /** A connector author learns from this list which code refuses request attributes that fail to merge. */
+    @Test
+    void computeDtbsDocumentsTheAttributeRefusalAmongItsUnprocessableCodes() {
+        assertTrue(unprocessableDescription("computeDtbs").contains("`ATTRIBUTES_REJECTED`"),
+                "computeDtbs does not document ATTRIBUTES_REJECTED as a 422 code");
+    }
+
+    /** A request-side fault and a merge fault share one code, so a connector author learns both from this entry. */
+    @Test
+    void computeDtbsRefusesAnUndeclaredRequestAttributeAsAnAttributeRefusal() {
+        assertTrue(unprocessableEntry("computeDtbs", "ATTRIBUTES_REJECTED").contains("undeclared"),
+                "the ATTRIBUTES_REJECTED entry does not cover a request attribute the listing does not declare");
+    }
+
+    /** A stamp the connector cannot draw names no single attribute to fix. */
+    @Test
+    void computeDtbsRefusesAVisibleSignatureItCannotDrawAsUnsupported() {
+        assertTrue(unprocessableEntry("computeDtbs", "PARAMETER_UNSUPPORTED").contains("visible signature"),
+                "the PARAMETER_UNSUPPORTED entry does not cover a visible signature the connector cannot draw");
+    }
+
+    /** Document permissions bind a timestamp revision as they bind a signature. */
+    @Test
+    void theSignatureTimestampPairDocumentsTheDocumentsRefusal() {
+        for (String methodName : List.of("computeSignatureTimestampImprint", "embedSignatureTimestamp")) {
+            assertTrue(unprocessableDescription(methodName).contains("`DOCUMENT_SIGNING_FORBIDDEN`"),
+                    methodName + " does not document DOCUMENT_SIGNING_FORBIDDEN as a 422 code");
+        }
+    }
+
+    /** A connector without ARCHIVAL answers the archive pair as it answers extendToLevel without LONG_TERM. */
+    @Test
+    void theArchiveTimestampPairDocumentsTheUndeclaredLevel() {
+        for (String methodName : List.of("computeArchiveTimestampImprint", "embedArchiveTimestamp")) {
+            assertTrue(unprocessableEntry(methodName, "PARAMETER_UNSUPPORTED").contains("ARCHIVAL"),
+                    methodName + " does not refuse a family the connector declares no ARCHIVAL level for");
+        }
+    }
+
+    /** A connector reports an unusable profile as errors in its 200 answer. */
+    @Test
+    void validateProfileRefusesOnlyARequestItCannotProcess() {
+        assertTrue(unprocessableEntry("validateProfile", "PARAMETER_UNSUPPORTED").contains("family"));
+        assertTrue(unprocessableEntry("validateProfile", "VALIDATION_FAILED").contains("allowedRequestAttributes"));
+        assertFalse(unprocessableDescription("validateProfile").contains("ATTRIBUTES_REJECTED"),
+                "validateProfile refuses a profile's values instead of reporting them as errors");
+        assertTrue(operationDescription("validateProfile").contains("errors in a 200"));
+    }
+
+    /** The platform stores the modes with the profile and enforces them on every signing request. */
+    @Test
+    void validateProfileBoundsItsTransferModesByTheDeclaration() {
+        assertTrue(operationDescription("validateProfile")
+                .contains("every transfer mode it names MUST be among the transfer modes the family declares"));
+    }
+
+    /** The body reads a malformed family code as a string, so bean validation refuses it as a field rule. */
+    @Test
+    void everyOperationRefusesAMalformedFamilyAsAFieldRule() {
+        for (String methodName : EXPECTED_POST_PATHS.keySet()) {
+            assertFalse(responseDescription(methodName, "400").contains("family"),
+                    methodName + " documents a malformed family as an unreadable body");
+            assertTrue(unprocessableDescription(methodName).contains("malformed family"),
+                    methodName + " does not document a malformed family as a field rule");
+        }
+    }
+
+    private static String unprocessableEntry(String methodName, String errorCode) {
+        String description = unprocessableDescription(methodName);
+        int start = description.indexOf("`" + errorCode + "`");
+        assertTrue(start >= 0, methodName + " does not document " + errorCode + " as a 422 code");
+        int end = description.indexOf("\n", start);
+        return end < 0 ? description.substring(start) : description.substring(start, end);
+    }
+
     private static String unprocessableDescription(String methodName) {
+        return responseDescription(methodName, "422");
+    }
+
+    private static String responseDescription(String methodName, String responseCode) {
         return Arrays
                 .stream(method(methodName).getAnnotation(ApiResponses.class).value())
-                .filter(response -> "422".equals(response.responseCode()))
+                .filter(response -> responseCode.equals(response.responseCode()))
                 .map(ApiResponse::description)
                 .findFirst()
-                .orElseThrow(() -> new AssertionError(methodName + " documents no 422 at all"));
+                .orElseThrow(() -> new AssertionError(methodName + " documents no " + responseCode + " at all"));
     }
 
     private static String operationDescription(String methodName) {
@@ -236,14 +343,13 @@ class ContentSigningFormattingControllerContractTest {
                 "ContentSigningFormattingOperation codes and the controller's POST routes disagree");
     }
 
-    /** The one discriminated request; every other operation takes a concrete family-invariant type. */
+    /** One body shape serves every family code. */
     @Test
-    void onlyComputeDtbsTakesThePolymorphicRequest() {
+    void everyOperationTakesAConcreteRequest() {
         for (String name : EXPECTED_POST_PATHS.keySet()) {
             Class<?> body = method(name).getParameterTypes()[0];
-            boolean isPolymorphic = Modifier.isAbstract(body.getModifiers());
-            assertEquals("computeDtbs".equals(name), isPolymorphic,
-                    name + " takes " + body.getSimpleName() + "; only computeDtbs may take an abstract request");
+            assertFalse(Modifier.isAbstract(body.getModifiers()),
+                    name + " takes " + body.getSimpleName() + ", which is abstract");
         }
     }
 

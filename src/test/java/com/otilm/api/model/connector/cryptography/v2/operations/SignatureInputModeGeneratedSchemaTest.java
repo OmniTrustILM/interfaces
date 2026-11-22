@@ -24,7 +24,7 @@ class SignatureInputModeGeneratedSchemaTest {
 
         // then
         assertNotNull(modeSchema);
-        assertEquals(List.of("data", "prehashedDigest"), modeSchema.getEnum());
+        assertEquals(List.of("data", "dataDigest"), modeSchema.getEnum());
         assertTrue(requestSchema.getProperties().get("signatureInputMode").get$ref().endsWith("/SignatureInputMode"));
         assertFalse(requestSchema.getRequired().contains("signatureInputMode"));
     }

@@ -53,16 +53,16 @@ class FeatureFlagTest {
     }
 
     @Test
-    void prehashedSigningFlag_declaresCryptographyCapability() {
+    void dataDigestSigningFlag_declaresCryptographyCapability() {
         // given
-        var prehashedSigningCode = "prehashedSigning";
+        var dataDigestSigningCode = "dataDigestSigning";
 
         // when
-        FeatureFlag flag = FeatureFlag.findByCode(prehashedSigningCode);
+        FeatureFlag flag = FeatureFlag.findByCode(dataDigestSigningCode);
 
         // then
-        assertEquals(FeatureFlag.PREHASHED_SIGNING, flag);
-        assertEquals("Prehashed Signing", flag.getLabel());
+        assertEquals(FeatureFlag.DATA_DIGEST_SIGNING, flag);
+        assertEquals("Data Digest Signing", flag.getLabel());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
         assertEquals(List.of(ConnectorInterface.CRYPTOGRAPHY), flag.getApplicableInterfaces());
     }
@@ -110,6 +110,21 @@ class FeatureFlagTest {
         assertEquals("Signer Bound at Creation", flag.getLabel());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
         assertEquals(List.of(ConnectorInterface.KEY_LIFECYCLE), flag.getApplicableInterfaces());
+    }
+
+    @Test
+    void findsDiscoveryIncremental_byCode() {
+        // given
+        var discoveryIncrementalCode = "discoveryIncremental";
+
+        // when
+        FeatureFlag flag = FeatureFlag.findByCode(discoveryIncrementalCode);
+
+        // then
+        assertEquals(FeatureFlag.DISCOVERY_INCREMENTAL, flag);
+        assertEquals("Incremental Discovery", flag.getLabel());
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
+        assertEquals(List.of(ConnectorInterface.DISCOVERY), flag.getApplicableInterfaces());
     }
 
     @Test

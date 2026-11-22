@@ -2,9 +2,11 @@ package com.otilm.api.interfaces.core.web;
 
 import com.otilm.api.model.client.discovery.DiscoveryDto;
 import com.otilm.api.model.core.auth.Resource;
+import com.otilm.api.model.core.scheduler.ScheduleDiscoveryDto;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -197,6 +199,20 @@ class DiscoveryControllerContractTest {
         Parameter request = parameterOfType("createDiscovery", DiscoveryDto.class);
         assertNotNull(request.getAnnotation(Valid.class),
                 "createDiscovery's request body must carry @Valid — the DTO's constraints are inert without it");
+    }
+
+    @Test
+    void scheduleRequestBodyIsBeanValidated() {
+        Parameter request = parameterOfType("scheduleDiscovery", ScheduleDiscoveryDto.class);
+        assertNotNull(request.getAnnotation(Valid.class),
+                "scheduleDiscovery's request body must carry @Valid — the DTO's constraints are inert without it");
+    }
+
+    @Test
+    void scheduledDiscoveryRequestIsBeanValidated() throws NoSuchFieldException {
+        Field request = ScheduleDiscoveryDto.class.getDeclaredField("request");
+        assertNotNull(request.getAnnotation(Valid.class),
+                "ScheduleDiscoveryDto.request must carry @Valid, or the scheduled discovery's window is not validated");
     }
 
     @Test

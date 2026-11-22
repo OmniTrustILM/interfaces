@@ -5,19 +5,18 @@ import com.otilm.api.interfaces.core.cmp.PkiMessageError;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cmp.PKIBody;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Exception for error handling for cmp failure scenarios.
  * <p>
  * citation (from RFC 4210): This message MAY be generated at any time during a PKI transaction.
+ * <p>
+ * Building one logs nothing: the code that handles the failure logs it, and only that code knows whether the cause
+ * carries text a connector wrote, which can repeat secrets the request carried.
  *
  * @see <a href="https://www.rfc-editor.org/rfc/rfc4210#section-5.3.21">...</a>
  */
 public class CmpBaseException extends Exception implements PlatformException {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CmpBaseException.class.getName());
 
     protected int failureInfo;
     protected String errorDetails;
@@ -27,11 +26,9 @@ public class CmpBaseException extends Exception implements PlatformException {
         if (ex instanceof CmpBaseException) {
             this.failureInfo = ((CmpBaseException) ex).failureInfo;
             this.errorDetails = ((CmpBaseException) ex).errorDetails;
-            LOG.error("exception at: {}", errorDetails, ex);
         } else {
             this.failureInfo = PKIFailureInfo.systemFailure;
-            this.errorDetails = ex.getLocalizedMessage();
-            LOG.error("exception at: ", ex);
+            this.errorDetails = "system failure";
         }
     }
 
@@ -48,27 +45,9 @@ public class CmpBaseException extends Exception implements PlatformException {
         if (ex instanceof CmpBaseException) {
             this.failureInfo = ((CmpBaseException) ex).failureInfo;
             this.errorDetails = ((CmpBaseException) ex).errorDetails;
-            if (tid != null) {
-                LOG.error("exception at: {} {}", tid, errorDetails, ex);
-            } else {
-                LOG.error("exception at: {}", errorDetails, ex);
-            }
         } else {
             this.failureInfo = failureInfo;
             this.errorDetails = errorDetails;
-            if (ex != null) {
-                if (tid == null) {
-                    LOG.error("exception at: ", ex);
-                } else {
-                    LOG.error("exception at: {} ", tid, ex);
-                }
-            } else {
-                if (tid == null) {
-                    LOG.error("error at: {}", errorDetails);
-                } else {
-                    LOG.error("error at: {} {}", tid, errorDetails);
-                }
-            }
         }
     }
 
@@ -77,6 +56,16 @@ public class CmpBaseException extends Exception implements PlatformException {
      */
     public PKIBody toPKIBody() {
         return PkiMessageError.generateBody(failureInfo, errorDetails);
+    }
+
+    /**
+     * The details of the error as the raising code wrote them, or as the CMP exception it wraps did. Unlike
+     * {@link #getMessage()}, which repeats the message of its cause, they never take a non-CMP cause's text.
+     *
+     * @return the details of the error
+     */
+    public String getErrorDetails() {
+        return errorDetails;
     }
 
     @Override

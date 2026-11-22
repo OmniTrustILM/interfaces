@@ -42,9 +42,9 @@ public class ManagedSignatureFormattingConnectorValidator
         } else if (dto.getWorkflow() instanceof ContentSigningWorkflowRequestDto dsw) {
             formattingConnectorUuid = dsw.getSignatureFormattingConnectorUuid();
             boolean familyPresent = requireOnManagedWorkflow(context, "family", dsw.getFamily());
-            boolean maxLevelPresent = requireOnManagedWorkflow(context, "maxLevel", dsw.getMaxLevel());
+            boolean levelPresent = requireOnManagedWorkflow(context, "level", dsw.getLevel());
             boolean sourceConsistent = validateTimestampSource(context, dsw);
-            valid = familyPresent && maxLevelPresent && sourceConsistent;
+            valid = familyPresent && levelPresent && sourceConsistent;
         } else {
             return true;
         }
@@ -65,23 +65,23 @@ public class ManagedSignatureFormattingConnectorValidator
      */
     private boolean validateTimestampSource(ConstraintValidatorContext context,
             ContentSigningWorkflowRequestDto workflow) {
-        if (workflow.getMaxLevel() == null) {
+        if (workflow.getLevel() == null) {
             return true;
         }
         boolean sourcePresent = workflow.getTimestampSource() != null;
-        if (workflow.getMaxLevel() == SignatureLevel.SIGNED) {
+        if (workflow.getLevel() == SignatureLevel.SIGNED) {
             if (!sourcePresent) {
                 return true;
             }
             addWorkflowViolation(context, TIMESTAMP_SOURCE_PROPERTY,
-                    "timestampSource must be omitted when maxLevel is SIGNED");
+                    "timestampSource must be omitted when level is SIGNED");
             return false;
         }
         if (sourcePresent) {
             return true;
         }
         addWorkflowViolation(context, TIMESTAMP_SOURCE_PROPERTY,
-                "timestampSource is required when maxLevel is TIMESTAMPED or higher");
+                "timestampSource is required when level is TIMESTAMPED or higher");
         return false;
     }
 
@@ -101,14 +101,14 @@ public class ManagedSignatureFormattingConnectorValidator
         boolean attributesAbsent = rejectOnDelegatedWorkflow(context, "signatureFormattingConnectorAttributes",
                 workflow.getSignatureFormattingConnectorAttributes());
         boolean familyAbsent = rejectOnDelegatedWorkflow(context, "family", workflow.getFamily());
-        boolean maxLevelAbsent = rejectOnDelegatedWorkflow(context, "maxLevel", workflow.getMaxLevel());
+        boolean levelAbsent = rejectOnDelegatedWorkflow(context, "level", workflow.getLevel());
         boolean sourceAbsent = rejectOnDelegatedWorkflow(context, TIMESTAMP_SOURCE_PROPERTY,
                 workflow.getTimestampSource());
         boolean nonRepudiationAbsent = rejectTrueOnDelegatedWorkflow(context, "requireNonRepudiation",
                 workflow.getRequireNonRepudiation());
         boolean extendedKeyUsageAbsent = rejectOnDelegatedWorkflow(context, "requiredExtendedKeyUsageOids",
                 workflow.getRequiredExtendedKeyUsageOids());
-        return connectorAbsent && attributesAbsent && familyAbsent && maxLevelAbsent && sourceAbsent
+        return connectorAbsent && attributesAbsent && familyAbsent && levelAbsent && sourceAbsent
                 && nonRepudiationAbsent && extendedKeyUsageAbsent;
     }
 

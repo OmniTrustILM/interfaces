@@ -21,8 +21,8 @@ public class ComputeDtbsResponseDto {
 
     @ToString.Exclude
     @NotNull(message = "dtbs is required")
-    @Schema(description = "The data-to-be-signed bytes, base64-encoded in JSON. They must embed the digest of the "
-            + "document the user authorized.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The data-to-be-signed bytes, base64-encoded in JSON. They must embed `documentDigest`.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] dtbs;
 
     @ToString.Exclude
@@ -39,6 +39,6 @@ public class ComputeDtbsResponseDto {
     @NotNull(message = "formattingContext is required")
     @Schema(description = "Whatever the connector needs to complete this signature once the signature value comes "
             + "back, base64-encoded in JSON. The platform replays it verbatim to embedSignatureValue and never stores "
-            + "it, and it counts toward the request size ceiling.", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "it.", requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] formattingContext;
 }

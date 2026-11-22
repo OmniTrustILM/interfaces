@@ -12,6 +12,7 @@ public enum SettingsSectionCategory implements IPlatformEnum {
     PLATFORM_UTILS("utils", "Utils", SettingsSection.PLATFORM, "Platform utils settings"),
     PLATFORM_CERTIFICATES("certificates", "Certificates", SettingsSection.PLATFORM, "Platform certificates settings"),
     PLATFORM_BRANDING("branding", "Branding", SettingsSection.PLATFORM, "Platform branding settings"),
+    PLATFORM_SIGNING("signing", "Signing", SettingsSection.PLATFORM, "Platform signing settings"),
     AUDIT_LOGGING("audit", "Audit Logging", SettingsSection.LOGGING, "Audit logging settings"),
     EVENT_LOGGING("event", "Event Logging", SettingsSection.LOGGING, "Event logging settings"),
     OAUTH2_PROVIDER("oauth2Provider", "OAuth2 Provider", SettingsSection.AUTHENTICATION, "OAuth2 provider settings");

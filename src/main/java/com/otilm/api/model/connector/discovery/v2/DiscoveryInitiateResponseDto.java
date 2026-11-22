@@ -21,7 +21,8 @@ public class DiscoveryInitiateResponseDto {
 
     // Excluded from toString: opaque, no logging value, up to 64 KB.
     @Schema(description = "Opaque run handle. Core replays it on status, results, stop, resume and cancel and never "
-            + "shows it. At most 64 KB serialized; a larger one fails the run.",
+            + "shows it. At most 64 KB serialized; a larger one fails the run. In checkpointed delivery each results "
+            + "page replaces it, and a resume response omits it; Core ignores one sent on resume.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @ToString.Exclude
     private List<MetadataAttribute> checkpoint;
@@ -31,4 +32,10 @@ public class DiscoveryInitiateResponseDto {
             + "resume response replaces the value. A stop can still be refused past the point of no return.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean stoppable;
+
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "The delivery mode this run uses from this call on; one of the offered modes. Absent means "
+            + "buffered.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    private DiscoveryDeliveryMode deliveryMode;
 }

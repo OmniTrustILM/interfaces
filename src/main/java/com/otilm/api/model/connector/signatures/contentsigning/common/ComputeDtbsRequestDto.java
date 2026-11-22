@@ -1,14 +1,7 @@
 package com.otilm.api.model.connector.signatures.contentsigning.common;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.api.model.common.signature.SignatureFamily;
-import com.otilm.api.model.connector.signatures.contentsigning.cades.CadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.jades.JadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.pades.PadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.xades.XadesComputeDtbsRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -20,32 +13,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Abstract base of the {@code computeDtbs} request, the one operation whose payload varies by family.
- *
- * <p>
  * Everything the connector needs to build the data-to-be-signed bytes arrives here, including {@code signingTime}. The
  * connector never reads its own clock. A signature's time must be the one the platform recorded, not the one a
  * connector replica observed.
- * </p>
- *
- * <p>
- * The union resolves on the inherited {@code family} property. {@link ComputeDtbsInterface} explains why the
- * discriminator sits inside the object. Each subtype fixes that property to its own family and carries whatever typed
- * parameters that family defines.
- * </p>
  */
 @Getter
 @Setter
 @ToString(callSuper = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "family",
-        visible = true)
-@JsonSubTypes({
-        @Type(value = PadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.PADES),
-        @Type(value = XadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.XADES),
-        @Type(value = CadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.CADES),
-        @Type(value = JadesComputeDtbsRequestDto.class, name = SignatureFamily.Codes.JADES)})
-@Schema(implementation = ComputeDtbsInterface.class)
-public abstract class ComputeDtbsRequestDto extends ContentSigningFormattingRequestDto implements ComputeDtbsInterface {
+@Schema(name = "ComputeDtbsRequest", description = "Request to compute the data-to-be-signed bytes")
+public class ComputeDtbsRequestDto extends ContentSigningFormattingRequestDto {
 
     @Valid
     @NotNull(message = "document is required")
@@ -71,18 +47,12 @@ public abstract class ComputeDtbsRequestDto extends ContentSigningFormattingRequ
             requiredMode = Schema.RequiredMode.REQUIRED)
     private SignatureAlgorithm signatureAlgorithm;
 
-    protected ComputeDtbsRequestDto(SignatureFamily family) {
-        super.setFamily(family);
-    }
-
-    /**
-     * Refuses to repoint the discriminator.
-     */
-    @Override
-    public void setFamily(SignatureFamily family) {
-        if (family != getFamily()) {
-            throw new IllegalArgumentException("family is fixed to " + getFamily() + " by " + getClass().getSimpleName()
-                    + " and cannot be set to " + family + "; construct the subtype for the family you want");
-        }
-    }
+    @ToString.Exclude
+    @Schema(description = "Values the signing request sets for request attributes, each allowed by the Signing "
+            + "Profile and checked against its definition. The connector must merge them over `formattingAttributes`, "
+            + "the request winning, and carry the merged result to embedSignatureValue in `formattingContext`. May be "
+            + "an empty list, but must be present.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "requestAttributes may be an empty list, but must be present")
+    private List<@NotNull(
+            message = "requestAttributes must not contain null items") RequestAttribute> requestAttributes;
 }

@@ -12,6 +12,6 @@ public class CertificateChainResponseDto {
     private boolean completeChain;
 
     @Schema(description = "List of certificates in the chain", requiredMode = Schema.RequiredMode.REQUIRED)
-    private List<CertificateDetailDto> certificates;
+    private List<CertificateDetail> certificates;
 
 }

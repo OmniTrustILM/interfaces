@@ -62,13 +62,11 @@ class CryptographyKeySchemaTest {
                                 Set
                                         .of("SecretKeyOperationStatusResponseV2Dto",
                                                 "KeyPairOperationStatusResponseV2Dto"))),
-                        named("listed key",
-                                new UnionContract(ListedKeyV2Dto.class, "ListedKeyV2", "keyRequestType",
-                                        Map
-                                                .of("secret", "#/components/schemas/ListedSecretKeyV2Dto", "keyPair",
-                                                        "#/components/schemas/ListedKeyPairV2Dto"),
-                                        Set.of("keyRequestType", "label"),
-                                        Set.of("ListedSecretKeyV2Dto", "ListedKeyPairV2Dto"))));
+                        named("listed key", new UnionContract(ListedKeyV2Dto.class, "ListedKeyV2", "keyRequestType",
+                                Map
+                                        .of("secret", "#/components/schemas/ListedSecretKeyV2Dto", "keyPair",
+                                                "#/components/schemas/ListedKeyPairV2Dto"),
+                                Set.of("keyRequestType"), Set.of("ListedSecretKeyV2Dto", "ListedKeyPairV2Dto"))));
     }
 
     @Test

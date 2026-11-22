@@ -17,7 +17,7 @@ class ResourceCommentableTest {
                     Resource.APPROVAL, Resource.RA_PROFILE, Resource.VAULT_PROFILE, Resource.COMPLIANCE_PROFILE,
                     Resource.APPROVAL_PROFILE, Resource.NOTIFICATION_PROFILE, Resource.SIGNING_PROFILE,
                     Resource.TOKEN_PROFILE, Resource.ACME_PROFILE, Resource.SCEP_PROFILE, Resource.CMP_PROFILE,
-                    Resource.TSP_PROFILE);
+                    Resource.TSP_PROFILE, Resource.EST_PROFILE);
 
     @Test
     void commentableResourcesContainExactlyTheSupportedSet() {

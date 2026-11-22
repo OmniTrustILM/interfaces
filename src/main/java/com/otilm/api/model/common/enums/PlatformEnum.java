@@ -10,6 +10,8 @@ import com.otilm.api.model.client.connector.v2.ConnectorVersion;
 import com.otilm.api.model.client.connector.v2.FeatureFlag;
 import com.otilm.api.model.client.cryptography.key.KeyCompromiseReason;
 import com.otilm.api.model.client.cryptography.key.KeyRequestType;
+import com.otilm.api.model.client.discovery.DiscoveryWindowMode;
+import com.otilm.api.model.client.signing.profile.record.SigningRecordPersistenceMode;
 import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningType;
 import com.otilm.api.model.client.signing.profile.scheme.SigningScheme;
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
@@ -28,7 +30,6 @@ import com.otilm.api.model.common.enums.cryptography.KeyFormat;
 import com.otilm.api.model.common.enums.cryptography.KeyType;
 import com.otilm.api.model.common.enums.cryptography.RsaEncryptionScheme;
 import com.otilm.api.model.common.enums.cryptography.RsaSignatureScheme;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.cryptography.enums.TokenInstanceStatus;
 import com.otilm.api.model.connector.secrets.SecretType;
@@ -62,11 +63,13 @@ import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
 import com.otilm.api.model.core.cryptography.key.KeyState;
 import com.otilm.api.model.core.cryptography.key.KeyUsage;
+import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingOutcome;
 import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
 import com.otilm.api.model.core.discovery.DiscoveryMessageSeverity;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
 import com.otilm.api.model.core.enums.CertificateProtocol;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
+import com.otilm.api.model.core.est.EstAuthenticationPolicy;
 import com.otilm.api.model.core.logging.enums.ActorType;
 import com.otilm.api.model.core.logging.enums.AuthMethod;
 import com.otilm.api.model.core.logging.enums.Module;
@@ -127,6 +130,7 @@ public enum PlatformEnum implements IPlatformEnum {
     CERTIFICATE_REQUEST_FORMAT(CertificateRequestFormat.class, "Certificate request format"),
     DISCOVERY_STATUS(DiscoveryStatus.class, "Discovery status"),
     DISCOVERY_MESSAGE_SEVERITY(DiscoveryMessageSeverity.class, "Discovery run message severity"),
+    DISCOVERY_WINDOW_MODE(DiscoveryWindowMode.class, "Discovery window mode"),
     PROTOCOL(CertificateProtocol.class, "Protocol used to issue certificate"),
     CERTIFICATE_SUBJECT_TYPE(CertificateSubjectType.class, "Subject Type of certificate"),
     CERTIFICATE_KEY_USAGE(CertificateKeyUsage.class, "Key Usage of Certificate"),
@@ -144,6 +148,7 @@ public enum PlatformEnum implements IPlatformEnum {
     KEY_USAGE(KeyUsage.class, "Key usage"),
     KEY_REQUEST_TYPE(KeyRequestType.class, "Key request type"),
     TOKEN_KEY_STATUS(TokenKeyStatus.class, "Status of a key found on a token"),
+    TOKEN_KEY_ONBOARDING_OUTCOME(TokenKeyOnboardingOutcome.class, "Outcome of onboarding a key found on a token"),
     KEY_COMPROMISE_REASON(KeyCompromiseReason.class, "Key compromise reason"),
     TOKEN_STATUS(TokenInstanceStatus.class, "Token instance status"),
     DIGEST_ALGORITHM(DigestAlgorithm.class, "Digest algorithm"),
@@ -163,6 +168,7 @@ public enum PlatformEnum implements IPlatformEnum {
 
     // Protocols
     PROTOCOL_CHALLENGE_SOURCE(ProtocolChallengeSource.class, "Protocol challenge source"),
+    EST_AUTHENTICATION_POLICY(EstAuthenticationPolicy.class, "EST authentication policy"),
     ACME_IDENTIFIER_MATCH_TYPE(AcmeIdentifierMatchType.class, "ACME identifier match type"),
     ACME_IDENTIFIER_AUTHORIZATION_MODE(AcmeIdentifierAuthorizationMode.class, "ACME identifier authorization mode"),
 
@@ -208,9 +214,9 @@ public enum PlatformEnum implements IPlatformEnum {
     // Signing
     MANAGED_SIGNING_TYPE(ManagedSigningType.class, "Managed Signing Type"),
     QC_TYPE(QcType.class, "QC Type"),
-    SIGNATURE_FAMILY(SignatureFamily.class, "Signature Family"),
     SIGNATURE_LEVEL(SignatureLevel.class, "Signature Level"),
     SIGNING_PROTOCOL(SigningProtocol.class, "Signing Protocol"),
+    SIGNING_RECORD_PERSISTENCE_MODE(SigningRecordPersistenceMode.class, "Signing Record Persistence Mode"),
     SIGNING_SCHEME(SigningScheme.class, "Signing Scheme"),
     SIGNING_WORKFLOW_TYPE(SigningWorkflowType.class, "Signing Workflow Type"),
     TIMESTAMP_SOURCE_TYPE(TimestampSourceType.class, "Timestamp Source Type"),
@@ -243,7 +249,7 @@ public enum PlatformEnum implements IPlatformEnum {
 
     PlatformEnum(Class<? extends IPlatformEnum> enumClass, String label, String description) {
         this.enumClass = enumClass;
-        this.code = enumClass.getSimpleName();
+        this.code = openApiSchemaName(enumClass);
         this.label = label;
         this.description = description;
     }
@@ -284,5 +290,10 @@ public enum PlatformEnum implements IPlatformEnum {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("Unknown platform enum for class %s.", clazz)));
+    }
+
+    private static String openApiSchemaName(Class<? extends IPlatformEnum> enumClass) {
+        Schema schema = enumClass.getAnnotation(Schema.class);
+        return schema != null && !schema.name().isBlank() ? schema.name() : enumClass.getSimpleName();
     }
 }

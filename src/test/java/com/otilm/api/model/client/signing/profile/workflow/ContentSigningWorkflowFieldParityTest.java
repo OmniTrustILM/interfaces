@@ -10,12 +10,7 @@ class ContentSigningWorkflowFieldParityTest {
 
     @Test
     void theAllowListIsDeclaredAsTheSameCollectionOnBothSurfaces() {
-        assertGenericTypeMatches("allowedRequestParameterGroups");
-    }
-
-    @Test
-    void theTypedDefaultsAreDeclaredAsTheSameUnionOnBothSurfaces() {
-        assertGenericTypeMatches("defaultSignatureParameters");
+        assertGenericTypeMatches("allowedRequestAttributes");
     }
 
     private static void assertGenericTypeMatches(String fieldName) {

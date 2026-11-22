@@ -14,7 +14,7 @@ class CertificateEventTest {
 
     @Test
     void detailSaysWhetherTheKeystoreIsAvailable() {
-        CertificateDetailDto detail = new CertificateDetailDto();
+        CertificateDetail detail = new X509CertificateDetail();
 
         detail.setKeystoreAvailable(true);
 

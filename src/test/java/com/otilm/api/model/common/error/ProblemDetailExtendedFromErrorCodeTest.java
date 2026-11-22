@@ -22,9 +22,9 @@ class ProblemDetailExtendedFromErrorCodeTest {
 
     @Test
     void documentHandlingCodesEmitOneStable2SegmentUri() {
-        ProblemDetailExtended tooLarge = ProblemDetailExtended
-                .fromErrorCode(ErrorCode.DOCUMENT_TOO_LARGE, "detail", null, "corr-4");
-        assertEquals("https://docs.otilm.com/problems/connector/DOCUMENT_TOO_LARGE", tooLarge.getType().toString());
+        ProblemDetailExtended malformed = ProblemDetailExtended
+                .fromErrorCode(ErrorCode.DOCUMENT_MALFORMED, "detail", null, "corr-4");
+        assertEquals("https://docs.otilm.com/problems/connector/DOCUMENT_MALFORMED", malformed.getType().toString());
 
         ProblemDetailExtended notFound = ProblemDetailExtended
                 .fromErrorCode(ErrorCode.SIGNATURE_NOT_FOUND, "detail", null, "corr-5");

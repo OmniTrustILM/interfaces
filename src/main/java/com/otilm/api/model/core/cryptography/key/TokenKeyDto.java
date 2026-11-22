@@ -2,6 +2,7 @@ package com.otilm.api.model.core.cryptography.key;
 
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyEntryV2Dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.util.UUID;
@@ -26,8 +27,9 @@ public class TokenKeyDto {
             + "key pair.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> keyPairMeta;
 
-    @Schema(description = "Label the key storage keeps for the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private String label;
+    @Schema(description = "Name the key storage shows for the key, such as a PKCS#11 label, a keystore alias or a KMS "
+            + "key name; it may be absent or shared by several keys", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String storageName;
 
     @Schema(description = "Algorithm of the key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyAlgorithm keyAlgorithm;
@@ -57,6 +59,13 @@ public class TokenKeyDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String suggestedName;
 
-    @Schema(description = "Why the key cannot be onboarded", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Platform's summary of why the key cannot be onboarded",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String reason;
+
+    @Schema(description = "Text of the token instance's connector naming the cause behind the status and how to fix "
+            + "it, alongside the platform's `reason`. Clients display it and never parse it.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, maxLength = KeyEntryV2Dto.MAX_DIAGNOSTIC_LENGTH)
+    @ToString.Exclude
+    private String diagnostic;
 }

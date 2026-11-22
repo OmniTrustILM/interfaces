@@ -4,9 +4,9 @@ import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.clients.BaseApiClient;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.interfaces.client.v1.signing.contentsigning.ContentSigningFormattingSyncApiClient;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -17,9 +17,10 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
+import jakarta.validation.Validator;
 import javax.net.ssl.TrustManager;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -32,27 +33,54 @@ import reactor.core.publisher.Mono;
  */
 public class ContentSigningFormattingApiClient extends BaseApiClient implements ContentSigningFormattingSyncApiClient {
 
-    public ContentSigningFormattingApiClient(WebClient webClient, TrustManager[] defaultTrustManagers) {
+    private final ContentSigningResponseValidator responseValidator;
+
+    public ContentSigningFormattingApiClient(WebClient webClient, TrustManager[] defaultTrustManagers,
+            Validator validator) {
         this.webClient = webClient;
         this.defaultTrustManagers = defaultTrustManagers;
+        this.responseValidator = new ContentSigningResponseValidator(validator);
     }
 
-    /**
-     * Decodes an array rather than using {@code toEntityList}, whose per-element tokenizer would degrade the codec's
-     * {@code maxInMemorySize} into a per-element cap.
-     */
     @Override
-    public List<BaseAttribute> listFormattingAttributes(ApiClientConnectorInfo connector,
+    public ContentSigningDeclarationDto getDeclaration(ApiClientConnectorInfo connector) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
+
+        ResponseEntity<ContentSigningDeclarationDto> response = processRequest(r -> r
+                .uri(connector.getUrl() + ContentSigningFormattingPaths.DECLARATION)
+                .retrieve()
+                .toEntity(ContentSigningDeclarationDto.class)
+                .block(), request, connector);
+        return responseValidator.requireValidDeclaration(response == null ? null : response.getBody(), connector);
+    }
+
+    @Override
+    public ContentSigningFormattingAttributesDto listFormattingAttributes(ApiClientConnectorInfo connector,
             ContentSigningFormattingOperation operation) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.GET, connector, true);
 
-        return processRequest(r -> toMutableList(requireBody(r
+        ResponseEntity<ContentSigningFormattingAttributesDto> response = processRequest(r -> r
                 .uri(connector.getUrl() + ContentSigningFormattingPaths.attributes(operation))
                 .retrieve()
-                .toEntity(BaseAttribute[].class), "listFormattingAttributes")), request, connector);
+                .toEntity(ContentSigningFormattingAttributesDto.class)
+                .block(), request, connector);
+        return responseValidator.requireValidListing(response == null ? null : response.getBody(), connector);
     }
 
-    /** Serialized against the abstract base; {@code family} is a real property, so the concrete family still ships. */
+    @Override
+    public ValidateProfileResponseDto validateProfile(ApiClientConnectorInfo connector,
+            ValidateProfileRequestDto requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        ResponseEntity<ValidateProfileResponseDto> response = processRequest(r -> r
+                .uri(connector.getUrl() + ContentSigningFormattingPaths.VALIDATE_PROFILE)
+                .body(Mono.just(requestDto), ValidateProfileRequestDto.class)
+                .retrieve()
+                .toEntity(ValidateProfileResponseDto.class)
+                .block(), request, connector);
+        return responseValidator.requireValidProfileValidation(response == null ? null : response.getBody(), connector);
+    }
+
     @Override
     public ComputeDtbsResponseDto computeDtbs(ApiClientConnectorInfo connector, ComputeDtbsRequestDto requestDto)
             throws ConnectorException {
@@ -143,7 +171,6 @@ public class ContentSigningFormattingApiClient extends BaseApiClient implements 
                 .toBodilessEntity(), "cancelExtendToLevel"), request, connector);
     }
 
-    /** @param bodyType the declared type the body is serialized against, abstract for {@code computeDtbs} */
     private <B, R> R post(ApiClientConnectorInfo connector, ContentSigningFormattingOperation operation, B requestDto,
             Class<B> bodyType, Class<R> responseType) throws ConnectorException {
         return postTo(connector, ContentSigningFormattingPaths.operation(operation), operation.getCode(), requestDto,
@@ -159,10 +186,5 @@ public class ContentSigningFormattingApiClient extends BaseApiClient implements 
                 .body(Mono.just(requestDto), bodyType)
                 .retrieve()
                 .toEntity(responseType), operationName), request, connector);
-    }
-
-    /** A fresh {@link ArrayList}, not an {@link Arrays#asList} view, so a caller may sort or filter in place. */
-    private static <T> List<T> toMutableList(T[] result) {
-        return new ArrayList<>(Arrays.asList(result));
     }
 }

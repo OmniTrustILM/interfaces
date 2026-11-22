@@ -20,16 +20,23 @@ public class CertificateSimpleDto {
     @Schema(description = "Relation type", requiredMode = Schema.RequiredMode.REQUIRED)
     private CertificateRelationType relationType;
 
-    @Schema(description = "Common name", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Name to show for the certificate: the common name of an X.509 certificate, the "
+            + "identifier of a certificate type without one", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String displayName;
+
+    @Schema(description = "Common name. Absent when the certificate has no common name: its type has none, or the subject of an X.509 certificate has none (a registration with only alternative names)",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String commonName;
 
-    @Schema(description = "Subject distinguished name", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Subject distinguished name. Absent when the certificate has no subject distinguished name: its type has none, or an X.509 certificate was registered with only alternative names.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String subjectDn;
 
     @Schema(description = "Issuer common name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerCommonName;
 
-    @Schema(description = "Issuer distinguished name", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Issuer distinguished name. X.509 only; absent for other types.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String issuerDn;
 
     @Schema(description = "Certificate serial number", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -38,16 +45,19 @@ public class CertificateSimpleDto {
     @Schema(description = "Certificate fingerprint", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
 
-    @Schema(description = "Public key algorithm", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Public key algorithm. Absent when the certificate has no public key: its type has none, or the certificate is registered and not yet issued",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKeyAlgorithm;
 
-    @Schema(description = "Alternative public key algorithm", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Alternative public key algorithm. X.509 only; absent for other types.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altPublicKeyAlgorithm;
 
     @Schema(description = "Signature algorithm", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String signatureAlgorithm;
 
-    @Schema(description = "Alternative signature algorithm", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Alternative signature algorithm. X.509 only; absent for other types.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altSignatureAlgorithm;
 
     @Schema(description = "Not before date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)

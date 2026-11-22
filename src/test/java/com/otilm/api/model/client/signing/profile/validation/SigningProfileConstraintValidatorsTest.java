@@ -8,8 +8,8 @@ import com.otilm.api.model.client.signing.profile.workflow.ContentSigningWorkflo
 import com.otilm.api.model.client.signing.profile.workflow.RawSigningWorkflowRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.TimestampingWorkflowRequestDto;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.InternalTimestampSourceRequestDto;
-import com.otilm.api.model.common.signature.SignatureFamily;
 import com.otilm.api.model.common.signature.SignatureLevel;
+import com.otilm.api.model.common.validation.SignatureFamilyFormat;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -60,11 +60,11 @@ class SigningProfileConstraintValidatorsTest {
         return scheme;
     }
 
-    private ContentSigningWorkflowRequestDto contentSigningWorkflow(SignatureLevel maxLevel) {
+    private ContentSigningWorkflowRequestDto contentSigningWorkflow(SignatureLevel level) {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
         workflow.setSignatureFormattingConnectorUuid(UUID.randomUUID());
-        workflow.setFamily(SignatureFamily.PADES);
-        workflow.setMaxLevel(maxLevel);
+        workflow.setFamily("pades");
+        workflow.setLevel(level);
         return workflow;
     }
 
@@ -304,6 +304,8 @@ class SigningProfileConstraintValidatorsTest {
                     .validate(profileRequest(managedScheme(), contentSigningWorkflow(level)));
 
             assertTrue(hasViolationOn(violations, "workflow.timestampSource"), level.name() + " was accepted");
+            assertTrue(hasViolationWithMessage(violations,
+                    "timestampSource is required when level is TIMESTAMPED or higher"), level.name());
         }
     }
 
@@ -341,15 +343,26 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
-    void aManagedProfileWithoutAMaxLevelIsRejected() {
-        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
-                .validate(profileRequest(managedScheme(), contentSigningWorkflow(null)));
+    void aManagedProfileWithAMalformedFamilyIsRejected() {
+        ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(SignatureLevel.SIGNED);
+        workflow.setFamily("PAdES");
 
-        assertTrue(hasViolationOn(violations, "workflow.maxLevel"));
+        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
+                .validate(profileRequest(managedScheme(), workflow));
+
+        assertTrue(hasViolationWithMessage(violations, SignatureFamilyFormat.MESSAGE));
     }
 
     @Test
-    void aManagedProfileMissingBothFamilyAndMaxLevelReportsBoth() {
+    void aManagedProfileWithoutALevelIsRejected() {
+        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
+                .validate(profileRequest(managedScheme(), contentSigningWorkflow(null)));
+
+        assertTrue(hasViolationOn(violations, "workflow.level"));
+    }
+
+    @Test
+    void aManagedProfileMissingBothFamilyAndLevelReportsBoth() {
         ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(null);
         workflow.setFamily(null);
 
@@ -357,7 +370,7 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(managedScheme(), workflow));
 
         assertTrue(hasViolationOn(violations, "workflow.family"));
-        assertTrue(hasViolationOn(violations, "workflow.maxLevel"));
+        assertTrue(hasViolationOn(violations, "workflow.level"));
     }
 
     @Test
@@ -380,25 +393,25 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(delegatedScheme(), workflow));
 
         assertFalse(hasViolationOn(violations, "workflow.family"));
-        assertFalse(hasViolationOn(violations, "workflow.maxLevel"));
+        assertFalse(hasViolationOn(violations, "workflow.level"));
     }
 
     @Test
     void aDelegatedProfileCarryingAManagedLevelIsRejectedAtThatField() {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setMaxLevel(SignatureLevel.TIMESTAMPED);
+        workflow.setLevel(SignatureLevel.TIMESTAMPED);
 
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(delegatedScheme(), workflow));
 
-        assertTrue(hasViolationOn(violations, "workflow.maxLevel"));
+        assertTrue(hasViolationOn(violations, "workflow.level"));
         assertFalse(hasViolationOn(violations, "workflow.timestampSource"));
     }
 
     @Test
     void aDelegatedProfileCarryingASignatureFamilyIsRejected() {
         ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setFamily(SignatureFamily.PADES);
+        workflow.setFamily("pades");
 
         assertTrue(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)), "workflow.family"));
     }
@@ -502,15 +515,6 @@ class SigningProfileConstraintValidatorsTest {
     }
 
     @Test
-    void aDelegatedProfileCarryingADocumentSizeCapIsAccepted() {
-        ContentSigningWorkflowRequestDto workflow = new ContentSigningWorkflowRequestDto();
-        workflow.setDocumentSizeCap(1L);
-
-        assertFalse(hasViolationOn(validator.validate(profileRequest(delegatedScheme(), workflow)),
-                "workflow.documentSizeCap"));
-    }
-
-    @Test
     void aManagedProfileAtSignedNeedsNoTimestampSource() {
         Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
                 .validate(profileRequest(managedScheme(), contentSigningWorkflow(SignatureLevel.SIGNED)));
@@ -527,7 +531,7 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(managedScheme(), workflow));
 
         assertTrue(hasViolationOn(violations, "workflow.timestampSource"));
-        assertTrue(hasViolationWithMessage(violations, "timestampSource must be omitted when maxLevel is SIGNED"));
+        assertTrue(hasViolationWithMessage(violations, "timestampSource must be omitted when level is SIGNED"));
     }
 
     @Test
@@ -539,27 +543,5 @@ class SigningProfileConstraintValidatorsTest {
                 .validate(profileRequest(delegatedScheme(), workflow));
 
         assertTrue(hasViolationWithMessage(violations, "timestampSource must be omitted for delegated signing"));
-    }
-
-    @Test
-    void aNonPositiveDocumentSizeCapIsRejected() {
-        ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(SignatureLevel.SIGNED);
-        workflow.setDocumentSizeCap(0L);
-
-        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
-                .validate(profileRequest(managedScheme(), workflow));
-
-        assertTrue(hasViolationOn(violations, "workflow.documentSizeCap"));
-    }
-
-    @Test
-    void aPositiveDocumentSizeCapIsAccepted() {
-        ContentSigningWorkflowRequestDto workflow = contentSigningWorkflow(SignatureLevel.SIGNED);
-        workflow.setDocumentSizeCap(1L);
-
-        Set<ConstraintViolation<SigningProfileRequestDto>> violations = validator
-                .validate(profileRequest(managedScheme(), workflow));
-
-        assertFalse(hasViolationOn(violations, "workflow.documentSizeCap"));
     }
 }

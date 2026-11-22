@@ -28,6 +28,8 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyCreationStatusResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyDestructionStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyEntryStatus;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyEntryV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyHandleV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationStatusResponseV2Dto;
@@ -793,9 +795,9 @@ class KeyApiClientTest {
         // then
         assertEquals(2L, result.getTotalItems());
         assertEquals(2, result.getItems().size());
-        assertEquals("signer", result.getItems().get(0).getLabel());
-        assertNotNull(((ListedKeyPairV2Dto) result.getItems().get(0)).getPublicKeyData());
-        assertNull(((ListedKeyPairV2Dto) result.getItems().get(1)).getPublicKeyData());
+        assertEquals("signer", result.getItems().get(0).getStorageName());
+        assertNotNull(((ListedKeyPairV2Dto) result.getItems().get(0).getKey()).getPublicKeyData());
+        assertNull(((ListedKeyPairV2Dto) result.getItems().get(1).getKey()).getPublicKeyData());
         RequestPatternBuilder request = tokenProfileRequest(LIST_PATH)
                 .withRequestBody(WireMock.matchingJsonPath("$.keyRequestType", WireMock.equalTo("keyPair")))
                 .withRequestBody(WireMock.matchingJsonPath("$.offset", WireMock.equalTo("0")))
@@ -816,6 +818,24 @@ class KeyApiClientTest {
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertEquals("Connector returned 2 keys on a page that holds 1", exception.getCause().getMessage());
         assertSame(connector, exception.getConnector());
+    }
+
+    @Test
+    void listKeys_keepsTheTokenOrderAcrossStatuses() throws ConnectorException {
+        // given
+        stubJsonResponse(LIST_PATH, HttpStatus.OK, mixedStatusPageJson());
+
+        // when
+        ListKeysResponseV2Dto result = client.listKeys(connector, listKeysRequest(4));
+
+        // then
+        assertEquals(
+                List
+                        .of(KeyEntryStatus.AVAILABLE, KeyEntryStatus.UNREADABLE, KeyEntryStatus.REFUSED,
+                                KeyEntryStatus.UNADDRESSABLE),
+                result.getItems().stream().map(KeyEntryV2Dto::getStatus).toList());
+        assertEquals(List.of("first", "second", "third", "fourth"),
+                result.getItems().stream().map(KeyEntryV2Dto::getStorageName).toList());
     }
 
     @Test
@@ -844,7 +864,7 @@ class KeyApiClientTest {
     void resolveKeys_rejectsAResponseMissingAResult() {
         // given
         stubJsonResponse(RESOLVE_PATH, HttpStatus.OK, """
-                {"results": [{"identifier": "1", "outcome": "notFound"}]}
+                {"results": [{"identifier": "1", "status": "notFound"}]}
                 """);
 
         // when
@@ -873,11 +893,11 @@ class KeyApiClientTest {
                   "results": [
                     {
                       "identifier": "0",
-                      "outcome": "found",
+                      "status": "available",
+                      "storageName": "signer",
                       "key": {
                         "keyRequestType": "keyPair",
                         "keyPairMeta": [%3$s],
-                        "label": "signer",
                         "privateKeyData": {
                           "keyMeta": [%1$s],
                           "keyData": {"type":"Private","algorithm":"RSA","length":2048}
@@ -888,7 +908,7 @@ class KeyApiClientTest {
                         }
                       }
                     },
-                    {"identifier": "1", "outcome": "notFound"}
+                    {"identifier": "1", "status": "notFound"}
                   ]
                 }
                 """.formatted(VALID_METADATA_JSON, publicKeySpkiBase64(), LISTED_HANDLE_JSON);
@@ -907,30 +927,58 @@ class KeyApiClientTest {
                 {
                   "items": [
                     {
-                      "keyRequestType": "keyPair",
-                      "keyPairMeta": [%3$s],
-                      "label": "signer",
-                      "privateKeyData": {
-                        "keyMeta": [%1$s],
-                        "keyData": {"type":"Private","algorithm":"RSA","length":2048}
-                      },
-                      "publicKeyData": {
-                        "keyMeta": [%1$s],
-                        "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                      "status": "available",
+                      "storageName": "signer",
+                      "key": {
+                        "keyRequestType": "keyPair",
+                        "keyPairMeta": [%3$s],
+                        "privateKeyData": {
+                          "keyMeta": [%1$s],
+                          "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                        },
+                        "publicKeyData": {
+                          "keyMeta": [%1$s],
+                          "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                        }
                       }
                     },
                     {
-                      "keyRequestType": "keyPair",
-                      "keyPairMeta": [%3$s],
-                      "privateKeyData": {
-                        "keyMeta": [%1$s],
-                        "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                      "status": "available",
+                      "key": {
+                        "keyRequestType": "keyPair",
+                        "keyPairMeta": [%3$s],
+                        "privateKeyData": {
+                          "keyMeta": [%1$s],
+                          "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                        }
                       }
                     }
                   ],
                   "totalItems": 2
                 }
                 """.formatted(VALID_METADATA_JSON, publicKeySpkiBase64(), LISTED_HANDLE_JSON);
+    }
+
+    private static String mixedStatusPageJson() {
+        String key = """
+                {
+                  "keyRequestType": "keyPair",
+                  "keyPairMeta": [%2$s],
+                  "privateKeyData": {"keyMeta": [%1$s], "keyData": {"type":"Private","algorithm":"RSA","length":2048}}
+                }
+                """.formatted(VALID_METADATA_JSON, LISTED_HANDLE_JSON);
+        return """
+                {
+                  "items": [
+                    {"status": "available", "storageName": "first", "key": %1$s},
+                    {"status": "unreadable", "storageName": "second", "diagnostic": "CKR_DEVICE_ERROR"},
+                    {"status": "refused", "storageName": "third", "key": %1$s},
+                    {"status": "unaddressable", "storageName": "fourth",
+                     "keyData": {"type":"Private","algorithm":"RSA","length":2048}}
+                  ],
+                  "totalItems": 4
+                }
+                """.formatted(key);
     }
 
     private static String exportResponseJson() {

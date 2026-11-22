@@ -46,9 +46,9 @@ public class ClientCertificateRequestDto {
     @Schema(description = "Certificate signing request encoded as Base64 string")
     private String request;
 
-    @Schema(description = "Certificate signing request format", defaultValue = "pkcs10")
-    @Builder.Default
-    private CertificateRequestFormat format = CertificateRequestFormat.PKCS10;
+    @Schema(description = "Format of the request, which says how to read it. When absent, the default format of the "
+            + "certificate type applies: pkcs10 for X.509", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRequestFormat format;
 
     // ------------------------------------------------------------------------------------------------------------------
     // Key Related Parameters

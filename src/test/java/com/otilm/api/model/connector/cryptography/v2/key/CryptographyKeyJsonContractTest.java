@@ -101,7 +101,6 @@ class CryptographyKeyJsonContractTest {
     void listedKey_roundTripsDiscriminatedSubtype(ListedKeyContract contract) throws Exception {
         // given
         ListedKeyV2Dto key = contract.key();
-        key.setLabel("signing");
 
         // when
         String json = mapper.writeValueAsString(key);
@@ -110,7 +109,18 @@ class CryptographyKeyJsonContractTest {
         // then
         assertEquals(contract.wireCode(), mapper.readTree(json).get("keyRequestType").textValue());
         assertInstanceOf(contract.type(), roundTripped);
-        assertEquals("signing", roundTripped.getLabel());
+    }
+
+    @Test
+    void keyEntry_readsTheStorageNameAndDiagnostic() throws Exception {
+        // given
+        String json = "{\"status\":\"unreadable\",\"diagnostic\":\"CKR_ATTRIBUTE_SENSITIVE\",\"storageName\":\"legacy\"}";
+
+        // when
+        ListedKeyEntryV2Dto entry = mapper.readValue(json, ListedKeyEntryV2Dto.class);
+
+        // then
+        assertEquals(mapper.readTree(json), mapper.valueToTree(entry));
     }
 
     static Stream<Named<ListedKeyContract>> listedKeys() {

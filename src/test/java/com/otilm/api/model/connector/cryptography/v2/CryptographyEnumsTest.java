@@ -9,9 +9,8 @@ import com.otilm.api.model.common.enums.IPlatformEnum;
 import com.otilm.api.model.common.enums.cryptography.SignatureInputMode;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
-import com.otilm.api.model.connector.cryptography.v2.key.KeyResolutionOutcome;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyEntryStatus;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
-import com.otilm.api.model.connector.cryptography.v2.key.UnusableKeyReason;
 import com.otilm.api.model.connector.cryptography.v2.lifecycle.OperationEventType;
 import com.otilm.api.model.connector.cryptography.v2.operations.SignatureActivationDecision;
 import com.otilm.api.model.connector.cryptography.v2.token.TokenStatusV2;
@@ -56,8 +55,8 @@ class CryptographyEnumsTest {
                                 "Return 202 Accepted with an operation tracking handle"),
                         contract(SignatureInputMode.DATA, "data", "Data",
                                 "Each item is the data; a hash-then-sign algorithm computes its digest before signing"),
-                        contract(SignatureInputMode.PREHASHED_DIGEST, "prehashedDigest", "Prehashed digest",
-                                "Each item is already the digest the signature algorithm fixes; the connector signs it without hashing again"),
+                        contract(SignatureInputMode.DATA_DIGEST, "dataDigest", "Data digest",
+                                "Each item is already the digest of the data, as the signature algorithm fixes it; the signer signs it without hashing again"),
                         contract(OperationStatus.IN_PROGRESS, "inProgress", "In progress",
                                 "Operation is still running at the upstream system"),
                         contract(OperationStatus.COMPLETED, "completed", "Completed",
@@ -65,25 +64,18 @@ class CryptographyEnumsTest {
                         contract(OperationStatus.FAILED, "failed", "Failed", "Operation has reached terminal failure"),
                         contract(OperationStatus.CANCELLED, "cancelled", "Cancelled",
                                 "Operation was deliberately terminated before completion"),
-                        contract(UnusableKeyReason.UNADDRESSABLE, "unaddressable", "Unaddressable",
-                                "The connector cannot name the key in a handle that addresses it alone"),
-                        contract(UnusableKeyReason.UNSUPPORTED_TYPE, "unsupportedType", "Unsupported type",
+                        contract(KeyEntryStatus.AVAILABLE, "available", "Available",
+                                "The connector offers the key for onboarding"),
+                        contract(KeyEntryStatus.REFUSED, "refused", "Refused",
+                                "The connector can read the key and refuses to let the platform onboard it"),
+                        contract(KeyEntryStatus.UNADDRESSABLE, "unaddressable", "Unaddressable",
+                                "The connector cannot identify the key uniquely by a handle, or the handle matches more than one key"),
+                        contract(KeyEntryStatus.UNSUPPORTED_TYPE, "unsupportedType", "Unsupported type",
                                 "The key is of a type the connector cannot operate"),
-                        contract(UnusableKeyReason.UNREADABLE, "unreadable", "Unreadable",
+                        contract(KeyEntryStatus.UNREADABLE, "unreadable", "Unreadable",
                                 "The connector cannot read the key"),
-                        contract(UnusableKeyReason.NOT_FOUND, "notFound", "Not found",
-                                "The token no longer holds the key it counted"),
-                        contract(KeyResolutionOutcome.FOUND, "found", "Found",
-                                "The token holds one key under the handle"),
-                        contract(KeyResolutionOutcome.NOT_FOUND, "notFound", "Not found",
-                                "The token holds no key under the handle"),
-                        contract(KeyResolutionOutcome.AMBIGUOUS, "ambiguous", "Ambiguous",
-                                "The token holds more than one key under the handle"),
-                        contract(KeyResolutionOutcome.UNSUPPORTED_TYPE, "unsupportedType", "Unsupported type",
-                                "The token holds the key, and it is of a type the connector cannot operate"),
-                        contract(KeyResolutionOutcome.UNREADABLE, "unreadable", "Unreadable",
-                                "The token holds the key, and the connector cannot read it"),
-                        contract(KeyResolutionOutcome.INVALID_HANDLE, "invalidHandle", "Invalid handle",
+                        contract(KeyEntryStatus.NOT_FOUND, "notFound", "Not found", "The token holds no matching key"),
+                        contract(KeyEntryStatus.INVALID_HANDLE, "invalidHandle", "Invalid handle",
                                 "The handle is not one this connector issues"),
                         contract(TokenStatusV2.CONNECTED, "Connected", "Connected",
                                 "The token or its backing provider is reachable"),
@@ -158,11 +150,8 @@ class CryptographyEnumsTest {
                                 .of(OperationStatus.values())
                                 .map(value -> wireContract(value, value.getCode(), OperationStatus.class)),
                         Stream
-                                .of(UnusableKeyReason.values())
-                                .map(value -> wireContract(value, value.getCode(), UnusableKeyReason.class)),
-                        Stream
-                                .of(KeyResolutionOutcome.values())
-                                .map(value -> wireContract(value, value.getCode(), KeyResolutionOutcome.class)),
+                                .of(KeyEntryStatus.values())
+                                .map(value -> wireContract(value, value.getCode(), KeyEntryStatus.class)),
                         Stream
                                 .of(KeyTypeV2.values())
                                 .map(value -> wireContract(value, value.getCode(), KeyTypeV2.class)),
@@ -207,11 +196,8 @@ class CryptographyEnumsTest {
                                 new UnknownWireCode(SignatureInputMode.class, unknownCode, ValidationException.class)),
                         named("operation status",
                                 new UnknownWireCode(OperationStatus.class, unknownCode, ValidationException.class)),
-                        named("unusable key reason",
-                                new UnknownWireCode(UnusableKeyReason.class, unknownCode, ValidationException.class)),
-                        named("key resolution outcome",
-                                new UnknownWireCode(KeyResolutionOutcome.class, unknownCode,
-                                        ValidationException.class)),
+                        named("key entry status",
+                                new UnknownWireCode(KeyEntryStatus.class, unknownCode, ValidationException.class)),
                         named("operation event type",
                                 new UnknownWireCode(OperationEventType.class, unknownCode, ValidationException.class)),
                         named("signature activation decision",

@@ -1,6 +1,9 @@
 package com.otilm.api.model.connector.discovery.v2;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.MetadataAttributeProperties;
@@ -10,6 +13,8 @@ import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.testsupport.ValidatorFixture;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DiscoveryV2RequestDtoTest {
@@ -255,5 +262,90 @@ class DiscoveryV2RequestDtoTest {
                 "toString must include runId, the one field worth correlating log lines by: " + str);
         assertFalse(str.contains("super-secret-target-password"),
                 "toString must not leak run-level attribute values, which can carry target credentials: " + str);
+    }
+
+    @Test
+    void deliveryModesSkipUnknownCodes() throws Exception {
+        DiscoveryRunRequestDto dto = mapper
+                .readValue(
+                        "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                                + "\"deliveryModes\":[\"streamed\",\"checkpointed\",\"buffered\"]}",
+                        DiscoveryRunRequestDto.class);
+        assertEquals(List.of(DiscoveryDeliveryMode.CHECKPOINTED, DiscoveryDeliveryMode.BUFFERED),
+                dto.getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesEmptyAndAllUnknownReadAsEmpty() throws Exception {
+        String base = "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],";
+        assertEquals(List.of(),
+                mapper.readValue(base + "\"deliveryModes\":[]}", DiscoveryRunRequestDto.class).getDeliveryModes());
+        assertEquals(List.of(),
+                mapper.readValue(base + "\"deliveryModes\":[\"x\"]}", DiscoveryRunRequestDto.class).getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesAbsentIsNull() throws Exception {
+        assertNull(mapper
+                .readValue("{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"]}",
+                        DiscoveryRunRequestDto.class)
+                .getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesSkipElementsThatAreNotStrings() throws Exception {
+        String json = "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                + "\"deliveryModes\":[1,null,{\"x\":1},[\"buffered\"],\"buffered\"]}";
+        assertEquals(List.of(DiscoveryDeliveryMode.BUFFERED),
+                mapper.readValue(json, DiscoveryRunRequestDto.class).getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesThatAreNotAnArrayAreRefused() {
+        String json = "{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                + "\"deliveryModes\":\"buffered\"}";
+        assertThrows(MismatchedInputException.class, () -> mapper.readValue(json, DiscoveryRunRequestDto.class));
+    }
+
+    @Test
+    void deliveryModesNullReadsAsNull() throws Exception {
+        assertNull(mapper
+                .readValue("{\"runId\":\"11111111-1111-1111-1111-111111111111\",\"resources\":[\"certificates\"],"
+                        + "\"deliveryModes\":null}", DiscoveryRunRequestDto.class)
+                .getDeliveryModes());
+    }
+
+    @Test
+    void deliveryModesAbsentIsOmittedFromTheWire() throws Exception {
+        DiscoveryRunRequestDto dto = new DiscoveryRunRequestDto();
+        dto.setRunId(UUID.randomUUID());
+        dto.setResources(List.of(Resource.CERTIFICATE));
+        assertFalse(mapper.writeValueAsString(dto).contains("deliveryModes"));
+    }
+
+    @Test
+    void omitsDiscoverSince_whenAbsent() throws Exception {
+        DiscoveryInitiateRequestDto dto = new DiscoveryInitiateRequestDto();
+        dto.setRunId(UUID.randomUUID());
+        dto.setResources(List.of(Resource.CERTIFICATE));
+
+        assertFalse(mapper.writeValueAsString(dto).contains("discoverSince"));
+    }
+
+    @Test
+    void writesDiscoverSinceAsIsoInstant() throws Exception {
+        ObjectMapper isoMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        DiscoveryInitiateRequestDto dto = new DiscoveryInitiateRequestDto();
+        dto.setRunId(UUID.randomUUID());
+        dto.setResources(List.of(Resource.CERTIFICATE));
+        dto.setDiscoverSince(OffsetDateTime.of(2026, 11, 17, 8, 30, 0, 0, ZoneOffset.UTC));
+
+        String json = isoMapper.writeValueAsString(dto);
+        DiscoveryInitiateRequestDto back = isoMapper.readValue(json, DiscoveryInitiateRequestDto.class);
+
+        JsonNode written = isoMapper.readTree(json).get("discoverSince");
+        assertTrue(written.isTextual(), json);
+        assertEquals("2026-11-17T08:30:00Z", written.asText());
+        assertEquals(dto.getDiscoverSince(), back.getDiscoverSince());
     }
 }

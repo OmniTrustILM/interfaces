@@ -23,6 +23,9 @@ class ContentSigningFormattingPathsTest {
     /** {@code /extendToLevel/status} and {@code /extendToLevel/cancel}, which carry no operation code of their own. */
     private static final int ENVELOPE_COMPANION_ROUTES = 2;
 
+    /** {@code /validateProfile}, which carries no operation code of its own. */
+    private static final int PROFILE_ROUTES = 1;
+
     @Test
     void theBasePathMatchesTheController() {
         RequestMapping mapping = ContentSigningFormattingController.class.getAnnotation(RequestMapping.class);
@@ -88,6 +91,13 @@ class ContentSigningFormattingPathsTest {
         assertEquals(ContentSigningFormattingPaths.EXTEND_TO_LEVEL_CANCEL, companionRoute("cancelExtendToLevel"));
     }
 
+    @Test
+    void theProfileRouteMatchesTheController() {
+        assertEquals(ContentSigningFormattingPaths.BASE + "/validateProfile",
+                ContentSigningFormattingPaths.VALIDATE_PROFILE);
+        assertEquals(ContentSigningFormattingPaths.VALIDATE_PROFILE, companionRoute("validateProfile"));
+    }
+
     private static String companionRoute(String methodName) {
         PostMapping mapping = controllerMethod(methodName).getAnnotation(PostMapping.class);
 
@@ -102,8 +112,9 @@ class ContentSigningFormattingPathsTest {
                 .filter(m -> m.getAnnotation(PostMapping.class) != null)
                 .count();
 
-        assertEquals(ContentSigningFormattingOperation.values().length + ENVELOPE_COMPANION_ROUTES, postRoutes,
-                "the controller posts to a route neither ContentSigningFormattingOperation nor the envelope names");
+        assertEquals(ContentSigningFormattingOperation.values().length + ENVELOPE_COMPANION_ROUTES + PROFILE_ROUTES,
+                postRoutes, "the controller posts to a route outside the enum codes, the envelope companions and the "
+                        + "profile route");
         assertTrue(postRoutes > 0);
     }
 

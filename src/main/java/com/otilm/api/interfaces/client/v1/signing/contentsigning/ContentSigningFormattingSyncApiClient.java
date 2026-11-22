@@ -2,9 +2,9 @@ package com.otilm.api.interfaces.client.v1.signing.contentsigning;
 
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.exception.ConnectorException;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -15,7 +15,9 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.ExtendToLe
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
-import java.util.List;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -24,9 +26,15 @@ import org.springframework.http.ResponseEntity;
  */
 public interface ContentSigningFormattingSyncApiClient {
 
+    ContentSigningDeclarationDto getDeclaration(ApiClientConnectorInfo connector) throws ConnectorException;
+
     /** The attribute schema configuring one operation. */
-    List<BaseAttribute> listFormattingAttributes(ApiClientConnectorInfo connector,
+    ContentSigningFormattingAttributesDto listFormattingAttributes(ApiClientConnectorInfo connector,
             ContentSigningFormattingOperation operation) throws ConnectorException;
+
+    /** A profile's problems arrive as errors in the response. */
+    ValidateProfileResponseDto validateProfile(ApiClientConnectorInfo connector, ValidateProfileRequestDto request)
+            throws ConnectorException;
 
     ComputeDtbsResponseDto computeDtbs(ApiClientConnectorInfo connector, ComputeDtbsRequestDto request)
             throws ConnectorException;

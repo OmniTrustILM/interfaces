@@ -1,10 +1,16 @@
 package com.otilm.api.model.client.discovery;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDeliveryMode;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryProgressDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryResourceProgressDto;
 import com.otilm.api.model.core.auth.Resource;
 import com.otilm.api.model.core.discovery.DiscoveryStatus;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -170,5 +176,41 @@ class DiscoveryDetailDtoTest {
         assertTrue(json.contains("\"message\":null"), json);
         assertTrue(json.contains("\"startTime\":null"), json);
         assertTrue(json.contains("\"endTime\":null"), json);
+    }
+
+    @Test
+    void deliveryModeReadsAndIsOmittedWhenAbsent() throws Exception {
+        DiscoveryDetailDto back = mapper.readValue("{\"deliveryMode\":\"checkpointed\"}", DiscoveryDetailDto.class);
+        assertEquals(DiscoveryDeliveryMode.CHECKPOINTED, back.getDeliveryMode());
+
+        assertFalse(mapper.writeValueAsString(v1Run()).contains("deliveryMode"));
+    }
+
+    @Test
+    void windowAndDiscoverSinceRoundTrip() throws Exception {
+        ObjectMapper isoMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        DiscoveryWindowDto window = new DiscoveryWindowDto();
+        window.setMode(DiscoveryWindowMode.LOOKBACK);
+        window.setLookback(Duration.ofDays(1));
+        DiscoveryDetailDto dto = v1Run();
+        dto.setWindow(window);
+        dto.setDiscoverSince(OffsetDateTime.of(2026, 11, 17, 8, 30, 0, 0, ZoneOffset.UTC));
+
+        String json = isoMapper.writeValueAsString(dto);
+        DiscoveryDetailDto back = isoMapper.readValue(json, DiscoveryDetailDto.class);
+
+        assertTrue(json.contains("\"discoverSince\":\"2026-11-17T08:30:00Z\""), json);
+        assertEquals(DiscoveryWindowMode.LOOKBACK, back.getWindow().getMode());
+        assertEquals(Duration.ofDays(1), back.getWindow().getLookback());
+        assertEquals(dto.getDiscoverSince(), back.getDiscoverSince());
+    }
+
+    @Test
+    void keepsEmittingDiscoverSinceAsNull_whenTheRunWasFull() throws Exception {
+        String json = mapper.writeValueAsString(v1Run());
+
+        assertTrue(json.contains("\"discoverSince\":null"), json);
     }
 }

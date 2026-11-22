@@ -4,15 +4,18 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.otilm.api.clients.BaseApiClient;
 import com.otilm.api.exception.ConnectorException;
-import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.client.attribute.RequestAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.SignatureAlgorithm;
-import com.otilm.api.model.common.signature.SignatureFamily;
+import com.otilm.api.model.common.signature.DocumentTransferMode;
 import com.otilm.api.model.common.signature.SignatureLevel;
 import com.otilm.api.model.connector.common.v2.OperationExecutionMode;
 import com.otilm.api.model.connector.common.v2.OperationStatus;
 import com.otilm.api.model.connector.signatures.contentsigning.common.CertificateChainDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ComputeDtbsResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingAttributesDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.ContentSigningFormattingOperation;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedSignatureValueRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.EmbedTimestampRequestDto;
@@ -25,15 +28,21 @@ import com.otilm.api.model.connector.signatures.contentsigning.common.InlineDocu
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentRequestDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.SignedDocumentResponseDto;
 import com.otilm.api.model.connector.signatures.contentsigning.common.TimestampImprintResponseDto;
-import com.otilm.api.model.connector.signatures.contentsigning.jades.JadesComputeDtbsRequestDto;
-import com.otilm.api.model.connector.signatures.contentsigning.pades.PadesComputeDtbsRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileRequestDto;
+import com.otilm.api.model.connector.signatures.contentsigning.common.ValidateProfileResponseDto;
+import com.otilm.api.model.connector.signatures.contentsigning.declaration.ContentSigningDeclarationDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
+import jakarta.validation.Validation;
 import java.time.OffsetDateTime;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
+import java.util.Set;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +50,6 @@ import org.springframework.http.ResponseEntity;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,17 +62,28 @@ class ContentSigningFormattingApiClientTest {
 
     private static final String BASE = "/v1/signatureProvider/contentSigning";
 
+    private static WireMockServer mockServer;
+
     private ContentSigningFormattingApiClient client;
     private ConnectorDto connector;
-    private WireMockServer mockServer;
 
-    @BeforeEach
-    void setUp() {
-        client = new ContentSigningFormattingApiClient(BaseApiClient.prepareWebClient(), null);
-
+    @BeforeAll
+    static void startMockServer() {
         mockServer = new WireMockServer(options().dynamicPort());
         mockServer.start();
         WireMock.configureFor("localhost", mockServer.port());
+    }
+
+    @AfterAll
+    static void stopMockServer() {
+        mockServer.stop();
+    }
+
+    @BeforeEach
+    void setUp() {
+        mockServer.resetAll();
+        client = new ContentSigningFormattingApiClient(BaseApiClient.prepareWebClient(), null,
+                Validation.buildDefaultValidatorFactory().getValidator());
 
         connector = new ConnectorDto();
         connector.setName("ades-connector-under-test");
@@ -72,46 +91,211 @@ class ContentSigningFormattingApiClientTest {
         connector.setStatus(ConnectorStatus.CONNECTED);
     }
 
-    @AfterEach
-    void tearDown() {
-        mockServer.stop();
+    @Test
+    void getDeclaration_readsTheDeclarationRoute() throws ConnectorException {
+        stubGet(BASE + "/declaration", """
+                { "families": [ { "code": "pades", "label": "PAdES",
+                  "levels": [ { "level": "signed", "name": "PAdES-B-B" } ], "transferModes": [ "inline" ] } ] }
+                """);
+
+        ContentSigningDeclarationDto result = client.getDeclaration(connector);
+
+        assertEquals("pades", result.getFamilies().get(0).getCode());
     }
 
     @Test
-    void listFormattingAttributes_readsTheOperationsOwnRoute() throws ConnectorException {
+    void getDeclaration_reportsAnEmptyBodyAsAConnectorFault() {
+        stubGet(BASE + "/declaration", "");
+
+        assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+    }
+
+    @Test
+    void getDeclaration_reportsADeclarationBreakingItsRulesAsAConnectorFault() {
+        stubGet(BASE + "/declaration", """
+                { "families": [ { "code": "pades", "label": "PAdES",
+                  "levels": [ { "level": "timestamped", "name": "PAdES-B-T" } ], "transferModes": [ "inline" ] } ] }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+
+        assertEquals("Connector returned an invalid content-signing declaration: families[0].levels: must run up from "
+                + "SIGNED without a gap, but TIMESTAMPED comes where SIGNED belongs", fault.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{}", "{ \"families\": [] }"})
+    void getDeclaration_reportsADeclarationWithoutFamiliesAsAConnectorFault(String familiesless) {
+        stubGet(BASE + "/declaration", familiesless);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client.getDeclaration(connector));
+
+        assertEquals("Connector returned an invalid content-signing declaration: families: must not be empty",
+                fault.getMessage());
+    }
+
+    @Test
+    void listFormattingAttributes_readsBothListsFromTheOperationsOwnRoute() throws ConnectorException {
         String json = """
-                [
-                  { "uuid": "11111111-1111-1111-1111-111111111111", "name": "signaturePacking", "type": "data", "contentType": "string", "version": 2 }
-                ]
+                {
+                  "profileAttributes": [
+                    { "uuid": "11111111-1111-1111-1111-111111111111", "name": "signaturePacking", "type": "data",
+                      "contentType": "string", "version": 3 }
+                  ],
+                  "requestAttributes": [
+                    { "uuid": "22222222-2222-2222-2222-222222222222", "name": "reason", "type": "data",
+                      "contentType": "string", "version": 3 }
+                  ]
+                }
                 """;
         stubGet(BASE + "/computeDtbs/attributes", json);
 
-        List<BaseAttribute> result = client
+        ContentSigningFormattingAttributesDto result = client
                 .listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS);
 
-        assertEquals(1, result.size());
-        assertEquals("signaturePacking", result.get(0).getName());
+        assertEquals("signaturePacking", result.getProfileAttributes().getFirst().getName());
+        assertEquals("reason", result.getRequestAttributes().getFirst().getName());
     }
 
     @Test
     void listFormattingAttributes_bindsTheOperationWireCodeIntoThePath() throws ConnectorException {
-        stubGet(BASE + "/embedArchiveTimestamp/attributes", "[]");
+        stubGet(BASE + "/embedArchiveTimestamp/attributes", """
+                { "profileAttributes": [], "requestAttributes": [] }
+                """);
 
-        List<BaseAttribute> result = client
+        ContentSigningFormattingAttributesDto result = client
                 .listFormattingAttributes(connector, ContentSigningFormattingOperation.EMBED_ARCHIVE_TIMESTAMP);
 
-        assertEquals(0, result.size());
+        assertEquals(List.of(), result.getProfileAttributes());
     }
 
-    /** The array is wrapped by this client, so the wrapper — not Jackson — decides mutability. */
     @Test
-    void listFormattingAttributes_returnsAMutableList() throws ConnectorException {
-        stubGet(BASE + "/computeDtbs/attributes", "[]");
+    void listFormattingAttributes_reportsAnEmptyBodyAsAConnectorFault() {
+        stubGet(BASE + "/computeDtbs/attributes", "");
 
-        List<BaseAttribute> result = client
-                .listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS);
+        assertThrows(ConnectorException.class,
+                () -> client.listFormattingAttributes(connector, ContentSigningFormattingOperation.COMPUTE_DTBS));
+    }
 
-        assertDoesNotThrow(() -> result.add(null));
+    /** A Go connector serializes an unset list as null. The client reports that as a connector fault. */
+    @Test
+    void listFormattingAttributes_reportsANullListAsAConnectorFault() {
+        stubGet(BASE + "/embedSignatureValue/attributes", """
+                { "profileAttributes": [], "requestAttributes": null }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class, () -> client
+                .listFormattingAttributes(connector, ContentSigningFormattingOperation.EMBED_SIGNATURE_VALUE));
+
+        assertEquals("Connector returned an invalid formatting attribute listing: requestAttributes: must not be null",
+                fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_postsTheProfileToItsOwnRoute() throws ConnectorException {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [], "transferModes": [ "inline" ] }
+                """);
+
+        ValidateProfileResponseDto result = client.validateProfile(connector, validateProfileRequest());
+
+        assertEquals(Set.of(DocumentTransferMode.INLINE), result.getTransferModes());
+        mockServer
+                .verify(WireMock
+                        .postRequestedFor(WireMock.urlEqualTo(BASE + "/validateProfile"))
+                        .withRequestBody(WireMock.matchingJsonPath("$.family", WireMock.equalTo("pades")))
+                        .withRequestBody(WireMock
+                                .matchingJsonPath("$.allowedRequestAttributes[0]",
+                                        WireMock.equalTo("signatureContext"))));
+    }
+
+    /** A Go connector decodes only v3 attributes. A Java connector or WireMock accepts both versions. */
+    @Test
+    void validateProfile_sendsTheProfileValuesAsV3Attributes() throws ConnectorException {
+        stubPost(BASE + "/validateProfile", "{ \"errors\": [], \"transferModes\": [ \"inline\" ] }");
+        ValidateProfileRequestDto request = validateProfileRequest();
+        RequestAttributeV3 font = new RequestAttributeV3();
+        font.setName("font");
+        font.setContent(List.of(new StringAttributeContentV3("DejaVuSans")));
+        request.setFormattingAttributes(List.of(font));
+
+        client.validateProfile(connector, request);
+
+        mockServer
+                .verify(WireMock
+                        .postRequestedFor(WireMock.urlEqualTo(BASE + "/validateProfile"))
+                        .withRequestBody(
+                                WireMock.matchingJsonPath("$.formattingAttributes[0].version", WireMock.equalTo("v3")))
+                        .withRequestBody(
+                                WireMock.matchingJsonPath("$.formattingAttributes[0].content[0].contentType")));
+    }
+
+    @Test
+    void validateProfile_returnsTheProblemsTheConnectorFound() throws ConnectorException {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [ { "attributeName": "font", "reason": "The font file cannot be parsed" } ],
+                  "transferModes": [] }
+                """);
+
+        ValidateProfileResponseDto result = client.validateProfile(connector, validateProfileRequest());
+
+        assertEquals("font", result.getErrors().getFirst().getAttributeName());
+        assertEquals("The font file cannot be parsed", result.getErrors().getFirst().getReason());
+    }
+
+    @Test
+    void validateProfile_reportsAnEmptyBodyAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", "");
+
+        assertThrows(ConnectorException.class, () -> client.validateProfile(connector, validateProfileRequest()));
+    }
+
+    @Test
+    void validateProfile_reportsAValidProfileWithoutTransferModesAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", "{ \"errors\": [], \"transferModes\": [] }");
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: transferModeNamedForValidProfile: "
+                + "transferModes must name at least one mode when errors is empty", fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_reportsAnOmittedErrorListAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", "{ \"transferModes\": [ \"inline\" ] }");
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: errors: "
+                + "errors may be an empty list, but must be present", fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_reportsAnOmittedTransferModeSetAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [ { "attributeName": "font", "reason": "The font file cannot be parsed" } ] }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: transferModes: "
+                + "transferModes may be an empty set, but must be present", fault.getMessage());
+    }
+
+    @Test
+    void validateProfile_reportsAnErrorWithoutItsAttributeAsAConnectorFault() {
+        stubPost(BASE + "/validateProfile", """
+                { "errors": [ { "reason": "The font file cannot be parsed" } ], "transferModes": [] }
+                """);
+
+        ConnectorException fault = assertThrows(ConnectorException.class,
+                () -> client.validateProfile(connector, validateProfileRequest()));
+
+        assertEquals("Connector returned an invalid profile validation result: errors[0].attributeName: "
+                + "attributeName is required", fault.getMessage());
     }
 
     @Test
@@ -126,24 +310,12 @@ class ContentSigningFormattingApiClientTest {
         assertArrayEquals(new byte[]{4, 5, 6}, result.getFormattingContext());
     }
 
-    /** Serialized against the abstract base, so the family would vanish if the discriminator were not a property. */
-    @Test
-    void computeDtbs_putsTheConcreteFamilyOnTheWire() throws ConnectorException {
-        stubPost(BASE + "/computeDtbs", "{ \"dtbs\": \"AQID\", \"formattingContext\": \"BAUG\" }");
-
-        client.computeDtbs(connector, padesRequest());
-
-        mockServer
-                .verify(WireMock
-                        .postRequestedFor(WireMock.urlEqualTo(BASE + "/computeDtbs"))
-                        .withRequestBody(WireMock.matchingJsonPath("$.family", WireMock.equalTo("pades"))));
-    }
-
     @Test
     void computeDtbs_carriesEachFamilyItIsGiven() throws ConnectorException {
         stubPost(BASE + "/computeDtbs", "{ \"dtbs\": \"AQID\", \"formattingContext\": \"BAUG\" }");
 
-        JadesComputeDtbsRequestDto request = new JadesComputeDtbsRequestDto();
+        ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
+        request.setFamily("jades");
         request.setDocument(new InlineDocumentTransferDto(new byte[]{7, 7, 7}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
@@ -160,11 +332,12 @@ class ContentSigningFormattingApiClientTest {
 
     @Test
     void embedSignatureValue_postsAndReturnsTheSignedDocument() throws ConnectorException {
-        stubPost(BASE + "/embedSignatureValue", "{ \"signedDocument\": \"AQID\" }");
+        stubPost(BASE + "/embedSignatureValue", "{ \"signedDocument\": \"AQID\", \"mediaType\": \"application/pdf\" }");
 
         SignedDocumentResponseDto result = client.embedSignatureValue(connector, embedSignatureValueRequest());
 
         assertArrayEquals(new byte[]{1, 2, 3}, result.getSignedDocument());
+        assertEquals("application/pdf", result.getMediaType());
     }
 
     /**
@@ -218,11 +391,13 @@ class ContentSigningFormattingApiClientTest {
 
     @Test
     void embedSignatureTimestamp_postsToItsOwnRoute() throws ConnectorException {
-        stubPost(BASE + "/embedSignatureTimestamp", "{ \"signedDocument\": \"AQID\" }");
+        stubPost(BASE + "/embedSignatureTimestamp",
+                "{ \"signedDocument\": \"AQID\", \"mediaType\": \"application/pdf\" }");
 
         SignedDocumentResponseDto result = client.embedSignatureTimestamp(connector, timestampRequest());
 
         assertArrayEquals(new byte[]{1, 2, 3}, result.getSignedDocument());
+        assertEquals("application/pdf", result.getMediaType());
         mockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(BASE + "/embedSignatureTimestamp")));
     }
 
@@ -231,11 +406,13 @@ class ContentSigningFormattingApiClientTest {
      */
     @Test
     void embedArchiveTimestamp_postsToItsOwnRoute() throws ConnectorException {
-        stubPost(BASE + "/embedArchiveTimestamp", "{ \"signedDocument\": \"BAUG\" }");
+        stubPost(BASE + "/embedArchiveTimestamp",
+                "{ \"signedDocument\": \"BAUG\", \"mediaType\": \"application/pdf\" }");
 
         SignedDocumentResponseDto result = client.embedArchiveTimestamp(connector, timestampRequest());
 
         assertArrayEquals(new byte[]{4, 5, 6}, result.getSignedDocument());
+        assertEquals("application/pdf", result.getMediaType());
         mockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(BASE + "/embedArchiveTimestamp")));
     }
 
@@ -346,7 +523,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ExtendToLevelRequestDto validExtendToLevel() {
         ExtendToLevelRequestDto request = new ExtendToLevelRequestDto();
-        request.setFamily(SignatureFamily.PADES);
+        request.setFamily("pades");
         request.setFormattingAttributes(List.of());
         request.setSignedDocument(new byte[]{9});
         request.setTargetLevel(SignatureLevel.LONG_TERM);
@@ -360,7 +537,7 @@ class ContentSigningFormattingApiClientTest {
 
     private static ExtendOperationScopedRequestDto scopedRequest() {
         ExtendOperationScopedRequestDto request = new ExtendOperationScopedRequestDto();
-        request.setFamily(SignatureFamily.PADES);
+        request.setFamily("pades");
         request.setFormattingAttributes(List.of());
         request.setOperationMeta(validMetadata());
         return request;
@@ -401,13 +578,22 @@ class ContentSigningFormattingApiClientTest {
         assertThrows(IllegalStateException.class, () -> client.computeDtbs(connector, padesRequest()));
     }
 
-    private static PadesComputeDtbsRequestDto padesRequest() {
-        PadesComputeDtbsRequestDto request = new PadesComputeDtbsRequestDto();
+    private static ComputeDtbsRequestDto padesRequest() {
+        ComputeDtbsRequestDto request = new ComputeDtbsRequestDto();
+        request.setFamily("pades");
         request.setDocument(new InlineDocumentTransferDto(new byte[]{1, 2, 3}));
         request.setSignerCertificateChain(List.of(new byte[]{9}));
         request.setSigningTime(OffsetDateTime.parse("2026-08-11T10:15:30Z"));
         request.setSignatureAlgorithm(SignatureAlgorithm.SHA256_WITH_RSA_PSS);
         request.setFormattingAttributes(List.of());
+        return request;
+    }
+
+    private static ValidateProfileRequestDto validateProfileRequest() {
+        ValidateProfileRequestDto request = new ValidateProfileRequestDto();
+        request.setFamily("pades");
+        request.setFormattingAttributes(List.of());
+        request.setAllowedRequestAttributes(Set.of("signatureContext"));
         return request;
     }
 

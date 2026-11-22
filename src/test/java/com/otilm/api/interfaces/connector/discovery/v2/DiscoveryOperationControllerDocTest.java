@@ -1,12 +1,17 @@
 package com.otilm.api.interfaces.connector.discovery.v2;
 
+import com.otilm.api.model.client.discovery.DiscoveryDetailDto;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.common.error.ProblemDetailExtended;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDeliveryMode;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryDrainRequestDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryInitiateResponseDto;
+import com.otilm.api.model.connector.discovery.v2.DiscoveryResultsResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryStopResponseDto;
 import com.otilm.api.model.connector.discovery.v2.DiscoveryV2ScopedRequestDto;
 import com.otilm.api.testsupport.OpenApiProseAssertions;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -120,8 +125,9 @@ class DiscoveryOperationControllerDocTest {
 
     /**
      * {@code checkpoint} is declared on {@link DiscoveryV2ScopedRequestDto}, so every operation whose request body
-     * extends that base replays it. The two responses that mint it must name all of them, initiate excepted: that is
-     * the call it comes back from.
+     * extends that base replays it. The initiate and stop responses must name all of them, initiate excepted: that is
+     * the call it comes back from. The results response mints a checkpoint only in checkpointed delivery, and says
+     * instead that Core replays it on the next call.
      */
     @Test
     void handleMintingResponsesNameEveryOperationThatReplaysTheCheckpoint() throws NoSuchFieldException {
@@ -213,6 +219,171 @@ class DiscoveryOperationControllerDocTest {
                         + " does not declare ProblemDetailExtended content");
             }
         }
+    }
+
+    @Test
+    void resultsDescriptionCarriesTheCheckpointedDeliveryRules() {
+        String description = operation("results").getAnnotation(Operation.class).description();
+        for (String rule : List
+                .of("afterSequence + 1", "the checkpoint after its items", "call again now",
+                        "nothing more is ready now", "100 items", "acknowledgement", "20 seconds", "503")) {
+            assertTrue(description.contains(rule), "results description must state \"" + rule + "\": " + description);
+        }
+    }
+
+    @Test
+    void resultsDocumentsABusyConnector503() {
+        ApiResponses responses = operation("results").getAnnotation(ApiResponses.class);
+        assertTrue(Arrays.stream(responses.value()).anyMatch(r -> r.responseCode().equals("503")),
+                "expected a documented 503 (connector busy) on results");
+    }
+
+    @Test
+    void initiateAndStopDescribeDeliveryModes() {
+        assertTrue(operation("initiate").getAnnotation(Operation.class).description().contains("delivery modes"));
+        assertTrue(operation("stop").getAnnotation(Operation.class).description().contains("without a checkpoint"));
+    }
+
+    @Test
+    void requestCheckpointNamesTheResultsPageAsItsSourceInCheckpointedDelivery() throws NoSuchFieldException {
+        String description = DiscoveryV2ScopedRequestDto.class
+                .getDeclaredField("checkpoint")
+                .getAnnotation(Schema.class)
+                .description();
+        assertTrue(description.contains("checkpointed delivery, results"), description);
+    }
+
+    @Test
+    void resultsBusyResponseIsScopedToCheckpointedDelivery() {
+        String description = response("results", "503").description();
+        assertTrue(description.contains("In checkpointed delivery"), description);
+        assertTrue(description.contains("does not offer checkpointed"), description);
+    }
+
+    @Test
+    void resumeResponsesFollowTheDeliveryModeRules() {
+        String accepted = response("resume", "202").description();
+        String refused = response("resume", "422").description();
+        assertTrue(accepted.contains("in buffered delivery"), accepted);
+        assertTrue(refused.contains("delivery modes"), refused);
+    }
+
+    @Test
+    void moreIsDescribedInTheWordsOfTheResultsContract() throws NoSuchFieldException {
+        String field = DiscoveryResultsResponseDto.class
+                .getDeclaredField("more")
+                .getAnnotation(Schema.class)
+                .description();
+        String page = response("results", "200").description();
+        assertTrue(field.contains("nothing more is ready now"), field);
+        assertTrue(page.contains("nothing more is ready now"), page);
+    }
+
+    @Test
+    void offerSaysItTravelsOnEveryCallAndWhatAnEmptyListMeans() throws NoSuchFieldException {
+        String offer = DiscoveryV2ScopedRequestDto.class
+                .getDeclaredField("deliveryModes")
+                .getAnnotation(ArraySchema.class)
+                .arraySchema()
+                .description();
+        String results = operation("results").getAnnotation(Operation.class).description();
+        assertTrue(offer.contains("a call without it comes from a Core"), offer);
+        assertTrue(offer.contains("An empty list offers no mode"), offer);
+        assertTrue(results.contains("does not offer checkpointed"), results);
+        assertTrue(results.contains("comes from a Core that does not drive checkpointed runs"), results);
+        assertTrue(results.contains("a Core that offers checkpointed can take the retry"), results);
+    }
+
+    @Test
+    void tagScopes404ToRunsThatCannotBeServedFromTheRequest() {
+        String tag = DiscoveryOperationController.class.getAnnotation(Tag.class).description();
+        assertFalse(tag.contains("Answer 404 only for a runId you cannot rebuild"), tag);
+        assertTrue(tag.contains("In buffered delivery, if you can rebuild the run"), tag);
+        assertTrue(tag.contains("a replayed checkpoint that disagrees with afterSequence"), tag);
+        assertTrue(tag.contains("a checkpoint you cannot read is an invalid request"), tag);
+    }
+
+    @Test
+    void anyCheckpointed422OnResultsEndsTheRun() {
+        String refused = response("results", "422").description();
+        String results = operation("results").getAnnotation(Operation.class).description();
+        assertTrue(refused.contains("any 422 ends the run"), refused);
+        assertTrue(results.contains("cannot read"), results);
+    }
+
+    @Test
+    void busyRetryNamesNoTransportCarrier() {
+        String results = operation("results").getAnnotation(Operation.class).description();
+        assertFalse(results.contains("Retry-After"), results);
+    }
+
+    @Test
+    void resumeNamesTheCheckpointCoreActuallyHolds() {
+        String resume = operation("resume").getAnnotation(Operation.class).description();
+        assertTrue(resume.contains("the stop's checkpoint"), resume);
+        assertTrue(resume.contains("from initiate"), resume);
+        assertFalse(resume.contains("Core keeps the one it stored with the last page"), resume);
+    }
+
+    @Test
+    void checkpointFieldsStateTheirCheckpointedDeliveryRules() throws NoSuchFieldException {
+        String stop = schemaDescription(DiscoveryStopResponseDto.class, "checkpoint");
+        String initiate = schemaDescription(DiscoveryInitiateResponseDto.class, "checkpoint");
+        String results = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
+        assertTrue(stop.contains("In checkpointed delivery, omit it"), stop);
+        assertTrue(stop.contains("Core keeps the checkpoint it holds"), stop);
+        assertTrue(initiate.contains("a resume response omits it"), initiate);
+        assertTrue(results.contains("a larger one fails the run"), results);
+    }
+
+    @Test
+    void maxBytesCountsTheItemsAndCoreLeavesRoomForTheCheckpointAndTheResponse() throws NoSuchFieldException {
+        String maxBytes = schemaDescription(DiscoveryDrainRequestDto.class, "maxBytes");
+        String checkpoint = schemaDescription(DiscoveryResultsResponseDto.class, "checkpoint");
+        assertEquals(131_072L, DiscoveryDrainRequestDto.CHECKPOINTED_RESPONSE_RESERVE);
+        assertTrue(maxBytes.contains("at most 10354688 bytes: 10 MiB less a 128 KB (131072-byte) reserve"), maxBytes);
+        assertTrue(maxBytes.contains("the page's checkpoint (at most 64 KB) and the rest of the response"), maxBytes);
+        assertTrue(maxBytes.contains("leaving the same room"), maxBytes);
+        assertTrue(checkpoint.contains("does not count against maxBytes"), checkpoint);
+    }
+
+    @Test
+    void deliveryModesAreDefinedWhereTheyArePublished() throws NoSuchFieldException {
+        String modes = DiscoveryDeliveryMode.class.getAnnotation(Schema.class).description();
+        String detail = schemaDescription(DiscoveryDetailDto.class, "deliveryMode");
+        assertTrue(modes.contains("`buffered`: the connector holds"), modes);
+        assertTrue(modes.contains("`checkpointed`: the connector holds nothing"), modes);
+        assertTrue(detail.contains("Absent for v1 runs."), detail);
+        assertTrue(detail.contains("whose initiate was refused or never answered, shows buffered"), detail);
+    }
+
+    @Test
+    void stopNamesTheCallsCoreSuspends() {
+        String stop = operation("stop").getAnnotation(Operation.class).description();
+        assertTrue(stop.contains("no status or results call"), stop);
+        assertFalse(stop.contains("does not call the connector"), stop);
+        assertFalse(stop.contains("last page"), stop);
+        assertTrue(stop.contains("A stop past the point of no return is still refused with 422"), stop);
+    }
+
+    private static String schemaDescription(Class<?> type, String field) throws NoSuchFieldException {
+        return type.getDeclaredField(field).getAnnotation(Schema.class).description();
+    }
+
+    private static ApiResponse response(String operation, String code) {
+        return Arrays
+                .stream(operation(operation).getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals(code))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static Method operation(String name) {
+        return Arrays
+                .stream(DiscoveryOperationController.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals(name))
+                .findFirst()
+                .orElseThrow();
     }
 
     private static boolean isErrorStatus(String responseCode) {
