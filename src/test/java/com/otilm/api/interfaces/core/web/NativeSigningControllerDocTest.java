@@ -1,6 +1,7 @@
 package com.otilm.api.interfaces.core.web;
 
 import com.otilm.api.model.client.signing.nativesigning.SignDocumentRequestDto;
+import com.otilm.api.model.client.signing.nativesigning.SignRawRequestDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static com.otilm.api.testsupport.OpenApiProseAssertions.assertLanguageNeutral;
 import static com.otilm.api.testsupport.OpenApiProseAssertions.assertNoJargon;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,13 +68,10 @@ class NativeSigningControllerDocTest {
 
     @Test
     void unprocessableAnswersAnArrayOfMessages() throws NoSuchMethodException {
-        ApiResponse unprocessable = Arrays
-                .stream(signDocumentMethod().getAnnotation(ApiResponses.class).value())
-                .filter(r -> r.responseCode().equals("422"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("signDocument declares no 422 response"));
-        assertEquals(String.class, unprocessable.content()[0].array().schema().implementation(),
-                "Core renders a refusal as an array of messages");
+        for (Method operation : List.of(signDocumentMethod(), signRawMethod())) {
+            assertEquals(String.class, unprocessable(operation).content()[0].array().schema().implementation(),
+                    operation.getName() + ": Core renders a refusal as an array of messages");
+        }
     }
 
     @Test
@@ -93,6 +92,42 @@ class NativeSigningControllerDocTest {
     }
 
     @Test
+    void signRawIsPostedToTheSigningProfilesRawPath() throws NoSuchMethodException {
+        Method signRaw = signRawMethod();
+        PostMapping mapping = signRaw.getAnnotation(PostMapping.class);
+        assertNotNull(mapping, "signRaw must be a POST");
+        assertArrayEquals(new String[]{"/signingProfiles/{signingProfileUuid}/raw/sign"}, mapping.path());
+        assertEquals("signRaw", signRaw.getAnnotation(Operation.class).operationId());
+    }
+
+    @Test
+    void signRawStatesItsBatchContract() throws NoSuchMethodException {
+        String description = signRawMethod().getAnnotation(Operation.class).description();
+        for (String promise : List
+                .of("in request order", "succeeds or fails as a whole", "writes no signing record",
+                        "A retry is a new signing", "names the item by its identifier", "synchronous",
+                        "no signature activation data")) {
+            assertTrue(description.contains(promise), "signRaw does not state '" + promise + "': " + description);
+        }
+        assertNoJargon("signRaw", description);
+        assertLanguageNeutral("signRaw", description);
+    }
+
+    /** Integrators tell a mistake of theirs from a platform fault only if every refusal is listed. */
+    @Test
+    void signRawDescribesItsRefusals() throws NoSuchMethodException {
+        String description = unprocessable(signRawMethod()).description();
+        for (String refusal : List
+                .of("ILM Native API inactive", "not a raw-signing profile", "`signatureInputMode` is not `dataDigest`",
+                        "`maxItemsPerRequest`", "`digestAlgorithm` differs", "digest size", "repeats",
+                        "`certificateFingerprint`")) {
+            assertTrue(description.contains(refusal), "signRaw's 422 omits '" + refusal + "': " + description);
+        }
+        assertNoJargon("signRaw 422", description);
+        assertLanguageNeutral("signRaw 422", description);
+    }
+
+    @Test
     void serviceUnavailableDeclaresTheRetryAfterHeader() {
         ApiResponse unavailable = Arrays
                 .stream(NativeSigningController.class.getAnnotation(ApiResponses.class).value())
@@ -105,5 +140,17 @@ class NativeSigningControllerDocTest {
 
     private static Method signDocumentMethod() throws NoSuchMethodException {
         return NativeSigningController.class.getMethod("signDocument", UUID.class, SignDocumentRequestDto.class);
+    }
+
+    private static Method signRawMethod() throws NoSuchMethodException {
+        return NativeSigningController.class.getMethod("signRaw", UUID.class, SignRawRequestDto.class);
+    }
+
+    private static ApiResponse unprocessable(Method operation) {
+        return Arrays
+                .stream(operation.getAnnotation(ApiResponses.class).value())
+                .filter(r -> r.responseCode().equals("422"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(operation.getName() + " declares no 422 response"));
     }
 }
