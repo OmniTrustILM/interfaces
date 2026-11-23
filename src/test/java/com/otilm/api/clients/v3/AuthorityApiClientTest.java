@@ -153,6 +153,24 @@ class AuthorityApiClientTest {
     }
 
     @Test
+    void listCertificateTypes_returnsNoTypesWhenTheConnectorAnswersWithoutABody() throws ConnectorException {
+        // given
+        mockServer
+                .stubFor(WireMock
+                        .post(CERTIFICATE_TYPES_PATH)
+                        .willReturn(WireMock
+                                .aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+
+        // when
+        List<SupportedCertificateTypeDtoV3> types = client.listCertificateTypes(connector, authorityRequest());
+
+        // then
+        Assertions.assertEquals(List.of(), types);
+    }
+
+    @Test
     void listCertificateTypes_failsWithNotFoundWhenTheConnectorDoesNotServeTheOperation() {
         // given
         mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(WireMock.aResponse().withStatus(404)));

@@ -69,7 +69,8 @@ public interface AuthorityController extends AuthProtectedConnectorController {
                     + "listed like any other type, so the response is the whole answer. Optional endpoint — see "
                     + "responses.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Supported certificate types retrieved"),
+            @ApiResponse(responseCode = "200",
+                    description = "Supported certificate types retrieved; an empty array means X.509 only"),
             @ApiResponse(responseCode = "404",
                     description = "Endpoint not served by this connector — Core treats the authority as issuing X.509 only"),
             @ApiResponse(responseCode = "501",

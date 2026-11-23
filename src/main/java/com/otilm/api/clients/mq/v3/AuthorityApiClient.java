@@ -82,6 +82,6 @@ public class AuthorityApiClient implements AuthoritySyncApiClient {
         SupportedCertificateTypeDtoV3[] result = proxyClient
                 .sendRequest(connector, PATH_CERTIFICATE_TYPES, HTTP_METHOD_POST, requestDto,
                         SupportedCertificateTypeDtoV3[].class);
-        return SupportedCertificateTypes.requireValid(Arrays.asList(result), connector);
+        return SupportedCertificateTypes.requireValid(result == null ? List.of() : Arrays.asList(result), connector);
     }
 }
