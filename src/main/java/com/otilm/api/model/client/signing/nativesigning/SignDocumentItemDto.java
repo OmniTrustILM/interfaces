@@ -1,9 +1,12 @@
 package com.otilm.api.model.client.signing.nativesigning;
 
+import com.otilm.api.model.client.signing.nativesigning.validation.ItemIdentifierFormat;
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
 import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +24,8 @@ public class SignDocumentItemDto implements IdentifiedDataV2Dto {
     @Schema(description = "Identifier used to correlate the item with its result; unique within the request",
             examples = {"contract-2026-17"}, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "identifier is required")
+    @Size(max = ItemIdentifierFormat.MAX_LENGTH, message = ItemIdentifierFormat.LENGTH_MESSAGE)
+    @Pattern(regexp = ItemIdentifierFormat.REGEX, message = ItemIdentifierFormat.MESSAGE)
     private String identifier;
 
     @Sensitive
