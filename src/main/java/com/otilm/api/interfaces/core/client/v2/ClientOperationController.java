@@ -14,6 +14,7 @@ import com.otilm.api.model.client.certificate.ManuallyIssueCertificateRequestDto
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.core.certificate.CertificateDetail;
+import com.otilm.api.model.core.certificate.SupportedCertificateTypeDto;
 import com.otilm.api.model.core.v2.AvailableOperationsDto;
 import com.otilm.api.model.core.v2.ClientCertificateDataResponseDto;
 import com.otilm.api.model.core.v2.ClientCertificateIssueRequestDto;
@@ -270,6 +271,15 @@ public interface ClientOperationController extends AuthProtectedController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Attributes obtained")})
     @GetMapping(path = "/attributes/renew", produces = {"application/json"})
     List<BaseAttribute> listRenewCertificateAttributes(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+            @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid)
+            throws ConnectorException, NotFoundException;
+
+    @Operation(summary = "List supported certificate types",
+            description = "Return the certificate types that can be issued through this RA profile, as its certificate authority reports them. An authority that does not report its types issues X.509 only.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Supported certificate types obtained")})
+    @GetMapping(path = "/certificateTypes", produces = {"application/json"})
+    List<SupportedCertificateTypeDto> listSupportedCertificateTypes(
             @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
             @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid)
             throws ConnectorException, NotFoundException;

@@ -23,6 +23,7 @@ import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.core.certificate.CertificateDetail;
+import com.otilm.api.model.core.certificate.SupportedCertificateTypeDto;
 import com.otilm.api.model.core.raprofile.RaProfileCertificateRequestAttributesUpdateDto;
 import com.otilm.api.model.core.raprofile.RaProfileCertificateValidationSettingsUpdateDto;
 import com.otilm.api.model.core.raprofile.RaProfileDto;
@@ -433,6 +434,19 @@ public interface RAProfileManagementController extends AuthProtectedController {
     @GetMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/attributes/issue",
             produces = {"application/json"})
     List<BaseAttribute> listIssueCertificateAttributes(
+            @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
+            @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid)
+            throws ConnectorException, NotFoundException;
+
+    @Operation(summary = "List supported Certificate types", operationId = "listRaProfileSupportedCertificateTypes",
+            description = "Return the certificate types that can be issued through this RA profile, as its certificate authority reports them. An authority that does not report its types issues X.509 only.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Supported certificate types obtained"),
+            @ApiResponse(responseCode = "404", description = "RA Profile not found",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
+    @GetMapping(path = "/authorities/{authorityUuid}/raProfiles/{raProfileUuid}/certificateTypes",
+            produces = {"application/json"})
+    List<SupportedCertificateTypeDto> listSupportedCertificateTypes(
             @Parameter(description = "Authority Instance UUID") @PathVariable String authorityUuid,
             @Parameter(description = "RA Profile UUID") @PathVariable String raProfileUuid)
             throws ConnectorException, NotFoundException;
