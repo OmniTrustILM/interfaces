@@ -216,10 +216,13 @@ class SigningProfileControllerContractTest {
             assertEquals("Signing Profile not found", notFound.description());
             assertEquals(ErrorMessageDto.class, notFound.content()[0].schema().implementation());
         }
-        assertTrue(activate
-                .getAnnotation(Operation.class)
-                .description()
-                .contains("Refused with 422 on a timestamping profile and on a profile that uses delegated signing."));
+        String activation = activate.getAnnotation(Operation.class).description();
+        for (String refusal : List
+                .of("on a timestamping profile", "on a profile that uses delegated signing",
+                        "on a raw-signing profile whose signing key also signs for a content-signing or timestamping "
+                                + "profile, including through another certificate on the same key")) {
+            assertTrue(activation.contains(refusal), "activateIlmNative omits '" + refusal + "': " + activation);
+        }
         ApiResponse unprocessable = documented(activate, "422");
         assertEquals("Unprocessable Content", unprocessable.description());
         assertEquals(String.class, unprocessable.content()[0].array().schema().implementation(),

@@ -379,8 +379,9 @@ public interface SigningProfileController extends AuthProtectedController {
 
     @Operation(operationId = "activateIlmNative", summary = "Activate the ILM Native API for Signing Profile",
             description = "Enables the native signing API on a content-signing or raw-signing profile that uses "
-                    + "ILM-managed signing. Refused with 422 on a timestamping profile and on a profile that uses "
-                    + "delegated signing.")
+                    + "ILM-managed signing. Refused with 422 on a timestamping profile, on a profile that uses "
+                    + "delegated signing, and on a raw-signing profile whose signing key also signs for a "
+                    + "content-signing or timestamping profile, including through another certificate on the same key.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "ILM Native API activated"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
