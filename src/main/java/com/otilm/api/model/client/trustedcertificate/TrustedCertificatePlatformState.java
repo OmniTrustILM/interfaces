@@ -32,10 +32,6 @@ public enum TrustedCertificatePlatformState implements IPlatformEnum {
     private final String label;
     private final String description;
 
-    TrustedCertificatePlatformState(String code, String label) {
-        this(code, label, null);
-    }
-
     TrustedCertificatePlatformState(String code, String label, String description) {
         this.code = code;
         this.label = label;

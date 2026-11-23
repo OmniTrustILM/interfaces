@@ -28,10 +28,6 @@ public enum TrustedCertificatePurpose implements IPlatformEnum {
     private final String label;
     private final String description;
 
-    TrustedCertificatePurpose(String code, String label) {
-        this(code, label, null);
-    }
-
     TrustedCertificatePurpose(String code, String label, String description) {
         this.code = code;
         this.label = label;

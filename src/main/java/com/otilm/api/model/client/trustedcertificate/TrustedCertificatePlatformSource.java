@@ -27,10 +27,6 @@ public enum TrustedCertificatePlatformSource implements IPlatformEnum {
     private final String label;
     private final String description;
 
-    TrustedCertificatePlatformSource(String code, String label) {
-        this(code, label, null);
-    }
-
     TrustedCertificatePlatformSource(String code, String label, String description) {
         this.code = code;
         this.label = label;
