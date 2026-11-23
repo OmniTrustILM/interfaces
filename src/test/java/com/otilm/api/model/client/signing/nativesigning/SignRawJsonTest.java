@@ -42,7 +42,6 @@ class SignRawJsonTest {
         assertArrayEquals(DIGEST, request.getItems().getFirst().getData());
     }
 
-    /** The input mode was renamed before release, so the earlier name must not quietly mean anything. */
     @Test
     void anUnknownModeIsRejectedWhileDecoding() {
         assertThrows(JsonProcessingException.class,

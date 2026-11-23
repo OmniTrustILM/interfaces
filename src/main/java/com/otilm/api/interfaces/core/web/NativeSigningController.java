@@ -50,9 +50,9 @@ public interface NativeSigningController extends AuthProtectedController {
     @Operation(operationId = "signDocument", summary = "Sign documents",
             description = "Sign every document of the request at the Signing Profile's signature level and return "
                     + "the signing outputs in request order. The request succeeds or fails as a whole: a failed request "
-                    + "returns no output and writes no signing record for its documents. A retry is a new signing. A signing "
-                    + "failure names the item by its identifier; a validation failure names the field path by item "
-                    + "index.")
+                    + "returns no output and writes no signing record for its documents. A retry is a new signing. A "
+                    + "failure of one item names it by its identifier; a validation failure names the field path by "
+                    + "item index.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Documents signed"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
@@ -76,9 +76,9 @@ public interface NativeSigningController extends AuthProtectedController {
             description = "Sign every digest of the request with the Signing Profile's key and return the signatures "
                     + "in request order, with the signature algorithm and the signing certificate chain that verify "
                     + "them. The request succeeds or fails as a whole: a failed request returns no signature and writes "
-                    + "no signing record for its items. A retry is a new signing, with new signing records. A signing "
-                    + "failure names the item by its identifier; a validation failure names the field path by item "
-                    + "index. The operation is synchronous and carries no signature activation data.")
+                    + "no signing record for its items. A retry is a new signing, with new signing records. A failure of "
+                    + "one item names it by its identifier; a validation failure names the field path by item index. "
+                    + "The operation is synchronous and carries no signature activation data.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Digests signed"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",

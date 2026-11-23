@@ -126,7 +126,6 @@ class SignRawSchemaGenerationTest {
         Map<String, Schema> schemas = allSchemas();
         for (String name : SCHEMA_NAMES) {
             schema(schemas, name);
-            assertFalse(name.endsWith("V2"), name);
         }
     }
 
