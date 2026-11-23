@@ -13,6 +13,7 @@ import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypes;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import org.springframework.core.ParameterizedTypeReference;
@@ -116,12 +117,13 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
             CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        return processRequest(
+        List<SupportedCertificateTypeDtoV3> types = processRequest(
                 r -> requireBody(r
                         .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
                         .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)
                         .retrieve()
                         .toEntityList(SupportedCertificateTypeDtoV3.class), "listCertificateTypes"),
                 request, connector);
+        return SupportedCertificateTypes.requireValid(types, connector);
     }
 }

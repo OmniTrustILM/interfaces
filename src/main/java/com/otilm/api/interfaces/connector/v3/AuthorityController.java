@@ -11,6 +11,7 @@ import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -65,9 +66,14 @@ public interface AuthorityController extends AuthProtectedConnectorController {
     @Operation(summary = "List supported certificate types",
             description = "List the certificate types the authority issues, or the types it issues through one RA "
                     + "profile when the RA profile attributes are given. Each type appears at most once, and X.509 is "
-                    + "listed like any other type, so the response is the whole answer. A connector that does not "
-                    + "implement the operation, or answers it with 404 or 501, is treated as issuing X.509 only.")
-    @ApiResponse(responseCode = "200", description = "Supported certificate types retrieved")
+                    + "listed like any other type, so the response is the whole answer. Optional endpoint — see "
+                    + "responses.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Supported certificate types retrieved"),
+            @ApiResponse(responseCode = "404",
+                    description = "Endpoint not served by this connector — Core treats the authority as issuing X.509 only"),
+            @ApiResponse(responseCode = "501",
+                    description = "Connector declines the operation (ErrorCode.OPERATION_NOT_SUPPORTED) — Core treats the authority as issuing X.509 only")})
     @PostMapping(path = "/certificateTypes", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     List<@NotNull SupportedCertificateTypeDtoV3> listCertificateTypes(

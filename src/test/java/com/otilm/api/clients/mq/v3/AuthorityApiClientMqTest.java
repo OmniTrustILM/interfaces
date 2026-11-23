@@ -49,4 +49,20 @@ class AuthorityApiClientMqTest {
         Assertions.assertSame(request, invocation.body());
         Assertions.assertEquals(SupportedCertificateTypeDtoV3[].class, invocation.responseType());
     }
+
+    @Test
+    void listCertificateTypes_failsWhenTheConnectorListsATypeTwice() {
+        // given
+        CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
+        request.setAuthorityAttributes(List.of());
+        SupportedCertificateTypeDtoV3 repeated = SupportedCertificateTypeDtoV3.of(CertificateType.SSH);
+        proxyClient.respondWith(new SupportedCertificateTypeDtoV3[]{repeated, repeated});
+
+        // when
+        ConnectorException thrown = Assertions
+                .assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
+
+        // then
+        Assertions.assertEquals("Connector listed the certificate type SSH more than once", thrown.getMessage());
+    }
 }

@@ -1,11 +1,13 @@
 package com.otilm.api.model.connector.v3.authority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otilm.api.model.client.attribute.RequestAttributeV2;
 import com.otilm.api.model.core.certificate.CertificateType;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CertificateTypesDtosTest {
@@ -54,5 +56,21 @@ class CertificateTypesDtosTest {
         // then
         assertEquals("{\"certificateType\":\"" + CertificateType.SSH.getCode() + "\"}", json);
         assertEquals(supported, back);
+    }
+
+    @Test
+    void requestKeepsTheAttributesOutOfItsTextForm() {
+        // given
+        RequestAttributeV2 secret = new RequestAttributeV2();
+        secret.setName("caCredential");
+        CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
+        request.setAuthorityAttributes(List.of(secret));
+        request.setRaProfileAttributes(List.of(secret));
+
+        // when
+        String text = request.toString();
+
+        // then
+        assertFalse(text.contains("caCredential"));
     }
 }

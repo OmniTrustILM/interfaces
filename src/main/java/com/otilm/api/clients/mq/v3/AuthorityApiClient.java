@@ -13,6 +13,7 @@ import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypes;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -81,6 +82,6 @@ public class AuthorityApiClient implements AuthoritySyncApiClient {
         SupportedCertificateTypeDtoV3[] result = proxyClient
                 .sendRequest(connector, PATH_CERTIFICATE_TYPES, HTTP_METHOD_POST, requestDto,
                         SupportedCertificateTypeDtoV3[].class);
-        return Arrays.asList(result);
+        return SupportedCertificateTypes.requireValid(Arrays.asList(result), connector);
     }
 }
