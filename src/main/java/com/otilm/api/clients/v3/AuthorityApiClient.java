@@ -39,6 +39,9 @@ import reactor.core.publisher.Mono;
 @SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncApiClient {
 
+    private static final ParameterizedTypeReference<List<SupportedCertificateTypeDtoV3>> SUPPORTED_CERTIFICATE_TYPES = new ParameterizedTypeReference<>() {
+    };
+
     private static final String AUTHORITY_BASE_CONTEXT = "/v3/authorityProvider/authorities";
     private static final String AUTHORITY_ATTRIBUTES_CONTEXT = AUTHORITY_BASE_CONTEXT + "/attributes";
     private static final String AUTHORITY_RA_PROFILE_ATTRIBUTES_CONTEXT = AUTHORITY_BASE_CONTEXT
@@ -117,13 +120,13 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
             CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        List<SupportedCertificateTypeDtoV3> types = processRequest(
-                r -> requireBody(r
-                        .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
-                        .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)
-                        .retrieve()
-                        .toEntityList(SupportedCertificateTypeDtoV3.class), "listCertificateTypes"),
-                request, connector);
+        // read as one list: read element by element, a null entry would be dropped before it can be refused
+        ResponseEntity<List<SupportedCertificateTypeDtoV3>> response = processRequest(r -> requireResponse(r
+                .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
+                .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)
+                .retrieve()
+                .toEntity(SUPPORTED_CERTIFICATE_TYPES), "listCertificateTypes"), request, connector);
+        List<SupportedCertificateTypeDtoV3> types = response.getBody() != null ? response.getBody() : List.of();
         return SupportedCertificateTypes.requireValid(types, connector);
     }
 }

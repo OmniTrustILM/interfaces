@@ -247,6 +247,20 @@ class AuthorityApiClientTest {
     }
 
     @Test
+    void listCertificateTypes_failsWhenAnEntryIsNull() {
+        // given
+        mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(typesResponse("[null]")));
+        CertificateTypesRequestDtoV3 request = authorityRequest();
+
+        // when
+        ConnectorException thrown = Assertions
+                .assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
+
+        // then
+        Assertions.assertEquals("Connector listed a supported certificate type without a type", thrown.getMessage());
+    }
+
+    @Test
     void listCertificateTypes_failsWhenAnEntryNamesNoType() {
         // given
         mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(typesResponse("[{}]")));
