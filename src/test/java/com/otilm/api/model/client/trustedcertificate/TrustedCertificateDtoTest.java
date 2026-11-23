@@ -2,15 +2,43 @@ package com.otilm.api.model.client.trustedcertificate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TrustedCertificateDtoTest {
+
+    @Test
+    void platformCheckTimestampsKeepTheirInstant() throws Exception {
+        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+        Instant expected = Instant.parse("2026-11-23T09:15:30Z");
+        TrustedCertificateDto dto = mapper
+                .readValue("{\"platformStateCheckedAt\":\"2026-11-23T10:15:30+01:00\"}", TrustedCertificateDto.class);
+        TrustedCertificateSyncDto sync = mapper
+                .readValue("{\"lastSuccessfulCheckAt\":\"2026-11-23T10:15:30+01:00\"}",
+                        TrustedCertificateSyncDto.class);
+        assertEquals(expected, dto.getPlatformStateCheckedAt().toInstant());
+        assertEquals(expected, sync.getLastSuccessfulCheckAt().toInstant());
+    }
+
+    @Test
+    void readsAnItemFromACoreThatSendsNoPlatformState() throws Exception {
+        TrustedCertificateDto dto = new ObjectMapper()
+                .findAndRegisterModules()
+                .readValue(
+                        "{\"uuid\":\"u1\",\"certificateUuid\":\"c1\",\"purposes\":[\"validation\"],\"expiring\":false}",
+                        TrustedCertificateDto.class);
+        assertNull(dto.getPlatformState());
+        assertNull(dto.getPlatformStateCheckedAt());
+        assertEquals(Set.of(TrustedCertificatePurpose.VALIDATION), dto.getPurposes());
+    }
 
     @Test
     void purposesAndPlatformStateDescribeAPendingPlatformRemoval() throws Exception {

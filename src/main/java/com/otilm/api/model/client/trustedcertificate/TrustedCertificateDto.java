@@ -2,6 +2,7 @@ package com.otilm.api.model.client.trustedcertificate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,7 +56,7 @@ public class TrustedCertificateDto {
     private String platformStateMessage;
 
     @Schema(description = "When the platform state was last checked", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private LocalDateTime platformStateCheckedAt;
+    private OffsetDateTime platformStateCheckedAt;
 
     @Schema(description = "Expires within the validation expiring threshold, 30 days when not set",
             requiredMode = Schema.RequiredMode.REQUIRED)

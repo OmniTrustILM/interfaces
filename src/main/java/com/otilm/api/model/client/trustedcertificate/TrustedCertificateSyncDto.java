@@ -1,7 +1,7 @@
 package com.otilm.api.model.client.trustedcertificate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +16,7 @@ public class TrustedCertificateSyncDto {
 
     @Schema(description = "When the platform was last compared successfully",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private LocalDateTime lastSuccessfulCheckAt;
+    private OffsetDateTime lastSuccessfulCheckAt;
 
     @Schema(description = "Why the last comparison failed, absent when it succeeded",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
