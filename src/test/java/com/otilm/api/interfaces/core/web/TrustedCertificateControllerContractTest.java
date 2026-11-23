@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Pins the trusted certificate routes Core implements and the Administrator UI calls, so a changed verb, path or
- * payload shape fails this build instead of surfacing as a broken page.
+ * Pins the trusted certificate routes Core implements and the Administrator UI calls, so a changed verb, path, return
+ * type or parameter count fails this build instead of surfacing as a broken page.
  */
 class TrustedCertificateControllerContractTest {
 

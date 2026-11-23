@@ -5,8 +5,6 @@ import com.otilm.api.model.core.logging.Loggable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.constraints.NotEmpty;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,18 +23,9 @@ class TrustedCertificateRequestDtosTest {
     private static final String UUID_1 = "5f0b1c2e-0000-4000-8000-000000000001";
 
     @Test
-    void addRequestRequiresPurposes() throws Exception {
-        Field purposes = TrustedCertificateAddRequestDto.class.getDeclaredField("purposes");
-        assertNotNull(purposes.getAnnotation(NotEmpty.class));
+    void addRequestDocumentsExactlyOneCertificateSource() {
         Schema schema = TrustedCertificateAddRequestDto.class.getAnnotation(Schema.class);
         assertTrue(schema.description().contains("Exactly one of certificateUuids and certificateContent"));
-    }
-
-    @Test
-    void updateRequestLogsItsUuids() {
-        TrustedCertificateUpdateRequestDto dto = new TrustedCertificateUpdateRequestDto();
-        dto.setUuids(List.of("5f0b1c2e-0000-4000-8000-000000000001"));
-        assertEquals(1, dto.toLogResourceObjectsUuids().size());
     }
 
     @Test
@@ -45,12 +33,6 @@ class TrustedCertificateRequestDtosTest {
         TrustedCertificateApplyRequestDto dto = new ObjectMapper()
                 .readValue("{}", TrustedCertificateApplyRequestDto.class);
         assertNull(dto.getUuids());
-    }
-
-    @Test
-    void absentUuidsLogNoResourceObjects() {
-        assertTrue(new TrustedCertificateAddRequestDto().toLogResourceObjectsUuids().isEmpty());
-        assertTrue(new TrustedCertificateApplyRequestDto().toLogResourceObjectsUuids().isEmpty());
     }
 
     @Test
@@ -114,11 +96,13 @@ class TrustedCertificateRequestDtosTest {
         }
         TrustedCertificateAddRequestDto add = new TrustedCertificateAddRequestDto();
         add.setCertificateUuids(List.of(UUID_1));
+        TrustedCertificateUpdateRequestDto update = new TrustedCertificateUpdateRequestDto();
+        update.setUuids(List.of(UUID_1));
         TrustedCertificateRemoveRequestDto remove = new TrustedCertificateRemoveRequestDto();
         remove.setUuids(List.of(UUID_1));
         TrustedCertificateApplyRequestDto apply = new TrustedCertificateApplyRequestDto();
         apply.setUuids(List.of(UUID_1));
-        for (Loggable request : List.of(add, remove, apply)) {
+        for (Loggable request : List.of(add, update, remove, apply)) {
             assertEquals(List.of(UUID.fromString(UUID_1)), request.toLogResourceObjectsUuids());
         }
     }

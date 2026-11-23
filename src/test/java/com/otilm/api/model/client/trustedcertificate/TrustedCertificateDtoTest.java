@@ -70,7 +70,7 @@ class TrustedCertificateDtoTest {
     }
 
     @Test
-    void bulkResultCarriesOneItemPerRequest() throws Exception {
+    void bulkResultSerializesItemReferenceAndSuccess() throws Exception {
         TrustedCertificateBulkItemDto item = new TrustedCertificateBulkItemDto();
         item.setReference("c1");
         item.setSuccess(false);

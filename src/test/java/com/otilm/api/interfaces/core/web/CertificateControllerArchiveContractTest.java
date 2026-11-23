@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Pins the bulk archive response: it archives what it can and lists the trusted certificates it skipped, so it answers
- * 200 with a body instead of 204.
+ * 200 with a body.
  */
 class CertificateControllerArchiveContractTest {
 
