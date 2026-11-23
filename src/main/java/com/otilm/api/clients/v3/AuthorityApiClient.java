@@ -9,8 +9,10 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,6 +44,7 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
             + "/raProfile/attributes";
     private static final String AUTHORITY_CRL_CONTEXT = AUTHORITY_BASE_CONTEXT + "/crl";
     private static final String AUTHORITY_CA_CERTIFICATES_CONTEXT = AUTHORITY_BASE_CONTEXT + "/caCertificates";
+    private static final String AUTHORITY_CERTIFICATE_TYPES_CONTEXT = AUTHORITY_BASE_CONTEXT + "/certificateTypes";
 
     private static final ParameterizedTypeReference<List<RequestAttribute>> ATTRIBUTE_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
     };
@@ -106,5 +109,19 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
                 .body(Mono.just(requestDto), CaCertificatesRequestDtoV3.class)
                 .retrieve()
                 .toEntity(CaCertificatesResponseDto.class), "getCaCertificates"), request, connector);
+    }
+
+    @Override
+    public List<SupportedCertificateTypeDtoV3> listCertificateTypes(ApiClientConnectorInfo connector,
+            CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        return processRequest(
+                r -> requireBody(r
+                        .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
+                        .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)
+                        .retrieve()
+                        .toEntityList(SupportedCertificateTypeDtoV3.class), "listCertificateTypes"),
+                request, connector);
     }
 }

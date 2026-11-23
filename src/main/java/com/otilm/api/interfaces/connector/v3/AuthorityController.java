@@ -5,11 +5,16 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
+import com.otilm.api.model.core.certificate.CertificateType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,4 +62,17 @@ public interface AuthorityController extends AuthProtectedConnectorController {
     @PostMapping(path = "/caCertificates", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     CaCertificatesResponseDto getCaCertificates(@RequestBody CaCertificatesRequestDtoV3 request);
+
+    @Operation(summary = "List supported certificate types",
+            description = "List the certificate types the authority issues, or the types it issues through one RA "
+                    + "profile when the RA profile attributes are given. Each type appears at most once, and X.509 is "
+                    + "listed like any other type, so the response is the whole answer. A connector that does not "
+                    + "implement the operation, or answers it with 404 or 501, is treated as issuing X.509 only.")
+    @ApiResponse(responseCode = "200", description = "Supported certificate types retrieved")
+    @PostMapping(path = "/certificateTypes", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    default List<@NotNull SupportedCertificateTypeDtoV3> listCertificateTypes(
+            @RequestBody @Valid CertificateTypesRequestDtoV3 request) {
+        return List.of(SupportedCertificateTypeDtoV3.of(CertificateType.X509));
+    }
 }

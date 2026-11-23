@@ -8,8 +8,11 @@ import com.otilm.api.exception.ConnectorProblemException;
 import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
+import com.otilm.api.model.core.certificate.CertificateType;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import java.util.List;
@@ -98,6 +101,48 @@ class AuthorityApiClientTest {
         CaCertificatesResponseDto response = client.getCaCertificates(connector, req);
         Assertions.assertEquals(2, response.getCertificates().size());
         Assertions.assertEquals("issuing-base64", response.getCertificates().get(0).getCertificateData());
+    }
+
+    @Test
+    void listCertificateTypes_returnsTheTypesOfTheRaProfile() throws ConnectorException {
+        // given
+        mockServer
+                .stubFor(WireMock
+                        .post("/v3/authorityProvider/authorities/certificateTypes")
+                        .withRequestBody(
+                                WireMock.equalToJson("{\"authorityAttributes\":[],\"raProfileAttributes\":[]}"))
+                        .willReturn(WireMock
+                                .aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("[{\"certificateType\":\"X.509\"},{\"certificateType\":\"SSH\"}]")));
+        CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
+        request.setAuthorityAttributes(List.of());
+        request.setRaProfileAttributes(List.of());
+
+        // when
+        List<SupportedCertificateTypeDtoV3> types = client.listCertificateTypes(connector, request);
+
+        // then
+        Assertions
+                .assertEquals(List
+                        .of(SupportedCertificateTypeDtoV3.of(CertificateType.X509),
+                                SupportedCertificateTypeDtoV3.of(CertificateType.SSH)),
+                        types);
+    }
+
+    @Test
+    void listCertificateTypes_failsWhenTheConnectorDoesNotServeTheOperation() {
+        // given
+        mockServer
+                .stubFor(WireMock
+                        .post("/v3/authorityProvider/authorities/certificateTypes")
+                        .willReturn(WireMock.aResponse().withStatus(404)));
+        CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
+        request.setAuthorityAttributes(List.of());
+
+        // when / then
+        Assertions.assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
     }
 
     @Test
