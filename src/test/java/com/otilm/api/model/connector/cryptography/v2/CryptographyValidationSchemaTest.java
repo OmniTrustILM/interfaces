@@ -7,7 +7,6 @@ import com.otilm.api.model.connector.cryptography.v2.key.ImportableKeyTypeV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.PrivateKeyDataV2Dto;
-import com.otilm.api.model.connector.cryptography.v2.key.PublicKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.SecretKeyDataV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.TransferableKeyTypeV2Dto;
@@ -91,8 +90,7 @@ class CryptographyValidationSchemaTest {
 
     static Stream<Named<Class<?>>> keyDataSchemas() {
         return Stream
-                .of(named("secret key", SecretKeyDataV2Dto.class), named("public key", PublicKeyDataV2Dto.class),
-                        named("private key", PrivateKeyDataV2Dto.class));
+                .of(named("secret key", SecretKeyDataV2Dto.class), named("private key", PrivateKeyDataV2Dto.class));
     }
 
     @ParameterizedTest(name = "{0}")

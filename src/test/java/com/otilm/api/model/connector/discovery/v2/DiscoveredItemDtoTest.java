@@ -136,7 +136,7 @@ class DiscoveredItemDtoTest {
 
         DiscoveredKeyDto key = new DiscoveredKeyDto();
         key.setType(KeyType.PRIVATE_KEY);
-        key.setAlgorithm(KeyAlgorithm.RSA);
+        key.setAlgorithm(KeyAlgorithm.ECDSA);
         key.setFingerprint("9c1a2b3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcde");
         // publicKey, publicKeyFormat, length intentionally left unset.
         dto.setPayload(key);
@@ -151,7 +151,7 @@ class DiscoveredItemDtoTest {
         DiscoveredItemDto back = mapper.readValue(json, DiscoveredItemDto.class);
         DiscoveredKeyDto backPayload = assertInstanceOf(DiscoveredKeyDto.class, back.getPayload());
         assertEquals(KeyType.PRIVATE_KEY, backPayload.getType());
-        assertEquals(KeyAlgorithm.RSA, backPayload.getAlgorithm());
+        assertEquals(KeyAlgorithm.ECDSA, backPayload.getAlgorithm());
         assertEquals("9c1a2b3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcde", backPayload.getFingerprint());
         assertNull(backPayload.getPublicKey());
         assertNull(backPayload.getPublicKeyFormat());

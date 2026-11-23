@@ -21,6 +21,7 @@ import com.otilm.api.model.connector.cryptography.v2.material.EncryptedKeyMateri
 import com.otilm.api.model.connector.cryptography.v2.token.TokenScopedRequestV2Dto;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
@@ -35,6 +36,7 @@ import org.bouncycastle.asn1.pkcs.KeyDerivationFunc;
 import org.bouncycastle.asn1.pkcs.PBES2Parameters;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -96,7 +98,6 @@ public final class CryptographyDtoFixtures {
     public static PublicKeyDataV2Dto validPublicKeyData() {
         PublicKeyDataV2Dto keyData = new PublicKeyDataV2Dto();
         keyData.setAlgorithm(KeyAlgorithm.RSA);
-        keyData.setLength(2048);
         keyData.setPublicKeySpki(Base64.getDecoder().decode(RSA_2048_PUBLIC_KEY_SPKI_BASE64));
         return keyData;
     }
@@ -122,33 +123,31 @@ public final class CryptographyDtoFixtures {
         return response;
     }
 
-    public static KeyPairDataResponseV2Dto validDistinctLengthKeyPairResponse(KeyAlgorithm algorithm)
-            throws GeneralSecurityException {
+    public static KeyPairDataResponseV2Dto validParameterizedKeyPairResponse(KeyAlgorithm algorithm)
+            throws GeneralSecurityException, IOException {
         KeyPairGenerator generator;
-        int publicLength;
-        int privateLength;
         switch (algorithm) {
             case ECDSA -> {
                 generator = KeyPairGenerator.getInstance("EC");
                 generator.initialize(new ECGenParameterSpec("secp256r1"));
-                publicLength = 512;
-                privateLength = 256;
             }
-            case MLDSA -> {
-                generator = KeyPairGenerator.getInstance("ML-DSA-65", new BouncyCastleProvider());
-                publicLength = 15616;
-                privateLength = 32256;
-            }
-            default -> throw new IllegalArgumentException("Unsupported key-pair length fixture: " + algorithm);
+            case MLDSA -> generator = KeyPairGenerator.getInstance("ML-DSA-65", new BouncyCastleProvider());
+            default -> throw new IllegalArgumentException("Unsupported key-pair parameters fixture: " + algorithm);
         }
+        KeyPair keyPair = generator.generateKeyPair();
 
         PublicKeyDataResponseV2Dto publicKey = validPublicKeyDataResponse();
         publicKey.getKeyData().setAlgorithm(algorithm);
-        publicKey.getKeyData().setLength(publicLength);
-        publicKey.getKeyData().setPublicKeySpki(generator.generateKeyPair().getPublic().getEncoded());
+        publicKey.getKeyData().setPublicKeySpki(keyPair.getPublic().getEncoded());
         PrivateKeyDataResponseV2Dto privateKey = validPrivateKeyDataResponse();
         privateKey.getKeyData().setAlgorithm(algorithm);
-        privateKey.getKeyData().setLength(privateLength);
+        privateKey.getKeyData().setLength(null);
+        privateKey
+                .getKeyData()
+                .setAlgorithmIdentifier(PrivateKeyInfo
+                        .getInstance(keyPair.getPrivate().getEncoded())
+                        .getPrivateKeyAlgorithm()
+                        .getEncoded(ASN1Encoding.DER));
 
         KeyPairDataResponseV2Dto response = new KeyPairDataResponseV2Dto();
         response.setPublicKeyData(publicKey);

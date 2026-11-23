@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -90,30 +91,11 @@ class KeyDataValidationTest {
         assertTrue(violations.isEmpty());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = KeyAlgorithm.class,
-            names = {"FALCON", "MLDSA", "SLHDSA", "MLKEM", "DILITHIUM", "SPHINCSPLUS", "UNKNOWN"})
-    void validate_hasNoViolations_forPositiveOptionalLength(KeyAlgorithm algorithm) {
-        // given
-        int positiveLength = 256;
-        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
-        keyData.setAlgorithm(algorithm);
-        keyData.setLength(positiveLength);
-
-        // when
-        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
-
-        // then
-        assertTrue(violations.isEmpty());
-    }
-
     static Stream<Named<InvalidKeyData>> invalidOptionalLengths() {
         int zeroLength = 0;
         int negativeLength = -1;
         return Arrays
                 .stream(KeyAlgorithm.values())
-                .filter(algorithm -> algorithm != KeyAlgorithm.RSA && algorithm != KeyAlgorithm.ECDSA
-                        && algorithm != KeyAlgorithm.AES)
                 .flatMap(algorithm -> Stream.of(zeroLength, negativeLength).map(length -> {
                     PrivateKeyDataV2Dto keyData = validPrivateKeyData();
                     keyData.setAlgorithm(algorithm);
@@ -121,20 +103,6 @@ class KeyDataValidationTest {
                     return named(algorithm + " length " + length,
                             new InvalidKeyData(keyData, "length", "key length must be positive"));
                 }));
-    }
-
-    @Test
-    void validate_rejectsMissingEcLength() {
-        // given
-        PrivateKeyDataV2Dto keyData = validPrivateKeyData();
-        keyData.setAlgorithm(KeyAlgorithm.ECDSA);
-        keyData.setLength(null);
-
-        // when
-        Set<ConstraintViolation<PrivateKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
-
-        // then
-        assertHasViolation(violations, "length", "key length is required for RSA, ECDSA, and AES");
     }
 
     @Test
@@ -172,23 +140,30 @@ class KeyDataValidationTest {
                 .flatMap(namedDescriptor -> {
                     KeyDataV2Dto missingAlgorithm = copyOf(namedDescriptor.getPayload());
                     missingAlgorithm.setAlgorithm(null);
-                    KeyDataV2Dto missingLength = copyOf(namedDescriptor.getPayload());
-                    missingLength.setLength(null);
-                    KeyDataV2Dto zeroLength = copyOf(namedDescriptor.getPayload());
-                    zeroLength.setLength(0);
-                    KeyDataV2Dto negativeLength = copyOf(namedDescriptor.getPayload());
-                    negativeLength.setLength(-1);
                     String role = namedDescriptor.getName();
+                    KeyDataV2Dto descriptor = namedDescriptor.getPayload();
+                    Stream<Named<InvalidKeyData>> missingLength = descriptor instanceof SecretKeyDataV2Dto
+                            ? Stream
+                                    .of(named(role + " missing length",
+                                            new InvalidKeyData(withLength(descriptor, null), "length",
+                                                    "key length is required")))
+                            : Stream.empty();
+                    Stream<Named<InvalidKeyData>> nonPositiveLengths = descriptor instanceof PublicKeyDataV2Dto
+                            ? Stream.empty()
+                            : Stream
+                                    .of(named(role + " zero length",
+                                            new InvalidKeyData(withLength(descriptor, 0), "length",
+                                                    "key length must be positive")),
+                                            named(role + " negative length",
+                                                    new InvalidKeyData(withLength(descriptor, -1), "length",
+                                                            "key length must be positive")));
                     return Stream
-                            .of(named(role + " missing algorithm",
-                                    new InvalidKeyData(missingAlgorithm, "algorithm", "key algorithm is required")),
-                                    named(role + " missing length",
-                                            new InvalidKeyData(missingLength, "length",
-                                                    "key length is required for RSA, ECDSA, and AES")),
-                                    named(role + " zero length",
-                                            new InvalidKeyData(zeroLength, "length", "key length must be positive")),
-                                    named(role + " negative length", new InvalidKeyData(negativeLength, "length",
-                                            "key length must be positive")));
+                            .of(Stream
+                                    .of(named(role + " missing algorithm",
+                                            new InvalidKeyData(missingAlgorithm, "algorithm",
+                                                    "key algorithm is required"))),
+                                    missingLength, nonPositiveLengths)
+                            .flatMap(Function.identity());
                 });
     }
 
@@ -221,13 +196,12 @@ class KeyDataValidationTest {
     }
 
     @Test
-    void validate_hasNoViolations_forRsaSpkiWithMatchingModulusLength() throws Exception {
+    void validate_hasNoViolations_forRsaSpki() throws Exception {
         // given
-        int declaredRsaLength = 2048;
-        byte[] rsaSpki = generateRsaSpki(declaredRsaLength);
+        int rsaLength = 2048;
+        byte[] rsaSpki = generateRsaSpki(rsaLength);
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(KeyAlgorithm.RSA);
-        keyData.setLength(declaredRsaLength);
         keyData.setPublicKeySpki(rsaSpki);
 
         // when
@@ -238,15 +212,13 @@ class KeyDataValidationTest {
     }
 
     @Test
-    void validate_hasNoViolations_forEcSpkiWithProviderReportedLength() throws Exception {
+    void validate_hasNoViolations_forEcSpki() throws Exception {
         // given
-        int reportedEcLength = 512;
         KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
         generator.initialize(new ECGenParameterSpec("secp256r1"));
         byte[] ecSpki = generator.generateKeyPair().getPublic().getEncoded();
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(KeyAlgorithm.ECDSA);
-        keyData.setLength(reportedEcLength);
         keyData.setPublicKeySpki(ecSpki);
 
         // when
@@ -263,7 +235,6 @@ class KeyDataValidationTest {
         byte[] pqcSpki = generateSpki(algorithm.generatorName());
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(algorithm.declaredAlgorithm());
-        keyData.setLength(null);
         keyData.setPublicKeySpki(pqcSpki);
 
         // when
@@ -298,7 +269,6 @@ class KeyDataValidationTest {
         byte[] parseableSpki = generateRsaSpki(actualRsaLength);
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(KeyAlgorithm.UNKNOWN);
-        keyData.setLength(actualRsaLength);
         keyData.setPublicKeySpki(parseableSpki);
 
         // when
@@ -315,7 +285,6 @@ class KeyDataValidationTest {
         byte[] rsaSpki = generateRsaSpki(actualRsaLength);
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(KeyAlgorithm.ECDSA);
-        keyData.setLength(actualRsaLength);
         keyData.setPublicKeySpki(rsaSpki);
 
         // when
@@ -333,7 +302,6 @@ class KeyDataValidationTest {
         byte[] rsaSpki = generateRsaSpki(rsaLength);
         PublicKeyDataV2Dto keyData = validPublicKeyData();
         keyData.setAlgorithm(KeyAlgorithm.AES);
-        keyData.setLength(rsaLength);
         keyData.setPublicKeySpki(rsaSpki);
 
         // when
@@ -388,25 +356,6 @@ class KeyDataValidationTest {
         return Stream.of(named("secret key", validSecretKeyData()), named("private key", validPrivateKeyData()));
     }
 
-    @Test
-    void validate_rejectsSpki_forMismatchedRsaLength() throws Exception {
-        // given
-        int actualRsaLength = 2048;
-        int mismatchedDeclaredLength = 3072;
-        byte[] rsaSpki = generateRsaSpki(actualRsaLength);
-        PublicKeyDataV2Dto keyData = validPublicKeyData();
-        keyData.setAlgorithm(KeyAlgorithm.RSA);
-        keyData.setLength(mismatchedDeclaredLength);
-        keyData.setPublicKeySpki(rsaSpki);
-
-        // when
-        Set<ConstraintViolation<PublicKeyDataV2Dto>> violations = VALIDATOR.validate(keyData);
-
-        // then
-        assertHasViolation(violations, "publicKeySpkiMatchingDeclaredRsaLength",
-                "publicKeySpki does not match the declared RSA key length");
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidPublicKeyEncodings")
     void publicKeySpki_setterRejectsInvalidEncoding(byte[] invalidEncoding) {
@@ -441,7 +390,6 @@ class KeyDataValidationTest {
         byte[] expectedStoredSpki = callerOwnedSpki.clone();
         String firstBytesMarker = Arrays.toString(callerOwnedSpki);
         PublicKeyDataV2Dto keyData = validPublicKeyData();
-        keyData.setLength(rsaLength);
         keyData.setPublicKeySpki(callerOwnedSpki);
 
         // when
@@ -497,6 +445,16 @@ class KeyDataValidationTest {
             copy = validPublicKeyData();
         }
         copy.setMetadata(source.getMetadata());
+        return copy;
+    }
+
+    private static KeyDataV2Dto withLength(KeyDataV2Dto source, Integer length) {
+        KeyDataV2Dto copy = copyOf(source);
+        switch (copy) {
+            case SecretKeyDataV2Dto secret -> secret.setLength(length);
+            case PrivateKeyDataV2Dto privateKey -> privateKey.setLength(length);
+            default -> throw new IllegalArgumentException("Descriptor without a length: " + copy.getType());
+        }
         return copy;
     }
 

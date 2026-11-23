@@ -67,8 +67,24 @@ class DiscoveryV2SchemaGenerationTest {
 
         assertEquals(Set.of("resource", "certificateData"),
                 schemas.get("DiscoveredCertificateDto").getProperties().keySet());
-        assertEquals(Set.of("resource", "type", "algorithm", "length", "fingerprint", "publicKeyFormat", "publicKey"),
+        assertEquals(Set
+                .of("resource", "type", "algorithm", "length", "fingerprint", "publicKeyFormat", "publicKey",
+                        "algorithmIdentifier"),
                 schemas.get("DiscoveredKeyDto").getProperties().keySet());
+    }
+
+    @Test
+    void theKeyPayloadPublishesItsAlgorithmIdentifierAsAByteString() {
+        Map<String, Schema> schemas = openApi31Schemas(DiscoveredItemPayloadDto.class);
+
+        Schema<?> algorithmIdentifier = (Schema<?>) schemas
+                .get("DiscoveredKeyDto")
+                .getProperties()
+                .get("algorithmIdentifier");
+
+        assertEquals(Set.of("string"), algorithmIdentifier.getTypes());
+        assertEquals("byte", algorithmIdentifier.getFormat());
+        assertFalse(schemas.get("DiscoveredKeyDto").getRequired().contains("algorithmIdentifier"));
     }
 
     /**

@@ -113,9 +113,8 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
     }
 
     /**
-     * Validates that an export describes the key the platform holds a record of: the algorithm must match, a secret
-     * key's length must match whenever both state one, and a key pair's public key must be the one on record, byte for
-     * byte.
+     * Validates that an export describes the key on the platform's record: a secret key by its algorithm and any length
+     * both state, a key pair by its public key, byte for byte.
      *
      * @param expected the descriptor of the key the platform holds, built from its own record
      * @param response the connector's export response, already validated with {@link #validateExportKey}
@@ -139,18 +138,25 @@ public final class KeyTransferResponseValidator extends ResponseChecks {
             throw new IllegalArgumentException(
                     "Connector described the exported key as " + describe(actual) + "; expected " + describe(expected));
         }
-        if (expected.getAlgorithm() != actual.getAlgorithm()) {
-            throw new IllegalArgumentException("Connector exported a key with algorithm " + actual.getAlgorithm()
-                    + "; expected " + expected.getAlgorithm());
-        }
-        if (!(expected instanceof PublicKeyDataV2Dto) && lengthsDisagree(expected.getLength(), actual.getLength())) {
-            throw new IllegalArgumentException(
-                    "Connector exported a key of length " + actual.getLength() + "; expected " + expected.getLength());
+        if (expected instanceof SecretKeyDataV2Dto expectedSecret
+                && actual instanceof SecretKeyDataV2Dto actualSecret) {
+            requireMatchingSecret(expectedSecret, actualSecret);
         }
         if (expected instanceof PublicKeyDataV2Dto expectedPublic && actual instanceof PublicKeyDataV2Dto actualPublic
                 && !Arrays.equals(expectedPublic.getPublicKeySpki(), actualPublic.getPublicKeySpki())) {
             throw new IllegalArgumentException(
                     "Connector exported a public key that differs from the platform's record");
+        }
+    }
+
+    private static void requireMatchingSecret(SecretKeyDataV2Dto expected, SecretKeyDataV2Dto actual) {
+        if (expected.getAlgorithm() != actual.getAlgorithm()) {
+            throw new IllegalArgumentException("Connector exported a key with algorithm " + actual.getAlgorithm()
+                    + "; expected " + expected.getAlgorithm());
+        }
+        if (lengthsDisagree(expected.getLength(), actual.getLength())) {
+            throw new IllegalArgumentException(
+                    "Connector exported a key of length " + actual.getLength() + "; expected " + expected.getLength());
         }
     }
 
