@@ -1,6 +1,7 @@
 package com.otilm.api.model.client.trustedcertificate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.EnumSet;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,20 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TrustedCertificateDtoTest {
+
+    @Test
+    void purposesAndPlatformStateDescribeAPendingPlatformRemoval() throws Exception {
+        assertTrue(TrustedCertificateDto.class
+                .getDeclaredField("purposes")
+                .getAnnotation(Schema.class)
+                .description()
+                .contains("empty only while a platform removal is pending"));
+        assertTrue(TrustedCertificateDto.class
+                .getDeclaredField("platformState")
+                .getAnnotation(Schema.class)
+                .description()
+                .contains("a pending platform removal"));
+    }
 
     @Test
     void dtoWithoutPlatformStateRoundTrips() throws Exception {

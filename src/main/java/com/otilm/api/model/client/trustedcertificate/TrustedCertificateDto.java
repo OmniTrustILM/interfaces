@@ -42,12 +42,12 @@ public class TrustedCertificateDto {
     @Schema(description = "Certificate expiration date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private LocalDateTime notAfter;
 
-    @Schema(description = "Purposes the certificate is trusted for; never empty",
+    @Schema(description = "Purposes the certificate is trusted for; empty only while a platform removal is pending",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<TrustedCertificatePurpose> purposes;
 
-    @Schema(description = "Present only for the platform purpose when the platform applies trust",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Present when the platform applies trust and the certificate has the platform purpose or "
+            + "a pending platform removal", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TrustedCertificatePlatformState platformState;
 
     @Schema(description = "Reason for a failed or drifted platform state",

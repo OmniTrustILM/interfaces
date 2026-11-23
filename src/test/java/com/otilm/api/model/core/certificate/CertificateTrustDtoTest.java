@@ -9,7 +9,6 @@ import java.util.EnumSet;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,7 +45,21 @@ class CertificateTrustDtoTest {
     void trustIsOptionalOnTheDetail() throws Exception {
         Schema schema = CertificateDetail.class.getDeclaredField("trust").getAnnotation(Schema.class);
         assertEquals(Schema.RequiredMode.NOT_REQUIRED, schema.requiredMode());
-        assertFalse(schema.description().isBlank());
+        assertTrue(schema.description().contains("waiting for a platform removal"));
+    }
+
+    @Test
+    void trustDescribesAPendingPlatformRemoval() throws Exception {
+        assertTrue(CertificateTrustDto.class
+                .getDeclaredField("purposes")
+                .getAnnotation(Schema.class)
+                .description()
+                .contains("empty only while a platform removal is pending"));
+        assertTrue(CertificateTrustDto.class
+                .getDeclaredField("platformState")
+                .getAnnotation(Schema.class)
+                .description()
+                .contains("a pending platform removal"));
     }
 
     @Test
