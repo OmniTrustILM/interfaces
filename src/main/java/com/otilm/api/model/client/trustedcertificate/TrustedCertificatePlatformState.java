@@ -12,11 +12,11 @@ import java.util.Arrays;
 public enum TrustedCertificatePlatformState implements IPlatformEnum {
 
     PENDING("pending", "Pending", "Stored, not yet applied by the platform"),
-    APPLYING("applying", "Applying", "A deployment carrying it is running"),
+    APPLYING("applying", "Applying", "A platform rollout carrying it is running"),
     APPLIED("applied", "Applied", "The platform carries it"),
-    FAILED("failed", "Failed", "The last deployment carrying it failed"),
-    REMOVING("removing", "Removing", "Removal requested, the deployment dropping it has not landed yet"),
-    REMOVAL_FAILED("removalFailed", "Removal Failed", "The deployment that should have dropped it failed"),
+    FAILED("failed", "Failed", "The last platform rollout carrying it failed"),
+    REMOVING("removing", "Removing", "Removal requested; the platform rollout dropping it has not finished"),
+    REMOVAL_FAILED("removalFailed", "Removal Failed", "The platform rollout that should have dropped it failed"),
     MISSING("missing", "Missing on Platform", "Trusted by ILM, but the platform no longer holds it"),
     UNKNOWN("unknown", "Unknown", "The platform has not been reachable since the change, or reports no state");
 

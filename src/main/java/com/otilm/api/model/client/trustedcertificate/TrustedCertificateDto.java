@@ -47,11 +47,11 @@ public class TrustedCertificateDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<TrustedCertificatePurpose> purposes;
 
-    @Schema(description = "Present when the platform applies trust and the certificate has the platform purpose or "
+    @Schema(description = "Present when ILM manages platform trust and the certificate has the platform purpose or "
             + "a pending platform removal", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TrustedCertificatePlatformState platformState;
 
-    @Schema(description = "Reason for a failed or drifted platform state",
+    @Schema(description = "Reason for a failed, removalFailed, missing or unknown platform state",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String platformStateMessage;
 

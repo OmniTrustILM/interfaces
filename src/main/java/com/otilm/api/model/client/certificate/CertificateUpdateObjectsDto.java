@@ -33,9 +33,9 @@ public class CertificateUpdateObjectsDto {
     @Schema(deprecated = true,
             description = "Deprecated, removed in the release after 2.21.0: use the trusted certificates API. "
                     + "Requires the trusted-certificate update permission besides certificate update. true applies "
-                    + "the same checks as Add and does nothing when the certificate is already trusted for "
-                    + "validation; false has no checks. Sets or clears the validation purpose only; platform trust "
-                    + "is untouched.")
+                    + "the same checks as adding a Trusted Certificate and does nothing when the certificate is "
+                    + "already trusted for validation; false has no checks. Sets or clears the validation purpose "
+                    + "only; platform trust is untouched.")
     private Boolean trustedCa;
 
     @Override

@@ -20,8 +20,9 @@ public class TrustedCertificateAddRequestDto implements Loggable {
     @Schema(description = "UUIDs of inventory certificates to trust", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<@NotNull String> certificateUuids;
 
-    @Schema(description = "Base64 content of one certificate to trust, the same encoding as certificate upload",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Base64 content of one certificate to trust, the same encoding as certificate upload. "
+            + "Adding by content also requires the certificate create permission, since the certificate is added to "
+            + "the inventory", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String certificateContent;
 
     @Schema(description = "Purposes to trust the certificates for", requiredMode = Schema.RequiredMode.REQUIRED)

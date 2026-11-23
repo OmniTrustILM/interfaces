@@ -56,8 +56,8 @@ public interface TrustedCertificateController extends AuthProtectedController {
             @Parameter(description = "Trusted Certificate UUID") @PathVariable String uuid) throws NotFoundException;
 
     @Operation(summary = "Add Trusted Certificates",
-            description = "Trusts several inventory certificates or one uploaded certificate for the given purposes. "
-                    + "A certificate that cannot be trusted fails only its own result.")
+            description = "Trusts the listed inventory certificates, or one uploaded certificate, for the given "
+                    + "purposes. A certificate that cannot be trusted fails only its own result.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = BULK_RESULT_DESCRIPTION),
             @ApiResponse(responseCode = "422", description = UNPROCESSABLE_CONTENT,
@@ -88,7 +88,10 @@ public interface TrustedCertificateController extends AuthProtectedController {
     TrustedCertificateBulkResultDto removeTrustedCertificates(
             @RequestBody @Valid TrustedCertificateRemoveRequestDto request);
 
-    @Operation(summary = "Delete a Trusted Certificate")
+    @Operation(summary = "Delete a Trusted Certificate",
+            description = "Removes trust from one certificate, as Remove does. The certificate stays in the inventory; "
+                    + "one trusted by the platform stays listed, with its removal pending, until the platform drops "
+                    + "it.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Trusted Certificate deleted"),
             @ApiResponse(responseCode = "404", description = "Not Found",
@@ -98,14 +101,10 @@ public interface TrustedCertificateController extends AuthProtectedController {
     void deleteTrustedCertificate(@Parameter(description = "Trusted Certificate UUID") @PathVariable String uuid)
             throws NotFoundException;
 
-    /**
-     * Runs the platform comparison, then re-sends rows that are pending, failed or missing and retries failed removals;
-     * never re-creates a row whose removal is pending.
-     */
     @Operation(summary = "Re-apply Trusted Certificates on the platform",
             description = "Compares the trusted certificates with the platform, then applies again the ones that are "
                     + "pending, failed or missing on the platform, and retries failed removals. A certificate whose "
-                    + "removal is pending stays removed.")
+                    + "removal is pending is not added back.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = BULK_RESULT_DESCRIPTION),
             @ApiResponse(responseCode = "422", description = UNPROCESSABLE_CONTENT,

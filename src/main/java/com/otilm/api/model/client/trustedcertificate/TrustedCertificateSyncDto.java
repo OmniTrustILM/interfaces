@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Health of the comparison between the trusted certificates and the platform")
 public class TrustedCertificateSyncDto {
 
-    @Schema(description = "Whether the platform trust has been loaded since the upgrade",
+    @Schema(description = "Whether ILM has completed its first load of the platform trust",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean initialImportDone;
 

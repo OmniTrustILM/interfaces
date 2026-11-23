@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "What the platform trusts and whether ILM manages it")
 public class TrustedCertificatePlatformDto {
 
-    @Schema(description = "Whether ILM applies platform trust in this deployment",
+    @Schema(description = "Whether ILM manages platform trust in this deployment",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean managed;
 
