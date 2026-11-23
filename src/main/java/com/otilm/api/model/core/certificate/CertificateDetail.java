@@ -36,6 +36,10 @@ public abstract class CertificateDetail extends CertificateDto implements Certif
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateRegistrationDetailDto registration;
 
+    @Schema(description = "Trust of this certificate; absent when not trusted, present whatever the subject type",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateTrustDto trust;
+
     /**
      * @deprecated As of release 2.16.0. Replaced by
      * {@link com.otilm.api.interfaces.core.web.v2.ComplianceController#getComplianceCheckResult(Resource, UUID)}

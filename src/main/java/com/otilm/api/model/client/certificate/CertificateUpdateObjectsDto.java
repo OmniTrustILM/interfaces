@@ -25,7 +25,17 @@ public class CertificateUpdateObjectsDto {
             + "at its authority. Optional — an authority that offers no identify schema needs none.")
     private List<RequestAttribute> attributes;
 
-    @Schema(description = "Mark CA certificate as trusted")
+    /**
+     * @deprecated As of release 2.21.0, removed in the release after it. Trust is managed through
+     * {@link com.otilm.api.interfaces.core.web.TrustedCertificateController}.
+     */
+    @Deprecated(since = "2.21.0", forRemoval = true)
+    @Schema(deprecated = true,
+            description = "Deprecated, removed in the release after 2.21.0: use the trusted certificates API. "
+                    + "Requires the trusted-certificate update permission besides certificate update. true applies "
+                    + "the same checks as Add and does nothing when the certificate is already trusted for "
+                    + "validation; false has no checks. Sets or clears the validation purpose only; platform trust "
+                    + "is untouched.")
     private Boolean trustedCa;
 
     @Override
