@@ -18,7 +18,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -29,7 +28,6 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Named;
@@ -39,6 +37,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.otilm.api.model.common.cryptography.ExplicitCurveFixtures.ecIdentifier;
 import static com.otilm.api.model.common.cryptography.ExplicitCurveFixtures.madeUp;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -60,7 +59,7 @@ class KeyParametersValidationTest {
 
     private static final AlgorithmIdentifier RSA_ENCRYPTION = new AlgorithmIdentifier(
             PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
-    private static final AlgorithmIdentifier P256 = ec(new X962Parameters(SECObjectIdentifiers.secp256r1));
+    private static final AlgorithmIdentifier P256 = ecIdentifier(new X962Parameters(SECObjectIdentifiers.secp256r1));
     private static final AlgorithmIdentifier ML_DSA_65 = new AlgorithmIdentifier(NISTObjectIdentifiers.id_ml_dsa_65);
 
     @AutoClose
@@ -110,17 +109,27 @@ class KeyParametersValidationTest {
     }
 
     @Test
-    void rejectsALengthOnThePublicDescriptor() {
+    void acceptsThePublicDescriptorOfAConnectorReleasedBefore2_21() throws Exception {
         // given
-        String json = """
-                {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%s"}
-                """.formatted(Base64.getEncoder().encodeToString(rsaSpki(2048)));
+        String releasedConnectorDescriptor = publicDescriptorWithLength();
 
         // when
-        Exception rejected = assertThrows(Exception.class, () -> MAPPER.readValue(json, KeyDataV2Dto.class));
+        KeyDataV2Dto key = MAPPER.readValue(releasedConnectorDescriptor, KeyDataV2Dto.class);
 
         // then
-        assertTrue(rejected.getMessage().contains("Unsupported v2 key-data property: length"), rejected.getMessage());
+        assertNoViolations(VALIDATOR.validate(key));
+    }
+
+    @Test
+    void writesThePublicDescriptorWithoutTheLengthItRead() throws Exception {
+        // given
+        KeyDataV2Dto key = MAPPER.readValue(publicDescriptorWithLength(), KeyDataV2Dto.class);
+
+        // when
+        String written = MAPPER.writeValueAsString(key);
+
+        // then
+        assertFalse(written.contains("length"), written);
     }
 
     @Test
@@ -178,7 +187,7 @@ class KeyParametersValidationTest {
     void rejectsAnSpkiOnAnExplicitCurvePastTheBoundBeforeParsingTheKey() throws Exception {
         // given
         X9ECParameters longOrder = madeUp(256, 400_000, BigInteger.TWO);
-        byte[] spki = new SubjectPublicKeyInfo(ec(longOrder), longOrder.getG().getEncoded(false))
+        byte[] spki = new SubjectPublicKeyInfo(ecIdentifier(longOrder), longOrder.getG().getEncoded(false))
                 .getEncoded(ASN1Encoding.DER);
         PublicKeyDataV2Dto key = new PublicKeyDataV2Dto();
 
@@ -196,7 +205,7 @@ class KeyParametersValidationTest {
         // given
         byte[] named = ecSpki("secp256r1");
         SubjectPublicKeyInfo parsed = SubjectPublicKeyInfo.getInstance(named);
-        byte[] explicit = new SubjectPublicKeyInfo(ec(ECNamedCurveTable.getByName("secp256r1")),
+        byte[] explicit = new SubjectPublicKeyInfo(ecIdentifier(ECNamedCurveTable.getByName("secp256r1")),
                 parsed.getPublicKeyData().getBytes()).getEncoded(ASN1Encoding.DER);
         PublicKeyDataV2Dto key = publicKey(KeyAlgorithm.ECDSA, explicit);
 
@@ -245,7 +254,7 @@ class KeyParametersValidationTest {
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_RSASSA_PSS)));
         Object explicitBesideNamedCurve = envelope
                 .build(publicKey(KeyAlgorithm.ECDSA, ecSpki("secp256r1")),
-                        privateKey(KeyAlgorithm.ECDSA, null, ec(ECNamedCurveTable.getByName("secp256r1"))));
+                        privateKey(KeyAlgorithm.ECDSA, null, ecIdentifier(ECNamedCurveTable.getByName("secp256r1"))));
 
         // when
         List<Set<ConstraintViolation<Object>>> violations = Stream
@@ -355,6 +364,12 @@ class KeyParametersValidationTest {
         return response;
     }
 
+    private static String publicDescriptorWithLength() {
+        return """
+                {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%s"}
+                """.formatted(Base64.getEncoder().encodeToString(rsaSpki(2048)));
+    }
+
     private static byte[] rsaSpki(int bits) {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
@@ -373,14 +388,6 @@ class KeyParametersValidationTest {
 
     private static byte[] bcSpki(String algorithm) throws GeneralSecurityException {
         return KeyPairGenerator.getInstance(algorithm, BOUNCY_CASTLE).generateKeyPair().getPublic().getEncoded();
-    }
-
-    private static AlgorithmIdentifier ec(ASN1Encodable parameters) {
-        return new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, parameters);
-    }
-
-    private static AlgorithmIdentifier ec(X9ECParameters domain) {
-        return ec(new X962Parameters(domain));
     }
 
     private static byte[] der(AlgorithmIdentifier identifier) {

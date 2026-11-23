@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schemas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -149,7 +150,7 @@ class CryptographyKeySchemaTest {
     }
 
     @Test
-    void publicKeySchema_omitsLength() {
+    void publicKeySchema_marksLengthDeprecated() {
         // given
         Map<String, Schema> schemas = openApi31Schemas(PublicKeyDataV2Dto.class);
 
@@ -157,7 +158,9 @@ class CryptographyKeySchemaTest {
         Schema<?> length = resolvesProperty(schemas.get("PublicKeyDataV2Dto"), "length", schemas);
 
         // then
-        assertNull(length, "the SPKI states the public key's size");
+        assertNotNull(length, "connectors released before 2.21.0 send a length beside the SPKI");
+        assertEquals(Boolean.TRUE, length.getDeprecated());
+        assertNotEquals(Boolean.TRUE, length.getWriteOnly(), "connectors send it in their answers");
     }
 
     @ParameterizedTest(name = "{0}")

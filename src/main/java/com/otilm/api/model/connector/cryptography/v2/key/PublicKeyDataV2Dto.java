@@ -26,7 +26,8 @@ import org.bouncycastle.pqc.crypto.falcon.FalconPublicKeyParameters;
 import org.bouncycastle.pqc.legacy.sphincsplus.SPHINCSPlusPublicKeyParameters;
 
 @Schema(name = "PublicKeyDataV2Dto",
-        description = "Public-key descriptor carrying the public key as DER SubjectPublicKeyInfo",
+        description = "Public-key descriptor carrying the public key as DER SubjectPublicKeyInfo. "
+                + "Algorithm Unknown accepts any parseable public SPKI and skips algorithm-family matching.",
         additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
 @ToString(callSuper = true)
 public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
@@ -80,6 +81,20 @@ public final class PublicKeyDataV2Dto extends KeyDataV2Dto {
         this.publicKeySpki = publicKeySpki.clone();
         this.subjectPublicKeyInfo = parsed;
         this.publicKey = key;
+    }
+
+    /**
+     * @deprecated connectors released before 2.21.0 send the length beside the SPKI. Length is ignored because SPKI
+     * states the length itself.
+     */
+    @Deprecated(since = "2.21.0", forRemoval = true)
+    @JsonSetter("length")
+    @Schema(description = "Key length in bits, as connectors released before 2.21.0 send it; ignored, since the "
+            + "platform reads the size from `publicKeySpki`", type = "integer", format = "int32",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, accessMode = Schema.AccessMode.READ_WRITE,
+            deprecated = true)
+    public void setLength(Integer length) {
+        // publicKeySpki states the size.
     }
 
     boolean matchesDeclaredAlgorithm() {
