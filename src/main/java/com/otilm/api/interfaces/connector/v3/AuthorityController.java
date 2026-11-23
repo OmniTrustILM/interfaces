@@ -9,7 +9,6 @@ import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
-import com.otilm.api.model.core.certificate.CertificateType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -71,8 +70,6 @@ public interface AuthorityController extends AuthProtectedConnectorController {
     @ApiResponse(responseCode = "200", description = "Supported certificate types retrieved")
     @PostMapping(path = "/certificateTypes", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    default List<@NotNull SupportedCertificateTypeDtoV3> listCertificateTypes(
-            @RequestBody @Valid CertificateTypesRequestDtoV3 request) {
-        return List.of(SupportedCertificateTypeDtoV3.of(CertificateType.X509));
-    }
+    List<@NotNull SupportedCertificateTypeDtoV3> listCertificateTypes(
+            @RequestBody @Valid CertificateTypesRequestDtoV3 request);
 }
