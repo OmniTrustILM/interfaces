@@ -113,7 +113,8 @@ public interface TrustedCertificateController extends AuthProtectedController {
                             examples = {@ExampleObject(value = UNPROCESSABLE_CONTENT_EXAMPLE)}))})
     @PostMapping(path = "/apply", consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    TrustedCertificateBulkResultDto applyTrustedCertificates(@RequestBody TrustedCertificateApplyRequestDto request);
+    TrustedCertificateBulkResultDto applyTrustedCertificates(
+            @RequestBody @Valid TrustedCertificateApplyRequestDto request);
 
     @Operation(summary = "Get platform trust",
             description = "Whether ILM manages platform trust in this deployment and, when the deployment bundle is "

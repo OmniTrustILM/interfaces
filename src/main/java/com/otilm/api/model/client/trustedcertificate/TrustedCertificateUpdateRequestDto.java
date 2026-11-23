@@ -18,7 +18,7 @@ public class TrustedCertificateUpdateRequestDto implements Loggable {
 
     @Schema(description = "UUIDs of the Trusted Certificates to update", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty
-    private List<String> uuids;
+    private List<@NotNull String> uuids;
 
     @Schema(description = "Purposes the Trusted Certificates are trusted for after the update",
             requiredMode = Schema.RequiredMode.REQUIRED)

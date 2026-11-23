@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class TrustedCertificateAddRequestDto implements Loggable {
 
     @Schema(description = "UUIDs of inventory certificates to trust", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<String> certificateUuids;
+    private List<@NotNull String> certificateUuids;
 
     @Schema(description = "Base64 content of one certificate to trust, the same encoding as certificate upload",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)

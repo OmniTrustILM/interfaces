@@ -2,6 +2,8 @@ package com.otilm.api.model.client.trustedcertificate;
 
 import com.otilm.api.model.core.logging.Loggable;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -14,9 +16,10 @@ import lombok.NoArgsConstructor;
 public class TrustedCertificateApplyRequestDto implements Loggable {
 
     @Schema(description = "UUIDs of the Trusted Certificates to re-apply; absent means every one that is pending, "
-            + "failed, missing on the platform or whose removal failed",
+            + "failed, missing on the platform or whose removal failed. An empty list is refused",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private List<String> uuids;
+    @Size(min = 1)
+    private List<@NotNull String> uuids;
 
     @Override
     public Serializable toLogData() {

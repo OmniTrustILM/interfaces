@@ -117,7 +117,7 @@ class TrustedCertificateControllerContractTest {
 
     @Test
     void validatedBulkRequestsAreCheckedBeforeTheService() {
-        for (String name : Set.of("addTrustedCertificates", "updateTrustedCertificates", "removeTrustedCertificates")) {
+        for (String name : BULK_METHODS) {
             var parameter = method(name).getParameters()[0];
             assertNotNull(parameter.getAnnotation(RequestBody.class), name);
             assertNotNull(parameter.getAnnotation(Valid.class), name);

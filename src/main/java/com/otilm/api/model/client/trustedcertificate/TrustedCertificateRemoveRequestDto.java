@@ -3,6 +3,7 @@ package com.otilm.api.model.client.trustedcertificate;
 import com.otilm.api.model.core.logging.Loggable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +17,7 @@ public class TrustedCertificateRemoveRequestDto implements Loggable {
 
     @Schema(description = "UUIDs of the Trusted Certificates to remove", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty
-    private List<String> uuids;
+    private List<@NotNull String> uuids;
 
     @Override
     public Serializable toLogData() {
