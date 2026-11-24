@@ -9,8 +9,12 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.ListedCertificateType;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypes;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +30,7 @@ public class AuthorityApiClient implements AuthoritySyncApiClient {
     private static final String PATH_RA_PROFILE_ATTRIBUTES = BASE_PATH + "/raProfile/attributes";
     private static final String PATH_CRL = BASE_PATH + "/crl";
     private static final String PATH_CA_CERTIFICATES = BASE_PATH + "/caCertificates";
+    private static final String PATH_CERTIFICATE_TYPES = BASE_PATH + "/certificateTypes";
 
     private static final String HTTP_METHOD_GET = "GET";
     private static final String HTTP_METHOD_POST = "POST";
@@ -70,5 +75,14 @@ public class AuthorityApiClient implements AuthoritySyncApiClient {
         return proxyClient
                 .sendRequest(connector, PATH_CA_CERTIFICATES, HTTP_METHOD_POST, requestDto,
                         CaCertificatesResponseDto.class);
+    }
+
+    @Override
+    public List<SupportedCertificateTypeDtoV3> listCertificateTypes(ApiClientConnectorInfo connector,
+            CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
+        ListedCertificateType[] result = proxyClient
+                .sendRequest(connector, PATH_CERTIFICATE_TYPES, HTTP_METHOD_POST, requestDto,
+                        ListedCertificateType[].class);
+        return SupportedCertificateTypes.requireValid(result == null ? List.of() : Arrays.asList(result), connector);
     }
 }

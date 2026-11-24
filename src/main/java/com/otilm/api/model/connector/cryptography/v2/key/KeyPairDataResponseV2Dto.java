@@ -83,6 +83,14 @@ public final class KeyPairDataResponseV2Dto extends KeyCreationResponseV2Dto {
                 .equals(publicKeyData.getKeyData().getAlgorithm(), privateKeyData.getKeyData().getAlgorithm());
     }
 
+    @JsonIgnore
+    @Schema(hidden = true)
+    @AssertTrue(message = "algorithmIdentifier must equal the AlgorithmIdentifier of publicKeySpki")
+    public boolean isKeyParametersMatching() {
+        return isMissingAnyKeyDescriptor()
+                || privateKeyData.getKeyData().carriesTheIdentifierOf(publicKeyData.getKeyData());
+    }
+
     private boolean isMissingAnyKeyDescriptor() {
         return publicKeyData == null || privateKeyData == null || publicKeyData.getKeyData() == null
                 || privateKeyData.getKeyData() == null;

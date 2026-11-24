@@ -4,8 +4,10 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,10 @@ class AuthorityControllerCompileTest {
 
         public CaCertificatesResponseDto getCaCertificates(CaCertificatesRequestDtoV3 body) {
             return new CaCertificatesResponseDto();
+        }
+
+        public List<SupportedCertificateTypeDtoV3> listCertificateTypes(CertificateTypesRequestDtoV3 body) {
+            return List.of();
         }
     }
 

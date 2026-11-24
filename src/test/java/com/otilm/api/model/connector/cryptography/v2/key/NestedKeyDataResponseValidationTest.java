@@ -69,7 +69,7 @@ class NestedKeyDataResponseValidationTest {
         PublicKeyDataResponseV2Dto nullPublicMetadataElement = validPublicKeyDataResponse();
         nullPublicMetadataElement.setKeyMeta(Collections.singletonList(null));
         PublicKeyDataResponseV2Dto invalidPublicDescriptor = validPublicKeyDataResponse();
-        invalidPublicDescriptor.getKeyData().setLength(0);
+        invalidPublicDescriptor.getKeyData().setAlgorithm(null);
         PrivateKeyDataResponseV2Dto missingPrivateMetadata = validPrivateKeyDataResponse();
         missingPrivateMetadata.setKeyMeta(null);
         PrivateKeyDataResponseV2Dto emptyPrivateMetadata = validPrivateKeyDataResponse();
@@ -101,8 +101,8 @@ class NestedKeyDataResponseValidationTest {
                                 new InvalidResponse(nullPublicMetadataElement, "keyMeta[0].<list element>",
                                         "must not be null")),
                         named("invalid nested public descriptor",
-                                new InvalidResponse(invalidPublicDescriptor, "keyData.length",
-                                        "key length must be positive")),
+                                new InvalidResponse(invalidPublicDescriptor, "keyData.algorithm",
+                                        "key algorithm is required")),
                         named("missing private metadata",
                                 new InvalidResponse(missingPrivateMetadata, "keyMeta",
                                         "private key metadata is required and must not be empty")),

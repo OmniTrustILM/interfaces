@@ -9,8 +9,12 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.ListedCertificateType;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypes;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,12 +40,16 @@ import reactor.core.publisher.Mono;
 @SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncApiClient {
 
+    private static final ParameterizedTypeReference<List<ListedCertificateType>> LISTED_CERTIFICATE_TYPES = new ParameterizedTypeReference<>() {
+    };
+
     private static final String AUTHORITY_BASE_CONTEXT = "/v3/authorityProvider/authorities";
     private static final String AUTHORITY_ATTRIBUTES_CONTEXT = AUTHORITY_BASE_CONTEXT + "/attributes";
     private static final String AUTHORITY_RA_PROFILE_ATTRIBUTES_CONTEXT = AUTHORITY_BASE_CONTEXT
             + "/raProfile/attributes";
     private static final String AUTHORITY_CRL_CONTEXT = AUTHORITY_BASE_CONTEXT + "/crl";
     private static final String AUTHORITY_CA_CERTIFICATES_CONTEXT = AUTHORITY_BASE_CONTEXT + "/caCertificates";
+    private static final String AUTHORITY_CERTIFICATE_TYPES_CONTEXT = AUTHORITY_BASE_CONTEXT + "/certificateTypes";
 
     private static final ParameterizedTypeReference<List<RequestAttribute>> ATTRIBUTE_LIST_TYPE_REF = new ParameterizedTypeReference<>() {
     };
@@ -106,5 +114,21 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
                 .body(Mono.just(requestDto), CaCertificatesRequestDtoV3.class)
                 .retrieve()
                 .toEntity(CaCertificatesResponseDto.class), "getCaCertificates"), request, connector);
+    }
+
+    @Override
+    public List<SupportedCertificateTypeDtoV3> listCertificateTypes(ApiClientConnectorInfo connector,
+            CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        // toEntity, not toEntityList: decoding element by element would drop a null entry before requireValid can
+        // refuse it
+        ResponseEntity<List<ListedCertificateType>> response = processRequest(r -> requireResponse(r
+                .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
+                .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)
+                .retrieve()
+                .toEntity(LISTED_CERTIFICATE_TYPES), "listCertificateTypes"), request, connector);
+        List<ListedCertificateType> listed = response.getBody() != null ? response.getBody() : List.of();
+        return SupportedCertificateTypes.requireValid(listed, connector);
     }
 }
