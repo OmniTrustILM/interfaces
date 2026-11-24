@@ -43,7 +43,7 @@ public class KeyItemDetailDto extends NameAndUuidDto {
     @Sensitive
     private String keyData;
 
-    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
+    @Schema(description = "Key length in bits; absent when the platform cannot size the key.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true, minimum = "1")
     private Integer length;
 
@@ -71,4 +71,17 @@ public class KeyItemDetailDto extends NameAndUuidDto {
             defaultValue = "false")
     private boolean exportable;
 
+    @Schema(description = "Name of the key's standardized parameters: the curve of an ECDSA key or the parameter set of a "
+            + "post-quantum key, such as P-256 or ML-DSA-65; absent for RSA and AES keys, whose `length` gives their "
+            + "size, and for a key the platform cannot name.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            nullable = true)
+    private String parameterSet;
+
+    /** Keeps positional callers compiling, with {@code parameterSet} unset. */
+    public KeyItemDetailDto(String keyReferenceUuid, KeyType type, KeyAlgorithm keyAlgorithm, KeyFormat format,
+            String keyData, Integer length, List<MetadataResponseDto> metadata, List<KeyUsage> usage, boolean enabled,
+            KeyState state, KeyCompromiseReason reason, ComplianceStatus complianceStatus, boolean exportable) {
+        this(keyReferenceUuid, type, keyAlgorithm, format, keyData, length, metadata, usage, enabled, state, reason,
+                complianceStatus, exportable, null);
+    }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
 import com.otilm.api.model.common.enums.cryptography.KeyFormat;
 import com.otilm.api.model.common.enums.cryptography.KeyType;
+import com.otilm.api.model.connector.discovery.v2.validation.AlgorithmIdentifierFitsKey;
 import com.otilm.api.model.connector.discovery.v2.validation.NoPrivateKeyMaterial;
 import com.otilm.api.model.core.auth.Resource;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +24,7 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoPrivateKeyMaterial
+@AlgorithmIdentifierFitsKey
 @Schema(description = "A discovered key: its existence, intrinsic metadata and at most its public part. Private, "
         + "secret and split key material MUST NOT be sent, and a "
         + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES + " key MUST omit publicKey and publicKeyFormat.")
@@ -54,7 +56,8 @@ public class DiscoveredKeyDto implements DiscoveredItemPayloadDto {
             + "without exposing key material", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
 
-    @Schema(description = "Format of publicKey, typically SubjectPublicKeyInfo. Present only with publicKey.",
+    @Schema(description = "Format of `publicKey`, one of `Raw`, `SubjectPublicKeyInfo` or `Custom`; present only with "
+            + "`publicKey`, and taken as SubjectPublicKeyInfo when absent.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyFormat publicKeyFormat;
 
@@ -62,4 +65,16 @@ public class DiscoveredKeyDto implements DiscoveredItemPayloadDto {
             + NoPrivateKeyMaterial.TYPES_WITHOUT_A_PUBLIC_PART_NAMES + " key.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKey;
+
+    @Schema(description = "Base64-encoded DER AlgorithmIdentifier naming the key's parameters, as "
+            + "SubjectPublicKeyInfo and PKCS#8 carry it. The provider must send it, when it can read the parameters, "
+            + "for a private or split key and for a public key without a SubjectPublicKeyInfo `publicKey`, and must "
+            + "omit it for a secret key and beside a SubjectPublicKeyInfo `publicKey`.", type = "string",
+            format = "byte", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String algorithmIdentifier;
+
+    /** An absent {@code publicKeyFormat} implies SubjectPublicKeyInfo. */
+    public boolean hasPublicKeyInSpkiFormat() {
+        return publicKey != null && (publicKeyFormat == null || publicKeyFormat == KeyFormat.SPKI);
+    }
 }

@@ -111,6 +111,7 @@ class DiscoveredKeyDtoValidationTest {
         DiscoveredKeyDto dto = new DiscoveredKeyDto();
         dto.setType(KeyType.PRIVATE_KEY);
         dto.setAlgorithm(KeyAlgorithm.RSA);
+        dto.setLength(2048);
         // A non-private format on its own, so only the "no public part for this type" rule trips
         // (not the separate PRKI/EPRKI-format rule) — isolates the property-path behavior under test.
         dto.setPublicKeyFormat(KeyFormat.SPKI);
@@ -173,6 +174,7 @@ class DiscoveredKeyDtoValidationTest {
         DiscoveredKeyDto dto = new DiscoveredKeyDto();
         dto.setType(KeyType.PRIVATE_KEY);
         dto.setAlgorithm(KeyAlgorithm.RSA);
+        dto.setLength(2048);
         dto.setFingerprint("9c1a2b3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcde");
         // publicKey and publicKeyFormat intentionally left unset.
 

@@ -68,4 +68,10 @@ public class TokenKeyDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, maxLength = KeyEntryV2Dto.MAX_DIAGNOSTIC_LENGTH)
     @ToString.Exclude
     private String diagnostic;
+
+    @Schema(description = "Name of the key's standardized parameters: the curve of an ECDSA key or the parameter set of a "
+            + "post-quantum key, such as P-256 or ML-DSA-65; absent for RSA and AES keys, whose `length` gives their "
+            + "size, and for a key the platform cannot name.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            nullable = true)
+    private String parameterSet;
 }

@@ -33,6 +33,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyEntryV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyHandleV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationStatusResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.KeyPairDataResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyPairV2Dto;
@@ -66,6 +67,7 @@ import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDt
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPublicKeyData;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenProfileScope;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.withValidTokenScope;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -281,6 +283,35 @@ class KeyApiClientTest {
 
         // then
         assertValidationFailure(call);
+    }
+
+    @Test
+    void createKey_returnsTheKeyPairOfAConnectorReleasedBefore2_21() throws ConnectorException {
+        // given
+        String keyPairWithPublicLength = """
+                {
+                  "keyRequestType": "keyPair",
+                  "keyPairMeta": [%3$s],
+                  "privateKeyData": {
+                    "keyMeta": [%1$s],
+                    "keyData": {"type":"Private","algorithm":"RSA","length":2048}
+                  },
+                  "publicKeyData": {
+                    "keyMeta": [%1$s],
+                    "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                  }
+                }
+                """.formatted(VALID_METADATA_JSON, publicKeySpkiBase64(), LISTED_HANDLE_JSON);
+        stubJsonResponse(BASE_PATH, HttpStatus.OK, keyPairWithPublicLength);
+
+        // when
+        ResponseEntity<KeyCreationResponseV2Dto> result = client
+                .createKey(connector, createKeyRequest(KeyRequestType.KEY_PAIR, OperationExecutionMode.SYNCHRONOUS));
+
+        // then
+        KeyPairDataResponseV2Dto body = assertInstanceOf(KeyPairDataResponseV2Dto.class, result.getBody());
+        assertArrayEquals(validPublicKeyData().getPublicKeySpki(),
+                body.getPublicKeyData().getKeyData().getPublicKeySpki());
     }
 
     @Test
@@ -743,7 +774,7 @@ class KeyApiClientTest {
         String responseWithoutReference = """
                 {
                   "material": {"encryptedPrivateKeyInfo": "%s"},
-                  "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%s"}
+                  "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%s"}
                 }
                 """.formatted(envelopeBase64(), publicKeySpkiBase64());
         stubJsonResponse(EXPORT_PATH, HttpStatus.OK, responseWithoutReference);
@@ -904,7 +935,7 @@ class KeyApiClientTest {
                         },
                         "publicKeyData": {
                           "keyMeta": [%1$s],
-                          "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                          "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%2$s"}
                         }
                       }
                     },
@@ -938,7 +969,7 @@ class KeyApiClientTest {
                         },
                         "publicKeyData": {
                           "keyMeta": [%1$s],
-                          "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%2$s"}
+                          "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%2$s"}
                         }
                       }
                     },
@@ -986,7 +1017,7 @@ class KeyApiClientTest {
                 {
                   "material": {"encryptedPrivateKeyInfo": "%s"},
                   "keyReference": "%s",
-                  "keyData": {"type":"Public","algorithm":"RSA","length":2048,"publicKeySpki":"%s"}
+                  "keyData": {"type":"Public","algorithm":"RSA","publicKeySpki":"%s"}
                 }
                 """.formatted(envelopeBase64(), KEY_REFERENCE, publicKeySpkiBase64());
     }
