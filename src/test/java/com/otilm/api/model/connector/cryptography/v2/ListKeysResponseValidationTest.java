@@ -249,6 +249,20 @@ class ListKeysResponseValidationTest {
     }
 
     @Test
+    void validateListKeys_refusesAPrivateKeyWhosePrivateMetadataCannotServeAsAHandle() {
+        // given
+        ListedKeyPairV2Dto privateOnly = listed("0a");
+        privateOnly.setPublicKeyData(null);
+        privateOnly.getPrivateKeyData().setKeyMeta(referenceOnlyHandle("signer-a"));
+
+        // when
+        OperationValidationResult result = VALIDATOR.validateListKeys(request(10), page(available(privateOnly)));
+
+        // then
+        assertInvalid(result, "Connector returned a key whose metadata cannot serve as a handle");
+    }
+
+    @Test
     void validateListKeys_refusesAShortPageBeforeTheEnd() {
         // given
         ListKeysRequestV2Dto request = request(2);
