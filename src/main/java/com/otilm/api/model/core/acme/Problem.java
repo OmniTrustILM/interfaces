@@ -4,6 +4,7 @@ public enum Problem {
 
     ACCOUNT_DOES_NOT_EXIST("accountDoesNotExist", "Account not found",
             "The request specified an account that does not exist"),
+    ALREADY_REPLACED("alreadyReplaced", "Certificate already replaced", "The certificate has already been replaced"),
     ALREADY_REVOKED("alreadyRevoked", "Certificate already revoked",
             "The request specified a certificate to be revoked that has already been revoked"),
     BAD_CSR("badCsr", "CSR Invalid", "Provided CSR is unacceptable (e.g., due to a short key"),

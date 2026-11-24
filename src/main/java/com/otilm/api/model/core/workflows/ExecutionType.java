@@ -12,7 +12,8 @@ import java.util.Arrays;
 public enum ExecutionType implements IPlatformEnum {
 
     SET_FIELD("setField", "Set field", "Set a field of the resource"),
-    SEND_NOTIFICATION("sendNotification", "Send notification", "Send a notification based on notification profile");
+    SEND_NOTIFICATION("sendNotification", "Send notification", "Send a notification based on notification profile"),
+    RENEW_CERTIFICATE("renewCertificate", "Renew certificate", "Renew the certificate automatically");
 
     private static final ExecutionType[] VALUES;
 

@@ -8,6 +8,8 @@ import com.otilm.api.model.core.protocol.ProtocolCertificateAssociationsRequestD
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +78,17 @@ public class AcmeProfileRequestDto {
             defaultValue = "preauthorizedOrChallenge", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
 
+    @Schema(description = "Serve ACME Renewal Information (RFC 9773) for certificates issued through this ACME Profile",
+            defaultValue = "false", example = "false")
+    private Boolean renewalInfoEnabled = false;
+
+    @Schema(description = "Polling interval in seconds suggested to ACME clients in the Retry-After header of the "
+            + "renewal information response", defaultValue = "21600", minimum = "300", maximum = "86400",
+            example = "21600")
+    @Min(300)
+    @Max(86400)
+    private Integer renewalInfoRetryAfter = 21600;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -96,6 +109,8 @@ public class AcmeProfileRequestDto {
                 .append("eabSecretUuids", eabSecretUuids)
                 .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
                 .append("identifierAuthorizationMode", identifierAuthorizationMode)
+                .append("renewalInfoEnabled", renewalInfoEnabled)
+                .append("renewalInfoRetryAfter", renewalInfoRetryAfter)
                 .toString();
     }
 

@@ -10,6 +10,8 @@ import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusRe
 import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import java.util.List;
@@ -89,6 +91,10 @@ class CertificateControllerCompileTest {
 
         public CertificateIdentificationResponseDto identify(CertificateIdentificationRequestDtoV3 body) {
             return new CertificateIdentificationResponseDto();
+        }
+
+        public CertificateRenewalInfoResponseDto renewalInfo(CertificateRenewalInfoRequestDtoV3 body) {
+            return new CertificateRenewalInfoResponseDto();
         }
     }
 

@@ -73,6 +73,14 @@ public class AcmeProfileDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private AcmeIdentifierAuthorizationMode identifierAuthorizationMode;
 
+    @Schema(description = "ACME Renewal Information (RFC 9773) is served for this ACME Profile", defaultValue = "false",
+            example = "false")
+    private Boolean renewalInfoEnabled = false;
+
+    @Schema(description = "Polling interval in seconds suggested to ACME clients in the Retry-After header of the "
+            + "renewal information response", defaultValue = "21600", example = "21600")
+    private Integer renewalInfoRetryAfter = 21600;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -96,6 +104,8 @@ public class AcmeProfileDto extends NameAndUuidDto {
                 .append("eabSecretUuids", eabSecretUuids)
                 .append("preauthorizedIdentifiers", preauthorizedIdentifiers)
                 .append("identifierAuthorizationMode", identifierAuthorizationMode)
+                .append("renewalInfoEnabled", renewalInfoEnabled)
+                .append("renewalInfoRetryAfter", renewalInfoRetryAfter)
                 .toString();
     }
 }

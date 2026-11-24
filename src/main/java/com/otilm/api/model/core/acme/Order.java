@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.acme;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -74,6 +75,14 @@ public class Order {
             examples = {"https://someserver.com/api/v1/protocols/acme/cert/YT65KFut6"})
     private String certificate;
 
+    /**
+     * Certificate identifier of the certificate this Order replaces, as sent by the client (RFC 9773)
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "Certificate identifier of the certificate this Order replaces",
+            examples = {"aYhba4dGQEHhs3uEe6CuLN4ByNQ.AIdlQyE"})
+    private String replaces;
+
     public OrderStatus getStatus() {
         return status;
     }
@@ -146,6 +155,14 @@ public class Order {
         this.certificate = certificate;
     }
 
+    public String getReplaces() {
+        return replaces;
+    }
+
+    public void setReplaces(String replaces) {
+        this.replaces = replaces;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -158,6 +175,7 @@ public class Order {
                 .append("authorizations", authorizations)
                 .append("finalize", finalize)
                 .append("certificate", certificate)
+                .append("replaces", replaces)
                 .toString();
     }
 }
