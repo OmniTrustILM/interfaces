@@ -67,7 +67,7 @@ public interface AuthorityController extends AuthProtectedConnectorController {
             description = "List the certificate types the authority issues, or the types it issues through one RA "
                     + "profile when the RA profile attributes are given. Each type appears at most once, and X.509 is "
                     + "listed like any other type: a non-empty response is the whole answer, and an empty one means "
-                    + "X.509 only. Core ignores a listed type it does not know. Optional endpoint — see responses.")
+                    + "X.509 only. Core ignores a listed type it does not know, and refuses a response in which it knows none. Optional endpoint — see responses.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Supported certificate types retrieved; an empty array means X.509 only"),

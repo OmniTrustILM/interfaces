@@ -267,7 +267,11 @@ class AuthorityApiClientTest {
                         .of("a type listed twice", "[{\"certificateType\":\"X.509\"},{\"certificateType\":\"X.509\"}]",
                                 "Connector listed the certificate type X.509 more than once"),
                         Arguments.of("a null entry", "[null]", withoutAType),
-                        Arguments.of("an entry without a type", "[{}]", withoutAType));
+                        Arguments.of("an entry without a type", "[{}]", withoutAType),
+                        Arguments
+                                .of("only types it does not know",
+                                        "[{\"certificateType\":\"a-type-of-a-later-version\"}]",
+                                        "Connector listed only certificate types this version does not know"));
     }
 
     private static CertificateTypesRequestDtoV3 authorityRequest() {

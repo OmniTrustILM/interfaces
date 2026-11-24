@@ -20,7 +20,8 @@ public final class SupportedCertificateTypes {
      * The listed types this version knows, in the order of the connector. A code it does not know is left out, since a
      * connector may be newer than its caller.
      *
-     * @throws ConnectorException when an entry is missing, names no type, or repeats a type
+     * @throws ConnectorException when an entry is missing, names no type, or repeats a type, or when types are listed
+     * and none of them is known, which an empty result would report as X.509 only
      */
     public static List<SupportedCertificateTypeDtoV3> requireValid(List<ListedCertificateType> listed,
             ApiClientConnectorInfo connector) throws ConnectorException {
@@ -36,6 +37,10 @@ public final class SupportedCertificateTypes {
                         connector);
             }
             knownType(code).map(SupportedCertificateTypeDtoV3::of).ifPresent(known::add);
+        }
+        if (!listed.isEmpty() && known.isEmpty()) {
+            throw new ConnectorException("Connector listed only certificate types this version does not know",
+                    connector);
         }
         return known;
     }

@@ -86,6 +86,23 @@ class AuthorityApiClientMqTest {
     }
 
     @Test
+    void listCertificateTypes_failsWhenTheConnectorListsOnlyTypesItDoesNotKnow() {
+        // given
+        CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
+        request.setAuthorityAttributes(List.of());
+        proxyClient.respondWith(new ListedCertificateType[]{ListedCertificateType.of("a-type-of-a-later-version")});
+
+        // when
+        ConnectorException thrown = Assertions
+                .assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
+
+        // then
+        Assertions
+                .assertEquals("Connector listed only certificate types this version does not know",
+                        thrown.getMessage());
+    }
+
+    @Test
     void listCertificateTypes_returnsNoTypesWhenTheConnectorAnswersWithoutABody() throws ConnectorException {
         // given
         CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
