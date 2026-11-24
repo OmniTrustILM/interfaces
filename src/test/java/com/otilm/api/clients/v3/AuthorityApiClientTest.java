@@ -19,10 +19,14 @@ import com.otilm.api.model.core.certificate.CertificateType;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -224,14 +228,11 @@ class AuthorityApiClientTest {
         Assertions.assertEquals(ErrorCode.OPERATION_NOT_SUPPORTED, thrown.getProblemDetail().getErrorCode());
     }
 
-    @Test
-    void listCertificateTypes_failsWhenTheConnectorListsATypeTwice() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("refusedListings")
+    void listCertificateTypes_failsWhenTheListingCannotBeUsed(String listing, String body, String refusal) {
         // given
-        mockServer
-                .stubFor(WireMock
-                        .post(CERTIFICATE_TYPES_PATH)
-                        .willReturn(
-                                typesResponse("[{\"certificateType\":\"X.509\"},{\"certificateType\":\"X.509\"}]")));
+        mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(typesResponse(body)));
         CertificateTypesRequestDtoV3 request = authorityRequest();
 
         // when
@@ -239,7 +240,7 @@ class AuthorityApiClientTest {
                 .assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
 
         // then
-        Assertions.assertEquals("Connector listed the certificate type X.509 more than once", thrown.getMessage());
+        Assertions.assertEquals(refusal, thrown.getMessage());
     }
 
     @Test
@@ -259,32 +260,14 @@ class AuthorityApiClientTest {
         Assertions.assertEquals(List.of(SupportedCertificateTypeDtoV3.of(CertificateType.X509)), types);
     }
 
-    @Test
-    void listCertificateTypes_failsWhenAnEntryIsNull() {
-        // given
-        mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(typesResponse("[null]")));
-        CertificateTypesRequestDtoV3 request = authorityRequest();
-
-        // when
-        ConnectorException thrown = Assertions
-                .assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
-
-        // then
-        Assertions.assertEquals("Connector listed a supported certificate type without a type", thrown.getMessage());
-    }
-
-    @Test
-    void listCertificateTypes_failsWhenAnEntryNamesNoType() {
-        // given
-        mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(typesResponse("[{}]")));
-        CertificateTypesRequestDtoV3 request = authorityRequest();
-
-        // when
-        ConnectorException thrown = Assertions
-                .assertThrows(ConnectorException.class, () -> client.listCertificateTypes(connector, request));
-
-        // then
-        Assertions.assertEquals("Connector listed a supported certificate type without a type", thrown.getMessage());
+    private static Stream<Arguments> refusedListings() {
+        var withoutAType = "Connector listed a supported certificate type without a type";
+        return Stream
+                .of(Arguments
+                        .of("a type listed twice", "[{\"certificateType\":\"X.509\"},{\"certificateType\":\"X.509\"}]",
+                                "Connector listed the certificate type X.509 more than once"),
+                        Arguments.of("a null entry", "[null]", withoutAType),
+                        Arguments.of("an entry without a type", "[{}]", withoutAType));
     }
 
     private static CertificateTypesRequestDtoV3 authorityRequest() {
