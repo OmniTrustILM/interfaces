@@ -55,9 +55,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * </p>
  *
  * <p>
- * Key listing and key resolution are available when
- * {@link com.otilm.api.model.client.connector.v2.FeatureFlag#KEY_LIST} is enabled. The platform then addresses a key
- * the token already held like one it created.
+ * Key listing and key resolution are available unless the connector declares
+ * {@link com.otilm.api.model.client.connector.v2.FeatureFlag#UNLISTABLE_TOKEN}. The platform addresses an onboarded key
+ * by the {@code keyMeta} that resolution returned for it, like a key it created.
  * </p>
  *
  * <p>
@@ -391,9 +391,14 @@ public interface KeyController extends AuthProtectedConnectorController {
 
     @Operation(summary = "List keys",
             description = "Return one page of the keys the token holds, including keys created outside the platform. "
-                    + "An error about one key goes into that key's entry. Only a fault of the whole token fails the request.")
+                    + "An error about one key goes into that key's entry. Only a fault of the whole token fails the request. "
+                    + "The platform calls it unless the connector declares `unlistableToken`.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Keys retrieved"),
+            @ApiResponse(responseCode = "404",
+                    description = "`OPERATION_NOT_SUPPORTED` — the connector declares `unlistableToken`",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422", description = """
                     - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
                     - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
@@ -409,9 +414,14 @@ public interface KeyController extends AuthProtectedConnectorController {
     @Operation(summary = "Resolve key handles",
             description = "Return the key the token holds under each handle a listing returned, or why it cannot. "
                     + "An error about one key goes into that key's result. "
-                    + "Only a fault of the whole token fails the request.")
+                    + "Only a fault of the whole token fails the request. "
+                    + "The platform calls it unless the connector declares `unlistableToken`.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Handles resolved"),
+            @ApiResponse(responseCode = "404",
+                    description = "`OPERATION_NOT_SUPPORTED` — the connector declares `unlistableToken`",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422", description = """
                     - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
                     - `VALIDATION_FAILED` — the body is readable but breaks a field rule.

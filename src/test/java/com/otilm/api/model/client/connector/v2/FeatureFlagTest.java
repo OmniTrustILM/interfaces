@@ -68,16 +68,16 @@ class FeatureFlagTest {
     }
 
     @Test
-    void keyListFlag_declaresCryptographyCapability() {
+    void unlistableTokenFlag_declaresCryptographyRestriction() {
         // given
-        var keyListCode = "keyList";
+        var unlistableTokenCode = "unlistableToken";
 
         // when
-        FeatureFlag flag = FeatureFlag.findByCode(keyListCode);
+        FeatureFlag flag = FeatureFlag.findByCode(unlistableTokenCode);
 
         // then
-        assertEquals(FeatureFlag.KEY_LIST, flag);
-        assertEquals("Key List", flag.getLabel());
+        assertEquals(FeatureFlag.UNLISTABLE_TOKEN, flag);
+        assertEquals("Unlistable Token", flag.getLabel());
         assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
         assertEquals(List.of(ConnectorInterface.CRYPTOGRAPHY), flag.getApplicableInterfaces());
     }
