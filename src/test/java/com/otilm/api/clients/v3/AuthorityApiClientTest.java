@@ -113,14 +113,10 @@ class AuthorityApiClientTest {
         // given
         mockServer
                 .stubFor(WireMock
-                        .post("/v3/authorityProvider/authorities/certificateTypes")
+                        .post(CERTIFICATE_TYPES_PATH)
                         .withRequestBody(
                                 WireMock.equalToJson("{\"authorityAttributes\":[],\"raProfileAttributes\":[]}"))
-                        .willReturn(WireMock
-                                .aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("[{\"certificateType\":\"X.509\"},{\"certificateType\":\"SSH\"}]")));
+                        .willReturn(typesResponse("[{\"certificateType\":\"X.509\"},{\"certificateType\":\"SSH\"}]")));
         CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
         request.setAuthorityAttributes(List.of());
         request.setRaProfileAttributes(List.of());

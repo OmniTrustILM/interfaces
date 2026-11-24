@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/** One certificate type an authority issues. */
 @Getter
 @Setter
 @ToString

@@ -120,7 +120,8 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
             CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
         WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
 
-        // read as one list: read element by element, a null entry would be dropped before it can be refused
+        // toEntity, not toEntityList: decoding element by element would drop a null entry before requireValid can
+        // refuse it
         ResponseEntity<List<SupportedCertificateTypeDtoV3>> response = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
                 .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)

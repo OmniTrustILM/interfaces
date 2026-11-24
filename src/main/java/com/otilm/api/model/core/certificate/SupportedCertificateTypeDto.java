@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/** One certificate type that can be issued through an RA profile. */
 @Getter
 @Setter
 @ToString
