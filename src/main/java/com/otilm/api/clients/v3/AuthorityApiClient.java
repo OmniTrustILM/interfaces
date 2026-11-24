@@ -12,6 +12,7 @@ import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.ListedCertificateType;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypes;
 import java.util.List;
@@ -39,7 +40,7 @@ import reactor.core.publisher.Mono;
 @SuppressWarnings("java:S1075") // contract paths, not configurable URIs
 public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncApiClient {
 
-    private static final ParameterizedTypeReference<List<SupportedCertificateTypeDtoV3>> SUPPORTED_CERTIFICATE_TYPES = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<List<ListedCertificateType>> LISTED_CERTIFICATE_TYPES = new ParameterizedTypeReference<>() {
     };
 
     private static final String AUTHORITY_BASE_CONTEXT = "/v3/authorityProvider/authorities";
@@ -122,12 +123,12 @@ public class AuthorityApiClient extends BaseApiClient implements AuthoritySyncAp
 
         // toEntity, not toEntityList: decoding element by element would drop a null entry before requireValid can
         // refuse it
-        ResponseEntity<List<SupportedCertificateTypeDtoV3>> response = processRequest(r -> requireResponse(r
+        ResponseEntity<List<ListedCertificateType>> response = processRequest(r -> requireResponse(r
                 .uri(connector.getUrl() + AUTHORITY_CERTIFICATE_TYPES_CONTEXT)
                 .body(Mono.just(requestDto), CertificateTypesRequestDtoV3.class)
                 .retrieve()
-                .toEntity(SUPPORTED_CERTIFICATE_TYPES), "listCertificateTypes"), request, connector);
-        List<SupportedCertificateTypeDtoV3> types = response.getBody() != null ? response.getBody() : List.of();
-        return SupportedCertificateTypes.requireValid(types, connector);
+                .toEntity(LISTED_CERTIFICATE_TYPES), "listCertificateTypes"), request, connector);
+        List<ListedCertificateType> listed = response.getBody() != null ? response.getBody() : List.of();
+        return SupportedCertificateTypes.requireValid(listed, connector);
     }
 }

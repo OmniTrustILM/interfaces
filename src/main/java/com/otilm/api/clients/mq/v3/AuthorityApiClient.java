@@ -12,6 +12,7 @@ import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.ListedCertificateType;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypes;
 import java.util.Arrays;
@@ -79,9 +80,9 @@ public class AuthorityApiClient implements AuthoritySyncApiClient {
     @Override
     public List<SupportedCertificateTypeDtoV3> listCertificateTypes(ApiClientConnectorInfo connector,
             CertificateTypesRequestDtoV3 requestDto) throws ConnectorException {
-        SupportedCertificateTypeDtoV3[] result = proxyClient
+        ListedCertificateType[] result = proxyClient
                 .sendRequest(connector, PATH_CERTIFICATE_TYPES, HTTP_METHOD_POST, requestDto,
-                        SupportedCertificateTypeDtoV3[].class);
+                        ListedCertificateType[].class);
         return SupportedCertificateTypes.requireValid(result == null ? List.of() : Arrays.asList(result), connector);
     }
 }

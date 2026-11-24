@@ -243,6 +243,23 @@ class AuthorityApiClientTest {
     }
 
     @Test
+    void listCertificateTypes_leavesOutATypeItDoesNotKnow() throws ConnectorException {
+        // given
+        var unknownCode = "a-type-of-a-later-version";
+        mockServer
+                .stubFor(WireMock
+                        .post(CERTIFICATE_TYPES_PATH)
+                        .willReturn(typesResponse(
+                                "[{\"certificateType\":\"X.509\"},{\"certificateType\":\"" + unknownCode + "\"}]")));
+
+        // when
+        List<SupportedCertificateTypeDtoV3> types = client.listCertificateTypes(connector, authorityRequest());
+
+        // then
+        Assertions.assertEquals(List.of(SupportedCertificateTypeDtoV3.of(CertificateType.X509)), types);
+    }
+
+    @Test
     void listCertificateTypes_failsWhenAnEntryIsNull() {
         // given
         mockServer.stubFor(WireMock.post(CERTIFICATE_TYPES_PATH).willReturn(typesResponse("[null]")));

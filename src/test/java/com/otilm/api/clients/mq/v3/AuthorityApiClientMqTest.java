@@ -2,6 +2,7 @@ package com.otilm.api.clients.mq.v3;
 
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
+import com.otilm.api.model.connector.v3.authority.ListedCertificateType;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import com.otilm.api.model.core.certificate.CertificateType;
 import com.otilm.api.model.core.connector.ConnectorDto;
@@ -35,7 +36,7 @@ class AuthorityApiClientMqTest {
         CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
         request.setAuthorityAttributes(List.of());
         SupportedCertificateTypeDtoV3 expected = SupportedCertificateTypeDtoV3.of(CertificateType.SSH);
-        proxyClient.respondWith(new SupportedCertificateTypeDtoV3[]{expected});
+        proxyClient.respondWith(new ListedCertificateType[]{ListedCertificateType.of("SSH")});
 
         // when
         List<SupportedCertificateTypeDtoV3> result = client.listCertificateTypes(connector, request);
@@ -47,7 +48,7 @@ class AuthorityApiClientMqTest {
         Assertions.assertEquals("/v3/authorityProvider/authorities/certificateTypes", invocation.path());
         Assertions.assertEquals("POST", invocation.method());
         Assertions.assertSame(request, invocation.body());
-        Assertions.assertEquals(SupportedCertificateTypeDtoV3[].class, invocation.responseType());
+        Assertions.assertEquals(ListedCertificateType[].class, invocation.responseType());
     }
 
     @Test
@@ -55,8 +56,8 @@ class AuthorityApiClientMqTest {
         // given
         CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
         request.setAuthorityAttributes(List.of());
-        SupportedCertificateTypeDtoV3 repeated = SupportedCertificateTypeDtoV3.of(CertificateType.SSH);
-        proxyClient.respondWith(new SupportedCertificateTypeDtoV3[]{repeated, repeated});
+        ListedCertificateType repeated = ListedCertificateType.of("SSH");
+        proxyClient.respondWith(new ListedCertificateType[]{repeated, repeated});
 
         // when
         ConnectorException thrown = Assertions
@@ -64,6 +65,24 @@ class AuthorityApiClientMqTest {
 
         // then
         Assertions.assertEquals("Connector listed the certificate type SSH more than once", thrown.getMessage());
+    }
+
+    @Test
+    void listCertificateTypes_leavesOutATypeItDoesNotKnow() throws ConnectorException {
+        // given
+        var unknownCode = "a-type-of-a-later-version";
+        CertificateTypesRequestDtoV3 request = new CertificateTypesRequestDtoV3();
+        request.setAuthorityAttributes(List.of());
+        proxyClient
+                .respondWith(new ListedCertificateType[]{
+                        ListedCertificateType.of("X.509"),
+                        ListedCertificateType.of(unknownCode)});
+
+        // when
+        List<SupportedCertificateTypeDtoV3> result = client.listCertificateTypes(connector, request);
+
+        // then
+        Assertions.assertEquals(List.of(SupportedCertificateTypeDtoV3.of(CertificateType.X509)), result);
     }
 
     @Test

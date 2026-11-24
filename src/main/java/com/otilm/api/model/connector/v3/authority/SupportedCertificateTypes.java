@@ -3,31 +3,44 @@ package com.otilm.api.model.connector.v3.authority;
 import com.otilm.api.clients.ApiClientConnectorInfo;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.core.certificate.CertificateType;
-import java.util.EnumSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-/** Checks the certificate types a connector lists before they reach the caller. */
+/** Reads the certificate types a connector lists before they reach the caller. */
 public final class SupportedCertificateTypes {
 
     private SupportedCertificateTypes() {
     }
 
     /**
+     * The listed types this version knows, in the order of the connector. A code it does not know is left out, since a
+     * connector may be newer than its caller.
+     *
      * @throws ConnectorException when an entry is missing, names no type, or repeats a type
      */
-    public static List<SupportedCertificateTypeDtoV3> requireValid(List<SupportedCertificateTypeDtoV3> types,
+    public static List<SupportedCertificateTypeDtoV3> requireValid(List<ListedCertificateType> listed,
             ApiClientConnectorInfo connector) throws ConnectorException {
-        Set<CertificateType> seen = EnumSet.noneOf(CertificateType.class);
-        for (SupportedCertificateTypeDtoV3 entry : types) {
+        Set<String> seen = new HashSet<>();
+        List<SupportedCertificateTypeDtoV3> known = new ArrayList<>();
+        for (ListedCertificateType entry : listed) {
             if (entry == null || entry.getCertificateType() == null) {
                 throw new ConnectorException("Connector listed a supported certificate type without a type", connector);
             }
-            if (!seen.add(entry.getCertificateType())) {
-                throw new ConnectorException("Connector listed the certificate type "
-                        + entry.getCertificateType().getCode() + " more than once", connector);
+            String code = entry.getCertificateType();
+            if (!seen.add(code)) {
+                throw new ConnectorException("Connector listed the certificate type " + code + " more than once",
+                        connector);
             }
+            knownType(code).map(SupportedCertificateTypeDtoV3::of).ifPresent(known::add);
         }
-        return types;
+        return known;
+    }
+
+    private static Optional<CertificateType> knownType(String code) {
+        return Arrays.stream(CertificateType.values()).filter(type -> type.getCode().equals(code)).findFirst();
     }
 }
