@@ -5,11 +5,16 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,4 +62,21 @@ public interface AuthorityController extends AuthProtectedConnectorController {
     @PostMapping(path = "/caCertificates", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     CaCertificatesResponseDto getCaCertificates(@RequestBody CaCertificatesRequestDtoV3 request);
+
+    @Operation(summary = "List supported certificate types",
+            description = "List the certificate types the authority issues, or the types it issues through one RA "
+                    + "profile when the RA profile attributes are given. Each type appears at most once, and X.509 is "
+                    + "listed like any other type: a non-empty response is the whole answer, and an empty one means "
+                    + "X.509 only. Core ignores a listed type it does not know, and refuses a response in which it knows none. Optional endpoint — see responses.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "Supported certificate types retrieved; an empty array means X.509 only"),
+            @ApiResponse(responseCode = "404",
+                    description = "Endpoint not served by this connector — Core treats the authority as issuing X.509 only"),
+            @ApiResponse(responseCode = "501",
+                    description = "Connector declines the operation (ErrorCode.OPERATION_NOT_SUPPORTED) — Core treats the authority as issuing X.509 only")})
+    @PostMapping(path = "/certificateTypes", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<@NotNull SupportedCertificateTypeDtoV3> listCertificateTypes(
+            @RequestBody @Valid CertificateTypesRequestDtoV3 request);
 }
