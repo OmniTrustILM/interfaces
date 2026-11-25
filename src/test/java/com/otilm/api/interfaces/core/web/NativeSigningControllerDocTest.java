@@ -118,7 +118,7 @@ class NativeSigningControllerDocTest {
     void signRawDescribesItsRefusals() throws NoSuchMethodException {
         String description = unprocessable(signRawMethod()).description();
         for (String refusal : List
-                .of("ILM Native API inactive", "not a raw-signing profile", "`signatureInputMode` is not `dataDigest`",
+                .of("ILM Native API inactive", "not a raw-signing profile", "`signatureInputMode` is `data`",
                         "`maxItemsPerRequest`", "`digestAlgorithm` differs", "digest size", "repeats",
                         "`certificateFingerprint`")) {
             assertTrue(description.contains(refusal), "signRaw's 422 omits '" + refusal + "': " + description);

@@ -84,7 +84,7 @@ public interface NativeSigningController extends AuthProtectedController {
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
                     description = "Request cannot be processed: the Signing Profile is disabled, has the ILM Native API "
-                            + "inactive or is not a raw-signing profile, `signatureInputMode` is not `dataDigest`, a "
+                            + "inactive or is not a raw-signing profile, `signatureInputMode` is `data`, a "
                             + "field fails validation (such as an empty item or an identifier that is blank or repeats), "
                             + "the request carries more items than the platform's `maxItemsPerRequest` signing setting "
                             + "allows, `digestAlgorithm` differs from the digest the Signing Profile's signature "

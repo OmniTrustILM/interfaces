@@ -46,7 +46,7 @@ public class SigningProfileRequestDto {
 
     @Valid
     @Schema(description = "Signing Record policy. When omitted on create, each signature gets a metadata-only "
-            + "Signing Record: who signed, when, and with which profile and version.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "Signing Record: who signed, when, and with which profile and version. When omitted on update, the "
+            + "current policy is kept.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private SigningRecordPolicyRequestDto recordPolicy;
 }

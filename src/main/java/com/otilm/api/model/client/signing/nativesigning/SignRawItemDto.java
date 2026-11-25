@@ -24,7 +24,7 @@ public class SignRawItemDto implements IdentifiedDataV2Dto {
     @Schema(description = "Identifier used to correlate the item with its result; unique within the request",
             examples = {"installer-x64"}, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "identifier is required")
-    @Size(max = ItemIdentifierFormat.MAX_LENGTH, message = ItemIdentifierFormat.LENGTH_MESSAGE)
+    @Size(min = 1, max = ItemIdentifierFormat.MAX_LENGTH, message = ItemIdentifierFormat.LENGTH_MESSAGE)
     @Pattern(regexp = ItemIdentifierFormat.REGEX, message = ItemIdentifierFormat.MESSAGE)
     private String identifier;
 

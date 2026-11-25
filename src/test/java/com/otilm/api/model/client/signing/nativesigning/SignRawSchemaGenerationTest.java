@@ -80,17 +80,19 @@ class SignRawSchemaGenerationTest {
     void theIdentifierPublishesItsBound() {
         Schema<?> identifier = property(REQUEST_SCHEMAS, "SignRawItem", "identifier");
 
+        assertEquals(1, identifier.getMinLength());
         assertEquals(ItemIdentifierFormat.MAX_LENGTH, identifier.getMaxLength());
         assertEquals(ItemIdentifierFormat.REGEX, identifier.getPattern());
     }
 
-    /** Both native operations write identifiers into the same logs and records, so one bound serves both. */
+    /** A caller builds identifiers the same way for either native operation, so one bound serves both. */
     @Test
     void signDocumentPublishesTheSameIdentifierBound() {
         Schema<?> signRaw = property(REQUEST_SCHEMAS, "SignRawItem", "identifier");
         Schema<?> signDocument = property(openApi31Schemas(SignDocumentRequestDto.class), "SignDocumentItem",
                 "identifier");
 
+        assertEquals(signRaw.getMinLength(), signDocument.getMinLength());
         assertEquals(signRaw.getMaxLength(), signDocument.getMaxLength());
         assertEquals(signRaw.getPattern(), signDocument.getPattern());
     }

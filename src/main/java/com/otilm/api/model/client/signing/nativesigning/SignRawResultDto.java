@@ -1,6 +1,7 @@
 package com.otilm.api.model.client.signing.nativesigning;
 
 import com.otilm.api.model.connector.cryptography.v2.operations.data.IdentifiedDataV2Dto;
+import com.otilm.api.model.core.logging.Sensitive;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -26,9 +27,12 @@ public class SignRawResultDto implements IdentifiedDataV2Dto {
             + "still be lost after it is staged.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private UUID signingRecordUuid;
 
+    @Sensitive
     @ToString.Exclude
-    @Schema(description = "Signature over the item's `data`, base64-encoded in JSON. An ECDSA signature is the "
-            + "DER-encoded sequence of r and s, not the concatenation of r and s that JWS uses.", format = "byte",
+    @Schema(description = "Signature over the item's `data`, base64-encoded in JSON. Under `dataDigest`, `data` is "
+            + "already the digest, so a verifier for `signatureAlgorithm` checks the signature against the original "
+            + "data, or against `data` when it takes a precomputed digest. An ECDSA signature is the DER-encoded "
+            + "sequence of r and s, not the concatenation of r and s that JWS uses.", format = "byte",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] signature;
 }

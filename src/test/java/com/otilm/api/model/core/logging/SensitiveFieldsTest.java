@@ -9,6 +9,7 @@ import com.otilm.api.model.client.scep.BaseScepProfileRequestDto;
 import com.otilm.api.model.client.signing.nativesigning.SignDocumentItemDto;
 import com.otilm.api.model.client.signing.nativesigning.SignDocumentRequestDto;
 import com.otilm.api.model.client.signing.nativesigning.SignDocumentResultDto;
+import com.otilm.api.model.client.signing.nativesigning.SignRawResultDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialCreateRequestDto;
 import com.otilm.api.model.client.signing.protocols.tsp.TspBasicCredentialUpdateRequestDto;
 import com.otilm.api.model.common.attribute.common.content.data.FileAttributeContentData;
@@ -81,7 +82,8 @@ class SensitiveFieldsTest {
                         Arguments.of(BaseEndEntityRequestDto.class, "password"),
                         Arguments.of(ClientBaseEndEntityRequestDto.class, "password"),
                         Arguments.of(SignDocumentItemDto.class, "document"),
-                        Arguments.of(SignDocumentResultDto.class, "output"));
+                        Arguments.of(SignDocumentResultDto.class, "output"),
+                        Arguments.of(SignRawResultDto.class, "signature"));
     }
 
     @ParameterizedTest(name = "{0}.{1}")
