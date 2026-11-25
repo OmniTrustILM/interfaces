@@ -11,11 +11,13 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "Response metadata attribute instance with content")
 @AllArgsConstructor
+@NoArgsConstructor
 public class ResponseMetadataV2 extends ResponseMetadata {
 
     private List<NameAndUuidDto> sourceObjects;
