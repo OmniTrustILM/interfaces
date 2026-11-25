@@ -13,6 +13,11 @@ class CertificateEventTest {
     }
 
     @Test
+    void findByCodeFindsTheRenewalWindowUpdate() {
+        assertEquals(CertificateEvent.UPDATE_RENEWAL_WINDOW, CertificateEvent.findByCode("Update renewal window"));
+    }
+
+    @Test
     void detailSaysWhetherTheKeystoreIsAvailable() {
         CertificateDetail detail = new X509CertificateDetail();
 

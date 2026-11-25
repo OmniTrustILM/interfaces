@@ -131,6 +131,7 @@ public enum Operation implements IPlatformEnum {
     GET_ASSOCIATIONS("getAssociations", "Get associations"),
     LIST_VERSIONS("listVersions", "List versions"),
     GET_PROXY_INSTALLATION("getProxyInstallation", "Get proxy installation instructions"),
+    REQUEST_EARLY_RENEWAL("requestEarlyRenewal", "Request early renewal"),
 
     // legacy
     LIST_CERTIFICATE_PROFILES("listCertificateProfiles", "List Certificate profiles"),

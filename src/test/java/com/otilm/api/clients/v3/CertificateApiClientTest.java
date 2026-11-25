@@ -3,6 +3,7 @@ package com.otilm.api.clients.v3;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.otilm.api.clients.BaseApiClient;
+import com.otilm.api.exception.ConnectorClientException;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ConnectorProblemException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
@@ -11,6 +12,10 @@ import com.otilm.api.model.common.error.ErrorCode;
 import com.otilm.api.model.connector.v3.certificate.CertificateAttributeListRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateDataResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateOperationCancelRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestItemDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoStatus;
 import com.otilm.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.model.core.connector.ConnectorStatus;
@@ -197,6 +202,56 @@ class CertificateApiClientTest {
                                 .withBody("[]")));
 
         Assertions.assertTrue(client.listIdentifyAttributes(connector, attributeListRequest()).isEmpty());
+    }
+
+    @Test
+    void renewalInfo_mapsResponseBody() throws ConnectorException {
+        mockServer
+                .stubFor(WireMock
+                        .post("/v3/authorityProvider/certificates/renewalInfo")
+                        .willReturn(WireMock
+                                .aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("""
+                                        {"retryAfter":7200,"results":[
+                                          {"reference":"a","status":"available",
+                                           "windowStart":"2026-12-01T00:00:00Z","windowEnd":"2026-12-03T00:00:00Z"},
+                                          {"reference":"b","status":"notSupported","reason":"not covered"}]}
+                                        """)));
+
+        CertificateRenewalInfoResponseDto response = client.renewalInfo(connector, renewalInfoRequest());
+
+        Assertions.assertEquals(7200, response.getRetryAfter());
+        Assertions.assertEquals(2, response.getResults().size());
+        Assertions.assertEquals(CertificateRenewalInfoStatus.AVAILABLE, response.getResults().get(0).getStatus());
+        Assertions.assertNotNull(response.getResults().get(0).getWindowEnd());
+        Assertions.assertEquals(CertificateRenewalInfoStatus.NOT_SUPPORTED, response.getResults().get(1).getStatus());
+    }
+
+    @Test
+    void renewalInfo_tooManyRequestsSurfacesAsClientException() {
+        mockServer
+                .stubFor(WireMock
+                        .post("/v3/authorityProvider/certificates/renewalInfo")
+                        .willReturn(WireMock.aResponse().withStatus(429)));
+
+        ConnectorClientException ex = Assertions
+                .assertThrows(ConnectorClientException.class,
+                        () -> client.renewalInfo(connector, renewalInfoRequest()));
+
+        Assertions.assertEquals(HttpStatus.TOO_MANY_REQUESTS, ex.getHttpStatus());
+    }
+
+    private static CertificateRenewalInfoRequestDtoV3 renewalInfoRequest() {
+        CertificateRenewalInfoRequestItemDtoV3 item = new CertificateRenewalInfoRequestItemDtoV3();
+        item.setReference("a");
+        item.setCertificate("MIIBkjCCATs...");
+        CertificateRenewalInfoRequestDtoV3 request = new CertificateRenewalInfoRequestDtoV3();
+        request.setAuthorityAttributes(List.of());
+        request.setRaProfileAttributes(List.of());
+        request.setCertificates(List.of(item));
+        return request;
     }
 
     private static String schemaJson(String name) {

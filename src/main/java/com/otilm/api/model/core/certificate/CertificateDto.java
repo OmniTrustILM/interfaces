@@ -54,6 +54,10 @@ public class CertificateDto implements Loggable, AttributeProjectable {
     @Schema(description = "Certificate expiration date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Date notAfter;
 
+    @Schema(description = "Start of the renewal window; empty when the certificate has no renewal window",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Date renewalWindowStart;
+
     @Schema(description = "Public key algorithm. Absent when the certificate has no public key: its type has none, or the certificate is registered and not yet issued",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String publicKeyAlgorithm;
