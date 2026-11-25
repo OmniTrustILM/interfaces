@@ -24,7 +24,7 @@ import lombok.ToString;
 @Schema(name = "TokenKeySelectionDto", description = "A key to onboard, and the name to give it")
 public class TokenKeySelectionDto {
 
-    @Schema(description = "Metadata of the key pair, exactly as the listing returned it",
+    @Schema(description = "Metadata of the key pair or the private key alone, exactly as the listing returned it",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyPairMeta is required and must not be empty")
     private List<@NotNull(

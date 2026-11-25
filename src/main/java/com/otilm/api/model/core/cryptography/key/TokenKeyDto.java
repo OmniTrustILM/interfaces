@@ -23,8 +23,9 @@ import lombok.ToString;
 @Schema(name = "TokenKeyDto", description = "A key found in the key storage, and whether it can be onboarded")
 public class TokenKeyDto {
 
-    @Schema(description = "Metadata identifying the key pair in the key storage. Send it back unchanged to onboard the "
-            + "key pair.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Metadata identifying the key pair in the key storage, or the private key alone when "
+            + "`privateOnly` is true. Send it back unchanged to onboard the key.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> keyPairMeta;
 
     @Schema(description = "Name the key storage shows for the key, such as a PKCS#11 label, a keystore alias or a KMS "
@@ -41,6 +42,10 @@ public class TokenKeyDto {
     @Schema(description = "SHA-256 fingerprint of the public key of a key pair",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fingerprint;
+
+    @Schema(description = "Whether the connector of the token instance reported the private key without its public "
+            + "key", requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean privateOnly;
 
     @Schema(description = "Onboarding status of the key", requiredMode = Schema.RequiredMode.REQUIRED)
     private TokenKeyStatus status;
