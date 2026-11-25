@@ -27,7 +27,8 @@ public enum CertificateEvent {
     UPDATE_LOCATION("Update Location"),
     ARCHIVE("Archive certificate"),
     UNARCHIVE("Unarchive certificate"),
-    DOWNLOAD_KEYSTORE("Download Keystore");
+    DOWNLOAD_KEYSTORE("Download Keystore"),
+    UPDATE_RENEWAL_WINDOW("Update renewal window");
 
     @Schema(description = "Certificate Event", examples = {"Issue Certificate"},
             requiredMode = Schema.RequiredMode.REQUIRED)

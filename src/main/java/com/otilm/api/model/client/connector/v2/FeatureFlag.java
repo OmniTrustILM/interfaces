@@ -94,6 +94,9 @@ public enum FeatureFlag implements IPlatformEnum {
     DISCOVERY_STOP_RESUME("discoveryStopResume", "Discovery Stop and Resume",
             "Supports pausing a running discovery with a resumable checkpoint and resuming it later",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.DISCOVERY)),
+    CERTIFICATE_RENEWAL_INFO("certificateRenewalInfo", "Certificate Renewal Information",
+            "Supports reporting the renewal window suggested by the certificate authority for an issued certificate",
+            FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
     DISCOVERY_INCREMENTAL("discoveryIncremental", "Incremental Discovery",
             "Honours discoverSince on initiate and discovers only items created or changed since then",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.DISCOVERY));

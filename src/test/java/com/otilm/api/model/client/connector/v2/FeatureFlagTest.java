@@ -15,6 +15,14 @@ class FeatureFlagTest {
     }
 
     @Test
+    void certificateRenewalInfoFlagExists() {
+        FeatureFlag flag = FeatureFlag.findByCode("certificateRenewalInfo");
+        assertEquals(FeatureFlag.CERTIFICATE_RENEWAL_INFO, flag);
+        assertEquals(FeatureFlag.FeatureFlagBehavior.ENFORCED, flag.getBehavior());
+        assertEquals(List.of(ConnectorInterface.AUTHORITY), flag.getApplicableInterfaces());
+    }
+
+    @Test
     void certificateStatusPollingFlagExists() {
         FeatureFlag flag = FeatureFlag.CERTIFICATE_STATUS_POLLING;
         assertEquals("certificateStatusPolling", flag.getCode());

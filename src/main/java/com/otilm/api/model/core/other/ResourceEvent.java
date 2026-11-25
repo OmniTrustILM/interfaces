@@ -13,6 +13,7 @@ import com.otilm.api.model.common.events.data.CertificateEventData;
 import com.otilm.api.model.common.events.data.CertificateExpiringEventData;
 import com.otilm.api.model.common.events.data.CertificateNotCompliantEventData;
 import com.otilm.api.model.common.events.data.CertificateRegisteredEventData;
+import com.otilm.api.model.common.events.data.CertificateRenewalDueEventData;
 import com.otilm.api.model.common.events.data.CertificateStatusChangedEventData;
 import com.otilm.api.model.common.events.data.CommentEventData;
 import com.otilm.api.model.common.events.data.CryptoAssetPqcNotReadyEventData;
@@ -44,6 +45,10 @@ public enum ResourceEvent implements IPlatformEnum {
     CERTIFICATE_EXPIRING(Codes.CERTIFICATE_EXPIRING, "Certificate expiring",
             "Event to trigger actions associated with expiring certificates without renewal", Resource.CERTIFICATE,
             List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateExpiringEventData.class, true),
+    CERTIFICATE_RENEWAL_DUE(Codes.CERTIFICATE_RENEWAL_DUE, "Certificate renewal due",
+            "Event when the renewal window of a certificate has opened, carrying the window, its source and whether the renewal was brought forward",
+            Resource.CERTIFICATE, List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateRenewalDueEventData.class,
+            true),
     CERTIFICATE_NOT_COMPLIANT(Codes.CERTIFICATE_NOT_COMPLIANT, "Certificate not compliant",
             "Event when the certificate is evaluated as not compliant. While it stays not compliant, it is raised again if a notification profile that notified about it sets frequency or repetitions, and the triggers on the event run on every raise.",
             Resource.CERTIFICATE, List.of(Resource.RA_PROFILE, Resource.GROUP), CertificateNotCompliantEventData.class,
@@ -177,6 +182,7 @@ public enum ResourceEvent implements IPlatformEnum {
         public static final String CERTIFICATE_ACTION_PERFORMED = "certificate_action_performed";
         public static final String CERTIFICATE_DISCOVERED = "certificate_discovered";
         public static final String CERTIFICATE_EXPIRING = "certificate_expiring";
+        public static final String CERTIFICATE_RENEWAL_DUE = "certificate_renewal_due";
         public static final String CERTIFICATE_UPLOADED = "certificate_uploaded";
         public static final String CERTIFICATE_REGISTERED = "certificate_registered";
 

@@ -14,6 +14,8 @@ import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusRe
 import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import java.util.List;
@@ -69,6 +71,8 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
     private static final String CERTIFICATE_IDENTIFY_ATTRIBUTES_CONTEXT = CERTIFICATE_BASE_CONTEXT
             + "/identify/attributes";
     private static final String CERTIFICATE_IDENTIFY_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/identify";
+
+    private static final String CERTIFICATE_RENEWAL_INFO_CONTEXT = CERTIFICATE_BASE_CONTEXT + "/renewalInfo";
 
     public CertificateApiClient(WebClient webClient, TrustManager[] defaultTrustManagers) {
         this.webClient = webClient;
@@ -289,5 +293,19 @@ public class CertificateApiClient extends BaseApiClient implements CertificateSy
                 .body(Mono.just(requestDto), CertificateIdentificationRequestDtoV3.class)
                 .retrieve()
                 .toEntity(CertificateIdentificationResponseDto.class), "identify"), request, connector);
+    }
+
+    // ---- Renewal information ----
+
+    @Override
+    public CertificateRenewalInfoResponseDto renewalInfo(ApiClientConnectorInfo connector,
+            CertificateRenewalInfoRequestDtoV3 requestDto) throws ConnectorException {
+        WebClient.RequestBodyUriSpec request = prepareRequest(HttpMethod.POST, connector, true);
+
+        return processRequest(r -> requireBody(r
+                .uri(connector.getUrl() + CERTIFICATE_RENEWAL_INFO_CONTEXT)
+                .body(Mono.just(requestDto), CertificateRenewalInfoRequestDtoV3.class)
+                .retrieve()
+                .toEntity(CertificateRenewalInfoResponseDto.class), "renewalInfo"), request, connector);
     }
 }
