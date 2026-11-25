@@ -28,7 +28,7 @@ public class SignRawResultDto implements IdentifiedDataV2Dto {
 
     @ToString.Exclude
     @Schema(description = "Signature over the item's `data`, base64-encoded in JSON. An ECDSA signature is the "
-            + "DER-encoded sequence of r and s, as X.509 and CMS carry it, not the concatenation of r and s that JWS "
-            + "uses.", format = "byte", requiredMode = Schema.RequiredMode.REQUIRED)
+            + "DER-encoded sequence of r and s, not the concatenation of r and s that JWS uses.", format = "byte",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private byte[] signature;
 }

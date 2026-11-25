@@ -74,24 +74,22 @@ public interface NativeSigningController extends AuthProtectedController {
 
     @Operation(operationId = "signRaw", summary = "Sign digests",
             description = "Sign every digest of the request with the Signing Profile's key and return the signatures "
-                    + "in request order, with the signature algorithm and the signing certificate chain that verify "
-                    + "them. The request succeeds or fails as a whole: a failed request returns no signature and writes "
-                    + "no signing record for its items. A retry is a new signing, with new signing records. A failure of "
-                    + "one item names it by its identifier; a validation failure names the field path by item index. "
-                    + "The operation is synchronous and carries no signature activation data.")
+                    + "in request order. The request succeeds or fails as a whole: a failed request returns no "
+                    + "signature and writes no signing record. A retry is a new signing. A failure of one item names it "
+                    + "by its identifier; a validation failure names the field path by item index. The operation is "
+                    + "synchronous and carries no signature activation data.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Digests signed"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
                     description = "Request cannot be processed: the Signing Profile is disabled, has the ILM Native API "
-                            + "inactive or is not a raw-signing profile, `signatureInputMode` is not `dataDigest`, the "
-                            + "request body violates a field validation rule such as an empty item or an identifier "
-                            + "that is blank or repeats, the request carries more items than the platform's "
-                            + "`maxItemsPerRequest` signing setting allows, `digestAlgorithm` differs from the digest "
-                            + "the Signing Profile's signature algorithm commits to, an item's length is not the digest "
-                            + "size of `digestAlgorithm`, or `certificateFingerprint` names another certificate than "
-                            + "the Signing Profile's current signing certificate",
+                            + "inactive or is not a raw-signing profile, `signatureInputMode` is not `dataDigest`, a "
+                            + "field fails validation (such as an empty item or an identifier that is blank or repeats), "
+                            + "the request carries more items than the platform's `maxItemsPerRequest` signing setting "
+                            + "allows, `digestAlgorithm` differs from the digest the Signing Profile's signature "
+                            + "algorithm commits to, an item's length is not the digest size of `digestAlgorithm`, or "
+                            + "`certificateFingerprint` does not match the Signing Profile's current signing certificate",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/signingProfiles/{signingProfileUuid}/raw/sign", consumes = {MediaType.APPLICATION_JSON_VALUE},

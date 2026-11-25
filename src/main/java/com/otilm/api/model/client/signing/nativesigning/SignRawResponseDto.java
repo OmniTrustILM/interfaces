@@ -24,8 +24,8 @@ public class SignRawResponseDto {
 
     @ToString.Exclude
     @ArraySchema(arraySchema = @Schema(
-            description = "Certificate chain of the signing certificate, the signing "
-                    + "certificate first. Each certificate is a DER-encoded X.509 certificate, base64-encoded in JSON.",
+            description = "Signing certificate and its chain, signing certificate first; each a DER-encoded X.509 "
+                    + "certificate, base64-encoded in JSON.",
             requiredMode = Schema.RequiredMode.REQUIRED), schema = @Schema(format = "byte"), minItems = 1)
     private List<byte[]> signerCertificateChain;
 

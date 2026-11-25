@@ -42,11 +42,11 @@ public class SignRawRequestDto {
     @UniqueIdentifiers(message = "identifiers must be unique within the request")
     private List<@NotNull(message = "items must not contain null items") @Valid SignRawItemDto> items;
 
-    @Schema(description = "SHA-256 fingerprint of the signing certificate the caller built its data for: 64 "
-            + "hexadecimal characters over the certificate's DER encoding, in either case, as the platform reports "
-            + "certificate fingerprints. When the Signing Profile's current signing certificate is another one, or the "
-            + "profile has no certificate before it signs, the request answers 422 and nothing is signed. Absent means "
-            + "no check.", examples = {"3f9a1c0e5b7d2e4f6a8c0b1d3e5f7a9c1b3d5e7f9a0c2e4b6d8f0a1c3e5b7d9f"},
+    @Schema(description = "SHA-256 fingerprint of the signing certificate the caller expects, as the platform reports "
+            + "certificate fingerprints: 64 hexadecimal characters in either case, over the DER encoding. If the "
+            + "Signing Profile's current signing certificate differs, or the profile has no certificate before it "
+            + "signs, the request answers 422 and nothing is signed. Absent means no check.",
+            examples = {"3f9a1c0e5b7d2e4f6a8c0b1d3e5f7a9c1b3d5e7f9a0c2e4b6d8f0a1c3e5b7d9f"},
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Pattern(regexp = "^[0-9a-fA-F]{64}$", message = "certificateFingerprint must be 64 hexadecimal characters")
     private String certificateFingerprint;

@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** What a client's JSON becomes on the way in, and what it reads on the way out. */
 class SignRawJsonTest {
 
     private static final byte[] DIGEST = new byte[32];
