@@ -77,7 +77,7 @@ public class AcmeProfileDto extends NameAndUuidDto {
             example = "false")
     private Boolean renewalInfoEnabled = false;
 
-    @Schema(description = "Polling interval in seconds suggested to ACME clients in the Retry-After header of the "
+    @Schema(description = "Polling interval in seconds suggested to ACME clients in the `Retry-After` header of the "
             + "renewal information response", defaultValue = "21600", example = "21600")
     private Integer renewalInfoRetryAfter = 21600;
 

@@ -21,7 +21,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class CertificateRenewalInfoRequestDtoV3 extends AuthorityV3ScopedRequestDto {
 
-    @Schema(description = "Certificates to look up, 1 to 50 per request; references must be unique",
+    @Schema(description = "Certificates to look up, 1 to 50 per request. Each `reference` must be unique within the request.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "certificates is required")
     @Size(min = 1, max = 50, message = "certificates must contain 1 to 50 items")

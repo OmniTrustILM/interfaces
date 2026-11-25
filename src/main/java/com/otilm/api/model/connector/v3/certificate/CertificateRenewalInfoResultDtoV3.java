@@ -22,11 +22,11 @@ public class CertificateRenewalInfoResultDtoV3 {
     @Schema(description = "Outcome for the certificate", requiredMode = Schema.RequiredMode.REQUIRED)
     private CertificateRenewalInfoStatus status;
 
-    @Schema(description = "Start of the window in which the CA advises renewing. Required when status=available; "
-            + "a start in the past means renew now", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Start of the window in which the CA advises renewing. Required when `status` is "
+            + "`available`. A start in the past means renew now.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private OffsetDateTime windowStart;
 
-    @Schema(description = "End of the renewal window, after windowStart. Required when status=available",
+    @Schema(description = "End of the renewal window, after `windowStart`. Required when `status` is `available`.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private OffsetDateTime windowEnd;
 
@@ -38,7 +38,7 @@ public class CertificateRenewalInfoResultDtoV3 {
     @Min(0)
     private Integer retryAfter;
 
-    @Schema(description = "Curated explanation text, never a raw exception message",
+    @Schema(description = "Human-readable explanation of the outcome. Must not contain raw internal error messages.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String reason;
 }

@@ -15,7 +15,7 @@ public class CertificateRenewalInfoSettingsDto implements Serializable {
             requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "86400", minimum = "60", maximum = "604800")
     private Integer refreshMaxInterval;
 
-    @Schema(description = "Delay in seconds between refreshes when the CA gives no retry-after",
+    @Schema(description = "Delay in seconds between refreshes when the CA suggests no retry interval",
             requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "21600", minimum = "60", maximum = "604800")
     private Integer refreshDefaultInterval;
 
@@ -23,8 +23,8 @@ public class CertificateRenewalInfoSettingsDto implements Serializable {
             requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "20", minimum = "1", maximum = "50")
     private Integer refreshBatchSize;
 
-    @Schema(description = "Delay in seconds before certificates the CA answered unknown or notSupported for are "
-            + "checked again", requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "604800", minimum = "3600",
-            maximum = "31536000")
+    @Schema(description = "Delay in seconds before Core checks again a certificate for which the CA answered "
+            + "`unknown` or `notSupported`", requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "604800",
+            minimum = "3600", maximum = "31536000")
     private Integer refreshRecheckInterval;
 }

@@ -195,14 +195,14 @@ public interface CertificateController extends AuthProtectedConnectorController 
     // ---- Renewal information ----
 
     @Operation(summary = "Get certificate renewal information",
-            description = "Return the CA's advised renewal window for a batch of 1 to 50 certificates. Optional "
-                    + "endpoint, served only by connectors that declare the certificateRenewalInfo feature flag "
-                    + "(FeatureFlag.CERTIFICATE_RENEWAL_INFO). Called only by the Core refresh job.")
+            description = "Return the CA's advised renewal window for a batch of 1 to 50 certificates.\n\n"
+                    + "Optional endpoint. Only connectors that declare the `certificateRenewalInfo` feature flag "
+                    + "serve it. Only the Core refresh job calls it.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
-                    description = "Batch processed; per-item outcome is in the result statuses"),
+                    description = "Batch processed. The outcome of each item is in the `status` of its result."),
             @ApiResponse(responseCode = "422",
-                    description = "Invalid request, such as more than 50 items or a duplicate reference"),
+                    description = "Invalid request, such as more than 50 items or a duplicate `reference`"),
             @ApiResponse(responseCode = "429", description = "Rate limited by the CA — Core backs the batch off"),
             @ApiResponse(responseCode = "503", description = "CA unavailable — Core backs the batch off")})
     @PostMapping(path = "/renewalInfo", consumes = MediaType.APPLICATION_JSON_VALUE,

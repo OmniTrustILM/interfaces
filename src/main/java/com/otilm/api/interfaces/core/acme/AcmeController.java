@@ -86,8 +86,9 @@ public interface AcmeController extends NoAuthController {
     @GetMapping(path = "/renewal-info/{certId}", produces = {"application/json"})
     ResponseEntity<RenewalInfo> getRenewalInfo(
             @Parameter(description = "ACME Profile name") @PathVariable String acmeProfileName,
-            @Parameter(description = "Certificate identifier: base64url AKI key identifier and serial number "
-                    + "joined by a dot") @PathVariable String certId)
+            @Parameter(
+                    description = "Certificate identifier: the base64url-encoded authority key identifier and serial number, "
+                            + "joined by `.`") @PathVariable String certId)
             throws NotFoundException, AcmeProblemDocumentException;
 
     @Operation(summary = "New Nonce",

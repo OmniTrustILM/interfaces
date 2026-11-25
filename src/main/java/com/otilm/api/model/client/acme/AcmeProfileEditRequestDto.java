@@ -83,7 +83,7 @@ public class AcmeProfileEditRequestDto {
             + "Omitting the property keeps the profile's current value.", example = "false")
     private Boolean renewalInfoEnabled;
 
-    @Schema(description = "Polling interval in seconds suggested to ACME clients in the Retry-After header of the "
+    @Schema(description = "Polling interval in seconds suggested to ACME clients in the `Retry-After` header of the "
             + "renewal information response. Omitting the property keeps the profile's current value.", minimum = "300",
             maximum = "86400", example = "21600")
     @Min(300)

@@ -82,7 +82,7 @@ public class AcmeProfileRequestDto {
             defaultValue = "false", example = "false")
     private Boolean renewalInfoEnabled = false;
 
-    @Schema(description = "Polling interval in seconds suggested to ACME clients in the Retry-After header of the "
+    @Schema(description = "Polling interval in seconds suggested to ACME clients in the `Retry-After` header of the "
             + "renewal information response", defaultValue = "21600", minimum = "300", maximum = "86400",
             example = "21600")
     @Min(300)

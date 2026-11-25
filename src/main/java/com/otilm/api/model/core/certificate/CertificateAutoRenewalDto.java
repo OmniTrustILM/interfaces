@@ -11,7 +11,7 @@ public class CertificateAutoRenewalDto {
     private AutoRenewalMode mode;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Schema(description = "Reason the certificate cannot be renewed automatically; present when the mode is none",
+    @Schema(description = "Reason the certificate cannot be renewed automatically. Present only when `mode` is `none`.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String blockedReason;
 }

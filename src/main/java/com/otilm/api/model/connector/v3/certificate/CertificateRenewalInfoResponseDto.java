@@ -16,12 +16,12 @@ import lombok.ToString;
 @Schema(name = "CertificateRenewalInfoResponseDtoV3")
 public class CertificateRenewalInfoResponseDto {
 
-    @Schema(description = "Default seconds until Core should ask again, for results without their own retryAfter",
+    @Schema(description = "Default number of seconds until Core should ask again. Applies to results without their own `retryAfter`.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "0")
     @Min(0)
     private Integer retryAfter;
 
-    @Schema(description = "One result per request item; an item missing here is treated as retry",
+    @Schema(description = "One result per request item. Core treats a missing item as status `retry`.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<CertificateRenewalInfoResultDtoV3> results;
 }

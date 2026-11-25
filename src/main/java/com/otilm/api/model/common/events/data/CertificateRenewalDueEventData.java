@@ -15,13 +15,15 @@ import lombok.EqualsAndHashCode;
 @Data
 public class CertificateRenewalDueEventData extends CertificateExpiringEventData {
 
-    @Schema(description = "Start of the renewal window in \"yyyy-MM-dd'T'HH:mm:ssXXX\" format")
+    @Schema(description = "Start of the renewal window, as an RFC 3339 date-time with seconds and a UTC offset, "
+            + "for example `2026-01-01T00:00:00+01:00`")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     @JsonDeserialize(using = ZonedDateTimeDeserializer.class)
     @JsonSerialize(using = ZonedDateTimeSerializer.class)
     private ZonedDateTime windowStart;
 
-    @Schema(description = "End of the renewal window in \"yyyy-MM-dd'T'HH:mm:ssXXX\" format")
+    @Schema(description = "End of the renewal window, as an RFC 3339 date-time with seconds and a UTC offset, "
+            + "for example `2026-01-01T00:00:00+01:00`")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     @JsonDeserialize(using = ZonedDateTimeDeserializer.class)
     @JsonSerialize(using = ZonedDateTimeSerializer.class)
