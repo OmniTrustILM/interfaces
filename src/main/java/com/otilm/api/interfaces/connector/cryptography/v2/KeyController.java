@@ -395,10 +395,6 @@ public interface KeyController extends AuthProtectedConnectorController {
                     + "The platform calls it unless the connector declares `unlistableToken`.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Keys retrieved"),
-            @ApiResponse(responseCode = "404",
-                    description = "`OPERATION_NOT_SUPPORTED` — the connector declares `unlistableToken`",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422", description = """
                     - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
                     - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
@@ -418,10 +414,6 @@ public interface KeyController extends AuthProtectedConnectorController {
                     + "The platform calls it unless the connector declares `unlistableToken`.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Handles resolved"),
-            @ApiResponse(responseCode = "404",
-                    description = "`OPERATION_NOT_SUPPORTED` — the connector declares `unlistableToken`",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetailExtended.class))),
             @ApiResponse(responseCode = "422", description = """
                     - `KEY_TYPE_NOT_LISTABLE` — the connector cannot list keys of the requested type on this token.
                     - `VALIDATION_FAILED` — the body is readable but breaks a field rule.
