@@ -15,8 +15,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validParameterizedKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPublicKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyDataResponse;
@@ -195,10 +195,10 @@ class KeyOperationStatusResponseValidationTest {
 
     @ParameterizedTest
     @EnumSource(value = KeyAlgorithm.class, names = {"ECDSA", "MLDSA"})
-    void validate_acceptsDistinctComponentLengths_forCompletedKeyPairResult(KeyAlgorithm algorithm) throws Exception {
+    void validate_acceptsAPairNamedByItsParameters_forCompletedKeyPairResult(KeyAlgorithm algorithm) throws Exception {
         // given
         KeyPairOperationStatusResponseV2Dto response = validCompletedKeyPairStatus();
-        response.setResult(validDistinctLengthKeyPairResponse(algorithm));
+        response.setResult(validParameterizedKeyPairResponse(algorithm));
 
         // when
         Set<ConstraintViolation<KeyPairOperationStatusResponseV2Dto>> violations = VALIDATOR.validate(response);
@@ -224,15 +224,14 @@ class KeyOperationStatusResponseValidationTest {
     @Test
     void validate_reportsNestedPath_forInvalidCompletedPublicKeyData() {
         // given
-        int invalidKeyLength = -1;
         KeyPairOperationStatusResponseV2Dto response = validCompletedKeyPairStatus();
-        response.getResult().getPublicKeyData().getKeyData().setLength(invalidKeyLength);
+        response.getResult().getPublicKeyData().getKeyData().setAlgorithm(null);
 
         // when
         Set<ConstraintViolation<KeyPairOperationStatusResponseV2Dto>> violations = VALIDATOR.validate(response);
 
         // then
-        assertHasViolation(violations, "result.publicKeyData.keyData.length", "key length must be positive");
+        assertHasViolation(violations, "result.publicKeyData.keyData.algorithm", "key algorithm is required");
     }
 
     private static Stream<Named<CreationStatusCase>> creationStatusMatrix() {

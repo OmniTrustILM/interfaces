@@ -51,6 +51,7 @@ import com.otilm.api.model.core.certificate.CertificateType;
 import com.otilm.api.model.core.certificate.CertificateValidationCheck;
 import com.otilm.api.model.core.certificate.CertificateValidationStatus;
 import com.otilm.api.model.core.certificate.QcType;
+import com.otilm.api.model.core.certificate.RenewalWindowSource;
 import com.otilm.api.model.core.cmp.CmpProfileVariant;
 import com.otilm.api.model.core.cmp.ProtectionMethod;
 import com.otilm.api.model.core.compliance.ComplianceRuleStatus;
@@ -136,6 +137,7 @@ public enum PlatformEnum implements IPlatformEnum {
     CERTIFICATE_KEY_USAGE(CertificateKeyUsage.class, "Key Usage of Certificate"),
     CERTIFICATE_RELATION_TYPE(CertificateRelationType.class,
             "Type of relation between successor and predecessor certificate"),
+    RENEWAL_WINDOW_SOURCE(RenewalWindowSource.class, "Source of a certificate renewal window"),
 
     // oid
     OID_CATEGORY(OidCategory.class, "OID Category"),

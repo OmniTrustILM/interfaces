@@ -4,6 +4,8 @@ import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateAttributeListRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
 import com.otilm.api.model.core.connector.ConnectorDto;
 import com.otilm.api.testsupport.RecordingProxyClient;
 import java.util.List;
@@ -66,6 +68,23 @@ class CertificateApiClientMqTest {
 
         Assertions.assertEquals(List.of(expected), result);
         assertDelegated("/v3/authorityProvider/certificates/identify/attributes");
+    }
+
+    @Test
+    void renewalInfo_delegates() throws ConnectorException {
+        CertificateRenewalInfoResponseDto expected = new CertificateRenewalInfoResponseDto();
+        proxyClient.respondWith(expected);
+        CertificateRenewalInfoRequestDtoV3 renewalInfoRequest = new CertificateRenewalInfoRequestDtoV3();
+
+        CertificateRenewalInfoResponseDto result = client.renewalInfo(connector, renewalInfoRequest);
+
+        Assertions.assertSame(expected, result);
+        RecordingProxyClient.Invocation invocation = proxyClient.invocation();
+        Assertions.assertSame(connector, invocation.connector());
+        Assertions.assertEquals("/v3/authorityProvider/certificates/renewalInfo", invocation.path());
+        Assertions.assertEquals("POST", invocation.method());
+        Assertions.assertSame(renewalInfoRequest, invocation.body());
+        Assertions.assertEquals(CertificateRenewalInfoResponseDto.class, invocation.responseType());
     }
 
     private void assertDelegated(String path) {

@@ -9,11 +9,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.validation.ValidMetadataAttribute;
 import com.otilm.api.model.common.enums.cryptography.KeyAlgorithm;
-import com.otilm.api.model.connector.cryptography.v2.key.validation.LengthWhenSizedByLength;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AccessLevel;
@@ -40,7 +38,6 @@ import lombok.ToString;
         @JsonSubTypes.Type(value = PublicKeyDataV2Dto.class, name = "Public"),
         @JsonSubTypes.Type(value = PrivateKeyDataV2Dto.class, name = "Private")})
 @Schema(implementation = KeyDataV2Dto.OpenApiView.class)
-@LengthWhenSizedByLength
 public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyDataV2Dto, PrivateKeyDataV2Dto {
 
     @Schema(description = "Type of the key", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -51,11 +48,6 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
     @Schema(description = "Cryptographic algorithm of the key", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "key algorithm is required")
     private KeyAlgorithm algorithm;
-
-    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED, minimum = "1")
-    @Min(value = 1, message = "key length must be positive")
-    private Integer length;
 
     @Schema(description = "Non-sensitive, provider-specific descriptive metadata",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -102,14 +94,12 @@ public abstract sealed class KeyDataV2Dto permits SecretKeyDataV2Dto, PublicKeyD
                     @DiscriminatorMapping(value = "Public", schema = PublicKeyDataV2Dto.class),
                     @DiscriminatorMapping(value = "Private", schema = PrivateKeyDataV2Dto.class)},
             oneOf = {SecretKeyDataV2Dto.class, PublicKeyDataV2Dto.class, PrivateKeyDataV2Dto.class})
-    @JsonPropertyOrder({"type", "algorithm", "length", "metadata"})
+    @JsonPropertyOrder({"type", "algorithm", "metadata"})
     interface OpenApiView {
 
         KeyTypeV2 getType();
 
         KeyAlgorithm getAlgorithm();
-
-        Integer getLength();
 
         List<MetadataAttribute> getMetadata();
     }

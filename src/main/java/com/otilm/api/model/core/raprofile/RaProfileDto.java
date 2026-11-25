@@ -50,6 +50,9 @@ public class RaProfileDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private RaProfileCertificateRequestAttributesDto certificateRequestAttributes;
 
+    @Schema(description = "Renewal window settings of the RA Profile", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private RaProfileRenewalSettingsDto renewalSettings;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)

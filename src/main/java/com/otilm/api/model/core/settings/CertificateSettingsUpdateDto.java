@@ -23,4 +23,8 @@ public class CertificateSettingsUpdateDto implements Serializable {
     @Valid
     @Schema(description = "Certificate upload settings")
     private CertificateUploadSettingsUpdateDto upload;
+
+    @Valid
+    @Schema(description = "Settings of the refresh of certificate renewal information obtained from authorities")
+    private CertificateRenewalInfoSettingsUpdateDto renewalInfo;
 }

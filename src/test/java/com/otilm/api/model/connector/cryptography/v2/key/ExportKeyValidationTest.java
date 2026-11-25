@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.EXPORT_PASSPHRASE;
-import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyRequest;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validExportKeyResponse;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validParameterizedKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyData;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPublicKeyData;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyData;
@@ -146,7 +146,7 @@ class ExportKeyValidationTest {
     void exportResponse_hasNoViolations_whenFullyPopulated() throws Exception {
         // given
         ExportKeyResponseV2Dto response = validExportKeyResponse();
-        response.setKeyData(validDistinctLengthKeyPairResponse(KeyAlgorithm.ECDSA).getPublicKeyData().getKeyData());
+        response.setKeyData(validParameterizedKeyPairResponse(KeyAlgorithm.ECDSA).getPublicKeyData().getKeyData());
 
         // when
         Set<ConstraintViolation<ExportKeyResponseV2Dto>> violations = VALIDATOR.validate(response);

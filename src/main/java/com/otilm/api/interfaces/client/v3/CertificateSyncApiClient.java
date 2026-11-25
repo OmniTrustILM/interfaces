@@ -12,6 +12,8 @@ import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusRe
 import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import java.util.List;
@@ -92,4 +94,9 @@ public interface CertificateSyncApiClient {
 
     CertificateIdentificationResponseDto identify(ApiClientConnectorInfo connector,
             CertificateIdentificationRequestDtoV3 requestDto) throws ConnectorException;
+
+    // ---- Renewal information ----
+
+    CertificateRenewalInfoResponseDto renewalInfo(ApiClientConnectorInfo connector,
+            CertificateRenewalInfoRequestDtoV3 requestDto) throws ConnectorException;
 }

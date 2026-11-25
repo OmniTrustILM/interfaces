@@ -15,7 +15,9 @@ public enum KeyFormat implements IPlatformEnum {
     PRKI("PrivateKeyInfo", "PrivateKeyInfo", "DER-encoded ASN.1 PrivateKeyInfo of the private key"),
     EPRKI("EncryptedPrivateKeyInfo", "EncryptedPrivateKeyInfo",
             "DER-encoded ASN.1 EncryptedPrivateKeyInfo of the private key"),
-    CUSTOM("Custom", "Custom", "Custom, external, specific data");
+    CUSTOM("Custom", "Custom", "Custom, external, specific data"),
+    ALGORITHM_IDENTIFIER("AlgorithmIdentifier", "AlgorithmIdentifier",
+            "DER-encoded ASN.1 AlgorithmIdentifier naming the parameters of a private key");
 
     private static final KeyFormat[] VALUES;
 

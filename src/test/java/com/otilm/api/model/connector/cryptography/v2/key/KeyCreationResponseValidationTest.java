@@ -18,9 +18,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validDistinctLengthKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadataAttribute;
+import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validParameterizedKeyPairResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPrivateKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validPublicKeyDataResponse;
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validSecretKeyData;
@@ -284,9 +284,9 @@ class KeyCreationResponseValidationTest {
 
     @ParameterizedTest
     @EnumSource(value = KeyAlgorithm.class, names = {"ECDSA", "MLDSA"})
-    void validate_acceptsDistinctComponentLengths_forKeyPairResponse(KeyAlgorithm algorithm) throws Exception {
+    void validate_acceptsAPairNamedByItsParameters_forKeyPairResponse(KeyAlgorithm algorithm) throws Exception {
         // given
-        KeyPairDataResponseV2Dto response = validDistinctLengthKeyPairResponse(algorithm);
+        KeyPairDataResponseV2Dto response = validParameterizedKeyPairResponse(algorithm);
 
         // when
         Set<ConstraintViolation<KeyPairDataResponseV2Dto>> violations = VALIDATOR

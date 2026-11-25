@@ -24,4 +24,10 @@ class ResourceEventMonitoringFlagsTest {
         assertFalse(ResourceEvent.CERTIFICATE_STATUS_CHANGED.isMonitoring());
         assertFalse(ResourceEvent.CERTIFICATE_STATUS_CHANGED.isSingleNotificationWithoutReminders());
     }
+
+    @Test
+    void renewalDueIsMonitoringButNotSingleNotification() {
+        assertTrue(ResourceEvent.CERTIFICATE_RENEWAL_DUE.isMonitoring());
+        assertFalse(ResourceEvent.CERTIFICATE_RENEWAL_DUE.isSingleNotificationWithoutReminders());
+    }
 }

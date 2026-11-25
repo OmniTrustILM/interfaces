@@ -76,7 +76,7 @@ public class KeyItemDto extends NameAndUuidDto implements AttributeProjectable {
     @Schema(description = "Key Format", requiredMode = Schema.RequiredMode.REQUIRED)
     private KeyFormat format;
 
-    @Schema(description = "Key length in bits. Required for RSA, ECDSA and AES; optional otherwise.",
+    @Schema(description = "Key length in bits; absent when the platform cannot size the key.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true, minimum = "1")
     private Integer length;
 
@@ -98,4 +98,21 @@ public class KeyItemDto extends NameAndUuidDto implements AttributeProjectable {
             example = AttributeProjectable.ATTRIBUTE_VALUES_EXAMPLE, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues;
 
+    @Schema(description = "Name of the key's standardized parameters: the curve of an ECDSA key or the parameter set of a "
+            + "post-quantum key, such as P-256 or ML-DSA-65; absent for RSA and AES keys, whose `length` gives their "
+            + "size, and for a key the platform cannot name.", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            nullable = true)
+    private String parameterSet;
+
+    /** Keeps positional callers compiling, with {@code parameterSet} unset. */
+    public KeyItemDto(String description, OffsetDateTime creationTime, String keyWrapperUuid, String tokenProfileUuid,
+            String tokenProfileName, String tokenInstanceUuid, String tokenInstanceName, String owner, String ownerUuid,
+            List<GroupDto> groups, int associations, String keyReferenceUuid, KeyType type, KeyAlgorithm keyAlgorithm,
+            KeyFormat format, Integer length, List<KeyUsage> usage, boolean enabled, KeyState state,
+            ComplianceStatus complianceStatus,
+            Map<FilterFieldSource, Map<String, List<BaseAttributeContentV3<?>>>> attributeValues) {
+        this(description, creationTime, keyWrapperUuid, tokenProfileUuid, tokenProfileName, tokenInstanceUuid,
+                tokenInstanceName, owner, ownerUuid, groups, associations, keyReferenceUuid, type, keyAlgorithm, format,
+                length, usage, enabled, state, complianceStatus, attributeValues, null);
+    }
 }

@@ -25,6 +25,7 @@ import com.otilm.api.model.client.certificate.UploadCertificateRequestDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.core.certificate.BulkEarlyRenewalRequestDto;
 import com.otilm.api.model.core.certificate.CertificateChainDownloadResponseDto;
 import com.otilm.api.model.core.certificate.CertificateChainResponseDto;
 import com.otilm.api.model.core.certificate.CertificateContentDto;
@@ -259,6 +260,17 @@ public interface CertificateController extends AuthProtectedController {
             produces = {MediaType.APPLICATION_JSON_VALUE})
     BulkOperationResponse bulkDeleteCertificate(@RequestBody RemoveCertificateDto request)
             throws NotFoundException, NotSupportedException;
+
+    @Operation(summary = "Request early renewal of multiple certificates",
+            description = "Marks the certificates "
+                    + "with the provided UUIDs for early renewal, spread over the requested period")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Early renewal requested for the certificates"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Content",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))})
+    @PostMapping(path = "/earlyRenewal", consumes = {MediaType.APPLICATION_JSON_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    BulkOperationResponse bulkRequestEarlyRenewal(@RequestBody @Valid BulkEarlyRenewalRequestDto request);
 
     @Operation(operationId = "getCertificateSearchableFields",
             summary = "Get Certificate searchable fields information",

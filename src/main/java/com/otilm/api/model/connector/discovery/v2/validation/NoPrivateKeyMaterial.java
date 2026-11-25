@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
 import java.util.Set;
 
 /**
- * Keeps key material out of discovery: {@code publicKeyFormat} is never a private-key format ({@code PRKI},
- * {@code EPRKI}), and a key with no public part ({@code PRIVATE_KEY}, {@code SECRET_KEY}, {@code SPLIT_KEY}) carries
+ * Keeps key material out of discovery: {@code publicKeyFormat} names a public-key format ({@code RAW}, {@code SPKI},
+ * {@code CUSTOM}), and a key with no public part ({@code PRIVATE_KEY}, {@code SECRET_KEY}, {@code SPLIT_KEY}) carries
  * neither {@code publicKey} nor {@code publicKeyFormat}.
  */
 @Constraint(validatedBy = NoPrivateKeyMaterialValidator.class)

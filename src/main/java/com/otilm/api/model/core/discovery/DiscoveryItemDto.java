@@ -75,4 +75,17 @@ public class DiscoveryItemDto {
             + "there is none.")
     private List<MetadataAttribute> meta;
 
+    // ALL_OF_REF keeps this description off the shared component; see ConnectorInterfaceDto.
+    @Schema(description = "Algorithm, parameter set and size the platform derives from the payload of a key item; "
+            + "absent for other resources and for a key payload the platform cannot read.",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, schemaResolution = Schema.SchemaResolution.ALL_OF_REF)
+    private KeyDescriptionDto keyDescription;
+
+    /** Keeps positional callers compiling, with {@code keyDescription} unset. */
+    public DiscoveryItemDto(String uuid, NameAndUuidDto inventory, long sequence, String uniqueRef,
+            OffsetDateTime discoveredAt, Resource resource, DiscoveredItemPayloadDto payload, boolean newlyDiscovered,
+            boolean processed, String processedError, List<MetadataAttribute> meta) {
+        this(uuid, inventory, sequence, uniqueRef, discoveredAt, resource, payload, newlyDiscovered, processed,
+                processedError, meta, null);
+    }
 }
