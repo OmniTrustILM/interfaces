@@ -57,7 +57,9 @@ public interface TrustedCertificateController extends AuthProtectedController {
 
     @Operation(summary = "Add Trusted Certificates",
             description = "Trusts the listed inventory certificates, or one uploaded certificate, for the given "
-                    + "purposes. A certificate that cannot be trusted fails only its own result.")
+                    + "purposes. A certificate that cannot be trusted fails only its own result. The purposes are "
+                    + "required: a request without them, such as the single-certificate request of release 2.20.0, "
+                    + "is refused.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = BULK_RESULT_DESCRIPTION),
             @ApiResponse(responseCode = "422", description = UNPROCESSABLE_CONTENT,
