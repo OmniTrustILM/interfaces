@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.List;
 import org.springframework.beans.BeanUtils;
@@ -32,14 +33,13 @@ public final class ApiClientCodecs {
                     "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", KOTLIN_MODULE);
 
     /**
-     * Configured as Spring's {@code Jackson2ObjectMapperBuilder} configured it, which is the wire contract: unknown
-     * properties do not fail, an active {@code @JsonView} writes only view-annotated properties, and a
-     * {@code ProblemDetail} carries its extension members at the top level.
+     * Configured as Spring Boot configures Spring's {@code Jackson2ObjectMapperBuilder}, which is the wire contract.
      */
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper
             .builder()
             .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
             .addModules(wellKnownModulesOnTheClasspath())
             .addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class)
             .build();

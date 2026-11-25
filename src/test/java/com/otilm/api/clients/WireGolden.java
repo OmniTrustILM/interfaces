@@ -23,7 +23,6 @@ import org.springframework.http.ProblemDetail;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/** Wire output compared against goldens recorded on the Spring Boot 3.5 line. */
 final class WireGolden {
 
     private static final Path ROOT = Path.of("src/test/resources/wire");
@@ -110,7 +109,7 @@ final class WireGolden {
         return !feature.matches() || recordedFeatures.contains(feature.group(1));
     }
 
-    /** Recording mode, -Dwire.golden.write=true, is for the 3.5 line only. */
+    /** Recording mode, -Dwire.golden.write=true, is for a deliberate wire change. */
     static void assertMatches(String name, String actual) throws IOException {
         Path golden = ROOT.resolve(name);
         if (Boolean.getBoolean(RECORD_PROPERTY)) {
