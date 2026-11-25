@@ -12,7 +12,7 @@ import lombok.Data;
 // through a $ref, and since OpenAPI 3.0 cannot carry a description beside one, a description on a referencing field
 // is hoisted onto this component — whichever resource resolves last wins. A class-level description is the only form
 // hoisting cannot overwrite; a referencing field keeps its own through ALL_OF_REF.
-@Schema(description = "An interface a connector implements: its code, its version, and the features it supports. "
+@Schema(description = "An interface a connector implements: its code, its version, and the feature flags it advertises. "
         + "The version decides which generation of the provider contract Core speaks to that connector.")
 @Data
 public class ConnectorInterfaceDto implements Serializable {
@@ -26,8 +26,8 @@ public class ConnectorInterfaceDto implements Serializable {
     @Schema(description = "Version of the implemented connector interface", requiredMode = Schema.RequiredMode.REQUIRED)
     private String version;
 
-    @Schema(description = "Features supported by the connector interface",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Feature flags the connector advertises for the interface: capabilities it supports "
+            + "and restrictions it declares", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<FeatureFlag> features;
 
 }

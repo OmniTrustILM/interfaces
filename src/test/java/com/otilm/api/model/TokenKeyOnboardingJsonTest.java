@@ -2,6 +2,7 @@ package com.otilm.api.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.attribute.RequestAttributeV3;
 import com.otilm.api.model.client.cryptography.key.OnboardTokenKeysRequestDto;
 import com.otilm.api.model.client.cryptography.key.TokenKeySelectionDto;
@@ -14,15 +15,18 @@ import com.otilm.api.model.core.cryptography.key.TokenKeyDto;
 import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingOutcome;
 import com.otilm.api.model.core.cryptography.key.TokenKeyOnboardingResultDto;
 import com.otilm.api.model.core.cryptography.key.TokenKeyStatus;
+import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import static com.otilm.api.model.connector.cryptography.v2.utils.CryptographyDtoFixtures.validMetadata;
+import static com.otilm.api.testsupport.OpenApiSchemaTestSupport.openApi31Schema;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TokenKeyOnboardingJsonTest {
@@ -158,15 +162,56 @@ class TokenKeyOnboardingJsonTest {
     void theStatusesOfUnusableKeysHaveCodesOfTheirOwn() {
         // when
         List<TokenKeyStatus> statuses = Stream
-                .of("unaddressable", "unsupportedKeyType", "unreadable", "gone", "refused", "publicKeyUnavailable")
+                .of("unaddressable", "unsupportedKeyType", "unreadable", "gone", "refused")
                 .map(TokenKeyStatus::findByCode)
                 .toList();
 
         // then
         assertEquals(List
                 .of(TokenKeyStatus.UNADDRESSABLE, TokenKeyStatus.UNSUPPORTED_KEY_TYPE, TokenKeyStatus.UNREADABLE,
-                        TokenKeyStatus.GONE, TokenKeyStatus.REFUSED, TokenKeyStatus.PUBLIC_KEY_UNAVAILABLE),
+                        TokenKeyStatus.GONE, TokenKeyStatus.REFUSED),
                 statuses);
+    }
+
+    @Test
+    void thePublicKeyUnavailableCodeIsAnUnknownStatus() {
+        // when / then
+        assertThrows(ValidationException.class, () -> TokenKeyStatus.findByCode("publicKeyUnavailable"));
+    }
+
+    @Test
+    void anEntryMarksAPrivateKeyWithoutItsPublicKeyAsPrivateOnly() throws Exception {
+        // given
+        TokenKeyDto entry = TokenKeyDto.builder().status(TokenKeyStatus.ONBOARDABLE).privateOnly(true).build();
+
+        // when
+        TokenKeyDto read = mapper.readValue(mapper.writeValueAsString(entry), TokenKeyDto.class);
+
+        // then
+        assertTrue(read.isPrivateOnly());
+    }
+
+    @Test
+    void anEntryOfAKeyPairSerializesPrivateOnlyAsFalse() {
+        // given
+        TokenKeyDto entry = TokenKeyDto.builder().status(TokenKeyStatus.ONBOARDABLE).fingerprint("ab12").build();
+
+        // when
+        JsonNode json = mapper.valueToTree(entry);
+
+        // then
+        assertTrue(json.path("privateOnly").isBoolean());
+        assertFalse(json.path("privateOnly").booleanValue());
+    }
+
+    @Test
+    void anEntryPublishesPrivateOnlyAsARequiredBoolean() {
+        // when
+        Schema<?> entry = openApi31Schema(TokenKeyDto.class);
+
+        // then
+        assertTrue(entry.getRequired().contains("privateOnly"), entry.getRequired().toString());
+        assertTrue(entry.getProperties().get("privateOnly").getTypes().contains("boolean"));
     }
 
     @Test
