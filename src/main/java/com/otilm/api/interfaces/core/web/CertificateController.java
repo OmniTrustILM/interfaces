@@ -22,7 +22,6 @@ import com.otilm.api.model.client.certificate.CertificateUpdateObjectsDto;
 import com.otilm.api.model.client.certificate.MultipleCertificateObjectUpdateDto;
 import com.otilm.api.model.client.certificate.RemoveCertificateDto;
 import com.otilm.api.model.client.certificate.UploadCertificateRequestDto;
-import com.otilm.api.model.common.BulkActionMessageDto;
 import com.otilm.api.model.common.ErrorMessageDto;
 import com.otilm.api.model.common.UuidDto;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
@@ -395,16 +394,11 @@ public interface CertificateController extends AuthProtectedController {
     void unarchiveCertificate(@Parameter(description = "Certificate UUID") @PathVariable UUID uuid)
             throws NotFoundException;
 
-    @Operation(summary = "Archive a list of certificates",
-            description = "Archives the listed certificates except trusted ones, which stay unarchived until their "
-                    + "trust is removed.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Certificates archived; the list names the skipped trusted certificates",
-                    content = @Content(
-                            array = @ArraySchema(schema = @Schema(implementation = BulkActionMessageDto.class))))})
-    @PatchMapping(path = "/archive", produces = {MediaType.APPLICATION_JSON_VALUE})
-    List<BulkActionMessageDto> bulkArchiveCertificate(@RequestBody List<UUID> uuids);
+    @Operation(summary = "Archive a list of certificates")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Certificates archived")})
+    @PatchMapping(path = "/archive")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void bulkArchiveCertificate(@RequestBody List<UUID> uuids);
 
     @Operation(summary = "Unarchive a list of certificates")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Certificates unarchived")})
