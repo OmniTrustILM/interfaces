@@ -97,4 +97,17 @@ class ResponseMetadataJsonTest {
         // then
         assertInstanceOf(ResponseMetadataV3.class, read);
     }
+
+    @Test
+    void readsAnItemWithAnUnknownVersionAsV3() throws Exception {
+        // given
+        JsonNode item = mapper.readTree(CONNECTOR_METADATA).get("items").get(0);
+        ((ObjectNode) item).put("version", "3");
+
+        // when
+        ResponseMetadata read = mapper.treeToValue(item, ResponseMetadata.class);
+
+        // then
+        assertEquals(AttributeVersion.V3, assertInstanceOf(ResponseMetadataV3.class, read).getVersion());
+    }
 }
