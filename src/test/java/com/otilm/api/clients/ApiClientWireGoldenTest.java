@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ApiClientWireGoldenTest {
 
     @Test
-    void apiClientMapperIsConfiguredAsOnThe35Line() throws IOException {
+    void apiClientMapperMatchesItsGolden() throws IOException {
         WireGolden.assertFingerprintMatches("api-client-mapper.txt", ApiClientCodecs.objectMapper());
     }
 
