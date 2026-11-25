@@ -52,9 +52,9 @@ class SignRawJsonTest {
     void theResponseCarriesBytesAsBase64AndTheAlgorithmByCode() throws JsonProcessingException {
         byte[] certificate = {0x30, 0x03, 0x02, 0x01, 0x01};
         byte[] signature = {0x01, 0x02, 0x03};
-        UUID record = UUID.randomUUID();
+        UUID recordUuid = UUID.randomUUID();
         SignRawResponseDto response = new SignRawResponseDto(SignatureAlgorithm.SHA256_WITH_ECDSA, List.of(certificate),
-                List.of(new SignRawResultDto("first", record, signature)));
+                List.of(new SignRawResultDto("first", recordUuid, signature)));
 
         JsonNode json = mapper.readTree(mapper.writeValueAsString(response));
 
@@ -63,7 +63,7 @@ class SignRawJsonTest {
                 json.get("signerCertificateChain").get(0).asText());
         JsonNode result = json.get("results").get(0);
         assertEquals("first", result.get("identifier").asText());
-        assertEquals(record.toString(), result.get("signingRecordUuid").asText());
+        assertEquals(recordUuid.toString(), result.get("signingRecordUuid").asText());
         assertEquals(Base64.getEncoder().encodeToString(signature), result.get("signature").asText());
     }
 
