@@ -11,6 +11,8 @@ import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusRe
 import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import io.swagger.v3.oas.annotations.Operation;
@@ -189,4 +191,21 @@ public interface CertificateController extends AuthProtectedConnectorController 
     @PostMapping(path = "/identify", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     CertificateIdentificationResponseDto identify(@RequestBody @Valid CertificateIdentificationRequestDtoV3 request);
+
+    // ---- Renewal information ----
+
+    @Operation(summary = "Get certificate renewal information",
+            description = "Return the CA's advised renewal window for a batch of 1 to 50 certificates.\n\n"
+                    + "Optional endpoint. Only connectors that declare the `certificateRenewalInfo` feature flag "
+                    + "serve it. Only the Core refresh job calls it.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "Batch processed. The outcome of each item is in the `status` of its result."),
+            @ApiResponse(responseCode = "422",
+                    description = "Invalid request, such as more than 50 items or a duplicate `reference`"),
+            @ApiResponse(responseCode = "429", description = "Rate limited by the CA — Core backs the batch off"),
+            @ApiResponse(responseCode = "503", description = "CA unavailable — Core backs the batch off")})
+    @PostMapping(path = "/renewalInfo", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    CertificateRenewalInfoResponseDto renewalInfo(@RequestBody @Valid CertificateRenewalInfoRequestDtoV3 request);
 }

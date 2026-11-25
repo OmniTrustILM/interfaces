@@ -7,6 +7,7 @@ import com.otilm.api.model.core.v2.ClientCertificateIssueRequestDto;
 import com.otilm.api.model.core.v2.ClientCertificateRekeyRequestDto;
 import com.otilm.api.model.core.v2.ClientCertificateRenewRequestDto;
 import com.otilm.api.model.core.v2.ClientCertificateRequestDto;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -203,6 +204,93 @@ class CertificateDetailJsonTest {
 
         // when / then
         assertThrows(IllegalArgumentException.class, () -> CertificateOperation.fromCode(unknownCode));
+    }
+
+    @Test
+    void roundTripsTheRenewalInfo_whenAWindowIsSet() throws Exception {
+        // given
+        CertificateDetail detail = x509Detail();
+        CertificateRenewalInfoDto info = new CertificateRenewalInfoDto();
+        info.setWindowStart(new Date(1_000L));
+        info.setWindowEnd(new Date(2_000L));
+        info.setExplanationUrl("https://ca.example/why");
+        info.setSource(RenewalWindowSource.AUTHORITY);
+        info.setUpdatedAt(new Date(500L));
+        info.setDue(true);
+        detail.setRenewalInfo(info);
+
+        // when
+        String written = mapper.writeValueAsString(detail);
+        JsonNode json = mapper.readTree(written);
+        CertificateDetail read = mapper.readValue(written, CertificateDetail.class);
+
+        // then
+        assertEquals("authority", json.get("renewalInfo").get("source").asText());
+        assertTrue(json.get("renewalInfo").get("due").asBoolean());
+        assertEquals(info, read.getRenewalInfo());
+    }
+
+    @Test
+    void roundTripsTheAutoRenewal_whenItIsSet() throws Exception {
+        // given
+        CertificateRenewalInfoDto info = new CertificateRenewalInfoDto();
+        CertificateAutoRenewalDto autoRenewal = new CertificateAutoRenewalDto();
+        autoRenewal.setMode(AutoRenewalMode.NONE);
+        autoRenewal.setBlockedReason("no stored certificate request");
+        info.setAutoRenewal(autoRenewal);
+
+        // when
+        String written = mapper.writeValueAsString(info);
+        JsonNode json = mapper.readTree(written);
+        CertificateRenewalInfoDto read = mapper.readValue(written, CertificateRenewalInfoDto.class);
+
+        // then
+        assertEquals("none", json.get("autoRenewal").get("mode").asText());
+        assertEquals("no stored certificate request", json.get("autoRenewal").get("blockedReason").asText());
+        assertEquals(info, read);
+    }
+
+    @Test
+    void omitsTheAutoRenewalAndItsReason_whenTheyAreNull() throws Exception {
+        // given
+        CertificateRenewalInfoDto info = new CertificateRenewalInfoDto();
+
+        // when
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(info));
+
+        // then
+        assertFalse(json.has("autoRenewal"));
+
+        // and
+        CertificateAutoRenewalDto autoRenewal = new CertificateAutoRenewalDto();
+        autoRenewal.setMode(AutoRenewalMode.LOCATION);
+        info.setAutoRenewal(autoRenewal);
+        assertFalse(mapper.readTree(mapper.writeValueAsString(info)).get("autoRenewal").has("blockedReason"));
+    }
+
+    @Test
+    void omitsTheRenewalInfo_whenThereIsNoWindow() throws Exception {
+        // given
+        CertificateDetail detail = x509Detail();
+
+        // when
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(detail));
+
+        // then
+        assertFalse(json.has("renewalInfo"));
+    }
+
+    @Test
+    void writesTheRenewalWindowStart_whenTheCertificateListItemCarriesIt() throws Exception {
+        // given
+        CertificateDto dto = new CertificateDto();
+        dto.setRenewalWindowStart(new Date(1_000L));
+
+        // when
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(dto));
+
+        // then
+        assertEquals(1_000L, json.get("renewalWindowStart").asLong());
     }
 
     private static CertificateDetail x509Detail() {
