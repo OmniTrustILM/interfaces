@@ -18,8 +18,8 @@ public class ConnectorInterfaceInfo implements Serializable {
     @Schema(description = "Version of the implemented connector interface", requiredMode = Schema.RequiredMode.REQUIRED)
     private String version;
 
-    @Schema(description = "Features supported by the connector interface",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Feature flags the connector advertises for the interface: capabilities it supports "
+            + "and restrictions it declares", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<FeatureFlag> features;
 
 }
