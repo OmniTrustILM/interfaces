@@ -13,7 +13,8 @@ import lombok.ToString;
 public class AuthorityConnectionResponseDto {
 
     @Schema(description = "Metadata the connector learned from the upstream CA while validating the authority, stored "
-            + "by Core as the authority's metadata. Replaces the metadata of an earlier save. Never carries secrets: "
+            + "by Core as the authority's metadata. Replaces the metadata of an earlier save; absent, null or empty "
+            + "clears it, the same as a 204. Never carries secrets: "
             + "metadata is shown to anyone who can read the authority.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<MetadataAttribute> metadata;

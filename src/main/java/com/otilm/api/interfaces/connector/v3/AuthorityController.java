@@ -38,8 +38,8 @@ public interface AuthorityController extends AuthProtectedConnectorController {
     @Operation(summary = "Check authority connection",
             description = "Validate and prepare the authority: validate the authority attributes by reaching the "
                     + "upstream CA, and return any metadata learned from it. Core calls this on every create and edit "
-                    + "of the authority and replaces the authority's metadata with the returned list; a 204 clears it. "
-                    + "Metadata must never carry secrets.")
+                    + "of the authority and replaces the authority's metadata with the returned list; a 204, or a 200 "
+                    + "whose metadata is absent, null or empty, clears it. " + "Metadata must never carry secrets.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     description = "Upstream CA is reachable with these attributes; the body carries authority metadata"),

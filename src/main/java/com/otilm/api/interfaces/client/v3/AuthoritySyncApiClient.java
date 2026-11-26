@@ -28,7 +28,8 @@ public interface AuthoritySyncApiClient {
 
     /**
      * Validate authority attributes by attempting to reach the upstream CA. On success the connector answers 204 with
-     * no body, or 200 with the authority metadata; the returned entity's body is {@code null} when there is none.
+     * no body, or 200 with the authority metadata; the returned entity's body is {@code null} when there is none. A
+     * body whose metadata is absent, null or empty means no metadata, the same as a 204.
      */
     ResponseEntity<AuthorityConnectionResponseDto> checkAuthorityConnection(ApiClientConnectorInfo connector,
             List<RequestAttribute> attributes) throws ValidationException, ConnectorException;
