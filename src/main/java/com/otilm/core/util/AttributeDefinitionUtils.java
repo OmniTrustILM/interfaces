@@ -665,9 +665,9 @@ public class AttributeDefinitionUtils {
             String label) {
         RangeAttributeConstraintData constraintData = (RangeAttributeConstraintData) constraint.getData();
         if (contentType.equals(AttributeContentType.INTEGER)) {
-            validateIntegerRangeConstraint(contents, errors, label, constraintData);
+            validateIntegerRangeConstraint(contents, errors, label, constraintData, constraint.getErrorMessage());
         } else if (contentType.equals(AttributeContentType.FLOAT)) {
-            validateFloatRangeConstraint(contents, errors, label, constraintData);
+            validateFloatRangeConstraint(contents, errors, label, constraintData, constraint.getErrorMessage());
         } else {
             errors
                     .add(ValidationError
@@ -676,42 +676,54 @@ public class AttributeDefinitionUtils {
     }
 
     private static void validateFloatRangeConstraint(List<? extends AttributeContent> contents,
-            List<ValidationError> errors, String label, RangeAttributeConstraintData constraintData) {
+            List<ValidationError> errors, String label, RangeAttributeConstraintData constraintData,
+            String errorMessage) {
+        if (hasNoBounds(constraintData)) {
+            return;
+        }
+        Integer from = constraintData.getFrom();
+        Integer to = constraintData.getTo();
         for (AttributeContent value : contents) {
-            if (constraintData.getFrom() != null && (Float) value.getData() < constraintData.getFrom()) {
-                errors
-                        .add(ValidationError
-                                .create("Value {} of attribute {} should be higher than {}", value.getData(), label,
-                                        constraintData.getFrom()));
+            Float number = value.getData();
+            if ((from != null && number < from) || (to != null && number > to)) {
+                errors.add(rangeViolation(number, label, from, to, errorMessage));
             }
-
-            if (constraintData.getTo() != null && (Float) value.getData() > constraintData.getTo()) {
-                errors
-                        .add(ValidationError
-                                .create("Value {} of attribute {} should be lower than {}", value.getData(), label,
-                                        constraintData.getTo()));
-            }
-
         }
     }
 
     private static void validateIntegerRangeConstraint(List<? extends AttributeContent> contents,
-            List<ValidationError> errors, String label, RangeAttributeConstraintData constraintData) {
+            List<ValidationError> errors, String label, RangeAttributeConstraintData constraintData,
+            String errorMessage) {
+        if (hasNoBounds(constraintData)) {
+            return;
+        }
+        Integer from = constraintData.getFrom();
+        Integer to = constraintData.getTo();
         for (AttributeContent value : contents) {
-            if (constraintData.getFrom() != null && (Integer) value.getData() < constraintData.getFrom()) {
-                errors
-                        .add(ValidationError
-                                .create("Value {} of attribute {} should be higher than {}", value.getData(), label,
-                                        constraintData.getFrom()));
-            }
-
-            if (constraintData.getTo() != null && (Integer) value.getData() > constraintData.getTo()) {
-                errors
-                        .add(ValidationError
-                                .create("Value {} of attribute {} should be lower than {}", value.getData(), label,
-                                        constraintData.getTo()));
+            Integer number = value.getData();
+            if ((from != null && number < from) || (to != null && number > to)) {
+                errors.add(rangeViolation(number, label, from, to, errorMessage));
             }
         }
+    }
+
+    /** A range that states no bound restricts nothing, so the content is left unread and is never cast. */
+    private static boolean hasNoBounds(RangeAttributeConstraintData constraintData) {
+        return constraintData == null || (constraintData.getFrom() == null && constraintData.getTo() == null);
+    }
+
+    /** Range bounds are inclusive; the constraint's own error message, when set, explains the violation. */
+    private static ValidationError rangeViolation(Number value, String label, Integer from, Integer to,
+            String errorMessage) {
+        if (errorMessage != null && !errorMessage.isBlank()) {
+            return ValidationError.create("Value {} of attribute {} is out of range: {}", value, label, errorMessage);
+        }
+        if (from != null && to != null) {
+            return ValidationError.create("Value {} of attribute {} must be between {} and {}", value, label, from, to);
+        }
+        return from != null
+                ? ValidationError.create("Value {} of attribute {} must be at least {}", value, label, from)
+                : ValidationError.create("Value {} of attribute {} must be at most {}", value, label, to);
     }
 
     private static void validateDateTimeConstraint(List<? extends AttributeContent> contents,

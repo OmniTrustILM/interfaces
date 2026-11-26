@@ -628,6 +628,99 @@ class AttributeDefinitionUtilsTest {
         Assertions.assertEquals(1, exception.getErrors().size());
     }
 
+    private static List<String> rangeErrors(AttributeContentType contentType, Integer from, Integer to,
+            String errorMessage, BaseAttributeContentV2<?> content) {
+        RangeAttributeConstraintData data = new RangeAttributeConstraintData();
+        data.setFrom(from);
+        data.setTo(to);
+        return rangeErrors(contentType, data, errorMessage, List.of(content));
+    }
+
+    private static List<String> rangeErrors(AttributeContentType contentType, RangeAttributeConstraintData data,
+            String errorMessage, List<BaseAttributeContentV2<?>> contents) {
+        RangeAttributeConstraint constraint = new RangeAttributeConstraint();
+        constraint.setData(data);
+        constraint.setErrorMessage(errorMessage);
+
+        DataAttributeProperties properties = new DataAttributeProperties();
+        properties.setLabel("Parallel executions");
+        DataAttributeV2 definition = new DataAttributeV2();
+        definition.setName("parallelExecutions");
+        definition.setType(AttributeType.DATA);
+        definition.setContentType(contentType);
+        definition.setProperties(properties);
+        definition.setConstraints(List.of(constraint));
+
+        return AttributeDefinitionUtils
+                .validateConstraints(definition, contents)
+                .stream()
+                .map(ValidationError::getErrorDescription)
+                .toList();
+    }
+
+    @Test
+    void testValidateConstraints_RangeBoundsAreInclusive() {
+        Assertions
+                .assertEquals(List.of(),
+                        rangeErrors(AttributeContentType.INTEGER, 1, 100, null, new IntegerAttributeContentV2(1)));
+        Assertions
+                .assertEquals(List.of(),
+                        rangeErrors(AttributeContentType.INTEGER, 1, 100, null, new IntegerAttributeContentV2(100)));
+        Assertions
+                .assertEquals(List.of(),
+                        rangeErrors(AttributeContentType.FLOAT, 1, 100, null, new FloatAttributeContentV2(100f)));
+    }
+
+    @Test
+    void testValidateConstraints_RangeMessageStatesInclusiveBounds() {
+        Assertions
+                .assertEquals(List.of("Value 101 of attribute Parallel executions must be between 1 and 100"),
+                        rangeErrors(AttributeContentType.INTEGER, 1, 100, null, new IntegerAttributeContentV2(101)));
+        Assertions
+                .assertEquals(List.of("Value 0 of attribute Parallel executions must be between 1 and 100"),
+                        rangeErrors(AttributeContentType.INTEGER, 1, 100, null, new IntegerAttributeContentV2(0)));
+        Assertions
+                .assertEquals(List.of("Value 100.5 of attribute Parallel executions must be between 1 and 100"),
+                        rangeErrors(AttributeContentType.FLOAT, 1, 100, null, new FloatAttributeContentV2(100.5f)));
+    }
+
+    @Test
+    void testValidateConstraints_RangeMessageWithOneBound() {
+        Assertions
+                .assertEquals(List.of("Value 0 of attribute Parallel executions must be at least 1"),
+                        rangeErrors(AttributeContentType.INTEGER, 1, null, null, new IntegerAttributeContentV2(0)));
+        Assertions
+                .assertEquals(List.of("Value 101 of attribute Parallel executions must be at most 100"),
+                        rangeErrors(AttributeContentType.INTEGER, null, 100, null, new IntegerAttributeContentV2(101)));
+    }
+
+    @Test
+    void testValidateConstraints_RangeMessageUsesConstraintErrorMessage() {
+        Assertions
+                .assertEquals(List
+                        .of("Value 101 of attribute Parallel executions is out of range: it can be between 1 and 100"),
+                        rangeErrors(AttributeContentType.INTEGER, 1, 100, "it can be between 1 and 100",
+                                new IntegerAttributeContentV2(101)));
+        Assertions
+                .assertEquals(List.of("Value 101 of attribute Parallel executions must be between 1 and 100"),
+                        rangeErrors(AttributeContentType.INTEGER, 1, 100, " ", new IntegerAttributeContentV2(101)));
+    }
+
+    @Test
+    void testValidateConstraints_RangeWithoutBoundsDoesNotCastContent() {
+        RangeAttributeConstraintData noBounds = new RangeAttributeConstraintData();
+        List<BaseAttributeContentV2<?>> doubleContent = List.of(new BaseAttributeContentV2<Double>(null, 1.5d));
+
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.FLOAT, noBounds, null, doubleContent));
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.INTEGER, noBounds, null, doubleContent));
+    }
+
+    @Test
+    void testValidateConstraints_RangeWithoutDataAndWithoutContent() {
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.FLOAT, null, null, List.of()));
+        Assertions.assertEquals(List.of(), rangeErrors(AttributeContentType.INTEGER, null, null, List.of()));
+    }
+
     @Test
     void testValidateAttributes_DateTime() {
         String attributeName = "testAttribute1";
