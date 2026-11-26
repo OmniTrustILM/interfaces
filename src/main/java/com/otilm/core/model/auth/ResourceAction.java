@@ -22,6 +22,8 @@ public enum ResourceAction implements IPlatformEnum {
     CREATE("create", "Create", AccessType.WRITE),
     UPDATE("update", "Update", AccessType.WRITE),
     DELETE("delete", "Delete", AccessType.WRITE),
+    USE("use", "Use", AccessType.WRITE),
+    APPROVE_DESTINATION("approveDestination", "Approve destination", AccessType.WRITE),
 
     // Posting comments on an object; a capability of its own, grantable to users who cannot update the object
     COMMENT("comment", "Comment", AccessType.WRITE),
