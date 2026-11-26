@@ -105,7 +105,8 @@ class NativeSigningControllerDocTest {
         String description = signRawMethod().getAnnotation(Operation.class).description();
         for (String promise : List
                 .of("in request order", "succeeds or fails as a whole", "writes no signing record",
-                        "A retry is a new signing", "A failure of one item names it by its identifier", "synchronous",
+                        "A retry is a new signing",
+                        "A failure the platform can attribute to one item names it by its identifier", "synchronous",
                         "no signature activation data")) {
             assertTrue(description.contains(promise), "signRaw does not state '" + promise + "': " + description);
         }

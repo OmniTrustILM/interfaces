@@ -20,7 +20,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @ValidSignRawItems
-@Schema(name = "SignRawRequest", description = "Digests the caller computed, to sign with the Signing Profile's key")
+@Schema(name = "SignRawRequest", description = "Items to sign with the Signing Profile's key")
 public class SignRawRequestDto {
 
     @Schema(description = "What every item's `data` is. Only `dataDigest` is accepted; `data` answers 422.",
@@ -28,9 +28,9 @@ public class SignRawRequestDto {
     @NotNull(message = "signatureInputMode is required")
     private SignatureInputMode signatureInputMode;
 
-    @Schema(description = "Algorithm the caller computed every digest with. It must be the digest the Signing "
-            + "Profile's signature algorithm commits to; any other answers 422.",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Digest algorithm the Signing Profile's signature algorithm commits to, stated by the caller "
+            + "as a cross-check; any other answers 422. Under `dataDigest`, it is the algorithm the caller computed "
+            + "every item with.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "digestAlgorithm is required")
     private DigestAlgorithm digestAlgorithm;
 
@@ -44,8 +44,10 @@ public class SignRawRequestDto {
 
     @Schema(description = "SHA-256 fingerprint of the signing certificate the caller expects, which is the first entry "
             + "of `signerCertificateChain`, as the platform reports certificate fingerprints: 64 hexadecimal "
-            + "characters in either case, over the DER encoding. If the Signing Profile's current signing certificate "
-            + "differs, the request answers 422 and nothing is signed. Absent means no check.",
+            + "characters in either case, over the DER encoding. It is checked against the certificate the platform "
+            + "signs the request with; when that differs, the request answers 422 and nothing is signed. A Signing "
+            + "Profile update reaches every platform instance only after a short delay, so a request just after one "
+            + "can still be checked against, and signed with, the previous certificate. Absent means no check.",
             examples = {"3f9a1c0e5b7d2e4f6a8c0b1d3e5f7a9c1b3d5e7f9a0c2e4b6d8f0a1c3e5b7d9f"},
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Pattern(regexp = "^[0-9a-fA-F]{64}$", message = "certificateFingerprint must be 64 hexadecimal characters")

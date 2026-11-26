@@ -72,14 +72,14 @@ public interface NativeSigningController extends AuthProtectedController {
             @Parameter(description = "Signing Profile UUID") @PathVariable UUID signingProfileUuid,
             @RequestBody @Valid SignDocumentRequestDto request) throws NotFoundException, SigningException;
 
-    @Operation(operationId = "signRaw", summary = "Sign digests",
-            description = "Sign every digest of the request with the Signing Profile's key and return the signatures "
+    @Operation(operationId = "signRaw", summary = "Sign raw data",
+            description = "Sign every item of the request with the Signing Profile's key and return the signatures "
                     + "in request order. The request succeeds or fails as a whole: a failed request returns no "
-                    + "signature and writes no signing record. A retry is a new signing. A failure of one item names it "
-                    + "by its identifier; a validation failure names the field path by item index. The operation is "
-                    + "synchronous and carries no signature activation data.")
+                    + "signature and writes no signing record. A retry is a new signing. A failure the platform can "
+                    + "attribute to one item names it by its identifier; a validation failure names the field path by "
+                    + "item index. The operation is synchronous and carries no signature activation data.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Digests signed"),
+            @ApiResponse(responseCode = "200", description = "Items signed"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",
                     content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422",
@@ -89,7 +89,7 @@ public interface NativeSigningController extends AuthProtectedController {
                             + "the request carries more items than the platform's `maxItemsPerRequest` signing setting "
                             + "allows, `digestAlgorithm` differs from the digest the Signing Profile's signature "
                             + "algorithm commits to, an item's length is not the digest size of `digestAlgorithm`, or "
-                            + "`certificateFingerprint` does not match the Signing Profile's current signing certificate",
+                            + "`certificateFingerprint` does not match the certificate the request would be signed with",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})
     @PostMapping(path = "/signingProfiles/{signingProfileUuid}/raw/sign", consumes = {MediaType.APPLICATION_JSON_VALUE},
