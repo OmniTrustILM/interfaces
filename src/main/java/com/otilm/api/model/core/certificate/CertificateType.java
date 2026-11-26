@@ -10,11 +10,13 @@ import java.util.Arrays;
 public enum CertificateType implements IPlatformEnum {
 
     X509(Codes.X509, Codes.X509),
-    SSH(Codes.SSH, Codes.SSH);
+    SSH(Codes.SSH, Codes.SSH),
+    CVC(Codes.CVC, Codes.CVC);
 
     public static class Codes {
         public static final String X509 = "X.509";
         public static final String SSH = "SSH";
+        public static final String CVC = "CVC";
 
         private Codes() {
         }

@@ -10,7 +10,8 @@ import java.util.Arrays;
 public enum CertificateRequestFormat implements IPlatformEnum {
 
     PKCS10("pkcs10", "PKCS#10", "PKCS#10 Certificate Request"),
-    CRMF("crmf", "CRMF", "Certificate Request Message Format");
+    CRMF("crmf", "CRMF", "Certificate Request Message Format"),
+    CVC("cvc", "CVC", "Card verifiable certificate request, BSI TR-03110 Part 3");
 
     private final String code;
     private final String label;

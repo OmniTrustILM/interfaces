@@ -20,7 +20,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "certificateType",
         visible = true)
-@JsonSubTypes({@JsonSubTypes.Type(value = X509CertificateDetail.class, name = CertificateType.Codes.X509)})
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = X509CertificateDetail.class, name = CertificateType.Codes.X509),
+        @JsonSubTypes.Type(value = CvcCertificateDetail.class, name = CertificateType.Codes.CVC)})
 @Schema(implementation = CertificateDetailDto.class)
 public abstract class CertificateDetail extends CertificateDto implements CertificateDetailDto {
 
