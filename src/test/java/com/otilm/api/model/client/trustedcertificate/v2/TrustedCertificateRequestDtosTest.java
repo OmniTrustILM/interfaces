@@ -1,6 +1,7 @@
-package com.otilm.api.model.client.trustedcertificate;
+package com.otilm.api.model.client.trustedcertificate.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePurpose;
 import com.otilm.api.model.core.logging.Loggable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Validation;

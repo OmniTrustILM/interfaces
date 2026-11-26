@@ -1,4 +1,4 @@
-package com.otilm.api.model.client.trustedcertificate;
+package com.otilm.api.model.client.trustedcertificate.v2;
 
 import com.otilm.api.model.core.logging.Loggable;
 import io.swagger.v3.oas.annotations.media.Schema;

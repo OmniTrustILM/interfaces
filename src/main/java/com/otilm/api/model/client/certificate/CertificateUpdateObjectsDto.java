@@ -27,7 +27,7 @@ public class CertificateUpdateObjectsDto {
 
     /**
      * @deprecated As of release 2.21.0, removed in the release after it. Trust is managed through
-     * {@link com.otilm.api.interfaces.core.web.TrustedCertificateController}.
+     * {@link com.otilm.api.interfaces.core.web.v2.TrustedCertificateController}.
      */
     @Deprecated(since = "2.21.0", forRemoval = true)
     @Schema(deprecated = true,

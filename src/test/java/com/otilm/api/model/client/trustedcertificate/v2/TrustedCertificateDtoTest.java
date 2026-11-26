@@ -1,6 +1,8 @@
-package com.otilm.api.model.client.trustedcertificate;
+package com.otilm.api.model.client.trustedcertificate.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformSource;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePurpose;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.EnumSet;

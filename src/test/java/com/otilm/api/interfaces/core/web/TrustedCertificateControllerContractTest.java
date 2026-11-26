@@ -1,41 +1,33 @@
 package com.otilm.api.interfaces.core.web;
 
-import com.otilm.api.model.client.trustedcertificate.TrustedCertificateBulkResultDto;
 import com.otilm.api.model.client.trustedcertificate.TrustedCertificateDto;
-import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformDto;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificateRequestDto;
+import io.swagger.v3.oas.annotations.Operation;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Pins the trusted certificate routes Core implements and the Administrator UI calls, so a changed verb, path, return
- * type or parameter count fails this build instead of surfacing as a broken page.
+ * Holds the release 2.20.0 trusted certificate API in place while it is deprecated, so clients written against it keep
+ * the same routes, request and item.
  */
 class TrustedCertificateControllerContractTest {
-
-    private static final Set<String> BULK_METHODS = Set
-            .of("addTrustedCertificates", "updateTrustedCertificates", "removeTrustedCertificates",
-                    "applyTrustedCertificates");
 
     private static Method method(String name) {
         return Arrays
@@ -46,81 +38,54 @@ class TrustedCertificateControllerContractTest {
     }
 
     private static void assertRoute(String name, Class<? extends Annotation> mappingType, String[] path,
-            Class<?> returnType, int parameterCount) {
+            Class<?> returnType) {
         Method method = method(name);
         Annotation mapping = method.getAnnotation(mappingType);
         assertNotNull(mapping, name + " must carry " + mappingType.getSimpleName());
-        assertArrayEquals(path, pathOf(mapping), name + " path");
-        assertEquals(returnType, method.getReturnType(), name + " return type");
-        assertEquals(parameterCount, method.getParameterCount(), name + " parameter count");
-    }
-
-    private static String[] pathOf(Annotation mapping) {
-        return switch (mapping) {
+        String[] actualPath = switch (mapping) {
             case GetMapping m -> m.path();
             case PostMapping m -> m.path();
-            case PatchMapping m -> m.path();
             case DeleteMapping m -> m.path();
             default -> throw new AssertionError("Unexpected mapping " + mapping);
         };
-    }
-
-    private static Map<String, String> documentedStatuses(String name) {
-        return Arrays
-                .stream(method(name).getAnnotation(ApiResponses.class).value())
-                .collect(Collectors.toMap(ApiResponse::responseCode, ApiResponse::description));
+        assertArrayEquals(path, actualPath, name + " path");
+        assertEquals(returnType, method.getReturnType(), name + " return type");
     }
 
     @Test
-    void declaresTheEightRoutes() {
-        assertEquals(8, TrustedCertificateController.class.getDeclaredMethods().length);
-        assertRoute("listTrustedCertificates", GetMapping.class, new String[]{}, List.class, 0);
-        assertRoute("getTrustedCertificate", GetMapping.class, new String[]{"/{uuid}"}, TrustedCertificateDto.class, 1);
-        assertRoute("addTrustedCertificates", PostMapping.class, new String[]{}, TrustedCertificateBulkResultDto.class,
-                1);
-        assertRoute("updateTrustedCertificates", PatchMapping.class, new String[]{},
-                TrustedCertificateBulkResultDto.class, 1);
-        assertRoute("removeTrustedCertificates", DeleteMapping.class, new String[]{},
-                TrustedCertificateBulkResultDto.class, 1);
-        assertRoute("deleteTrustedCertificate", DeleteMapping.class, new String[]{"/{uuid}"}, void.class, 1);
-        assertRoute("applyTrustedCertificates", PostMapping.class, new String[]{"/apply"},
-                TrustedCertificateBulkResultDto.class, 1);
-        assertRoute("getPlatformTrust", GetMapping.class, new String[]{"/platform"},
-                TrustedCertificatePlatformDto.class, 0);
+    void keepsTheFourRoutesOfRelease2200() {
+        assertArrayEquals(new String[]{"/v1/trustedCertificates"},
+                TrustedCertificateController.class.getAnnotation(RequestMapping.class).value());
+        assertEquals(4, TrustedCertificateController.class.getDeclaredMethods().length);
+        assertRoute("listTrustedCertificates", GetMapping.class, new String[]{}, List.class);
+        assertRoute("getTrustedCertificate", GetMapping.class, new String[]{"/{uuid}"}, TrustedCertificateDto.class);
+        assertRoute("createTrustedCertificate", PostMapping.class, new String[]{}, ResponseEntity.class);
+        assertRoute("deleteTrustedCertificate", DeleteMapping.class, new String[]{"/{uuid}"}, void.class);
+        assertArrayEquals(new Class<?>[]{TrustedCertificateRequestDto.class},
+                method("createTrustedCertificate").getParameterTypes());
     }
 
     @Test
-    void theSingleCreateIsGone() {
-        assertFalse(Arrays
-                .stream(TrustedCertificateController.class.getDeclaredMethods())
-                .anyMatch(m -> m.getName().equals("createTrustedCertificate")));
-    }
-
-    @Test
-    void noRouteInheritsANotFoundResponseFromTheInterface() {
-        assertNull(TrustedCertificateController.class.getDeclaredAnnotation(ApiResponses.class));
-        assertTrue(documentedStatuses("getTrustedCertificate").containsKey("404"));
-        assertTrue(documentedStatuses("deleteTrustedCertificate").containsKey("404"));
-        assertFalse(documentedStatuses("getPlatformTrust").containsKey("404"));
-    }
-
-    @Test
-    void bulkRoutesAnswerOkWithAResultAndUnprocessableContentForAMalformedRequest() {
-        for (String name : BULK_METHODS) {
-            Map<String, String> statuses = documentedStatuses(name);
-            assertEquals(Set.of("200", "422"), statuses.keySet(), name);
-            assertEquals("One result per distinct certificate; item failures never change the status code",
-                    statuses.get("200"), name);
-            assertEquals("Unprocessable Content", statuses.get("422"), name);
+    void everyRouteIsDeprecatedForRemovalAfterRelease2210() {
+        for (Method method : TrustedCertificateController.class.getDeclaredMethods()) {
+            assertTrue(method.getAnnotation(Operation.class).deprecated(), method.getName());
+            Deprecated deprecated = method.getAnnotation(Deprecated.class);
+            assertNotNull(deprecated, method.getName());
+            assertTrue(deprecated.forRemoval(), method.getName());
+            assertEquals("2.21.0", deprecated.since(), method.getName());
         }
     }
 
     @Test
-    void validatedBulkRequestsAreCheckedBeforeTheService() {
-        for (String name : BULK_METHODS) {
-            var parameter = method(name).getParameters()[0];
-            assertNotNull(parameter.getAnnotation(RequestBody.class), name);
-            assertNotNull(parameter.getAnnotation(Valid.class), name);
-        }
+    void theItemKeepsTheFieldsOfRelease2200() {
+        Set<String> fields = Arrays
+                .stream(TrustedCertificateDto.class.getDeclaredFields())
+                .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                .map(Field::getName)
+                .collect(Collectors.toSet());
+        assertEquals(Set
+                .of("uuid", "certificateContent", "issuer", "san", "serialNumber", "subject", "thumbprint", "notBefore",
+                        "notAfter"),
+                fields);
     }
 }

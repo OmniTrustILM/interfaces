@@ -1,5 +1,6 @@
-package com.otilm.api.model.client.trustedcertificate;
+package com.otilm.api.model.client.trustedcertificate.v2;
 
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformSource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
