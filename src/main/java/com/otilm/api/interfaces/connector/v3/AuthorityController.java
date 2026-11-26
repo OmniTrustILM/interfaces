@@ -11,6 +11,8 @@ import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +46,8 @@ public interface AuthorityController extends AuthProtectedConnectorController {
             @ApiResponse(responseCode = "200",
                     description = "Upstream CA is reachable with these attributes; the body carries authority metadata"),
             @ApiResponse(responseCode = "204",
-                    description = "Upstream CA is reachable with these attributes; no authority metadata")})
+                    description = "Upstream CA is reachable with these attributes; no authority metadata",
+                    content = @Content(schema = @Schema(hidden = true)))})
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<AuthorityConnectionResponseDto> checkAuthorityConnection(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authority attributes",
