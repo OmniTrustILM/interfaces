@@ -1,6 +1,7 @@
 package com.otilm.api.model.core.authority;
 
 import com.otilm.api.model.client.attribute.ResponseAttribute;
+import com.otilm.api.model.client.metadata.MetadataResponseDto;
 import com.otilm.api.model.common.NameAndUuidDto;
 import com.otilm.api.model.core.connector.v2.ConnectorInterfaceDto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -58,6 +59,10 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String kind;
 
+    @Schema(description = "Metadata the connector returned when the authority was last saved; v3 authorities only",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private List<MetadataResponseDto> metadata;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -69,6 +74,7 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
                 .append("connector", connector)
                 .append("connectorInterface", connectorInterface)
                 .append("kind", kind)
+                .append("metadata", metadata)
                 .toString();
     }
 }
