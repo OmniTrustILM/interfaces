@@ -60,7 +60,7 @@ public class AuthorityInstanceDto extends NameAndUuidDto {
     private String kind;
 
     @Schema(description = "Metadata the connector returned when the authority was last saved; v3 authorities only",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private List<MetadataResponseDto> metadata;
 
     @Override

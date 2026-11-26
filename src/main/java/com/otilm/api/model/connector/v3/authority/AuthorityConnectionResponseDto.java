@@ -16,6 +16,6 @@ public class AuthorityConnectionResponseDto {
             + "by Core as the authority's metadata. Replaces the metadata of an earlier save; absent, null or empty "
             + "clears it, the same as a 204. Never carries secrets: "
             + "metadata is shown to anyone who can read the authority.",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private List<MetadataAttribute> metadata;
 }
