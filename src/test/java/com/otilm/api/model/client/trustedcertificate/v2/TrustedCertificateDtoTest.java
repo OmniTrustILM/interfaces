@@ -31,6 +31,21 @@ class TrustedCertificateDtoTest {
     }
 
     @Test
+    void validityDatesKeepTheirInstant() throws Exception {
+        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+        TrustedCertificateDto dto = mapper
+                .readValue("{\"notBefore\":\"2026-01-01T10:00:00+01:00\",\"notAfter\":\"2027-01-01T10:00:00+01:00\"}",
+                        TrustedCertificateDto.class);
+        assertEquals(Instant.parse("2026-01-01T09:00:00Z"), dto.getNotBefore().toInstant());
+        assertEquals(Instant.parse("2027-01-01T09:00:00Z"), dto.getNotAfter().toInstant());
+    }
+
+    @Test
+    void itemIsPublishedUnderItsOwnSchemaName() {
+        assertEquals("TrustedCertificateDtoV2", TrustedCertificateDto.class.getAnnotation(Schema.class).name());
+    }
+
+    @Test
     void readsAnItemFromACoreThatSendsNoPlatformState() throws Exception {
         TrustedCertificateDto dto = new ObjectMapper()
                 .findAndRegisterModules()

@@ -95,17 +95,32 @@ class TrustedCertificateRequestDtosTest {
             assertTrue(request.toLogResourceObjectsNames().isEmpty());
             assertTrue(request.toLogResourceObjectsUuids().isEmpty());
         }
-        TrustedCertificateAddRequestDto add = new TrustedCertificateAddRequestDto();
-        add.setCertificateUuids(List.of(UUID_1));
         TrustedCertificateUpdateRequestDto update = new TrustedCertificateUpdateRequestDto();
         update.setUuids(List.of(UUID_1));
         TrustedCertificateRemoveRequestDto remove = new TrustedCertificateRemoveRequestDto();
         remove.setUuids(List.of(UUID_1));
         TrustedCertificateApplyRequestDto apply = new TrustedCertificateApplyRequestDto();
         apply.setUuids(List.of(UUID_1));
-        for (Loggable request : List.of(add, update, remove, apply)) {
+        for (Loggable request : List.of(update, remove, apply)) {
             assertEquals(List.of(UUID.fromString(UUID_1)), request.toLogResourceObjectsUuids());
         }
+    }
+
+    @Test
+    void addLogsTheRequestedInventoryCertificatesAsDataNotAsTrustedCertificates() {
+        TrustedCertificateAddRequestDto add = new TrustedCertificateAddRequestDto();
+        add.setCertificateUuids(List.of(UUID_1));
+        assertTrue(add.toLogResourceObjectsUuids().isEmpty());
+        assertEquals(List.of(UUID_1), add.toLogData());
+    }
+
+    @Test
+    void certificateContentStatesThatUnparseableContentIsRefused() throws Exception {
+        String description = TrustedCertificateAddRequestDto.class
+                .getDeclaredField("certificateContent")
+                .getAnnotation(Schema.class)
+                .description();
+        assertTrue(description.contains("not a single parseable X.509 certificate is refused with 422"));
     }
 
     private static Set<String> invalidPaths(Object request) {

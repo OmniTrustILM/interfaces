@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Result of one requested certificate in a bulk trusted certificate operation")
 public class TrustedCertificateBulkItemDto {
 
-    @Schema(description = "The requested certificate: its UUID, or the fingerprint of an uploaded file",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "The requested certificate: the UUID as sent in the request, or the hex SHA-256 fingerprint "
+            + "of the sent certificateContent", requiredMode = Schema.RequiredMode.REQUIRED)
     private String reference;
 
     @Schema(description = "UUID of the resulting Trusted Certificate, when there is one",

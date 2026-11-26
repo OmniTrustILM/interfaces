@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -23,7 +24,8 @@ public class TrustedCertificateAddRequestDto implements Loggable {
 
     @Schema(description = "Base64 content of one certificate to trust, the same encoding as certificate upload. "
             + "Adding by content also requires the certificate create permission, since the certificate is added to "
-            + "the inventory", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            + "the inventory. Content that is not a single parseable X.509 certificate is refused with 422",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String certificateContent;
 
     @Schema(description = "Purposes to trust the certificates for", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -32,7 +34,7 @@ public class TrustedCertificateAddRequestDto implements Loggable {
 
     @Override
     public Serializable toLogData() {
-        return null;
+        return certificateUuids == null ? null : new ArrayList<>(certificateUuids);
     }
 
     @Override
@@ -42,6 +44,6 @@ public class TrustedCertificateAddRequestDto implements Loggable {
 
     @Override
     public List<UUID> toLogResourceObjectsUuids() {
-        return certificateUuids == null ? List.of() : certificateUuids.stream().map(UUID::fromString).toList();
+        return List.of();
     }
 }

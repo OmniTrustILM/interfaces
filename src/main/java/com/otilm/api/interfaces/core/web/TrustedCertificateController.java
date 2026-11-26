@@ -29,12 +29,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping("/v1/trustedCertificates")
 @Tag(name = "Trusted Certificate Management", description = "Trusted Certificate Management API")
-@ApiResponses(value = @ApiResponse(responseCode = "404", description = "Not Found",
-        content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))))
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "404", description = "Not Found",
+                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
+        @ApiResponse(responseCode = "503",
+                description = "Platform trust is still being imported after an upgrade; retry later",
+                content = @Content(schema = @Schema(implementation = ErrorMessageDto.class)))})
 public interface TrustedCertificateController extends AuthProtectedController {
 
     String DEPRECATION = "Deprecated, removed in the release after 2.21.0: use /v2/trustedCertificates. Lists and "
             + "changes platform trust only.";
+    String CREATE_RULES = " Only CA and self-signed certificates that are neither archived nor expired are accepted, "
+            + "and creating also needs the permission to create certificates.";
 
     /**
      * @deprecated As of release 2.21.0, removed in the release after it. Use
@@ -62,10 +68,13 @@ public interface TrustedCertificateController extends AuthProtectedController {
      * {@link com.otilm.api.interfaces.core.web.v2.TrustedCertificateController}.
      */
     @Deprecated(since = "2.21.0", forRemoval = true)
-    @Operation(deprecated = true, summary = "Create a new Trusted Certificate", description = DEPRECATION)
+    @Operation(deprecated = true, summary = "Create a new Trusted Certificate",
+            description = DEPRECATION + CREATE_RULES)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New Trusted Certificate created",
                     content = @Content(schema = @Schema(implementation = UuidDto.class))),
+            @ApiResponse(responseCode = "409", description = "Already trusted for the platform",
+                    content = @Content(schema = @Schema(implementation = ErrorMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Content",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = "[\"Error Message 1\",\"Error Message 2\"]")}))})

@@ -101,6 +101,11 @@ class TrustedCertificateControllerContractTest {
     }
 
     @Test
+    void addDeclaresNoCheckedException() {
+        assertEquals(0, method("addTrustedCertificates").getExceptionTypes().length);
+    }
+
+    @Test
     void hasNoSingleCreateOrDelete() {
         assertFalse(Arrays
                 .stream(TrustedCertificateController.class.getDeclaredMethods())

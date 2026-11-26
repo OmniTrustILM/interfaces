@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.security.cert.CertificateException;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,8 +61,7 @@ public interface TrustedCertificateController extends AuthProtectedController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
                             examples = {@ExampleObject(value = UNPROCESSABLE_CONTENT_EXAMPLE)}))})
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    TrustedCertificateBulkResultDto addTrustedCertificates(@RequestBody @Valid TrustedCertificateAddRequestDto request)
-            throws CertificateException;
+    TrustedCertificateBulkResultDto addTrustedCertificates(@RequestBody @Valid TrustedCertificateAddRequestDto request);
 
     @Operation(operationId = "updateTrustedCertificatesV2", summary = "Update purposes of Trusted Certificates")
     @ApiResponses(value = {

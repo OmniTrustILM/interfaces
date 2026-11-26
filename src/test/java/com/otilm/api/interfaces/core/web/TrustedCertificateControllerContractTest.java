@@ -3,6 +3,8 @@ package com.otilm.api.interfaces.core.web;
 import com.otilm.api.model.client.trustedcertificate.TrustedCertificateDto;
 import com.otilm.api.model.client.trustedcertificate.TrustedCertificateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -77,6 +79,14 @@ class TrustedCertificateControllerContractTest {
     }
 
     @Test
+    void documentsTheAnswersCoreAddsFromRelease2210() {
+        assertTrue(statuses(TrustedCertificateController.class.getAnnotation(ApiResponses.class)).contains("503"));
+        Method create = method("createTrustedCertificate");
+        assertTrue(statuses(create.getAnnotation(ApiResponses.class)).contains("409"));
+        assertTrue(create.getAnnotation(Operation.class).description().contains("permission to create certificates"));
+    }
+
+    @Test
     void theItemKeepsTheFieldsOfRelease2200() {
         Set<String> fields = Arrays
                 .stream(TrustedCertificateDto.class.getDeclaredFields())
@@ -87,5 +97,9 @@ class TrustedCertificateControllerContractTest {
                 .of("uuid", "certificateContent", "issuer", "san", "serialNumber", "subject", "thumbprint", "notBefore",
                         "notAfter"),
                 fields);
+    }
+
+    private static Set<String> statuses(ApiResponses responses) {
+        return Arrays.stream(responses.value()).map(ApiResponse::responseCode).collect(Collectors.toSet());
     }
 }

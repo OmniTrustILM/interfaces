@@ -3,7 +3,6 @@ package com.otilm.api.model.client.trustedcertificate.v2;
 import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformState;
 import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePurpose;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import lombok.Data;
@@ -41,10 +40,10 @@ public class TrustedCertificateDto {
     private String thumbprint;
 
     @Schema(description = "Certificate validity start date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private LocalDateTime notBefore;
+    private OffsetDateTime notBefore;
 
     @Schema(description = "Certificate expiration date", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private LocalDateTime notAfter;
+    private OffsetDateTime notAfter;
 
     @Schema(description = "Purposes the certificate is trusted for; empty only while a platform removal is pending",
             requiredMode = Schema.RequiredMode.REQUIRED)
