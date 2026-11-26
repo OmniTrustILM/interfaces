@@ -55,6 +55,14 @@ class TrustedCertificateDtoTest {
     }
 
     @Test
+    void archivedMarkIsAlwaysSent() throws Exception {
+        String json = new ObjectMapper().findAndRegisterModules().writeValueAsString(new TrustedCertificateDto());
+        assertTrue(json.contains("\"archived\":false"));
+        assertEquals(Schema.RequiredMode.REQUIRED,
+                TrustedCertificateDto.class.getDeclaredField("archived").getAnnotation(Schema.class).requiredMode());
+    }
+
+    @Test
     void dtoWithoutPlatformStateRoundTrips() throws Exception {
         TrustedCertificateDto dto = new TrustedCertificateDto();
         dto.setUuid("u1");

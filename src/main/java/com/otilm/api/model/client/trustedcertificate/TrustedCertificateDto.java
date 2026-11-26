@@ -62,4 +62,8 @@ public class TrustedCertificateDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean expiring;
 
+    @Schema(description = "The inventory certificate is archived. It keeps its trust, and no purpose can be added "
+            + "until it is unarchived", requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean archived;
+
 }
