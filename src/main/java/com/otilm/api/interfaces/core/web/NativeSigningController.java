@@ -51,8 +51,8 @@ public interface NativeSigningController extends AuthProtectedController {
             description = "Sign every document of the request at the Signing Profile's signature level and return "
                     + "the signing outputs in request order. The request succeeds or fails as a whole: a failed request "
                     + "returns no output and writes no signing record for its documents. A retry is a new signing. A "
-                    + "failure of one item names it by its identifier; a validation failure names the field path by "
-                    + "item index.")
+                    + "failure the platform can attribute to one item names it by its identifier; a validation failure "
+                    + "names the field path by item index.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Documents signed"),
             @ApiResponse(responseCode = "404", description = "Signing Profile not found",

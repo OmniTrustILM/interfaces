@@ -88,6 +88,8 @@ class NativeSigningControllerDocTest {
         String description = signDocumentMethod().getAnnotation(Operation.class).description();
         assertTrue(description.contains("at the Signing Profile's signature level"), description);
         assertTrue(description.contains("succeeds or fails as a whole"), description);
+        assertTrue(description.contains("A failure the platform can attribute to one item names it by its identifier"),
+                description);
         assertNoJargon("signDocument", description);
     }
 
