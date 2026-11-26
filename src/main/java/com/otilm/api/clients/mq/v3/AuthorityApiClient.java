@@ -7,6 +7,7 @@ import com.otilm.api.exception.ValidationException;
 import com.otilm.api.interfaces.client.v3.AuthoritySyncApiClient;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.connector.v3.authority.AuthorityConnectionResponseDto;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
@@ -49,9 +50,11 @@ public class AuthorityApiClient implements AuthoritySyncApiClient {
     }
 
     @Override
-    public ResponseEntity<Void> checkAuthorityConnection(ApiClientConnectorInfo connector,
+    public ResponseEntity<AuthorityConnectionResponseDto> checkAuthorityConnection(ApiClientConnectorInfo connector,
             List<RequestAttribute> attributes) throws ValidationException, ConnectorException {
-        return proxyClient.sendRequestForEntity(connector, BASE_PATH, HTTP_METHOD_POST, attributes, Void.class);
+        return proxyClient
+                .sendRequestForEntity(connector, BASE_PATH, HTTP_METHOD_POST, attributes,
+                        AuthorityConnectionResponseDto.class);
     }
 
     @Override

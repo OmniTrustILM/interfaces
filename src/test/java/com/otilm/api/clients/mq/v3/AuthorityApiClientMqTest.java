@@ -1,6 +1,9 @@
 package com.otilm.api.clients.mq.v3;
 
 import com.otilm.api.exception.ConnectorException;
+import com.otilm.api.model.client.attribute.RequestAttribute;
+import com.otilm.api.model.common.attribute.v3.MetadataAttributeV3;
+import com.otilm.api.model.connector.v3.authority.AuthorityConnectionResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.ListedCertificateType;
 import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
@@ -11,6 +14,8 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Delegation test for the MQ-based v3 Authority client's certificate types listing. The MQ path constant is a second
@@ -28,6 +33,40 @@ class AuthorityApiClientMqTest {
         client = new AuthorityApiClient(proxyClient);
         connector = new ConnectorDto();
         connector.setUrl("http://localhost");
+    }
+
+    @Test
+    void checkAuthorityConnection_returnsMetadata() throws ConnectorException {
+        // given
+        List<RequestAttribute> attributes = List.of();
+        AuthorityConnectionResponseDto body = new AuthorityConnectionResponseDto();
+        body.setMetadata(List.of(new MetadataAttributeV3()));
+        proxyClient.respondWithEntity(ResponseEntity.ok(body));
+
+        // when
+        ResponseEntity<AuthorityConnectionResponseDto> response = client
+                .checkAuthorityConnection(connector, attributes);
+
+        // then
+        Assertions.assertSame(body, response.getBody());
+        RecordingProxyClient.Invocation invocation = proxyClient.invocation();
+        Assertions.assertEquals("/v3/authorityProvider/authorities", invocation.path());
+        Assertions.assertEquals("POST", invocation.method());
+        Assertions.assertSame(attributes, invocation.body());
+        Assertions.assertEquals(AuthorityConnectionResponseDto.class, invocation.responseType());
+    }
+
+    @Test
+    void checkAuthorityConnection_returnsNoBodyOn204() throws ConnectorException {
+        // given
+        proxyClient.respondWithEntity(ResponseEntity.noContent().build());
+
+        // when
+        ResponseEntity<AuthorityConnectionResponseDto> response = client.checkAuthorityConnection(connector, List.of());
+
+        // then
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        Assertions.assertNull(response.getBody());
     }
 
     @Test

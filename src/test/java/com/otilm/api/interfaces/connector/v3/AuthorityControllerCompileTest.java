@@ -2,6 +2,7 @@ package com.otilm.api.interfaces.connector.v3;
 
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.connector.v3.authority.AuthorityConnectionResponseDto;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
@@ -22,7 +23,7 @@ class AuthorityControllerCompileTest {
             return List.of();
         }
 
-        public ResponseEntity<Void> checkAuthorityConnection(List<RequestAttribute> body) {
+        public ResponseEntity<AuthorityConnectionResponseDto> checkAuthorityConnection(List<RequestAttribute> body) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
 
