@@ -1,5 +1,6 @@
 package com.otilm.api.model.client.signing.nativesigning;
 
+import com.otilm.api.model.client.signing.nativesigning.validation.ItemIdentifierFormat;
 import com.otilm.api.model.common.enums.cryptography.DigestAlgorithm;
 import com.otilm.api.model.common.signature.DocumentTransferMode;
 import com.otilm.api.testsupport.ValidatorFixture;
@@ -112,6 +113,11 @@ class SignDocumentRequestValidationTest {
                         invalid("repeated identifier", inlineRequest(inlineItem("same"), inlineItem("same")),
                                 "items[1].identifier",
                                 "identifiers must be unique within the request; duplicates item at index 0"),
+                        invalid("identifier over the bound",
+                                inlineRequest(inlineItem("x".repeat(ItemIdentifierFormat.MAX_LENGTH + 1))),
+                                "items[0].identifier", ItemIdentifierFormat.LENGTH_MESSAGE),
+                        invalid("identifier with a control character", inlineRequest(inlineItem("first\r\nforged")),
+                                "items[0].identifier", ItemIdentifierFormat.MESSAGE),
                         invalid("inline request naming a digest algorithm", inlineWithAlgorithm, "digestAlgorithm",
                                 "digestAlgorithm must be absent when transferMode is inline"),
                         invalid("inline item without its document",

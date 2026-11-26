@@ -45,7 +45,8 @@ public class SigningProfileRequestDto {
     private List<RequestAttribute> customAttributes = new ArrayList<>();
 
     @Valid
-    @Schema(description = "Signing Record policy. When omitted, defaults are used (no signing record).",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Signing Record policy. When omitted on create, each signature gets a metadata-only "
+            + "Signing Record: who signed, when, and with which profile and version. When omitted on update, the "
+            + "current policy is kept.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private SigningRecordPolicyRequestDto recordPolicy;
 }
