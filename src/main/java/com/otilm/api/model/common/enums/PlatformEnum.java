@@ -16,6 +16,9 @@ import com.otilm.api.model.client.signing.profile.scheme.ManagedSigningType;
 import com.otilm.api.model.client.signing.profile.scheme.SigningScheme;
 import com.otilm.api.model.client.signing.profile.workflow.SigningWorkflowType;
 import com.otilm.api.model.client.signing.profile.workflow.timestamp.TimestampSourceType;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformSource;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformState;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePurpose;
 import com.otilm.api.model.common.HealthStatus;
 import com.otilm.api.model.common.attribute.common.AttributeType;
 import com.otilm.api.model.common.attribute.common.AttributeVersion;
@@ -138,6 +141,9 @@ public enum PlatformEnum implements IPlatformEnum {
     CERTIFICATE_RELATION_TYPE(CertificateRelationType.class,
             "Type of relation between successor and predecessor certificate"),
     RENEWAL_WINDOW_SOURCE(RenewalWindowSource.class, "Source of a certificate renewal window"),
+    TRUSTED_CERTIFICATE_PURPOSE(TrustedCertificatePurpose.class, "Trusted certificate purpose"),
+    TRUSTED_CERTIFICATE_PLATFORM_STATE(TrustedCertificatePlatformState.class, "Trusted certificate platform state"),
+    TRUSTED_CERTIFICATE_PLATFORM_SOURCE(TrustedCertificatePlatformSource.class, "Trusted certificate platform source"),
 
     // oid
     OID_CATEGORY(OidCategory.class, "OID Category"),

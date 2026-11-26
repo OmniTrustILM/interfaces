@@ -1,0 +1,49 @@
+package com.otilm.api.model.client.trustedcertificate.v2;
+
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePurpose;
+import com.otilm.api.model.core.logging.Loggable;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Schema(description = "Certificates to trust and the purposes to trust them for. Exactly one of certificateUuids and "
+        + "certificateContent is set; an empty certificateUuids counts as absent.")
+public class TrustedCertificateAddRequestDto implements Loggable {
+
+    @Schema(description = "UUIDs of inventory certificates to trust", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<@NotNull String> certificateUuids;
+
+    @Schema(description = "Base64 content of one certificate to trust, the same encoding as certificate upload. "
+            + "Adding by content also requires the certificate create permission, since the certificate is added to "
+            + "the inventory. Content that is not a single parseable X.509 certificate is refused with 422",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String certificateContent;
+
+    @Schema(description = "Purposes to trust the certificates for", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotEmpty
+    private Set<@NotNull TrustedCertificatePurpose> purposes;
+
+    @Override
+    public Serializable toLogData() {
+        return certificateUuids == null ? null : new ArrayList<>(certificateUuids);
+    }
+
+    @Override
+    public List<String> toLogResourceObjectsNames() {
+        return List.of();
+    }
+
+    @Override
+    public List<UUID> toLogResourceObjectsUuids() {
+        return List.of();
+    }
+}

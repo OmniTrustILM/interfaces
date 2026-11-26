@@ -2,6 +2,9 @@ package com.otilm.api.model.common.enums;
 
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.otilm.api.model.client.discovery.DiscoveryWindowMode;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformSource;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePlatformState;
+import com.otilm.api.model.client.trustedcertificate.TrustedCertificatePurpose;
 import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
@@ -43,6 +46,33 @@ class PlatformEnumTest {
         assertEquals(PlatformEnum.PROTOCOL_CHALLENGE_SOURCE, entry);
         assertEquals(ProtocolChallengeSource.class, entry.getEnumClass());
         assertEquals("ProtocolChallengeSource", entry.getCode());
+    }
+
+    @Test
+    void trustedCertificatePurposeIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(TrustedCertificatePurpose.class);
+        assertNotNull(entry);
+        assertEquals(PlatformEnum.TRUSTED_CERTIFICATE_PURPOSE, entry);
+        assertEquals(TrustedCertificatePurpose.class, entry.getEnumClass());
+        assertEquals("TrustedCertificatePurpose", entry.getCode());
+    }
+
+    @Test
+    void trustedCertificatePlatformStateIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(TrustedCertificatePlatformState.class);
+        assertNotNull(entry);
+        assertEquals(PlatformEnum.TRUSTED_CERTIFICATE_PLATFORM_STATE, entry);
+        assertEquals(TrustedCertificatePlatformState.class, entry.getEnumClass());
+        assertEquals("TrustedCertificatePlatformState", entry.getCode());
+    }
+
+    @Test
+    void trustedCertificatePlatformSourceIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(TrustedCertificatePlatformSource.class);
+        assertNotNull(entry);
+        assertEquals(PlatformEnum.TRUSTED_CERTIFICATE_PLATFORM_SOURCE, entry);
+        assertEquals(TrustedCertificatePlatformSource.class, entry.getEnumClass());
+        assertEquals("TrustedCertificatePlatformSource", entry.getCode());
     }
 
     @Test

@@ -122,7 +122,7 @@ public class CertificateDto implements Loggable, AttributeProjectable {
     @Schema(description = "Private Key Availability", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean privateKeyAvailability;
 
-    @Schema(description = "Indicator whether CA is marked as trusted, set to null if certificate is not CA",
+    @Schema(description = "Trusted for validation; null when the certificate is not a CA or self-signed certificate",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean trustedCa;
 
