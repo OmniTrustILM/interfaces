@@ -930,7 +930,7 @@ class KeyApiClientTest {
                         "keyRequestType": "keyPair",
                         "keyPairMeta": [%3$s],
                         "privateKeyData": {
-                          "keyMeta": [%1$s],
+                          "keyMeta": [%3$s],
                           "keyData": {"type":"Private","algorithm":"RSA","length":2048}
                         },
                         "publicKeyData": {
@@ -964,7 +964,7 @@ class KeyApiClientTest {
                         "keyRequestType": "keyPair",
                         "keyPairMeta": [%3$s],
                         "privateKeyData": {
-                          "keyMeta": [%1$s],
+                          "keyMeta": [%3$s],
                           "keyData": {"type":"Private","algorithm":"RSA","length":2048}
                         },
                         "publicKeyData": {
@@ -979,7 +979,7 @@ class KeyApiClientTest {
                         "keyRequestType": "keyPair",
                         "keyPairMeta": [%3$s],
                         "privateKeyData": {
-                          "keyMeta": [%1$s],
+                          "keyMeta": [%3$s],
                           "keyData": {"type":"Private","algorithm":"RSA","length":2048}
                         }
                       }
@@ -994,10 +994,10 @@ class KeyApiClientTest {
         String key = """
                 {
                   "keyRequestType": "keyPair",
-                  "keyPairMeta": [%2$s],
+                  "keyPairMeta": [%1$s],
                   "privateKeyData": {"keyMeta": [%1$s], "keyData": {"type":"Private","algorithm":"RSA","length":2048}}
                 }
-                """.formatted(VALID_METADATA_JSON, LISTED_HANDLE_JSON);
+                """.formatted(LISTED_HANDLE_JSON);
         return """
                 {
                   "items": [

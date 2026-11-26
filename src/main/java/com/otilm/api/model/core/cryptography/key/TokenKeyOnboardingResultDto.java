@@ -22,7 +22,7 @@ import lombok.ToString;
 @Schema(name = "TokenKeyOnboardingResultDto", description = "What became of one selected key")
 public class TokenKeyOnboardingResultDto {
 
-    @Schema(description = "Metadata of the key pair, as the request sent it",
+    @Schema(description = "Metadata of the key pair or the private key alone, as the request sent it",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<MetadataAttribute> keyPairMeta;
 

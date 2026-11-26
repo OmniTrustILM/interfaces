@@ -17,4 +17,7 @@ public class CertificateSettingsDto implements Serializable {
             + "and by file import")
     private CertificateUploadSettingsDto upload;
 
+    @Schema(description = "Settings of the refresh of certificate renewal information obtained from authorities")
+    private CertificateRenewalInfoSettingsDto renewalInfo;
+
 }

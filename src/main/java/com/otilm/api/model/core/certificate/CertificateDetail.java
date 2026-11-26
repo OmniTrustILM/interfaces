@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.certificate;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.otilm.api.model.client.attribute.ResponseAttribute;
@@ -31,6 +32,11 @@ public abstract class CertificateDetail extends CertificateDto implements Certif
 
     @Schema(description = "Locations associated to the Certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Set<LocationDto> locations;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "Renewal window of the Certificate; absent when the certificate has no renewal window",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CertificateRenewalInfoDto renewalInfo;
 
     @Schema(description = "Pre-registration authorization status; present only for certificates that were pre-registered",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)

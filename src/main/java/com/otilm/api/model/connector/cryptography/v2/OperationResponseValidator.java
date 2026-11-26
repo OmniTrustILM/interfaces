@@ -4,6 +4,7 @@ import com.otilm.api.model.client.cryptography.key.KeyRequestType;
 import com.otilm.api.model.common.attribute.common.AttributeContent;
 import com.otilm.api.model.common.attribute.common.AttributeVersion;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.common.attribute.common.MetadataAttribute;
 import com.otilm.api.model.common.attribute.common.content.AttributeContentType;
 import com.otilm.api.model.common.attribute.common.properties.DataAttributeProperties;
 import com.otilm.api.model.common.attribute.v3.DataAttributeV3;
@@ -21,6 +22,7 @@ import com.otilm.api.model.connector.cryptography.v2.key.KeyOperationResponseV2D
 import com.otilm.api.model.connector.cryptography.v2.key.KeyTypeV2;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListKeysResponseV2Dto;
+import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyPairV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ListedKeyV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysRequestV2Dto;
 import com.otilm.api.model.connector.cryptography.v2.key.ResolveKeysResponseV2Dto;
@@ -521,9 +523,19 @@ public final class OperationResponseValidator extends ResponseChecks {
     }
 
     private static void requireNameableHandles(List<ListedKeyV2Dto> keys) {
-        if (!keys.stream().allMatch(key -> KeyHandles.isUnambiguous(key.handle()))) {
+        if (!keys.stream().allMatch(OperationResponseValidator::hasNameableHandles)) {
             throw new IllegalArgumentException("Connector returned a key whose metadata cannot serve as a handle");
         }
+    }
+
+    /** A pair's private handle counts too. The platform recognises a private key listed alone by it. */
+    private static boolean hasNameableHandles(ListedKeyV2Dto key) {
+        return KeyHandles.isUnambiguous(key.handle())
+                && (!(key instanceof ListedKeyPairV2Dto pair) || KeyHandles.isUnambiguous(privateHandleOf(pair)));
+    }
+
+    private static List<MetadataAttribute> privateHandleOf(ListedKeyPairV2Dto pair) {
+        return pair.getPrivateKeyData().getKeyMeta();
     }
 
     public OperationValidationResult validateEncrypt(CipherDataRequestV2Dto request,

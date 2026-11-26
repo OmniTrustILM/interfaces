@@ -17,6 +17,7 @@ import com.otilm.api.model.core.acme.KeyRollover;
 import com.otilm.api.model.core.acme.NewAccountRequest;
 import com.otilm.api.model.core.acme.Order;
 import com.otilm.api.model.core.acme.ProblemDocument;
+import com.otilm.api.model.core.acme.RenewalInfo;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -70,6 +71,25 @@ public interface AcmeRaProfileController extends NoAuthController {
     @GetMapping(path = "/directory", produces = {"application/json"})
     ResponseEntity<Directory> getDirectory(
             @Parameter(description = "RA Profile name") @PathVariable String raProfileName)
+            throws NotFoundException, AcmeProblemDocumentException;
+
+    @Operation(summary = "Get Renewal Information",
+            externalDocs = @ExternalDocumentation(description = "RFC 9773, section 4.2",
+                    url = "https://datatracker.ietf.org/doc/html/rfc9773#section-4.2"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Renewal information retrieved"),
+            @ApiResponse(responseCode = "400", description = "Malformed certificate identifier",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDocument.class))),
+            @ApiResponse(responseCode = "404", description = "Renewal information not available",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDocument.class)))})
+    @GetMapping(path = "/renewal-info/{certId}", produces = {"application/json"})
+    ResponseEntity<RenewalInfo> getRenewalInfo(
+            @Parameter(description = "RA Profile name") @PathVariable String raProfileName,
+            @Parameter(
+                    description = "Certificate identifier: the base64url-encoded authority key identifier and serial number, "
+                            + "joined by `.`") @PathVariable String certId)
             throws NotFoundException, AcmeProblemDocumentException;
 
     @Operation(summary = "New Nonce",

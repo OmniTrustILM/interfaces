@@ -7,8 +7,10 @@ import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
+import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CrlResponseDto;
+import com.otilm.api.model.connector.v3.authority.SupportedCertificateTypeDtoV3;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
@@ -36,4 +38,11 @@ public interface AuthoritySyncApiClient {
 
     CaCertificatesResponseDto getCaCertificates(ApiClientConnectorInfo connector, CaCertificatesRequestDtoV3 requestDto)
             throws ConnectorException;
+
+    /**
+     * The certificate types the authority issues, or the types it issues through the RA profile whose attributes the
+     * request carries. A connector without the operation fails the call; the caller decides what that means.
+     */
+    List<SupportedCertificateTypeDtoV3> listCertificateTypes(ApiClientConnectorInfo connector,
+            CertificateTypesRequestDtoV3 requestDto) throws ConnectorException;
 }

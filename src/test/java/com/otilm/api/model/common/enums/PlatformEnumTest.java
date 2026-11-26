@@ -9,6 +9,7 @@ import com.otilm.api.model.core.acme.AcmeIdentifierAuthorizationMode;
 import com.otilm.api.model.core.acme.AcmeIdentifierMatchType;
 import com.otilm.api.model.core.cbom.CbomAssetSyncState;
 import com.otilm.api.model.core.cbom.CbomSyncSkipState;
+import com.otilm.api.model.core.certificate.RenewalWindowSource;
 import com.otilm.api.model.core.cryptoasset.CryptographicAssetType;
 import com.otilm.api.model.core.cryptoasset.PqcExplanationStepOutcome;
 import com.otilm.api.model.core.cryptoasset.PqcVerdict;
@@ -90,6 +91,14 @@ class PlatformEnumTest {
         assertEquals(PlatformEnum.DISCOVERY_WINDOW_MODE, entry);
         assertEquals(DiscoveryWindowMode.class, entry.getEnumClass());
         assertEquals("DiscoveryWindowMode", entry.getCode());
+    }
+
+    @Test
+    void renewalWindowSourceIsRegistered() {
+        PlatformEnum entry = PlatformEnum.findByClass(RenewalWindowSource.class);
+        assertEquals(PlatformEnum.RENEWAL_WINDOW_SOURCE, entry);
+        assertEquals(RenewalWindowSource.class, entry.getEnumClass());
+        assertEquals("RenewalWindowSource", entry.getCode());
     }
 
     @Test

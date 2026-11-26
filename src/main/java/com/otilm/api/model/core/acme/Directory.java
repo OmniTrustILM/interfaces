@@ -1,5 +1,6 @@
 package com.otilm.api.model.core.acme;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -58,6 +59,15 @@ public class Directory {
     @Schema(description = "Metadata for the Directory object", requiredMode = Schema.RequiredMode.REQUIRED)
     private DirectoryMeta meta;
 
+    /**
+     * URL for the ACME Renewal Information resource. Present only when the ACME Profile has renewal information
+     * enabled.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "URL of the ACME Renewal Information resource, present when renewal information is "
+            + "enabled for the ACME Profile", examples = {"http://some-server.com/v1/protocols/acme/renewal-info"})
+    private String renewalInfo;
+
     public String getNewNonce() {
         return newNonce;
     }
@@ -114,6 +124,14 @@ public class Directory {
         this.meta = meta;
     }
 
+    public String getRenewalInfo() {
+        return renewalInfo;
+    }
+
+    public void setRenewalInfo(String renewalInfo) {
+        this.renewalInfo = renewalInfo;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -124,6 +142,7 @@ public class Directory {
                 .append("revokeCert", revokeCert)
                 .append("keyChange", keyChange)
                 .append("meta", meta)
+                .append("renewalInfo", renewalInfo)
                 .toString();
     }
 }

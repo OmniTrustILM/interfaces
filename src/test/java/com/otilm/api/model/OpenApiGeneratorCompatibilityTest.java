@@ -75,14 +75,6 @@ class OpenApiGeneratorCompatibilityTest {
                     TokenProfileDetailDto.class, ContentSigningDeclarationDto.class, ValidateProfileRequestDto.class,
                     ValidateProfileResponseDto.class);
 
-    /**
-     * {@code ResponseMetadata} binds its version subtypes under "2" and "3" while both the published mapping and the
-     * wire value its discriminator carries are "v2" and "v3", so no value it publishes resolves to a subtype at all.
-     * Correcting that changes what the metadata contract binds, so it is pinned as the one divergence rather than
-     * exempted: repairing the registry fails this too, and takes the entry with it.
-     */
-    private static final Set<String> KNOWN_DIVERGENT_MAPPINGS = Set.of("ResponseMetadataDto");
-
     /** Schemas these contracts introduce. Anything else a root pulls in belongs to a contract of its own. */
     private static final Set<String> CONTRIBUTED_SCHEMAS = Set
             .of("EncryptedKeyMaterialV2Dto", "ImportKeyRequestV2Dto", "ImportKeyAttributesRequestV2Dto",
@@ -337,8 +329,7 @@ class OpenApiGeneratorCompatibilityTest {
             }
         }
 
-        assertEquals(KNOWN_DIVERGENT_MAPPINGS, drifted.keySet(),
-                () -> "unions whose published mapping is not what Jackson binds: " + drifted);
+        assertTrue(drifted.isEmpty(), () -> "unions whose published mapping is not what Jackson binds: " + drifted);
         assertFalse(checked.isEmpty(), "no union with a Jackson registry was reached at all");
     }
 

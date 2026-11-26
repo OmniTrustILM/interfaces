@@ -28,8 +28,8 @@ public class KeyHandleV2Dto implements IdentifiedDataV2Dto {
     @NotBlank(message = "identifier is required")
     private String identifier;
 
-    @Schema(description = "Handle exactly as a listing returned it: `keyPairMeta` of a key pair, `keyMeta` of a "
-            + "secret key.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Handle exactly as a listing returned it: `keyPairMeta` of a key pair or of a private key "
+            + "listed alone, `keyMeta` of a secret key.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "keyMeta must not be empty")
     private List<@NotNull(
             message = "keyMeta must not contain null items") @ValidMetadataAttribute MetadataAttribute> keyMeta;

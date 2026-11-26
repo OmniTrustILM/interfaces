@@ -14,6 +14,8 @@ import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusRe
 import com.otilm.api.model.connector.v3.certificate.CertificateOperationStatusResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRegistrationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateRenewRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoRequestDtoV3;
+import com.otilm.api.model.connector.v3.certificate.CertificateRenewalInfoResponseDto;
 import com.otilm.api.model.connector.v3.certificate.CertificateRevocationRequestDtoV3;
 import com.otilm.api.model.connector.v3.certificate.CertificateSignRequestDtoV3;
 import java.util.Arrays;
@@ -55,6 +57,8 @@ public class CertificateApiClient implements CertificateSyncApiClient {
 
     private static final String PATH_IDENTIFY_ATTRIBUTES = BASE_PATH + "/identify/attributes";
     private static final String PATH_IDENTIFY = BASE_PATH + "/identify";
+
+    private static final String PATH_RENEWAL_INFO = BASE_PATH + "/renewalInfo";
 
     private static final String HTTP_METHOD_POST = "POST";
 
@@ -204,5 +208,15 @@ public class CertificateApiClient implements CertificateSyncApiClient {
         return proxyClient
                 .sendRequest(connector, PATH_IDENTIFY, HTTP_METHOD_POST, requestDto,
                         CertificateIdentificationResponseDto.class);
+    }
+
+    // ---- Renewal information ----
+
+    @Override
+    public CertificateRenewalInfoResponseDto renewalInfo(ApiClientConnectorInfo connector,
+            CertificateRenewalInfoRequestDtoV3 requestDto) throws ConnectorException {
+        return proxyClient
+                .sendRequest(connector, PATH_RENEWAL_INFO, HTTP_METHOD_POST, requestDto,
+                        CertificateRenewalInfoResponseDto.class);
     }
 }

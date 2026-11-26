@@ -13,8 +13,8 @@ import java.util.List;
  * Capability advertisements emitted by connectors beyond the version contract.
  *
  * <p>
- * <b>Opt-in semantic for ENFORCED flags:</b> a feature is supported only if the connector explicitly lists it. Absent =
- * NOT supported. Core enforces this gate before invoking capability-dependent operations.
+ * <b>ENFORCED flags</b> apply only when the connector lists them, whether they grant a capability or declare a
+ * restriction. Core enforces this gate before invoking flag-dependent operations.
  * </p>
  *
  * <p>
@@ -49,11 +49,12 @@ public enum FeatureFlag implements IPlatformEnum {
                     + "itself: the transport is trusted with them as it is with connector credentials, and the request must not "
                     + "outlive its operation, so over a message broker it expires with the operation timeout.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
-    KEY_LIST("keyList", "Key List",
-            "Supports listing the keys a token holds, including those created outside the platform, and resolving "
-                    + "the handles a listing returned. The platform can then onboard them. Every later request "
-                    + "addresses a listed key by the metadata the listing returned, exactly like a key the platform "
-                    + "created.",
+    UNLISTABLE_TOKEN("unlistableToken", "Unlistable Token",
+            "Declares that no token of the connector can list the keys it holds, as with a technology whose API "
+                    + "has no listing. The connector refuses key listing and resolution. The platform onboards none "
+                    + "of the tokens' keys and refuses to remove a key from the inventory while it stays on the token, "
+                    + "because a removed key could not be onboarded again. A connector without this flag must list and "
+                    + "resolve the keys of every type it can list.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.CRYPTOGRAPHY)),
     DATA_DIGEST_SIGNING("dataDigestSigning", "Data Digest Signing",
             "Signs items that are already digests without hashing them again: accepts signatureInputMode "
@@ -65,10 +66,11 @@ public enum FeatureFlag implements IPlatformEnum {
                     + "their values; on a rekey the platform states the replaced key's signer in the reserved "
                     + "boundSigner attribute instead, which the connector must publish in its create-key "
                     + "attribute schema. The connector must refuse a request carrying both and must return the "
-                    + "canonical signer with every key pair it creates. Every key of such a connector is bound, "
-                    + "so the flag excludes keyList and keyImport, whose keys arrive without a signer, and the "
-                    + "platform refuses a connector declaring them together. A key of any other connector binds "
-                    + "at its first certificate request.",
+                    + "canonical signer with every key pair it creates. Every key pair of such a connector is bound, "
+                    + "and its listing and resolution must report a bound key pair as refused where they would report "
+                    + "it as available. The flag excludes keyImport, whose keys arrive without a signer, and the platform "
+                    + "refuses a connector declaring both. A key of any other connector binds at its first "
+                    + "certificate request.",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.KEY_LIFECYCLE)),
     SECRET_VERSIONING("secretVersioning", "Secret Versioning",
             "Supports versioning of secrets, allowing to keep track of history of secrets.",
@@ -92,6 +94,9 @@ public enum FeatureFlag implements IPlatformEnum {
     DISCOVERY_STOP_RESUME("discoveryStopResume", "Discovery Stop and Resume",
             "Supports pausing a running discovery with a resumable checkpoint and resuming it later",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.DISCOVERY)),
+    CERTIFICATE_RENEWAL_INFO("certificateRenewalInfo", "Certificate Renewal Information",
+            "Supports reporting the renewal window suggested by the certificate authority for an issued certificate",
+            FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.AUTHORITY)),
     DISCOVERY_INCREMENTAL("discoveryIncremental", "Incremental Discovery",
             "Honours discoverSince on initiate and discovers only items created or changed since then",
             FeatureFlagBehavior.ENFORCED, List.of(ConnectorInterface.DISCOVERY));

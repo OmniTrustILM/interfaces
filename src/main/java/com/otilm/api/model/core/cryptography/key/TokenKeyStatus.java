@@ -17,9 +17,7 @@ public enum TokenKeyStatus implements IPlatformEnum {
     IN_INVENTORY_WITHOUT_TOKEN("inInventoryWithoutToken", "In inventory without token instance",
             "The platform inventory holds the public key without a token instance, in a key that cannot take this private key."),
     IMPORT_IN_PROGRESS("importInProgress", "Import in progress",
-            "An import of this key is still in progress. Onboarding waits until it settles."),
-    PUBLIC_KEY_UNAVAILABLE("publicKeyUnavailable", "Public key unavailable",
-            "The key storage offers no public key for this private key. Onboarding requires one."),
+            "An import that may hold this key is still in progress. Onboarding waits until it settles."),
     UNADDRESSABLE("unaddressable", "Unaddressable",
             "The connector of the token instance cannot identify this key uniquely by a handle. "
                     + "Onboarding requires such a handle."),
