@@ -3,6 +3,7 @@ package com.otilm.api.interfaces.core.web.v2;
 import com.otilm.api.model.client.trustedcertificate.v2.TrustedCertificateBulkResultDto;
 import com.otilm.api.model.client.trustedcertificate.v2.TrustedCertificateDto;
 import com.otilm.api.model.client.trustedcertificate.v2.TrustedCertificatePlatformDto;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -89,6 +90,14 @@ class TrustedCertificateControllerContractTest {
                 TrustedCertificateBulkResultDto.class, 1);
         assertRoute("getPlatformTrust", GetMapping.class, new String[]{"/platform"},
                 TrustedCertificatePlatformDto.class, 0);
+    }
+
+    @Test
+    void operationIdsDoNotCollideWithTheV1Operations() {
+        for (Method method : TrustedCertificateController.class.getDeclaredMethods()) {
+            assertEquals(method.getName() + "V2", method.getAnnotation(Operation.class).operationId(),
+                    method.getName());
+        }
     }
 
     @Test

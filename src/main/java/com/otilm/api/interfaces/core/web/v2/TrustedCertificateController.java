@@ -39,12 +39,12 @@ public interface TrustedCertificateController extends AuthProtectedController {
     String UNPROCESSABLE_CONTENT = "Unprocessable Content";
     String UNPROCESSABLE_CONTENT_EXAMPLE = "[\"Error Message 1\",\"Error Message 2\"]";
 
-    @Operation(summary = "List Trusted Certificates")
+    @Operation(operationId = "listTrustedCertificatesV2", summary = "List Trusted Certificates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of Trusted Certificates")})
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     List<TrustedCertificateDto> listTrustedCertificates();
 
-    @Operation(summary = "Get details of a Trusted Certificate")
+    @Operation(operationId = "getTrustedCertificateV2", summary = "Get details of a Trusted Certificate")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Trusted Certificate details retrieved"),
             @ApiResponse(responseCode = "404", description = "Not Found",
@@ -53,7 +53,7 @@ public interface TrustedCertificateController extends AuthProtectedController {
     TrustedCertificateDto getTrustedCertificate(
             @Parameter(description = "Trusted Certificate UUID") @PathVariable String uuid) throws NotFoundException;
 
-    @Operation(summary = "Add Trusted Certificates",
+    @Operation(operationId = "addTrustedCertificatesV2", summary = "Add Trusted Certificates",
             description = "Trusts the listed inventory certificates, or one uploaded certificate, for the given "
                     + "purposes. A certificate that cannot be trusted fails only its own result.")
     @ApiResponses(value = {
@@ -65,7 +65,7 @@ public interface TrustedCertificateController extends AuthProtectedController {
     TrustedCertificateBulkResultDto addTrustedCertificates(@RequestBody @Valid TrustedCertificateAddRequestDto request)
             throws CertificateException;
 
-    @Operation(summary = "Update purposes of Trusted Certificates")
+    @Operation(operationId = "updateTrustedCertificatesV2", summary = "Update purposes of Trusted Certificates")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = BULK_RESULT_DESCRIPTION),
             @ApiResponse(responseCode = "422", description = UNPROCESSABLE_CONTENT,
@@ -75,7 +75,7 @@ public interface TrustedCertificateController extends AuthProtectedController {
     TrustedCertificateBulkResultDto updateTrustedCertificates(
             @RequestBody @Valid TrustedCertificateUpdateRequestDto request);
 
-    @Operation(summary = "Remove trust from Trusted Certificates",
+    @Operation(operationId = "removeTrustedCertificatesV2", summary = "Remove trust from Trusted Certificates",
             description = "The certificates stay in the inventory.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = BULK_RESULT_DESCRIPTION),
@@ -86,7 +86,7 @@ public interface TrustedCertificateController extends AuthProtectedController {
     TrustedCertificateBulkResultDto removeTrustedCertificates(
             @RequestBody @Valid TrustedCertificateRemoveRequestDto request);
 
-    @Operation(summary = "Re-apply Trusted Certificates on the platform",
+    @Operation(operationId = "applyTrustedCertificatesV2", summary = "Re-apply Trusted Certificates on the platform",
             description = "Compares the trusted certificates with the platform, then applies again the ones that are "
                     + "pending, failed or missing on the platform, and retries failed removals. A certificate whose "
                     + "removal is pending is not added back.")
@@ -100,7 +100,7 @@ public interface TrustedCertificateController extends AuthProtectedController {
     TrustedCertificateBulkResultDto applyTrustedCertificates(
             @RequestBody @Valid TrustedCertificateApplyRequestDto request);
 
-    @Operation(summary = "Get platform trust",
+    @Operation(operationId = "getPlatformTrustV2", summary = "Get platform trust",
             description = "Whether ILM manages platform trust in this deployment and, when the deployment bundle is "
                     + "the source, the certificates it holds.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Platform trust retrieved")})
