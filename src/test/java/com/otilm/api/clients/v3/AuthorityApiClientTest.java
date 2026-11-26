@@ -8,7 +8,10 @@ import com.otilm.api.exception.ConnectorEntityNotFoundException;
 import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ConnectorProblemException;
 import com.otilm.api.exception.ConnectorServerException;
+import com.otilm.api.model.common.attribute.v3.MetadataAttributeV3;
+import com.otilm.api.model.common.attribute.v3.content.StringAttributeContentV3;
 import com.otilm.api.model.common.error.ErrorCode;
+import com.otilm.api.model.connector.v3.authority.AuthorityConnectionResponseDto;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
@@ -66,9 +69,37 @@ class AuthorityApiClientTest {
                         .post("/v3/authorityProvider/authorities")
                         .willReturn(WireMock.aResponse().withStatus(204)));
 
-        ResponseEntity<Void> response = client.checkAuthorityConnection(connector, List.of());
+        ResponseEntity<AuthorityConnectionResponseDto> response = client.checkAuthorityConnection(connector, List.of());
 
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        Assertions.assertNull(response.getBody());
+    }
+
+    @Test
+    void checkAuthorityConnection_returnsMetadataOn200() throws ConnectorException {
+        mockServer
+                .stubFor(WireMock
+                        .post("/v3/authorityProvider/authorities")
+                        .willReturn(WireMock
+                                .aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("{\"metadata\":[{\"version\":3,"
+                                        + "\"uuid\":\"6f0d2a52-6a4b-4c1e-9d1a-3b1e2c4d5e6f\","
+                                        + "\"name\":\"acmeAccountUrl\",\"type\":\"meta\",\"contentType\":\"string\","
+                                        + "\"properties\":{\"label\":\"ACME account URL\",\"visible\":true},"
+                                        + "\"content\":[{\"contentType\":\"string\","
+                                        + "\"data\":\"https://ca.example/acct/1\"}]}]}")));
+
+        ResponseEntity<AuthorityConnectionResponseDto> response = client.checkAuthorityConnection(connector, List.of());
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        MetadataAttributeV3 attribute = Assertions
+                .assertInstanceOf(MetadataAttributeV3.class, response.getBody().getMetadata().get(0));
+        Assertions.assertEquals("acmeAccountUrl", attribute.getName());
+        Assertions
+                .assertEquals("https://ca.example/acct/1",
+                        ((StringAttributeContentV3) attribute.getContent().get(0)).getData());
     }
 
     @Test

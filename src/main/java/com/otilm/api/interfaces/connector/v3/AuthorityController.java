@@ -3,6 +3,7 @@ package com.otilm.api.interfaces.connector.v3;
 import com.otilm.api.interfaces.connector.common.v2.AuthProtectedConnectorController;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.connector.v3.authority.AuthorityConnectionResponseDto;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
@@ -35,11 +36,19 @@ public interface AuthorityController extends AuthProtectedConnectorController {
     List<BaseAttribute> listAuthorityAttributes();
 
     @Operation(summary = "Check authority connection",
-            description = "Validate authority attributes by attempting to reach the upstream CA")
-    @ApiResponse(responseCode = "204", description = "Upstream CA is reachable with these attributes")
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> checkAuthorityConnection(@io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Authority attributes", required = true) @RequestBody List<RequestAttribute> attributes);
+            description = "Validate and prepare the authority: validate the authority attributes by reaching the "
+                    + "upstream CA, and return any metadata learned from it. Core calls this on every create and edit "
+                    + "of the authority and replaces the authority's metadata with the returned list; a 204 clears it. "
+                    + "Metadata must never carry secrets.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "Upstream CA is reachable with these attributes; the body carries authority metadata"),
+            @ApiResponse(responseCode = "204",
+                    description = "Upstream CA is reachable with these attributes; no authority metadata")})
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<AuthorityConnectionResponseDto> checkAuthorityConnection(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authority attributes",
+                    required = true) @RequestBody List<RequestAttribute> attributes);
 
     @Operation(summary = "List RA Profile Attributes",
             description = "RA profile attribute schema given authority context")
