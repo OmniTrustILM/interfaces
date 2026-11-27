@@ -123,8 +123,19 @@ public interface CertificateController extends AuthProtectedController {
             @RequestParam CertificateFormatEncoding encoding)
             throws NotFoundException, CertificateException, IOException;
 
-    @Operation(summary = "Delete a certificate")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Certificate deleted")})
+    @Operation(summary = "Delete a certificate",
+            description = "A certificate is not deleted while a user is bound to it, or while the current version or a "
+                    + "superseded version of a Signing Profile holds it. The refusal names the Signing Profiles that "
+                    + "hold the certificate.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Certificate deleted"),
+            @ApiResponse(responseCode = "422", description = "Certificate is in use and was not deleted",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "[\"Could not delete certificate signer.example.com with UUID "
+                                                    + "6f1c2a4e-0b7d-4c1e-9a53-2d8e7f6a1b90: it is used by the current version "
+                                                    + "of Signing Profile(s): code-signing.\"]")}))})
     @DeleteMapping(path = "/{uuid}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteCertificate(@Parameter(description = "Certificate UUID") @PathVariable UUID uuid)
