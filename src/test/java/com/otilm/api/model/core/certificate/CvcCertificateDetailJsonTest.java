@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otilm.api.model.core.enums.CertificateRequestFormat;
 import com.otilm.api.model.core.v2.ClientCertificateIssueRequestDto;
+import com.otilm.api.model.core.v2.ClientCertificateRekeyRequestDto;
+import com.otilm.api.model.core.v2.ClientCertificateRenewRequestDto;
+import com.otilm.api.model.core.v2.ClientCertificateRequestDto;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -152,6 +156,21 @@ class CvcCertificateDetailJsonTest {
         assertEquals(CvcCertificateRequestDetail.class, mappedSchema(requestSchema, CertificateType.Codes.CVC));
         assertTrue(Arrays.asList(detailSchema.oneOf()).contains(CvcCertificateDetail.class));
         assertTrue(Arrays.asList(requestSchema.oneOf()).contains(CvcCertificateRequestDetail.class));
+    }
+
+    @Test
+    void namesTheCvcDefault_whenTheFormatOfAClientRequestIsDescribed() throws Exception {
+        // given
+        List<Class<?>> requests = List
+                .of(ClientCertificateIssueRequestDto.class, ClientCertificateRenewRequestDto.class,
+                        ClientCertificateRekeyRequestDto.class, ClientCertificateRequestDto.class);
+
+        // when / then
+        for (Class<?> request : requests) {
+            String description = request.getDeclaredField("format").getAnnotation(Schema.class).description();
+            assertTrue(description.contains("pkcs10 for X.509"), request.getSimpleName());
+            assertTrue(description.contains("cvc for CVC"), request.getSimpleName());
+        }
     }
 
     private static Class<?> mappedSchema(Schema schema, String value) {
