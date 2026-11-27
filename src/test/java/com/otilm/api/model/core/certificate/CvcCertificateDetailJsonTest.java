@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -163,14 +164,105 @@ class CvcCertificateDetailJsonTest {
         // given
         List<Class<?>> requests = List
                 .of(ClientCertificateIssueRequestDto.class, ClientCertificateRenewRequestDto.class,
-                        ClientCertificateRekeyRequestDto.class, ClientCertificateRequestDto.class);
+                        ClientCertificateRekeyRequestDto.class);
 
         // when / then
         for (Class<?> request : requests) {
             String description = request.getDeclaredField("format").getAnnotation(Schema.class).description();
             assertTrue(description.contains("pkcs10 for X.509"), request.getSimpleName());
             assertTrue(description.contains("cvc for CVC"), request.getSimpleName());
+            assertTrue(description.contains("pkcs10 and crmf apply to X.509"), request.getSimpleName());
         }
+    }
+
+    @Test
+    void namesPkcs10AsTheOnlyDefault_whenTheStandaloneSubmissionHasNoCertificateType() throws Exception {
+        // given
+        String description = ClientCertificateRequestDto.class
+                .getDeclaredField("format")
+                .getAnnotation(Schema.class)
+                .description();
+
+        // when / then
+        assertTrue(description.contains("pkcs10 applies"));
+        assertFalse(description.contains("cvc"));
+    }
+
+    @Test
+    void readsTheOuterAndInnerReferences_whenAnAuthenticatedRequestCarriesBoth() throws Exception {
+        // given
+        String json = "{\"certificateType\":\"CVC\",\"holderReference\":\"SEILMTERM00004\","
+                + "\"authorityReference\":\"SEILMDV00001\",\"authenticatedBy\":\"SEILMTERM00002\"}";
+
+        // when
+        CvcCertificateRequestDetail read = assertInstanceOf(CvcCertificateRequestDetail.class,
+                mapper.readValue(json, CertificateRequestDetail.class));
+
+        // then
+        assertEquals("SEILMDV00001", read.getAuthorityReference());
+        assertEquals("SEILMTERM00002", read.getAuthenticatedBy());
+    }
+
+    @Test
+    void leavesTheOuterReferenceUnset_whenTheRequestIsNotAuthenticated() throws Exception {
+        // given
+        String json = "{\"certificateType\":\"CVC\",\"holderReference\":\"SEILMTERM00001\","
+                + "\"authorityReference\":\"SEILMDV00001\"}";
+
+        // when
+        CvcCertificateRequestDetail read = assertInstanceOf(CvcCertificateRequestDetail.class,
+                mapper.readValue(json, CertificateRequestDetail.class));
+
+        // then
+        assertEquals("SEILMDV00001", read.getAuthorityReference());
+        assertNull(read.getAuthenticatedBy());
+    }
+
+    @Test
+    void writesTheTerminalType_whenTheCertificateStatesOne() throws Exception {
+        // given
+        CvcCertificateDetail detail = cvcDetail();
+        detail.setTerminalType("0.4.0.127.0.7.3.1.2.2");
+
+        // when
+        JsonNode json = mapper.readTree(mapper.writeValueAsString(detail));
+
+        // then
+        assertEquals("0.4.0.127.0.7.3.1.2.2", json.get("terminalType").asText());
+    }
+
+    @Test
+    void fixesTheCertificateTypeOfEachBranch_whenTheUnionsAreDescribed() throws Exception {
+        // given
+        List<Class<?>> branches = List
+                .of(X509CertificateDetail.class, CvcCertificateDetail.class, X509CertificateRequestDetail.class,
+                        CvcCertificateRequestDetail.class);
+        List<String> expected = List
+                .of(CertificateType.Codes.X509, CertificateType.Codes.CVC, CertificateType.Codes.X509,
+                        CertificateType.Codes.CVC);
+
+        // when / then
+        for (int i = 0; i < branches.size(); i++) {
+            Schema schema = branches.get(i).getMethod("getCertificateType").getAnnotation(Schema.class);
+            assertEquals(List.of(expected.get(i)), Arrays.asList(schema.allowableValues()),
+                    branches.get(i).getSimpleName());
+        }
+    }
+
+    @Test
+    void listsTheRoleValues_whenTheCvcDetailIsDescribed() throws Exception {
+        // given
+        Schema role = CvcCertificateDetail.class.getDeclaredField("role").getAnnotation(Schema.class);
+
+        // when / then
+        assertEquals(List.of("cvca", "dv-domestic", "dv-foreign", "terminal"), Arrays.asList(role.allowableValues()));
+    }
+
+    @Test
+    void describesTheCvcEnumValues_whenTheCatalogueIsRead() {
+        // given / when / then
+        assertEquals("Card verifiable certificate, BSI TR-03110 Part 3", CertificateType.CVC.getDescription());
+        assertTrue(CertificateRequestFormat.class.getAnnotation(Schema.class).description().contains("Base64"));
     }
 
     private static Class<?> mappedSchema(Schema schema, String value) {

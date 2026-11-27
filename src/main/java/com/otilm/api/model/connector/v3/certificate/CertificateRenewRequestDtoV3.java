@@ -30,7 +30,9 @@ public class CertificateRenewRequestDtoV3 extends AuthorityV3ScopedRequestDto {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String request;
 
-    @Schema(description = "CSR format", defaultValue = "pkcs10", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Format of the request. A card verifiable certificate request always arrives with "
+            + "format cvc, which Core sends explicitly; an absent format means pkcs10 only", defaultValue = "pkcs10",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateRequestFormat format;
 
     @Schema(description = "Base64 of cert to renew. Serial + issuer DN parsed from this constitute the cert identity at the CA.",

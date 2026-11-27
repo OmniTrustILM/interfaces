@@ -21,9 +21,16 @@ public class CvcCertificateDetail extends CertificateDetail {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String authorityReference;
 
-    @Schema(description = "Role of the certificate holder as the certificate states it",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Role of the certificate holder as the certificate states it: cvca, dv-domestic, "
+            + "dv-foreign or terminal", requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            allowableValues = {"cvca", "dv-domestic", "dv-foreign", "terminal"})
     private String role;
+
+    @Schema(description = "Object identifier of the terminal type that the access rights are defined for: "
+            + "0.4.0.127.0.7.3.1.2.1 inspection system, 0.4.0.127.0.7.3.1.2.2 authentication terminal, "
+            + "0.4.0.127.0.7.3.1.2.3 signature terminal. The bits of the access rights mean different things "
+            + "for each", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String terminalType;
 
     @Schema(description = "Access rights of the certificate holder as the certificate states them, hexadecimal",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -32,15 +39,23 @@ public class CvcCertificateDetail extends CertificateDetail {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
-    @Schema(description = "First day the certificate is valid, in format yyyy-MM-dd",
+    @Schema(description = "First day the certificate is valid, a UTC date in format yyyy-MM-dd. "
+            + "The inherited notBefore is midnight UTC at the start of this day",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED, type = "string", format = "date")
     private LocalDate effectiveDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
-    @Schema(description = "Last day the certificate is valid, in format yyyy-MM-dd; the certificate is valid "
-            + "through the whole day", requiredMode = Schema.RequiredMode.NOT_REQUIRED, type = "string",
-            format = "date")
+    @Schema(description = "Last day the certificate is valid, a UTC date in format yyyy-MM-dd; the "
+            + "certificate is valid through the whole day. The inherited notAfter is midnight UTC at the start of "
+            + "the following day", requiredMode = Schema.RequiredMode.NOT_REQUIRED, type = "string", format = "date")
     private LocalDate expirationDate;
+
+    @Override
+    @Schema(description = "Certificate type", requiredMode = Schema.RequiredMode.REQUIRED,
+            allowableValues = CertificateType.Codes.CVC)
+    public CertificateType getCertificateType() {
+        return super.getCertificateType();
+    }
 }

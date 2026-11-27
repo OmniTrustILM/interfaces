@@ -46,8 +46,8 @@ public class ClientCertificateRequestDto {
     @Schema(description = "Certificate signing request encoded as Base64 string")
     private String request;
 
-    @Schema(description = "Format of the request, which says how to read it. When absent, the default format of the "
-            + "certificate type applies: pkcs10 for X.509, cvc for CVC",
+    @Schema(description = "Format of the request, which says how to read it: pkcs10 or crmf. When absent, pkcs10 applies. "
+            + "This submission has no certificate type and always takes an X.509 request",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateRequestFormat format;
 
