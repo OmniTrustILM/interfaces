@@ -13,7 +13,9 @@ import lombok.Data;
 @Data
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "certificateType",
         visible = true)
-@JsonSubTypes({@JsonSubTypes.Type(value = X509CertificateRequestDetail.class, name = CertificateType.Codes.X509)})
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = X509CertificateRequestDetail.class, name = CertificateType.Codes.X509),
+        @JsonSubTypes.Type(value = CvcCertificateRequestDetail.class, name = CertificateType.Codes.CVC)})
 @Schema(implementation = CertificateRequestDto.class)
 public abstract class CertificateRequestDetail implements CertificateRequestDto {
 

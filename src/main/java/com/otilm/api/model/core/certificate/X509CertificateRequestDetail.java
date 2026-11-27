@@ -30,4 +30,11 @@ public class X509CertificateRequestDetail extends CertificateRequestDetail {
 
     @Schema(description = "UUID of the Alternative Key", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String altKeyUuid;
+
+    @Override
+    @Schema(description = "Certificate type", requiredMode = Schema.RequiredMode.REQUIRED,
+            allowableValues = CertificateType.Codes.X509)
+    public CertificateType getCertificateType() {
+        return super.getCertificateType();
+    }
 }

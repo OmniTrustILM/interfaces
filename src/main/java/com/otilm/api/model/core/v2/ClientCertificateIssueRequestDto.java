@@ -37,8 +37,10 @@ public class ClientCertificateIssueRequestDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String request;
 
-    @Schema(description = "Format of the request, which says how to read it. When absent, the default format of the "
-            + "certificate type applies: pkcs10 for X.509", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Format of the request, which says how to read it. pkcs10 and crmf apply to X.509, cvc applies to "
+            + "CVC; a format that does not belong to the certificate type is refused. When absent, the default "
+            + "format of the certificate type applies: pkcs10 for X.509, cvc for CVC",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateRequestFormat format;
 
     @Schema(description = "Type of the certificate to issue. When absent, the certificate is X.509",

@@ -10,8 +10,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Certificate detail dependent on the certificate type", type = "object",
         discriminatorProperty = "certificateType",
         discriminatorMapping = {
-                @DiscriminatorMapping(value = CertificateType.Codes.X509, schema = X509CertificateDetail.class)},
-        oneOf = {X509CertificateDetail.class})
+                @DiscriminatorMapping(value = CertificateType.Codes.X509, schema = X509CertificateDetail.class),
+                @DiscriminatorMapping(value = CertificateType.Codes.CVC, schema = CvcCertificateDetail.class)},
+        oneOf = {X509CertificateDetail.class, CvcCertificateDetail.class})
 public interface CertificateDetailDto {
 
     @Schema(description = "Certificate type", requiredMode = Schema.RequiredMode.REQUIRED)

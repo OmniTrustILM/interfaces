@@ -10,7 +10,9 @@ public enum CertificateRelationType implements IPlatformEnum {
     RENEWAL("renewal", "Renewal", "Successor certificate is renewal of predecessor certificate"),
     REKEY("rekey", "Rekey", "Successor certificate is rekey of predecessor certificate"),
     REPLACEMENT("replacement", "Replacement", "Successor certificate is replacement of predecessor certificate"),
-    PENDING("pending", "Pending", "The relation type is to be decided after successor certificate is issued");
+    PENDING("pending", "Pending", "The relation type is to be decided after successor certificate is issued"),
+    LINK("link", "Link",
+            "Successor certificate is a link certificate of predecessor certificate: it certifies a new key with the key of the predecessor");
 
     private final String code;
     private final String label;

@@ -28,7 +28,9 @@ public class CertificateSignRequestDtoV3 extends AuthorityV3ScopedRequestDto {
     @NotBlank(message = "CSR (request) is required for issue")
     private String request;
 
-    @Schema(description = "CSR format", defaultValue = "pkcs10", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Format of the request. A card verifiable certificate request always arrives with "
+            + "format cvc, which Core sends explicitly; an absent format means pkcs10 only", defaultValue = "pkcs10",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CertificateRequestFormat format;
 
     @Schema(description = "Issue-specific dynamic attributes (schema from /issue/attributes)",

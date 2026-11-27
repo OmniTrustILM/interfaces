@@ -6,11 +6,16 @@ import com.otilm.api.model.common.enums.IPlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true,
+        description = "Format of a certificate request. The request is always sent Base64-encoded. pkcs10 and crmf "
+                + "are the DER of the PKCS#10 or CRMF structure and apply to X.509. cvc is the DER of the complete "
+                + "card verifiable certificate request, including the authentication data object around it when the "
+                + "request is authenticated, and applies to CVC")
 public enum CertificateRequestFormat implements IPlatformEnum {
 
     PKCS10("pkcs10", "PKCS#10", "PKCS#10 Certificate Request"),
-    CRMF("crmf", "CRMF", "Certificate Request Message Format");
+    CRMF("crmf", "CRMF", "Certificate Request Message Format"),
+    CVC("cvc", "CVC", "Card verifiable certificate request, BSI TR-03110 Part 3");
 
     private final String code;
     private final String label;

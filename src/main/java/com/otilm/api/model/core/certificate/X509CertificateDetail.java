@@ -29,4 +29,11 @@ public class X509CertificateDetail extends CertificateDetail {
 
     @Schema(description = "Alternative Key Pair of the certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private KeyDto altKey;
+
+    @Override
+    @Schema(description = "Certificate type", requiredMode = Schema.RequiredMode.REQUIRED,
+            allowableValues = CertificateType.Codes.X509)
+    public CertificateType getCertificateType() {
+        return super.getCertificateType();
+    }
 }

@@ -13,11 +13,13 @@ public class CertificateRelationsDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID certificateUuid;
 
-    @Schema(description = "List of certificates that renew, rekey or replace the subject certificate",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "List of certificates that renew, rekey or replace the subject certificate. For a CVCA "
+            + "certificate it also lists the link certificate that certifies a new key with the key of the "
+            + "subject certificate", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<CertificateSimpleDto> successorCertificates;
 
-    @Schema(description = "List of certificates which the subject certificate renews, rekeys or replaces.",
+    @Schema(description = "List of certificates which the subject certificate renews, rekeys or replaces. For a CVCA "
+            + "link certificate it lists the CVCA certificate whose key signed the link.",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<CertificateSimpleDto> predecessorCertificates;
 }
