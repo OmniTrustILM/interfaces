@@ -5,6 +5,7 @@ import com.otilm.api.exception.ConnectorException;
 import com.otilm.api.exception.ValidationException;
 import com.otilm.api.model.client.attribute.RequestAttribute;
 import com.otilm.api.model.common.attribute.common.BaseAttribute;
+import com.otilm.api.model.connector.v3.authority.AuthorityConnectionResponseDto;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesRequestDtoV3;
 import com.otilm.api.model.connector.v3.authority.CaCertificatesResponseDto;
 import com.otilm.api.model.connector.v3.authority.CertificateTypesRequestDtoV3;
@@ -26,10 +27,12 @@ public interface AuthoritySyncApiClient {
     List<BaseAttribute> listAuthorityAttributes(ApiClientConnectorInfo connector) throws ConnectorException;
 
     /**
-     * Validate authority attributes by attempting to reach the upstream CA. Returns 204 No Content on success.
+     * Validate authority attributes by attempting to reach the upstream CA. On success the connector answers 204 with
+     * no body, or 200 with the authority metadata; the returned entity's body is {@code null} when there is none. A
+     * body whose metadata is absent, null or empty means no metadata, the same as a 204.
      */
-    ResponseEntity<Void> checkAuthorityConnection(ApiClientConnectorInfo connector, List<RequestAttribute> attributes)
-            throws ValidationException, ConnectorException;
+    ResponseEntity<AuthorityConnectionResponseDto> checkAuthorityConnection(ApiClientConnectorInfo connector,
+            List<RequestAttribute> attributes) throws ValidationException, ConnectorException;
 
     List<BaseAttribute> listRaProfileAttributes(ApiClientConnectorInfo connector,
             List<RequestAttribute> authorityAttributes) throws ConnectorException;
